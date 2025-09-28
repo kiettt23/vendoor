@@ -1,14 +1,18 @@
 "use client";
+import BestSelling from "@/components/BestSelling";
+import Hero from "@/components/Hero";
+import Newsletter from "@/components/Newsletter";
+import OurSpec from "@/components/OurSpec";
+import LatestProducts from "@/components/LatestProducts";
 
-import { useSelector } from "react-redux";
-
-export default function HomePage() {
-  const state = useSelector((state) => state);
-  console.log("Redux state:", state);
-
+export default function Home() {
   return (
-    <div className="p-6 bg-green-500 text-white rounded-lg">
-      Tailwind v4 is working!
+    <div>
+      <Hero />
+      <LatestProducts />
+      <BestSelling />
+      <OurSpec />
+      <Newsletter />
     </div>
   );
 }

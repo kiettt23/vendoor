@@ -1,5 +1,7 @@
 import "./globals.css";
-import StoreProvider from "./StoreProvider";
+import { Toaster } from "react-hot-toast";
+import StoreProvider from "@/app/StoreProvider";
+import Footer from "@/components/Footer";
 
 export const metadata = {
   title: "Vendoor",
@@ -10,7 +12,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          <Toaster />
+          {children}
+        </StoreProvider>
       </body>
     </html>
   );
