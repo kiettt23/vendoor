@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 
 export default function AdminDashboard() {
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "$";
+  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
 
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({

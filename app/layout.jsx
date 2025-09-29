@@ -1,7 +1,6 @@
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import StoreProvider from "@/app/StoreProvider";
-import Footer from "@/components/Footer";
 
 export const metadata = {
   title: "Vendoor",
