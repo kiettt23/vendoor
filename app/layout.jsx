@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import StoreProvider from "@/app/StoreProvider";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata = {
   title: "Vendoor",
@@ -9,13 +10,15 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body>
-        <StoreProvider>
-          <Toaster />
-          {children}
-        </StoreProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body>
+          <StoreProvider>
+            <Toaster />
+            {children}
+          </StoreProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
