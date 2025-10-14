@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(request) {
   try {
-    const products = await prisma.product.findMany({
+    let products = await prisma.product.findMany({
       where: { inStock: true },
       include: {
         rating: {
