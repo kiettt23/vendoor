@@ -5,6 +5,9 @@ import { PaymentMethod } from "@prisma/client";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
+const SHIPPING_FEE = 5;
+const APP_ID = "vendoor";
+
 export async function POST(request) {
   try {
     const { userId, has } = getAuth(request);
@@ -97,7 +100,7 @@ export async function POST(request) {
         total -= (total * coupon.discount) / 100;
       }
       if (!isPlusMember && !isShippingFeeAdded) {
-        total += 5;
+        total += SHIPPING_FEE;
         isShippingFeeAdded = true;
       }
 
@@ -149,7 +152,7 @@ export async function POST(request) {
         metadata: {
           orderIds: orderIds.join(","),
           userId,
-          appId: "vendoor",
+          appId: APP_ID,
         },
       });
       return NextResponse.json({ session });
@@ -163,7 +166,7 @@ export async function POST(request) {
 
     return NextResponse.json({ message: "Orders Placed Successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("[Orders POST] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }
@@ -189,7 +192,7 @@ export async function GET(request) {
 
     return NextResponse.json({ orders });
   } catch (error) {
-    console.error(error);
+    console.error("[Orders GET] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

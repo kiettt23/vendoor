@@ -1,8 +1,8 @@
 import prisma from "@/lib/prisma";
-import next from "next";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
+const APP_ID = "vendoor";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(request) {
@@ -22,7 +22,7 @@ export async function POST(request) {
       });
       const { orderIds, userId, appId } = session.data[0].metadata;
 
-      if (appId !== "vendoor") {
+      if (appId !== APP_ID) {
         return NextResponse.json({ received: true, message: "Invalid appId" });
       }
       const orderIdsArray = orderIds.split(",");
@@ -68,13 +68,13 @@ export async function POST(request) {
       }
 
       default:
-        console.log("Unhandled event type:", event.type);
+        console.warn("[Stripe] Unhandled event type:", event.type);
         break;
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error(error);
+    console.error("[Stripe Webhook] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

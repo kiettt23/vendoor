@@ -11,7 +11,7 @@ const authAdmin = async (userId) => {
       user.emailAddresses[0].emailAddress
     );
   } catch (error) {
-    console.error(error);
+    console.error("[authAdmin] Error:", error);
     return false;
   }
 };
