@@ -21,7 +21,7 @@ export async function POST(request) {
     });
     return NextResponse.json({ message: "Order Status updated" });
   } catch (error) {
-    console.error(error);
+    console.error("[Store Orders POST] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }
@@ -50,7 +50,7 @@ export async function GET(request) {
     });
     return NextResponse.json({ orders });
   } catch (error) {
-    console.error(error);
+    console.error("[Store Orders GET] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }

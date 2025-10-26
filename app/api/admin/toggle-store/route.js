@@ -35,7 +35,7 @@ export async function POST(request) {
 
     return NextResponse.json({ message: "Store updated successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("[Admin Toggle Store] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }

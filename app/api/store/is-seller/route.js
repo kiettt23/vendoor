@@ -19,7 +19,7 @@ export async function GET(request) {
 
     return NextResponse.json({ isSeller, storeInfo });
   } catch (error) {
-    console.error(error);
+    console.error("[Store Is Seller] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }

@@ -44,7 +44,7 @@ export async function POST(request) {
       rating: response,
     });
   } catch (error) {
-    console.error(error);
+    console.error("[Rating POST] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }
@@ -65,7 +65,7 @@ export async function GET(request) {
 
     return NextResponse.json({ ratings });
   } catch (error) {
-    console.error(error);
+    console.error("[Rating GET] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }

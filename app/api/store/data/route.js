@@ -29,7 +29,7 @@ export async function GET(request) {
 
     return NextResponse.json({ store });
   } catch (error) {
-    console.error(error);
+    console.error("[Store Data GET] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }

@@ -27,7 +27,7 @@ export async function POST(request) {
 
     return NextResponse.json({ message: "Coupon added successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("[Admin Coupon POST] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }
@@ -52,7 +52,7 @@ export async function DELETE(request) {
 
     return NextResponse.json({ message: "Coupon deleted successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("[Admin Coupon DELETE] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }
@@ -74,7 +74,7 @@ export async function GET(request) {
 
     return NextResponse.json({ coupons });
   } catch (error) {
-    console.error(error);
+    console.error("[Admin Coupon GET] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }

@@ -16,7 +16,7 @@ export async function POST(request) {
 
     return NextResponse.json({ message: "Cart updated" });
   } catch (error) {
-    console.error(error);
+    console.error("[Cart POST] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
@@ -32,7 +32,7 @@ export async function GET(request) {
 
     return NextResponse.json({ cart: user.cart });
   } catch (error) {
-    console.error(error);
+    console.error("[Cart GET] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

@@ -37,7 +37,7 @@ export async function POST(request) {
 
     return NextResponse.json({ message: "Product stock updated successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("[Store Stock Toggle] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }

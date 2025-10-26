@@ -94,7 +94,7 @@ export async function POST(request) {
 
     return NextResponse.json({ message: "applied, waiting for approval" });
   } catch (error) {
-    console.error(error);
+    console.error("[Store Create POST] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }
@@ -119,7 +119,7 @@ export async function GET(request) {
 
     return NextResponse.json({ status: "not registered" });
   } catch (error) {
-    console.error(error);
+    console.error("[Store Create GET] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }

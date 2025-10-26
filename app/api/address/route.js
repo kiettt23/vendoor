@@ -17,7 +17,7 @@ export async function POST(request) {
       message: "Address added successfully",
     });
   } catch (error) {
-    console.error(error);
+    console.error("[Address POST] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }
@@ -36,7 +36,7 @@ export async function GET(request) {
 
     return NextResponse.json({ addresses });
   } catch (error) {
-    console.error(error);
+    console.error("[Address GET] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }

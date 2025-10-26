@@ -38,7 +38,7 @@ export async function POST(request) {
 
     return NextResponse.json({ coupon });
   } catch (error) {
-    console.error(error);
+    console.error("[Coupon GET] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }

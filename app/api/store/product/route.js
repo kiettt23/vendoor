@@ -72,7 +72,7 @@ export async function POST(request) {
 
     return NextResponse.json({ message: "Product added successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("[Store Product POST] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }
@@ -93,7 +93,7 @@ export async function GET(request) {
 
     return NextResponse.json({ products });
   } catch (error) {
-    console.error(error);
+    console.error("[Store Product GET] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }

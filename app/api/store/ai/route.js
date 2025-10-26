@@ -67,7 +67,7 @@ export async function POST(request) {
 
     return NextResponse.json({ ...result });
   } catch (error) {
-    console.error(error);
+    console.error("[Store AI] Error:", error);
     return NextResponse.json(
       { error: error.code || error.message },
       { status: 400 }
