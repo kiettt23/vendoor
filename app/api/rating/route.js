@@ -27,7 +27,7 @@ export async function POST(request) {
 
     if (isAlreadyRated) {
       return NextResponse.json(
-        { error: "Product already rated" },
+        { error: ERROR_MESSAGES.PRODUCT_ALREADY_RATED },
         { status: 400 }
       );
     }
