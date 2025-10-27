@@ -1,27 +1,21 @@
 import authAdmin from "@/middlewares/authAdmin";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { handleError } from "@/lib/errors/errorHandler";
+import { UnauthorizedError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-// Auth Admin
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.UNAUTHORIZED },
-        { status: 401 }
-      );
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
     return NextResponse.json({ isAdmin });
   } catch (error) {
-    console.error("[Admin Is Admin] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Admin Is Admin");
   }
 }
