@@ -2,11 +2,16 @@ import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { cartService } from "@/lib/services/cartService";
 import { handleError } from "@/lib/errors/errorHandler";
+import { validateData } from "@/lib/validations/validate";
+import { saveCartSchema } from "@/lib/validations/schemas";
 
 export async function POST(request) {
   try {
     const { userId } = getAuth(request);
-    const { cart } = await request.json();
+    const body = await request.json();
+
+    // ✨ Validate cart: quantity phải > 0
+    const { cart } = validateData(saveCartSchema, body);
 
     await cartService.saveCart(userId, cart);
 

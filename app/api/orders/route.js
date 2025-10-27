@@ -6,8 +6,10 @@ import Stripe from "stripe";
 import { orderService } from "@/lib/services/orderService";
 import { cartService } from "@/lib/services/cartService";
 import { handleError } from "@/lib/errors/errorHandler";
-import { UnauthorizedError, BadRequestError } from "@/lib/errors/AppError";
+import { UnauthorizedError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { validateData } from "@/lib/validations/validate";
+import { createOrderSchema } from "@/lib/validations/schemas";
 
 const APP_ID = "vendoor";
 
@@ -19,18 +21,14 @@ export async function POST(request) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    const { addressId, items, couponCode, paymentMethod } =
-      await request.json();
+    const body = await request.json();
 
-    if (
-      !addressId ||
-      !paymentMethod ||
-      !items ||
-      !Array.isArray(items) ||
-      items.length === 0
-    ) {
-      throw new BadRequestError(ERROR_MESSAGES.MISSING_ORDER_DETAILS);
-    }
+    // ✨ Validation với Zod - tự động check tất cả rules
+    // Nếu data không hợp lệ, sẽ throw ValidationError
+    const { addressId, items, couponCode, paymentMethod } = validateData(
+      createOrderSchema,
+      body
+    );
 
     const isPlusMember = has({ plan: "plus" });
 

@@ -4,19 +4,21 @@ import { ratingService } from "@/lib/services/ratingService";
 import { handleError } from "@/lib/errors/errorHandler";
 import { UnauthorizedError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { validateData } from "@/lib/validations/validate";
+import { createRatingSchema } from "@/lib/validations/schemas";
 
 export async function POST(request) {
   try {
     const { userId } = getAuth(request);
-    const { orderId, productId, rating, review } = await request.json();
+    const body = await request.json();
+
+    // ✨ Validate với Zod - check rating từ 1-5, productId và orderId bắt buộc
+    const validatedData = validateData(createRatingSchema, body);
 
     // Use service to create rating
     const newRating = await ratingService.createRating({
       userId,
-      orderId,
-      productId,
-      rating,
-      review,
+      ...validatedData,
     });
 
     return NextResponse.json({
