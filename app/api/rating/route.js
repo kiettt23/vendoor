@@ -3,7 +3,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-export const POST = async (request) => {
+export async function POST(request) {
   try {
     const { userId } = getAuth(request);
     const { orderId, productId, rating, review } = await request.json();
@@ -53,7 +53,7 @@ export const POST = async (request) => {
       { status: 400 }
     );
   }
-};
+}
 
 // Get all ratings for a user
 export async function GET(request) {

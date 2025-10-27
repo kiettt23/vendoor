@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-export const GET = async (request) => {
+export async function GET(request) {
   try {
     let products = await prisma.product.findMany({
       where: { inStock: true },
@@ -30,4 +30,4 @@ export const GET = async (request) => {
       { status: 500 }
     );
   }
-};
+}
