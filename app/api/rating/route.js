@@ -1,57 +1,30 @@
-import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { ratingService } from "@/lib/services/ratingService";
+import { handleError } from "@/lib/errors/errorHandler";
+import { UnauthorizedError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 export async function POST(request) {
   try {
     const { userId } = getAuth(request);
     const { orderId, productId, rating, review } = await request.json();
-    const order = await prisma.order.findUnique({
-      where: { id: orderId, userId },
-    });
 
-    if (!order) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.ORDER_NOT_FOUND },
-        { status: 404 }
-      );
-    }
-
-    const isAlreadyRated = await prisma.rating.findFirst({
-      where: {
-        productId,
-        orderId,
-      },
-    });
-
-    if (isAlreadyRated) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PRODUCT_ALREADY_RATED },
-        { status: 400 }
-      );
-    }
-
-    const response = await prisma.rating.create({
-      data: {
-        userId,
-        productId,
-        rating,
-        review,
-        orderId,
-      },
+    // Use service to create rating
+    const newRating = await ratingService.createRating({
+      userId,
+      orderId,
+      productId,
+      rating,
+      review,
     });
 
     return NextResponse.json({
       message: "Rating added successfully",
-      rating: response,
+      rating: newRating,
     });
   } catch (error) {
-    console.error("[Rating POST] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Rating POST");
   }
 }
 
@@ -59,22 +32,16 @@ export async function POST(request) {
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
+
     if (!userId) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.UNAUTHORIZED },
-        { status: 401 }
-      );
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
-    const ratings = await prisma.rating.findMany({
-      where: { userId },
-    });
+
+    // Use service to get ratings
+    const ratings = await ratingService.getUserRatings(userId);
 
     return NextResponse.json({ ratings });
   } catch (error) {
-    console.error("[Rating GET] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Rating GET");
   }
 }
