@@ -10,7 +10,9 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest --coverage"
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest run --coverage",
+    "test:coverage:watch": "vitest --coverage --watch"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.33.1",

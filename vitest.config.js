@@ -62,14 +62,22 @@ export default defineConfig({
       // Coverage reporters
       reporter: ["text", "json", "html"], // text = console, html = browser report
 
-      // Coverage thresholds (optional)
-      // Uncomment để enforce minimum coverage
-      // thresholds: {
-      //   lines: 80,      // 80% lines covered
-      //   functions: 80,  // 80% functions covered
-      //   branches: 80,   // 80% branches covered
-      //   statements: 80, // 80% statements covered
-      // },
+      // Coverage thresholds - Enforce minimum coverage cho services layer
+      thresholds: {
+        // Global thresholds (toàn project)
+        lines: 15, // 15% minimum (hiện tại: 19%)
+        functions: 14, // 14% minimum (hiện tại: 17%)
+        branches: 15, // 15% minimum (hiện tại: 21%)
+        statements: 15, // 15% minimum (hiện tại: 19%)
+
+        // Per-file thresholds cho services layer
+        "lib/services/*.js": {
+          lines: 70, // Services phải có 70%+ coverage
+          functions: 70,
+          branches: 65,
+          statements: 70,
+        },
+      },
     },
   },
 
