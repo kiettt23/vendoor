@@ -4,6 +4,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import { PaymentMethod } from "@prisma/client";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 const SHIPPING_FEE = 5;
 const APP_ID = "vendoor";
@@ -13,7 +14,10 @@ export async function POST(request) {
     const { userId, has } = getAuth(request);
 
     if (!userId) {
-      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.UNAUTHORIZED },
+        { status: 401 }
+      );
     }
 
     const { addressId, items, couponCode, paymentMethod } =
@@ -28,8 +32,8 @@ export async function POST(request) {
       items.length === 0
     ) {
       return NextResponse.json(
-        { error: "missing order details." },
-        { status: 401 }
+        { error: ERROR_MESSAGES.MISSING_ORDER_DETAILS },
+        { status: 400 }
       );
     }
 
@@ -41,7 +45,7 @@ export async function POST(request) {
       });
       if (!coupon) {
         return NextResponse.json(
-          { error: "Coupon not found" },
+          { error: ERROR_MESSAGES.COUPON_NOT_FOUND },
           { status: 400 }
         );
       }
@@ -52,7 +56,7 @@ export async function POST(request) {
       const userorders = await prisma.order.findMany({ where: { userId } });
       if (userorders.length > 0) {
         return NextResponse.json(
-          { error: "Coupon valid for new users" },
+          { error: ERROR_MESSAGES.COUPON_FOR_NEW_USERS },
           { status: 400 }
         );
       }
@@ -64,7 +68,7 @@ export async function POST(request) {
     if (couponCode && coupon.forMember) {
       if (!isPlusMember) {
         return NextResponse.json(
-          { error: "Coupon valid for members only" },
+          { error: ERROR_MESSAGES.COUPON_FOR_MEMBERS },
           { status: 400 }
         );
       }

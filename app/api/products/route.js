@@ -1,7 +1,8 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-export async function GET(request) {
+export const GET = async (request) => {
   try {
     let products = await prisma.product.findMany({
       where: { inStock: true },
@@ -25,8 +26,8 @@ export async function GET(request) {
   } catch (error) {
     console.error("[Products GET] Error:", error);
     return NextResponse.json(
-      { error: "An internal server error occurred" },
+      { error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
       { status: 500 }
     );
   }
-}
+};

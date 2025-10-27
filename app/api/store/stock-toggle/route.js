@@ -1,7 +1,8 @@
-import authSeller from "@/middlewares/authSeller";
+import { authSeller } from "@/middlewares/authSeller";
 import { getAuth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 // toggle stock of a product
 export async function POST(request) {
@@ -11,14 +12,17 @@ export async function POST(request) {
 
     if (!productId) {
       return NextResponse.json(
-        { error: "missing details: productId" },
+        { error: ERROR_MESSAGES.MISSING_PRODUCT_ID },
         { status: 400 }
       );
     }
     const storeId = await authSeller(userId);
 
     if (!storeId) {
-      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.UNAUTHORIZED },
+        { status: 401 }
+      );
     }
 
     // check if product exists
@@ -27,7 +31,10 @@ export async function POST(request) {
     });
 
     if (!product) {
-      return NextResponse.json({ error: "no product found" }, { status: 404 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.PRODUCT_NOT_FOUND },
+        { status: 404 }
+      );
     }
 
     await prisma.product.update({

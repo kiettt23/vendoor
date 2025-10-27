@@ -2,6 +2,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import authSeller from "@/middlewares/authSeller";
 import { openai } from "@/configs/openai";
 import { NextResponse } from "next/server";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 async function main(base64Image, mimeType) {
   const messages = [
@@ -59,7 +60,10 @@ export async function POST(request) {
     const isSeller = await authSeller(userId);
 
     if (!isSeller) {
-      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.UNAUTHORIZED },
+        { status: 401 }
+      );
     }
 
     const { base64Image, mimeType } = await request.json();

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import authAdmin from "@/middlewares/authAdmin";
 import prisma from "@/lib/prisma";
 import { inngest } from "@/inngest/client";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 // Add new coupon
 export async function POST(request) {
@@ -11,7 +12,10 @@ export async function POST(request) {
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.UNAUTHORIZED },
+        { status: 401 }
+      );
     }
 
     const { coupon } = await request.json();
@@ -42,7 +46,10 @@ export async function DELETE(request) {
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.UNAUTHORIZED },
+        { status: 401 }
+      );
     }
 
     const { searchParams } = request.nextUrl;
@@ -67,7 +74,10 @@ export async function GET(request) {
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.UNAUTHORIZED },
+        { status: 401 }
+      );
     }
 
     const coupons = await prisma.coupon.findMany({});

@@ -2,6 +2,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import authAdmin from "@/middlewares/authAdmin";
 import prisma from "@/lib/prisma";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 // Toggle Store isActive
 export async function POST(request) {
@@ -10,13 +11,19 @@ export async function POST(request) {
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.UNAUTHORIZED },
+        { status: 401 }
+      );
     }
 
     const { storeId } = await request.json();
 
     if (!storeId) {
-      return NextResponse.json({ error: "missing storeId" }, { status: 400 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.MISSING_STORE_ID },
+        { status: 400 }
+      );
     }
 
     // Find the store
@@ -25,7 +32,10 @@ export async function POST(request) {
     });
 
     if (!store) {
-      return NextResponse.json({ error: "store not found" }, { status: 400 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.STORE_NOT_FOUND },
+        { status: 400 }
+      );
     }
 
     await prisma.store.update({

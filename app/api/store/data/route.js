@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 // Get store info & store products
 export async function GET(request) {
@@ -9,7 +10,10 @@ export async function GET(request) {
     const username = searchParams.get("username").toLowerCase();
 
     if (!username) {
-      return NextResponse.json({ error: "missing username" }, { status: 400 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.MISSING_USERNAME },
+        { status: 400 }
+      );
     }
 
     // Get store info and inStock products with ratings
@@ -24,7 +28,10 @@ export async function GET(request) {
       },
     });
     if (!store) {
-      return NextResponse.json({ error: "store not found" }, { status: 400 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.STORE_NOT_FOUND },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({ store });

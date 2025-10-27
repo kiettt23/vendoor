@@ -1,10 +1,11 @@
 import { getAuth } from "@clerk/nextjs/server";
-import authSeller from "@/middlewares/authSeller";
+import { authSeller } from "@/middlewares/authSeller";
 import imagekit from "@/configs/imageKit";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-// Add a new product
+// Add product
 export async function POST(request) {
   try {
     const { userId } = getAuth(request);
@@ -32,7 +33,7 @@ export async function POST(request) {
       images.length < 1
     ) {
       return NextResponse.json(
-        { error: "missing product details" },
+        { error: ERROR_MESSAGES.MISSING_PRODUCT_DETAILS },
         { status: 400 }
       );
     }
@@ -87,7 +88,10 @@ export async function GET(request) {
     const storeId = await authSeller(userId);
 
     if (!storeId) {
-      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.UNAUTHORIZED },
+        { status: 401 }
+      );
     }
     const products = await prisma.product.findMany({ where: { storeId } });
 

@@ -1,6 +1,7 @@
+import authAdmin from "@/middlewares/authAdmin";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import authAdmin from "@/middlewares/authAdmin";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 // Auth Admin
 export async function GET(request) {
@@ -9,7 +10,10 @@ export async function GET(request) {
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.UNAUTHORIZED },
+        { status: 401 }
+      );
     }
 
     return NextResponse.json({ isAdmin });

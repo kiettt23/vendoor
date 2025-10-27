@@ -1,9 +1,9 @@
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-// Add new rating
-export async function POST(request) {
+export const POST = async (request) => {
   try {
     const { userId } = getAuth(request);
     const { orderId, productId, rating, review } = await request.json();
@@ -12,7 +12,10 @@ export async function POST(request) {
     });
 
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.ORDER_NOT_FOUND },
+        { status: 404 }
+      );
     }
 
     const isAlreadyRated = await prisma.rating.findFirst({
@@ -50,14 +53,17 @@ export async function POST(request) {
       { status: 400 }
     );
   }
-}
+};
 
 // Get all ratings for a user
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.UNAUTHORIZED },
+        { status: 401 }
+      );
     }
     const ratings = await prisma.rating.findMany({
       where: { userId },

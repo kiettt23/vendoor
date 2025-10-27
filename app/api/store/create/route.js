@@ -2,6 +2,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import imagekit from "@/configs/imageKit";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 // create the store
 export async function POST(request) {
@@ -29,7 +30,7 @@ export async function POST(request) {
       !image
     ) {
       return NextResponse.json(
-        { error: "missing store info" },
+        { error: ERROR_MESSAGES.MISSING_STORE_INFO },
         { status: 400 }
       );
     }
@@ -51,7 +52,7 @@ export async function POST(request) {
 
     if (isUsernameTaken) {
       return NextResponse.json(
-        { error: "username already taken" },
+        { error: ERROR_MESSAGES.USERNAME_ALREADY_TAKEN },
         { status: 400 }
       );
     }

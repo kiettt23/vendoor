@@ -2,6 +2,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import authAdmin from "@/middlewares/authAdmin";
 import prisma from "@/lib/prisma";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 // Approve Seller
 export async function POST(request) {
@@ -10,7 +11,10 @@ export async function POST(request) {
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.UNAUTHORIZED },
+        { status: 401 }
+      );
     }
 
     const { storeId, status } = await request.json();
@@ -27,7 +31,7 @@ export async function POST(request) {
       });
     }
 
-    return NextResponse.json({ message: status + "successfully" });
+    return NextResponse.json({ message: status + " successfully" });
   } catch (error) {
     console.error("[Admin Approve Store POST] Error:", error);
     return NextResponse.json(
@@ -44,7 +48,10 @@ export async function GET(request) {
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.UNAUTHORIZED },
+        { status: 401 }
+      );
     }
 
     const stores = await prisma.store.findMany({
