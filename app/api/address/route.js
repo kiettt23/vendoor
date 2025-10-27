@@ -1,45 +1,32 @@
-import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { addressService } from "@/lib/services/addressService";
+import { handleError } from "@/lib/errors/errorHandler";
 
-// Add new address
 export async function POST(request) {
   try {
     const { userId } = getAuth(request);
     const { address } = await request.json();
 
-    address.userId = userId;
-
-    const newAddress = await prisma.address.create({ data: address });
+    const newAddress = await addressService.saveAddress(userId, address);
 
     return NextResponse.json({
       newAddress,
       message: "Address added successfully",
     });
   } catch (error) {
-    console.error("[Address POST] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Address POST");
   }
 }
 
-// Get all addresses for a user
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
 
-    const addresses = await prisma.address.findMany({
-      where: { userId },
-    });
+    const address = await addressService.getAddress(userId);
 
-    return NextResponse.json({ addresses });
+    return NextResponse.json({ address });
   } catch (error) {
-    console.error("[Address GET] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Address GET");
   }
 }

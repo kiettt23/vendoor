@@ -1,33 +1,12 @@
-import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { productService } from "@/lib/services/productService";
+import { handleError } from "@/lib/errors/errorHandler";
 
 export async function GET(request) {
   try {
-    let products = await prisma.product.findMany({
-      where: { inStock: true },
-      include: {
-        rating: {
-          select: {
-            createdAt: true,
-            rating: true,
-            review: true,
-            user: { select: { name: true, image: true } },
-          },
-        },
-        store: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    // Remove products with store isActive false
-    products = products.filter((product) => product.store.isActive);
+    const products = await productService.getProducts();
     return NextResponse.json({ products });
   } catch (error) {
-    console.error("[Products GET] Error:", error);
-    return NextResponse.json(
-      { error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
-      { status: 500 }
-    );
+    return handleError(error, "Products GET");
   }
 }

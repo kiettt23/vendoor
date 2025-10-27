@@ -1,38 +1,29 @@
-import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { cartService } from "@/lib/services/cartService";
+import { handleError } from "@/lib/errors/errorHandler";
 
-// Update user cart
 export async function POST(request) {
   try {
     const { userId } = getAuth(request);
     const { cart } = await request.json();
 
-    // Save the cart to the user object
-    await prisma.user.update({
-      where: { id: userId },
-      data: { cart: cart },
-    });
+    await cartService.saveCart(userId, cart);
 
     return NextResponse.json({ message: "Cart updated" });
   } catch (error) {
-    console.error("[Cart POST] Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return handleError(error, "Cart POST");
   }
 }
 
-// Get user cart
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    const cart = await cartService.getCart(userId);
 
-    return NextResponse.json({ cart: user.cart });
+    return NextResponse.json({ cart });
   } catch (error) {
-    console.error("[Cart GET] Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return handleError(error, "Cart GET");
   }
 }
