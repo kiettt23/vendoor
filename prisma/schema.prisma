@@ -1,6 +1,5 @@
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["driverAdapters"]
+    provider = "prisma-client-js"
 }
 
 datasource db {
@@ -42,6 +41,13 @@ model Product {
     store      Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
     orderItems OrderItem[]
     rating     Rating[]
+
+    // Performance indexes for common queries
+    @@index([storeId])        // For store products listing
+    @@index([category])       // For category filtering
+    @@index([inStock])        // For available products
+    @@index([createdAt])      // For date sorting (latest products)
+    @@index([storeId, inStock]) // Composite: store products that are available
 }
 
 enum OrderStatus {
@@ -76,6 +82,14 @@ model Order {
     user    User    @relation("BuyerRelation", fields: [userId], references: [id])
     store   Store   @relation(fields: [storeId], references: [id])
     address Address @relation(fields: [addressId], references: [id])
+
+    // Performance indexes for common queries
+    @@index([userId])           // For user order history
+    @@index([storeId])          // For store order management
+    @@index([status])           // For order status filtering
+    @@index([createdAt])        // For date sorting
+    @@index([userId, status])   // Composite: user orders by status
+    @@index([storeId, status])  // Composite: store orders by status
 }
 
 // Required for creating an OrderItem: orderId, productId, quantity, price
@@ -108,6 +122,11 @@ model Rating {
     product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
     @@unique([userId, productId, orderId])
+    // Performance indexes for common queries
+    @@index([productId])        // For product ratings
+    @@index([userId])           // For user ratings
+    @@index([rating])           // For rating filtering/sorting
+    @@index([createdAt])        // For latest ratings
 }
 
 // Required for creating an Address: userId, name, email, street, city, state, zip, country, phone
@@ -127,6 +146,9 @@ model Address {
     // Relations
     Order Order[]
     user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    // Performance indexes for common queries
+    @@index([userId])           // For user addresses
 }
 
 // Required for creating a Coupon: code, description, discount, forNewUser, isPublic, expiresAt
@@ -160,4 +182,10 @@ model Store {
     Product Product[]
     Order   Order[]
     user    User      @relation(fields: [userId], references: [id])
+
+    // Performance indexes for common queries
+    @@index([status])           // For admin approval workflow
+    @@index([isActive])         // For active stores listing
+    @@index([username])         // For store lookup (already unique, but for performance)
+    @@index([createdAt])        // For latest stores
 }
