@@ -1,70 +1,43 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import authAdmin from "@/middlewares/authAdmin";
-import prisma from "@/lib/prisma";
+import { storeService } from "@/lib/services/storeService";
+import { handleError } from "@/lib/errors/errorHandler";
+import { UnauthorizedError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-// Approve Seller
 export async function POST(request) {
   try {
     const { userId } = getAuth(request);
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.UNAUTHORIZED },
-        { status: 401 }
-      );
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
     const { storeId, status } = await request.json();
 
-    if (status === "approved") {
-      await prisma.store.update({
-        where: { id: storeId },
-        data: { status: "approved", isActive: true },
-      });
-    } else if (status == "rejected") {
-      await prisma.store.update({
-        where: { id: storeId },
-        data: { status: "rejected" },
-      });
-    }
+    await storeService.approveStore(storeId, status);
 
     return NextResponse.json({ message: status + " successfully" });
   } catch (error) {
-    console.error("[Admin Approve Store POST] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Admin Approve Store POST");
   }
 }
 
-// get all pending and rejected stores
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.UNAUTHORIZED },
-        { status: 401 }
-      );
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    const stores = await prisma.store.findMany({
-      where: { status: { in: ["pending", "rejected"] } },
-      include: { user: true },
-    });
+    const stores = await storeService.getPendingStores();
 
     return NextResponse.json({ stores });
   } catch (error) {
-    console.error("[Admin Approve Store GET] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Admin Approve Store GET");
   }
 }

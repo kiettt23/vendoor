@@ -1,33 +1,24 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import authAdmin from "@/middlewares/authAdmin";
-import prisma from "@/lib/prisma";
+import { storeService } from "@/lib/services/storeService";
+import { handleError } from "@/lib/errors/errorHandler";
+import { UnauthorizedError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-// Get all approved stores
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.UNAUTHORIZED },
-        { status: 401 }
-      );
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    const stores = await prisma.store.findMany({
-      where: { status: "approved" },
-      include: { user: true },
-    });
+    const stores = await storeService.getApprovedStores();
 
     return NextResponse.json({ stores });
   } catch (error) {
-    console.error("[Admin Stores] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Admin Stores");
   }
 }

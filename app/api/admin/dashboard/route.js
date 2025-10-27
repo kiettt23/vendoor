@@ -2,26 +2,23 @@ import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import authAdmin from "@/middlewares/authAdmin";
 import prisma from "@/lib/prisma";
+import { handleError } from "@/lib/errors/errorHandler";
+import { UnauthorizedError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-// Get Dashboard Data for Admin (total orders, total stores, total products, total revenue)
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.UNAUTHORIZED },
-        { status: 401 }
-      );
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    // Get total orders
     const orders = await prisma.order.count();
-    // Get total stores on app
     const stores = await prisma.store.count();
-    // Get all orders include only createdAt and total & calculate total revenue
+    const products = await prisma.product.count();
+
     const allOrders = await prisma.order.findMany({
       select: {
         createdAt: true,
@@ -29,28 +26,18 @@ export async function GET(request) {
       },
     });
 
-    let totalRevenue = 0;
-    allOrders.forEach((order) => {
-      totalRevenue += order.total;
-    });
+    const totalRevenue = allOrders.reduce((sum, order) => sum + order.total, 0);
 
-    const revenue = totalRevenue.toFixed(2);
-    // total products on app
-    const products = await prisma.product.count();
     const dashboardData = {
       orders,
       stores,
       products,
-      revenue,
+      revenue: totalRevenue.toFixed(2),
       allOrders,
     };
 
     return NextResponse.json({ dashboardData });
   } catch (error) {
-    console.error("[Admin Dashboard] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Admin Dashboard");
   }
 }

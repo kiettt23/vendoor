@@ -1,54 +1,30 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import authAdmin from "@/middlewares/authAdmin";
-import prisma from "@/lib/prisma";
+import { storeService } from "@/lib/services/storeService";
+import { handleError } from "@/lib/errors/errorHandler";
+import { UnauthorizedError, BadRequestError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-// Toggle Store isActive
 export async function POST(request) {
   try {
     const { userId } = getAuth(request);
     const isAdmin = await authAdmin(userId);
 
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.UNAUTHORIZED },
-        { status: 401 }
-      );
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
     const { storeId } = await request.json();
 
     if (!storeId) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.MISSING_STORE_ID },
-        { status: 400 }
-      );
+      throw new BadRequestError(ERROR_MESSAGES.MISSING_STORE_ID);
     }
 
-    // Find the store
-    const store = await prisma.store.findUnique({
-      where: { id: storeId },
-    });
-
-    if (!store) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.STORE_NOT_FOUND },
-        { status: 400 }
-      );
-    }
-
-    await prisma.store.update({
-      where: { id: storeId },
-      data: { isActive: !store.isActive },
-    });
+    await storeService.toggleStoreStatus(storeId);
 
     return NextResponse.json({ message: "Store updated successfully" });
   } catch (error) {
-    console.error("[Admin Toggle Store] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Admin Toggle Store");
   }
 }
