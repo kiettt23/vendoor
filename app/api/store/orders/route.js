@@ -1,66 +1,43 @@
 import { getAuth } from "@clerk/nextjs/server";
 import authSeller from "@/middlewares/authSeller";
-import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { orderService } from "@/lib/services/orderService";
+import { handleError } from "@/lib/errors/errorHandler";
+import { UnauthorizedError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-// Update seller order status
 export async function POST(request) {
   try {
     const { userId } = getAuth(request);
     const storeId = await authSeller(userId);
 
     if (!storeId) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.UNAUTHORIZED },
-        { status: 401 }
-      );
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
     const { orderId, status } = await request.json();
 
-    await prisma.order.update({
-      where: { id: orderId, storeId },
-      data: { status },
-    });
+    await orderService.updateOrderStatus(orderId, status, storeId);
+
     return NextResponse.json({ message: "Order Status updated" });
   } catch (error) {
-    console.error("[Store Orders POST] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Store Orders POST");
   }
 }
 
-// Get all orders for a seller
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
     const storeId = await authSeller(userId);
 
     if (!storeId) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.UNAUTHORIZED },
-        { status: 401 }
-      );
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    const orders = await prisma.order.findMany({
-      where: { storeId },
-      include: {
-        user: true,
-        address: true,
-        orderItems: { include: { product: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    const orders = await orderService.getStoreOrders(storeId);
+
     return NextResponse.json({ orders });
   } catch (error) {
-    console.error("[Store Orders GET] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Store Orders GET");
   }
 }

@@ -1,24 +1,19 @@
 import { getAuth } from "@clerk/nextjs/server";
 import authSeller from "@/middlewares/authSeller";
-import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { orderService } from "@/lib/services/orderService";
+import { productService } from "@/lib/services/productService";
+import { ratingService } from "@/lib/services/ratingService";
+import { handleError } from "@/lib/errors/errorHandler";
 
-// Get Dashbord Data for Seller (total orders, total earnings, total products)
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
     const storeId = await authSeller(userId);
 
-    // Get all orders for the seller
-    const orders = await prisma.order.findMany({ where: { storeId } });
-
-    // Get all products with ratings for seller
-    const products = await prisma.product.findMany({ where: { storeId } });
-
-    const ratings = await prisma.rating.findMany({
-      where: { productId: { in: products.map((product) => product.id) } },
-      include: { user: true, product: true },
-    });
+    const orders = await orderService.getStoreOrders(storeId);
+    const products = await productService.getProducts({ storeId });
+    const ratings = await ratingService.getRatingsByStoreId(storeId);
 
     const dashboardData = {
       ratings,
@@ -31,10 +26,6 @@ export async function GET(request) {
 
     return NextResponse.json({ dashboardData });
   } catch (error) {
-    console.error("[Store Dashboard] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Store Dashboard");
   }
 }

@@ -19,9 +19,16 @@ export async function POST(request) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    const { addressId, items, couponCode, paymentMethod } = await request.json();
+    const { addressId, items, couponCode, paymentMethod } =
+      await request.json();
 
-    if (!addressId || !paymentMethod || !items || !Array.isArray(items) || items.length === 0) {
+    if (
+      !addressId ||
+      !paymentMethod ||
+      !items ||
+      !Array.isArray(items) ||
+      items.length === 0
+    ) {
       throw new BadRequestError(ERROR_MESSAGES.MISSING_ORDER_DETAILS);
     }
 
@@ -67,7 +74,7 @@ export async function POST(request) {
           appId: APP_ID,
         },
       });
-      
+
       return NextResponse.json({ session });
     }
 

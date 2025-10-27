@@ -1,21 +1,21 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { authSeller } from "@/middlewares/authSeller";
 import imagekit from "@/configs/imageKit";
-import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { productService } from "@/lib/services/productService";
+import { handleError } from "@/lib/errors/errorHandler";
+import { UnauthorizedError, BadRequestError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-// Add product
 export async function POST(request) {
   try {
     const { userId } = getAuth(request);
     const storeId = await authSeller(userId);
 
     if (!storeId) {
-      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    // Get the data from the form
     const formData = await request.formData();
     const name = formData.get("name");
     const description = formData.get("description");
@@ -32,13 +32,10 @@ export async function POST(request) {
       !category ||
       images.length < 1
     ) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.MISSING_PRODUCT_DETAILS },
-        { status: 400 }
-      );
+      throw new BadRequestError(ERROR_MESSAGES.MISSING_PRODUCT_DETAILS);
     }
 
-    // Uploading Images to ImageKit
+    // Upload images to ImageKit
     const imagesUrl = await Promise.all(
       images.map(async (image) => {
         const buffer = Buffer.from(await image.arrayBuffer());
@@ -59,48 +56,35 @@ export async function POST(request) {
       })
     );
 
-    await prisma.product.create({
-      data: {
-        name,
-        description,
-        mrp,
-        price,
-        category,
-        images: imagesUrl,
-        storeId,
-      },
+    await productService.createProduct({
+      name,
+      description,
+      mrp,
+      price,
+      category,
+      images: imagesUrl,
+      storeId,
     });
 
     return NextResponse.json({ message: "Product added successfully" });
   } catch (error) {
-    console.error("[Store Product POST] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Store Product POST");
   }
 }
 
-// Get all products for a seller
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
     const storeId = await authSeller(userId);
 
     if (!storeId) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.UNAUTHORIZED },
-        { status: 401 }
-      );
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
-    const products = await prisma.product.findMany({ where: { storeId } });
+
+    const products = await productService.getProducts({ storeId });
 
     return NextResponse.json({ products });
   } catch (error) {
-    console.error("[Store Product GET] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Store Product GET");
   }
 }

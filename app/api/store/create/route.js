@@ -1,17 +1,16 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 import imagekit from "@/configs/imageKit";
+import { storeService } from "@/lib/services/storeService";
+import { handleError } from "@/lib/errors/errorHandler";
+import { BadRequestError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
-// create the store
 export async function POST(request) {
   try {
     const { userId } = getAuth(request);
 
-    // Get the data from the form
     const formData = await request.formData();
-
     const name = formData.get("name");
     const username = formData.get("username");
     const description = formData.get("description");
@@ -29,35 +28,16 @@ export async function POST(request) {
       !address ||
       !image
     ) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.MISSING_STORE_INFO },
-        { status: 400 }
-      );
+      throw new BadRequestError(ERROR_MESSAGES.MISSING_STORE_INFO);
     }
 
-    // check if user has already registered a store
-    const store = await prisma.store.findFirst({
-      where: { userId: userId },
-    });
-
-    // if store is already registered then send status of store
-    if (store) {
-      return NextResponse.json({ status: store.status });
+    // Check if user already has a store
+    const existingStore = await storeService.getStoreByUserId(userId);
+    if (existingStore) {
+      return NextResponse.json({ status: existingStore.status });
     }
 
-    // check if username is already taken
-    const isUsernameTaken = await prisma.store.findFirst({
-      where: { username: username.toLowerCase() },
-    });
-
-    if (isUsernameTaken) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.USERNAME_ALREADY_TAKEN },
-        { status: 400 }
-      );
-    }
-
-    // image upload to imagekit
+    // Upload image to ImageKit
     const buffer = Buffer.from(await image.arrayBuffer());
     const response = await imagekit.upload({
       file: buffer,
@@ -74,56 +54,35 @@ export async function POST(request) {
       ],
     });
 
-    const newStore = await prisma.store.create({
-      data: {
-        userId,
-        name,
-        description,
-        username: username.toLowerCase(),
-        email,
-        contact,
-        address,
-        logo: optimizedImage,
-      },
-    });
-
-    // link store to user
-    await prisma.user.update({
-      where: { id: userId },
-      data: { store: { connect: { id: newStore.id } } },
+    await storeService.createStore({
+      userId,
+      name,
+      description,
+      username: username.toLowerCase(),
+      email,
+      contact,
+      address,
+      logo: optimizedImage,
     });
 
     return NextResponse.json({ message: "applied, waiting for approval" });
   } catch (error) {
-    console.error("[Store Create POST] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Store Create POST");
   }
 }
 
-// check is user have already registered a store if yes then send status of store
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
 
-    // check is user already registered a store
-    const store = await prisma.store.findFirst({
-      where: { userId: userId },
-    });
+    const store = await storeService.getStoreByUserId(userId);
 
-    // if store is already registered then send status of store
     if (store) {
       return NextResponse.json({ status: store.status });
     }
 
     return NextResponse.json({ status: "not registered" });
   } catch (error) {
-    console.error("[Store Create GET] Error:", error);
-    return NextResponse.json(
-      { error: error.code || error.message },
-      { status: 400 }
-    );
+    return handleError(error, "Store Create GET");
   }
 }
