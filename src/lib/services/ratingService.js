@@ -60,6 +60,13 @@ export class RatingService {
         review,
         orderId,
       },
+      include: {
+        product: {
+          select: {
+            storeId: true,
+          },
+        },
+      },
     });
 
     return newRating;

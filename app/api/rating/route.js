@@ -6,6 +6,7 @@ import { UnauthorizedError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/lib/constants/errorMessages";
 import { validateData } from "@/lib/validations/validate";
 import { createRatingSchema } from "@/lib/validations/schemas";
+import { getCacheOrFetch, invalidateCaches } from "@/lib/cache";
 
 export async function POST(request) {
   try {
@@ -20,6 +21,12 @@ export async function POST(request) {
       userId,
       ...validatedData,
     });
+
+    // Invalidate caches after rating creation
+    await invalidateCaches([
+      `user:ratings:${userId}`, // User's rating list
+      `store:${newRating.product.storeId}:dashboard`, // Store dashboard
+    ]);
 
     return NextResponse.json({
       message: "Rating added successfully",
@@ -39,8 +46,14 @@ export async function GET(request) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    // Use service to get ratings
-    const ratings = await ratingService.getUserRatings(userId);
+    // Cache key per user
+    // TTL: 5 minutes (ratings don't change frequently)
+    const cacheKey = `user:ratings:${userId}`;
+    const ratings = await getCacheOrFetch(
+      cacheKey,
+      () => ratingService.getUserRatings(userId),
+      300 // 5 minutes
+    );
 
     return NextResponse.json({ ratings });
   } catch (error) {

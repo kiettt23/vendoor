@@ -10,6 +10,7 @@ import { UnauthorizedError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/lib/constants/errorMessages";
 import { validateData } from "@/lib/validations/validate";
 import { createOrderSchema } from "@/lib/validations/schemas";
+import { getCacheOrFetch, invalidateCaches } from "@/lib/cache";
 
 const APP_ID = "vendoor";
 
@@ -79,6 +80,15 @@ export async function POST(request) {
     // Clear cart for COD orders
     await cartService.clearCart(userId);
 
+    // Invalidate caches after order creation
+    const storeIds = orders.map((order) => order.storeId);
+    await invalidateCaches([
+      `user:orders:${userId}`, // User's order list
+      `cart:${userId}`, // User's cart
+      ...storeIds.map((storeId) => `store:orders:${storeId}`), // Store's order lists
+      ...storeIds.map((storeId) => `store:${storeId}:dashboard`), // Store dashboards
+    ]);
+
     return NextResponse.json({ message: "Orders Placed Successfully" });
   } catch (error) {
     return handleError(error, "Orders POST");
@@ -93,7 +103,14 @@ export async function GET(request) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    const orders = await orderService.getUserOrders(userId);
+    // Cache key per user
+    // TTL: 2 minutes (orders update frequently)
+    const cacheKey = `user:orders:${userId}`;
+    const orders = await getCacheOrFetch(
+      cacheKey,
+      () => orderService.getUserOrders(userId),
+      120 // 2 minutes
+    );
 
     return NextResponse.json({ orders });
   } catch (error) {
