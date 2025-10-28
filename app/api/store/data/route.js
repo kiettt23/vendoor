@@ -3,6 +3,7 @@ import { storeService } from "@/lib/services/storeService";
 import { handleError } from "@/lib/errors/errorHandler";
 import { BadRequestError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { getCacheOrFetch } from "@/lib/cache";
 
 export async function GET(request) {
   try {
@@ -13,7 +14,14 @@ export async function GET(request) {
       throw new BadRequestError(ERROR_MESSAGES.MISSING_USERNAME);
     }
 
-    const store = await storeService.getStoreByUsername(username);
+    // Cache key per store username
+    // TTL: 30 minutes (public store data changes rarely)
+    const cacheKey = `store:username:${username}`;
+    const store = await getCacheOrFetch(
+      cacheKey,
+      () => storeService.getStoreByUsername(username),
+      1800 // 30 minutes
+    );
 
     return NextResponse.json({ store });
   } catch (error) {

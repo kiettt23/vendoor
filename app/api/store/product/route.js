@@ -6,6 +6,7 @@ import { productService } from "@/lib/services/productService";
 import { handleError } from "@/lib/errors/errorHandler";
 import { UnauthorizedError, BadRequestError } from "@/lib/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { invalidateCaches } from "@/lib/cache";
 
 export async function POST(request) {
   try {
@@ -65,6 +66,12 @@ export async function POST(request) {
       images: imagesUrl,
       storeId,
     });
+
+    // 🗑️ Invalidate related caches
+    await invalidateCaches([
+      "products:all", // Global products list
+      `store:${storeId}:dashboard`, // Store dashboard (product count)
+    ]);
 
     return NextResponse.json({ message: "Product added successfully" });
   } catch (error) {
