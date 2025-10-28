@@ -43,9 +43,9 @@ export default defineConfig({
 
       // Files cần measure coverage
       include: [
-        "lib/**/*.{js,jsx}", // Business logic
+        "src/lib/**/*.{js,jsx}", // Business logic
         "app/api/**/*.{js,jsx}", // API routes
-        "components/**/*.{js,jsx}", // React components
+        "src/components/**/*.{js,jsx}", // React components
       ],
 
       // Files không cần coverage
@@ -71,7 +71,7 @@ export default defineConfig({
         statements: 15, // 15% minimum (hiện tại: 19%)
 
         // Per-file thresholds cho services layer
-        "lib/services/*.js": {
+        "src/lib/services/*.js": {
           lines: 70, // Services phải có 70%+ coverage
           functions: 70,
           branches: 65,
@@ -84,7 +84,7 @@ export default defineConfig({
   // Path aliases (giống Next.js)
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./"),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
 });

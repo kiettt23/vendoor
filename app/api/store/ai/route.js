@@ -1,8 +1,8 @@
 import { getAuth } from "@clerk/nextjs/server";
 import authSeller from "@/lib/auth/authSeller";
-import openai from "@/configs/openai";
+import openai from "@/lib/config/openai";
 import { NextResponse } from "next/server";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { ERROR_MESSAGES } from "@/lib/constants/errorMessages";
 
 async function main(base64Image, mimeType) {
   const messages = [

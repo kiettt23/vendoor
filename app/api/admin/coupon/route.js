@@ -5,7 +5,7 @@ import { inngest } from "@/inngest/client";
 import { couponService } from "@/lib/services/couponService";
 import { handleError } from "@/lib/errors/errorHandler";
 import { UnauthorizedError } from "@/lib/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { ERROR_MESSAGES } from "@/lib/constants/errorMessages";
 
 export async function POST(request) {
   try {

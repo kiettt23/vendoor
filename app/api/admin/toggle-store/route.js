@@ -4,7 +4,7 @@ import authAdmin from "@/lib/auth/authAdmin";
 import { storeService } from "@/lib/services/storeService";
 import { handleError } from "@/lib/errors/errorHandler";
 import { UnauthorizedError, BadRequestError } from "@/lib/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { ERROR_MESSAGES } from "@/lib/constants/errorMessages";
 
 export async function POST(request) {
   try {

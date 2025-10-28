@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { NotFoundError } from "@/lib/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { ERROR_MESSAGES } from "@/lib/constants/errorMessages";
 
 class ProductService {
   async getProducts() {
