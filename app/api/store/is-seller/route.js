@@ -1,5 +1,5 @@
 import { getAuth } from "@clerk/nextjs/server";
-import authSeller from "@/middlewares/authSeller";
+import authSeller from "@/lib/auth/authSeller";
 import { NextResponse } from "next/server";
 import { storeService } from "@/lib/services/storeService";
 import { handleError } from "@/lib/errors/errorHandler";

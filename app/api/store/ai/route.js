@@ -1,6 +1,6 @@
 import { getAuth } from "@clerk/nextjs/server";
-import authSeller from "@/middlewares/authSeller";
-import { openai } from "@/configs/openai";
+import authSeller from "@/lib/auth/authSeller";
+import openai from "@/configs/openai";
 import { NextResponse } from "next/server";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
 

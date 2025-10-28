@@ -1,4 +1,4 @@
-import authAdmin from "@/middlewares/authAdmin";
+import authAdmin from "@/lib/auth/authAdmin";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { handleError } from "@/lib/errors/errorHandler";
