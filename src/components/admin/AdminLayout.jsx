@@ -23,7 +23,7 @@ const AdminLayout = ({ children }) => {
       });
       setIsAdmin(data.isAdmin);
     } catch (error) {
-      console.log(error);
+      // Error handled silently - user will see "not authorized" message
     } finally {
       setLoading(false);
     }

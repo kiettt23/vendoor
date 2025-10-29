@@ -14,7 +14,7 @@ export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const router = useRouter;
+  const router = useRouter();
   useEffect(() => {
     const fetchOrders = async () => {
       try {

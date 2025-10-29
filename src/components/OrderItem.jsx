@@ -5,9 +5,10 @@ import { useSelector } from "react-redux";
 import Rating from "./Rating";
 import { useState } from "react";
 import RatingModal from "./RatingModal";
+import { CURRENCY_SYMBOL } from "@/lib/constants";
+import { formatDate, formatPrice } from "@/lib/utils/formatters";
 
 const OrderItem = ({ order }) => {
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
   const [ratingModal, setRatingModal] = useState(null);
 
   const { ratings } = useSelector((state) => state.rating);
@@ -33,14 +34,13 @@ const OrderItem = ({ order }) => {
                     {item.product.name}
                   </p>
                   <p>
-                    {item.price}
-                    {currency} Qty : {item.quantity}{" "}
+                    {formatPrice(item.price)}
+                    {CURRENCY_SYMBOL} Qty : {item.quantity}{" "}
                   </p>
-                  <p className="mb-1">
-                    {new Date(order.createdAt).toDateString()}
-                  </p>
+                  <p className="mb-1">{formatDate(order.createdAt)}</p>
                   <div>
-                    {ratings.find(
+                    {Array.isArray(ratings) &&
+                    ratings.find(
                       (rating) =>
                         order.id === rating.orderId &&
                         item.product.id === rating.productId
@@ -84,7 +84,7 @@ const OrderItem = ({ order }) => {
 
         <td className="text-center max-md:hidden">
           {order.total}
-          {currency}
+          {CURRENCY_SYMBOL}
         </td>
 
         <td className="text-left max-md:hidden">

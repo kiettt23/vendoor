@@ -7,17 +7,17 @@ import { useRouter } from "next/navigation";
 import { Protect, useAuth, useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { fetchCart } from "@/lib/features/cart/cartSlice";
+import { CURRENCY_SYMBOL } from "@/lib/constants";
+import { formatPrice } from "@/lib/utils/formatters";
 
 const OrderSummary = ({ totalPrice, items }) => {
   const { user } = useUser();
   const { getToken } = useAuth();
   const dispatch = useDispatch();
 
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
-
   const router = useRouter();
 
-  const addressList = useSelector((state) => state.address.list);
+  const addressList = useSelector((state) => state.address.addresses || []);
 
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -55,9 +55,15 @@ const OrderSummary = ({ totalPrice, items }) => {
       }
       const token = await getToken();
 
+      // Transform items to API format: [{ id, quantity }]
+      const orderItems = items.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+      }));
+
       const orderData = {
         addressId: selectedAddress.id,
-        items,
+        items: orderItems,
         paymentMethod,
       };
 
@@ -161,18 +167,19 @@ const OrderSummary = ({ totalPrice, items }) => {
           </div>
           <div className="flex flex-col gap-1 font-medium text-right">
             <p>
-              {totalPrice.toLocaleString()}
-              {currency}
+              {formatPrice(totalPrice)}
+              {CURRENCY_SYMBOL}
             </p>
             <p>
-              <Protect plan={"plus"} fallback={`5${currency}`}>
+              <Protect plan={"plus"} fallback={`5${CURRENCY_SYMBOL}`}>
                 Free
               </Protect>
             </p>
             {coupon && (
-              <p>{`-${currency}${((coupon.discount / 100) * totalPrice).toFixed(
-                2
-              )}`}</p>
+              <p>{`-${(
+                (coupon.discount / 100) *
+                totalPrice
+              ).toLocaleString()}${CURRENCY_SYMBOL}`}</p>
             )}
           </div>
         </div>
@@ -224,15 +231,17 @@ const OrderSummary = ({ totalPrice, items }) => {
                     totalPrice +
                     5 -
                     (coupon.discount / 100) * totalPrice
-                  ).toFixed(2)
+                  ).toLocaleString()
                 : (totalPrice + 5).toLocaleString()
-            }
-            ${currency}`}
+            }${CURRENCY_SYMBOL}`}
           >
             {coupon
-              ? (totalPrice - (coupon.discount / 100) * totalPrice).toFixed(2)
+              ? (
+                  totalPrice -
+                  (coupon.discount / 100) * totalPrice
+                ).toLocaleString()
               : totalPrice.toLocaleString()}
-            {currency}
+            {CURRENCY_SYMBOL}
           </Protect>
         </p>
       </div>

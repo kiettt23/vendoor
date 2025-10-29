@@ -11,7 +11,7 @@ export async function POST(request) {
     const body = await request.json();
 
     // ✨ Validate địa chỉ: phone 10 số, pincode 5-6 số, etc.
-    const { address } = validateData(saveAddressSchema, { address: body });
+    const { address } = validateData(saveAddressSchema, body);
 
     const newAddress = await addressService.saveAddress(userId, address);
 

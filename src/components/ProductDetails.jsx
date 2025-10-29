@@ -13,12 +13,12 @@ import { useState } from "react";
 import Image from "next/image";
 import Counter from "./Counter";
 import { useDispatch, useSelector } from "react-redux";
+import { CURRENCY_SYMBOL, RATING } from "@/lib/constants";
 
 const ProductDetails = ({ product }) => {
   const productId = product.id;
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
 
-  const cart = useSelector((state) => state.cart.cartItems);
+  const cartItems = useSelector((state) => state.cart.cartItems || {});
   const dispatch = useDispatch();
 
   const router = useRouter();
@@ -62,16 +62,18 @@ const ProductDetails = ({ product }) => {
           {product.name}
         </h1>
         <div className="flex items-center mt-2">
-          {Array(5)
-            .fill("")
-            .map((_, index) => (
-              <StarIcon
-                key={index}
-                size={14}
-                className="text-transparent mt-0.5"
-                fill={averageRating >= index + 1 ? "#9810FA" : "#D1D5DB"}
-              />
-            ))}
+          {Array.from({ length: RATING.MAX_STARS }, (_, index) => (
+            <StarIcon
+              key={index}
+              size={14}
+              className="text-transparent mt-0.5"
+              fill={
+                averageRating >= index + 1
+                  ? RATING.ACTIVE_COLOR
+                  : RATING.INACTIVE_COLOR
+              }
+            />
+          ))}
           <p className="text-sm ml-3 text-slate-500">
             {product.rating.length} Reviews
           </p>
@@ -80,11 +82,11 @@ const ProductDetails = ({ product }) => {
           <p>
             {" "}
             {product.price}
-            {currency}{" "}
+            {CURRENCY_SYMBOL}{" "}
           </p>
           <p className="text-xl text-slate-500 line-through">
             {product.mrp}
-            {currency}
+            {CURRENCY_SYMBOL}
           </p>
         </div>
         <div className="flex items-center gap-2 text-slate-500">
@@ -96,7 +98,7 @@ const ProductDetails = ({ product }) => {
           </p>
         </div>
         <div className="flex items-end gap-5 mt-10">
-          {cart[productId] && (
+          {cartItems[productId] && (
             <div className="flex flex-col gap-3">
               <p className="text-lg text-slate-800 font-semibold">Quantity</p>
               <Counter productId={productId} />
@@ -104,11 +106,11 @@ const ProductDetails = ({ product }) => {
           )}
           <button
             onClick={() =>
-              !cart[productId] ? addToCartHandler() : router.push("/cart")
+              !cartItems[productId] ? addToCartHandler() : router.push("/cart")
             }
             className="bg-slate-800 text-white px-10 py-3 text-sm font-medium rounded hover:bg-slate-900 active:scale-95 transition"
           >
-            {!cart[productId] ? "Add to Cart" : "View Cart"}
+            {!cartItems[productId] ? "Add to Cart" : "View Cart"}
           </button>
         </div>
         <hr className="border-gray-300 my-5" />

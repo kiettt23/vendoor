@@ -6,6 +6,7 @@ import { DeleteIcon } from "lucide-react";
 import { couponDummyData } from "@/assets/assets";
 import { useAuth } from "@clerk/nextjs";
 import axios from "axios";
+import { formatDate } from "@/lib/utils/formatters";
 
 export default function AdminCoupons() {
   const { getToken } = useAuth();
@@ -220,7 +221,7 @@ export default function AdminCoupons() {
                     {coupon.discount}%
                   </td>
                   <td className="py-3 px-4 text-slate-800">
-                    {format(coupon.expiresAt, "yyyy-MM-dd")}
+                    {formatDate(coupon.expiresAt)}
                   </td>
                   <td className="py-3 px-4 text-slate-800">
                     {coupon.forNewUser ? "Yes" : "No"}

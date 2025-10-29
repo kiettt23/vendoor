@@ -1,6 +1,6 @@
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
-import StoreProvider from "@/app/StoreProvider";
+import StoreProvider from "./StoreProvider";
 import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata = {

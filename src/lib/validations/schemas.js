@@ -1,13 +1,6 @@
 import { z } from "zod";
+import { ORDER_STATUS, STORE_STATUS } from "../constants";
 
-// ============================================
-// PRODUCT SCHEMAS
-// ============================================
-// Giải thích: Schema này định nghĩa "luật" cho Product
-// - name: bắt buộc, tối thiểu 3 ký tự
-// - description: bắt buộc, tối thiểu 10 ký tự
-// - price: phải là số dương
-// - mrp: phải >= price (giá gốc phải lớn hơn giá bán)
 export const createProductSchema = z
   .object({
     name: z.string().min(3, "Tên sản phẩm phải có ít nhất 3 ký tự"),
@@ -23,10 +16,6 @@ export const createProductSchema = z
     path: ["mrp"],
   });
 
-// ============================================
-// ORDER SCHEMAS
-// ============================================
-// Giải thích: Validate data khi tạo đơn hàng
 export const createOrderSchema = z.object({
   addressId: z.string().min(1, "Vui lòng chọn địa chỉ giao hàng"),
   items: z
@@ -45,17 +34,9 @@ export const createOrderSchema = z.object({
 
 export const updateOrderStatusSchema = z.object({
   orderId: z.string().min(1, "Order ID không hợp lệ"),
-  status: z.enum(
-    ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"],
-    {
-      errorMap: () => ({ message: "Trạng thái không hợp lệ" }),
-    }
-  ),
+  status: z.enum(Object.values(ORDER_STATUS)),
 });
 
-// ============================================
-// STORE SCHEMAS
-// ============================================
 export const createStoreSchema = z.object({
   name: z.string().min(3, "Tên cửa hàng phải có ít nhất 3 ký tự"),
   username: z
@@ -74,20 +55,13 @@ export const createStoreSchema = z.object({
 
 export const approveStoreSchema = z.object({
   storeId: z.string().min(1, "Store ID không hợp lệ"),
-  status: z.enum(["approved", "rejected"], {
-    errorMap: () => ({
-      message: "Trạng thái phải là 'approved' hoặc 'rejected'",
-    }),
-  }),
+  status: z.enum([STORE_STATUS.APPROVED, STORE_STATUS.REJECTED]),
 });
 
 export const toggleStoreSchema = z.object({
   storeId: z.string().min(1, "Store ID không hợp lệ"),
 });
 
-// ============================================
-// COUPON SCHEMAS
-// ============================================
 export const createCouponSchema = z.object({
   code: z
     .string()
@@ -107,9 +81,6 @@ export const validateCouponSchema = z.object({
   code: z.string().min(1, "Vui lòng nhập mã giảm giá"),
 });
 
-// ============================================
-// RATING SCHEMAS
-// ============================================
 export const createRatingSchema = z.object({
   productId: z.string().min(1, "Product ID không hợp lệ"),
   orderId: z.string().min(1, "Order ID không hợp lệ"),
@@ -121,35 +92,35 @@ export const createRatingSchema = z.object({
   comment: z.string().optional(),
 });
 
-// ============================================
-// ADDRESS SCHEMAS
-// ============================================
 export const saveAddressSchema = z.object({
-  name: z.string().min(2, "Tên người nhận phải có ít nhất 2 ký tự"),
-  phone: z
-    .string()
-    .regex(/^0\d{9}$/, "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0"),
-  address: z.string().min(10, "Địa chỉ phải có ít nhất 10 ký tự"),
-  city: z.string().min(2, "Tên thành phố không hợp lệ"),
-  state: z.string().min(2, "Tên tỉnh/thành không hợp lệ"),
-  pincode: z.string().regex(/^\d{5,6}$/, "Mã bưu điện phải có 5-6 chữ số"),
+  address: z.object({
+    name: z.string().min(2, "Tên người nhận phải có ít nhất 2 ký tự"),
+    email: z.string().email("Email không hợp lệ"),
+    phone: z
+      .string()
+      .regex(/^0\d{9}$/, "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0"),
+    street: z.string().min(10, "Địa chỉ phải có ít nhất 10 ký tự"),
+    city: z.string().min(2, "Tên thành phố không hợp lệ"),
+    state: z.string().min(2, "Tên tỉnh/thành không hợp lệ"),
+    zip: z.string().min(4, "Mã bưu điện không hợp lệ"),
+    country: z.string().min(2, "Tên quốc gia không hợp lệ"),
+  }),
 });
 
-// ============================================
-// CART SCHEMAS
-// ============================================
 export const saveCartSchema = z.object({
-  cart: z.array(
-    z.object({
-      id: z.string(),
-      quantity: z.number().int().positive(),
-    })
-  ),
+  cart: z.union([
+    // Support array format: [{ id, quantity }]
+    z.array(
+      z.object({
+        id: z.string(),
+        quantity: z.number().int().positive(),
+      })
+    ),
+    // Support object format: { productId: quantity }
+    z.record(z.string(), z.number().int().positive()),
+  ]),
 });
 
-// ============================================
-// PRODUCT QUERY SCHEMAS
-// ============================================
 export const getProductsQuerySchema = z.object({
   category: z.string().optional(),
   search: z.string().optional(),

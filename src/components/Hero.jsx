@@ -4,10 +4,9 @@ import { ArrowRightIcon, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import CategoriesMarquee from "./CategoriesMarquee";
+import { CURRENCY_SYMBOL } from "@/lib/constants";
 
 const Hero = () => {
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
-
   return (
     <div className="mx-6">
       <div className="flex max-xl:flex-col gap-8 max-w-7xl mx-auto my-10">
@@ -17,7 +16,7 @@ const Hero = () => {
               <span className="bg-green-600 px-3 py-1 max-sm:ml-1 rounded-full text-white text-xs">
                 NEWS
               </span>{" "}
-              Free Shipping on Orders Above 200.000{currency} !{" "}
+              Free Shipping on Orders Above 200.000{CURRENCY_SYMBOL} !{" "}
               <ChevronRightIcon
                 className="group-hover:ml-2 transition-all"
                 size={16}
@@ -28,7 +27,7 @@ const Hero = () => {
             </h2>
             <div className="text-slate-800 text-sm font-medium mt-4 sm:mt-8">
               <p>Starts from</p>
-              <p className="text-3xl">69.000{currency}</p>
+              <p className="text-3xl">69.000{CURRENCY_SYMBOL}</p>
             </div>
             <button className="bg-slate-800 text-white text-sm py-2.5 px-7 sm:py-5 sm:px-12 mt-4 sm:mt-10 rounded-md hover:bg-slate-900 hover:scale-103 active:scale-95 transition">
               SEE MORE

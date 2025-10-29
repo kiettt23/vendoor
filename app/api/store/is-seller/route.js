@@ -9,7 +9,7 @@ import { ERROR_MESSAGES } from "@/lib/constants/errorMessages";
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
-    const storeId = await authSeller(request);
+    const storeId = await authSeller(userId);
 
     if (!storeId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);

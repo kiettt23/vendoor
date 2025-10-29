@@ -5,6 +5,7 @@ import { orderDummyData } from "@/assets/assets";
 import { useAuth } from "@clerk/nextjs";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { formatDateTime } from "@/lib/utils/formatters";
 
 export default function StoreOrders() {
   const [orders, setOrders] = useState([]);
@@ -132,7 +133,7 @@ export default function StoreOrders() {
                     </select>
                   </td>
                   <td className="px-4 py-3 text-gray-500">
-                    {new Date(order.createdAt).toLocaleString()}
+                    {formatDateTime(order.createdAt)}
                   </td>
                 </tr>
               ))}
@@ -225,7 +226,7 @@ export default function StoreOrders() {
               </p>
               <p>
                 <span className="text-green-700">Order Date:</span>{" "}
-                {new Date(selectedOrder.createdAt).toLocaleString()}
+                {formatDateTime(selectedOrder.createdAt)}
               </p>
             </div>
 

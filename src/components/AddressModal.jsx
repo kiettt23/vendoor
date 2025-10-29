@@ -43,7 +43,6 @@ const AddressModal = ({ setShowAddressModal }) => {
       toast.success(data.message);
       setShowAddressModal(false);
     } catch (error) {
-      console.log(error);
       toast.error(error?.response?.data?.message || error.message);
     }
   };

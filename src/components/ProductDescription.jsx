@@ -1,8 +1,10 @@
 "use client";
-import { ArrowRight, StarIcon } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { formatDate } from "@/lib/utils/formatters";
+import { RATING } from "@/lib/constants";
 
 const ProductDescription = ({ product }) => {
   const [selectedTab, setSelectedTab] = useState("Description");
@@ -45,22 +47,22 @@ const ProductDescription = ({ product }) => {
               />
               <div>
                 <div className="flex items-center">
-                  {Array(5)
-                    .fill("")
-                    .map((_, index) => (
-                      <StarIcon
-                        key={index}
-                        size={18}
-                        className="text-transparent mt-0.5"
-                        fill={item.rating >= index + 1 ? "#9810FA" : "#D1D5DB"}
-                      />
-                    ))}
+                  {Array.from({ length: RATING.MAX_STARS }, (_, index) => (
+                    <StarIcon
+                      key={index}
+                      size={18}
+                      className="text-transparent mt-0.5"
+                      fill={
+                        item.rating >= index + 1
+                          ? RATING.ACTIVE_COLOR
+                          : RATING.INACTIVE_COLOR
+                      }
+                    />
+                  ))}
                 </div>
                 <p className="text-sm max-w-lg my-4">{item.review}</p>
                 <p className="font-medium text-slate-800">{item.user.name}</p>
-                <p className="mt-3 font-light">
-                  {new Date(item.createdAt).toDateString()}
-                </p>
+                <p className="mt-3 font-light">{formatDate(item.createdAt)}</p>
               </div>
             </div>
           ))}

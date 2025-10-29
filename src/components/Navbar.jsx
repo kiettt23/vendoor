@@ -44,7 +44,7 @@ const Navbar = () => {
 
             <form
               onSubmit={handleSearch}
-              className="hidden xl:flex items-center w-xs text-sm gap-2 bg-slate-100 px-4 py-3 rounded-full"
+              className="flex items-center w-full max-w-xs text-sm gap-2 bg-slate-100 px-4 py-3 rounded-full"
             >
               <Search size={18} className="text-slate-600" />
               <input

@@ -13,11 +13,11 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { CURRENCY_SYMBOL, RATING } from "@/lib/constants";
+import { formatDate } from "@/lib/utils/formatters";
 
 export default function Dashboard() {
   const { getToken } = useAuth();
-
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
 
   const router = useRouter();
 
@@ -37,7 +37,7 @@ export default function Dashboard() {
     },
     {
       title: "Total Earnings",
-      value: dashboardData.totalEarnings + currency,
+      value: dashboardData.totalEarnings + CURRENCY_SYMBOL,
       icon: CircleDollarSignIcon,
     },
     { title: "Total Orders", value: dashboardData.totalOrders, icon: TagsIcon },
@@ -113,7 +113,7 @@ export default function Dashboard() {
                 <div>
                   <p className="font-medium">{review.user.name}</p>
                   <p className="font-light text-slate-500">
-                    {new Date(review.createdAt).toDateString()}
+                    {formatDate(review.createdAt)}
                   </p>
                 </div>
               </div>
@@ -126,18 +126,18 @@ export default function Dashboard() {
                 <p className="text-slate-400">{review.product?.category}</p>
                 <p className="font-medium">{review.product?.name}</p>
                 <div className="flex items-center">
-                  {Array(5)
-                    .fill("")
-                    .map((_, index) => (
-                      <StarIcon
-                        key={index}
-                        size={17}
-                        className="text-transparent mt-0.5"
-                        fill={
-                          review.rating >= index + 1 ? "#9810FA" : "#D1D5DB"
-                        }
-                      />
-                    ))}
+                  {Array.from({ length: RATING.MAX_STARS }, (_, index) => (
+                    <StarIcon
+                      key={index}
+                      size={17}
+                      className="text-transparent mt-0.5"
+                      fill={
+                        review.rating >= index + 1
+                          ? RATING.ACTIVE_COLOR
+                          : RATING.INACTIVE_COLOR
+                      }
+                    />
+                  ))}
                 </div>
               </div>
               <button

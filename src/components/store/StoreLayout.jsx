@@ -24,7 +24,7 @@ const StoreLayout = ({ children }) => {
       setIsSeller(data.isSeller);
       setStoreInfo(data.storeInfo);
     } catch (error) {
-      console.log(error);
+      // Error handled silently - user will see "not authorized" message
     } finally {
       setLoading(false);
     }

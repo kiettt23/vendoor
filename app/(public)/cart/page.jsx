@@ -1,18 +1,19 @@
 "use client";
+// Cart page - Fixed import issue
 import Counter from "@/components/Counter";
 import OrderSummary from "@/components/OrderSummary";
 import PageTitle from "@/components/PageTitle";
 import { deleteItemFromCart } from "@/lib/features/cart/cartSlice";
+import { CURRENCY_SYMBOL } from "@/lib/constants";
 import { Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { formatPrice } from "@/lib/utils/formatters";
 
 export default function Cart() {
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
-
   const { cartItems } = useSelector((state) => state.cart);
-  const products = useSelector((state) => state.product.list);
+  const products = useSelector((state) => state.product.products || []);
 
   const dispatch = useDispatch();
 
@@ -36,7 +37,7 @@ export default function Cart() {
   };
 
   const handleDeleteItemFromCart = (productId) => {
-    dispatch(deleteItemFromCart({ productId }));
+    dispatch(deleteItemFromCart(productId));
   };
 
   useEffect(() => {
@@ -83,7 +84,7 @@ export default function Cart() {
                       <p className="text-xs text-slate-500">{item.category}</p>
                       <p>
                         {item.price}
-                        {currency}
+                        {CURRENCY_SYMBOL}
                       </p>
                     </div>
                   </td>
@@ -91,8 +92,8 @@ export default function Cart() {
                     <Counter productId={item.id} />
                   </td>
                   <td className="text-center">
-                    {(item.price * item.quantity).toLocaleString()}
-                    {currency}
+                    {formatPrice(item.price * item.quantity)}
+                    {CURRENCY_SYMBOL}
                   </td>
                   <td className="text-center max-md:hidden">
                     <button

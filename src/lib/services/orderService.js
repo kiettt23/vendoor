@@ -87,10 +87,13 @@ class OrderService {
         data: {
           userId,
           storeId,
+          addressId: address,
           total: orderTotal,
-          address,
           paymentMethod,
-          status: "PENDING",
+          status: "ORDER_PLACED",
+          isPaid: paymentMethod === "STRIPE" ? false : false,
+          isCouponUsed: !!coupon,
+          coupon: coupon ? JSON.parse(JSON.stringify(coupon)) : {},
         },
       });
 
@@ -120,6 +123,7 @@ class OrderService {
           include: { product: true },
         },
         store: true,
+        address: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -137,6 +141,7 @@ class OrderService {
         user: {
           select: { name: true, email: true },
         },
+        address: true,
       },
       orderBy: { createdAt: "desc" },
     });

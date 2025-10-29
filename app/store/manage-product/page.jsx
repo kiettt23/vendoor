@@ -6,12 +6,12 @@ import Loading from "@/components/Loading";
 import { productDummyData } from "@/assets/assets";
 import { useAuth, useUser } from "@clerk/nextjs";
 import axios from "axios";
+import { CURRENCY_SYMBOL } from "@/lib/constants";
+import { formatPrice } from "@/lib/utils/formatters";
 
 export default function StoreManageProducts() {
   const { getToken } = useAuth();
   const { user } = useUser();
-
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
 
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
@@ -23,9 +23,9 @@ export default function StoreManageProducts() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(
-        data.products.sort((a, b) => {
-          new Date(b.createdAt) - new Date(a.createdAt);
-        })
+        data.products.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        )
       );
     } catch (error) {
       toast.error(error?.response?.data?.error || error.message);
@@ -99,10 +99,10 @@ export default function StoreManageProducts() {
                 {product.description}
               </td>
               <td className="px-4 py-3 hidden md:table-cell">
-                {product.mrp.toLocaleString()} {currency}
+                {formatPrice(product.mrp)} {CURRENCY_SYMBOL}
               </td>
               <td className="px-4 py-3">
-                {product.price.toLocaleString()} {currency}
+                {formatPrice(product.price)} {CURRENCY_SYMBOL}
               </td>
               <td className="px-4 py-3 text-center">
                 <label className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3">

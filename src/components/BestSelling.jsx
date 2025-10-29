@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 const BestSelling = () => {
   const displayQuantity = 8;
-  const products = useSelector((state) => state.product.list);
+  const products = useSelector((state) => state.product.products || []);
 
   return (
     <div className="px-6 my-30 max-w-6xl mx-auto">
