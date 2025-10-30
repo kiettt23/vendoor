@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { storeService } from "@/lib/services/storeService";
-import { handleError } from "@/lib/errors/errorHandler";
-import { BadRequestError } from "@/lib/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
-import { getCacheOrFetch } from "@/lib/cache";
+import { storeService } from "@/core/Store/storeService";
+import { handleError } from "@/errors/errorHandler";
+import { BadRequestError } from "@/errors/AppError";
+import { ERROR_MESSAGES } from "@/constants/AppError";
+import { getCacheOrFetch } from "@/infra/cache";
 
 export async function GET(request) {
   try {

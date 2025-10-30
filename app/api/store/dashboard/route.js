@@ -1,11 +1,11 @@
 import { getAuth } from "@clerk/nextjs/server";
-import authSeller from "@/middlewares/authSeller";
+import authSeller from "@/auth/authSeller";
 import { NextResponse } from "next/server";
-import { orderService } from "@/lib/services/orderService";
-import { productService } from "@/lib/services/productService";
-import { ratingService } from "@/lib/services/ratingService";
-import { handleError } from "@/lib/errors/errorHandler";
-import { getCacheOrFetch } from "@/lib/cache";
+import { orderService } from "@/core/services/orderService";
+import { productService } from "@/core/services/productService";
+import { ratingService } from "@/core/services/ratingService";
+import { handleError } from "@/errors/errorHandler";
+import { getCacheOrFetch } from "@/infra/cache";
 
 export async function GET(request) {
   try {

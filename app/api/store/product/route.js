@@ -1,12 +1,12 @@
 import { getAuth } from "@clerk/nextjs/server";
-import { authSeller } from "@/middlewares/authSeller";
-import imagekit from "@/configs/imageKit";
+import { authSeller } from "@/auth/authSeller";
+import imagekit from "@/infra/imageKit";
 import { NextResponse } from "next/server";
-import { productService } from "@/lib/services/productService";
-import { handleError } from "@/lib/errors/errorHandler";
-import { UnauthorizedError, BadRequestError } from "@/lib/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
-import { invalidateCaches } from "@/lib/cache";
+import { productService } from "@/core/services/productService";
+import { handleError } from "@/errors/errorHandler";
+import { UnauthorizedError, BadRequestError } from "@/errors/AppError";
+import { ERROR_MESSAGES } from "@/constants/AppError";
+import { invalidateCaches } from "@/infra/cache";
 
 export async function POST(request) {
   try {

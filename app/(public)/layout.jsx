@@ -1,14 +1,14 @@
 "use client";
-import Banner from "@/components/Banner";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Banner from "@/components/ui/Banner";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import { fetchProducts } from "@/store/features/product/productSlice";
+import { fetchCart, uploadCart } from "@/store/features/cart/cartSlice";
+import { fetchAddress } from "@/store/features/address/addressSlice";
+import { fetchUserRatings } from "@/store/features/rating/ratingSlice";
+import { useUser, useAuth } from "@clerk/nextjs";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "@/lib/features/product/productSlice";
-import { useUser, useAuth } from "@clerk/nextjs";
-import { fetchCart, uploadCart } from "@/lib/features/cart/cartSlice";
-import { fetchAddress } from "@/lib/features/address/addressSlice";
-import { fetchUserRatings } from "@/lib/features/rating/ratingSlice";
 
 export default function PublicLayout({ children }) {
   const dispatch = useDispatch();

@@ -1,11 +1,11 @@
 import { serve } from "inngest/next";
-import { inngest } from "../../../inngest/client";
+import { inngest } from "@/infra/inngest";
 import {
   deleteCouponOnExpiry,
   syncUserCreation,
   syncUserDeletion,
   syncUserUpdate,
-} from "@/inngest/functions";
+} from "@/core/events/handlers";
 
 // Create an API that serves zero functions
 export const { GET, POST, PUT } = serve({

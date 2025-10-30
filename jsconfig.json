@@ -1,7 +1,39 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
-    }
-  }
+      "@/*": ["*"],
+
+      "@/app/*": ["app/*"],
+      "@/prisma/*": ["prisma/*"],
+      "@/src/*": ["src/*"],
+
+      "@/components/*": ["src/components/*"],
+      "@/components/ui/*": ["src/components/ui/*"],
+      "@/components/layout/*": ["src/components/layout/*"],
+      "@/components/features/*": ["src/components/features/*"],
+      "@/components/admin/*": ["src/components/admin/*"],
+      "@/components/store/*": ["src/components/store/*"],
+
+      "@/auth/*": ["src/auth/*"],
+      "@/core/*": ["src/core/*"],
+      "@/infra/*": ["src/infra/*"],
+      "@/store/*": ["src/store/*"],
+      "@/errors/*": ["src/errors/*"],
+      "@/utils/*": ["src/utils/*"],
+      "@/constants/*": ["src/constants/*"],
+      "@/data/*": ["src/data/*"]
+    },
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "target": "ESNext",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "checkJs": false,
+    "jsx": "preserve",
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["app", "src", "prisma"],
+  "exclude": ["node_modules"]
 }

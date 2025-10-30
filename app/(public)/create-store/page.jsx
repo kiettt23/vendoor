@@ -1,11 +1,11 @@
 "use client";
-import { assets } from "@/assets/assets";
+import Loading from "@/components/layout/Loading";
+import { assets } from "@/data/assets";
+import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import Loading from "@/components/Loading";
-import { useUser } from "@clerk/nextjs";
-import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { SwatchBook } from "lucide-react";

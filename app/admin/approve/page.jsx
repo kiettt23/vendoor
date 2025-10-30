@@ -1,7 +1,7 @@
 "use client";
-import { storesDummyData } from "@/assets/assets";
+import { storesDummyData } from "@/data/assets";
 import StoreInfo from "@/components/admin/StoreInfo";
-import Loading from "@/components/Loading";
+import Loading from "@/components/layout/Loading";
 import { useUser, useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";

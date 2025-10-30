@@ -1,11 +1,11 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import authAdmin from "@/middlewares/authAdmin";
-import { inngest } from "@/inngest/client";
-import { couponService } from "@/lib/services/couponService";
-import { handleError } from "@/lib/errors/errorHandler";
-import { UnauthorizedError } from "@/lib/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import authAdmin from "@/auth/authAdmin";
+import { inngest } from "@/infra/inngest";
+import { couponService } from "@/core/services/couponService";
+import { handleError } from "@/errors/errorHandler";
+import { UnauthorizedError } from "@/errors/AppError";
+import { ERROR_MESSAGES } from "@/constants/AppError";
 
 export async function POST(request) {
   try {

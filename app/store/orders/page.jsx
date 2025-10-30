@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import Loading from "@/components/Loading";
-import { orderDummyData } from "@/assets/assets";
+import Loading from "@/components/layout/Loading";
 import { useAuth } from "@clerk/nextjs";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { orderDummyData } from "@/data/orderDummyData";
 
 export default function StoreOrders() {
   const [orders, setOrders] = useState([]);

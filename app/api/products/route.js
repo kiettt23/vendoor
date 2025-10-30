@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { productService } from "@/lib/services/productService";
-import { handleError } from "@/lib/errors/errorHandler";
-import { getCacheOrFetch } from "@/lib/cache";
+import { productService } from "@/core/services/productService";
+import { handleError } from "@/errors/errorHandler";
+import { getCacheOrFetch } from "@/infra/cache";
 
 export async function GET(request) {
   try {

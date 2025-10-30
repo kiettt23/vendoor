@@ -1,18 +1,18 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { ratingService } from "@/lib/services/ratingService";
-import { handleError } from "@/lib/errors/errorHandler";
-import { UnauthorizedError } from "@/lib/errors/AppError";
+import { ratingService } from "@/core/services/ratingService";
+import { handleError } from "@/errors/errorHandler";
+import { UnauthorizedError } from "@/errors/AppError";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
-import { validateData } from "@/lib/validations/validate";
-import { createRatingSchema } from "@/lib/validations/schemas";
+import { validateData } from "@/core/validations/validate";
+import { createRatingSchema } from "@/core/validations/schemas";
 
 export async function POST(request) {
   try {
     const { userId } = getAuth(request);
     const body = await request.json();
 
-    // ✨ Validate với Zod - check rating từ 1-5, productId và orderId bắt buộc
+    // Validate với Zod - check rating từ 1-5, productId và orderId bắt buộc
     const validatedData = validateData(createRatingSchema, body);
 
     // Use service to create rating

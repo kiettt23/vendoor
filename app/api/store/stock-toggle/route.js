@@ -1,10 +1,10 @@
-import { authSeller } from "@/middlewares/authSeller";
+import { authSeller } from "@/auth/authSeller";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { productService } from "@/lib/services/productService";
-import { handleError } from "@/lib/errors/errorHandler";
-import { UnauthorizedError, BadRequestError } from "@/lib/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { productService } from "@/core/services/productService";
+import { handleError } from "@/errors/errorHandler";
+import { UnauthorizedError, BadRequestError } from "@/errors/AppError";
+import { ERROR_MESSAGES } from "@/constants/AppError";
 
 export async function POST(request) {
   try {

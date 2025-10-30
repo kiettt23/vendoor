@@ -1,8 +1,8 @@
 "use client";
-import Counter from "@/components/Counter";
-import OrderSummary from "@/components/OrderSummary";
-import PageTitle from "@/components/PageTitle";
-import { deleteItemFromCart } from "@/lib/features/cart/cartSlice";
+import Counter from "@/components/features/Order/Counter";
+import OrderSummary from "@/components/features/Order/OrderSummary";
+import PageTitle from "@/components/layout/PageTitle";
+import { deleteItemFromCart } from "@/store/features/cart/cartSlice";
 import { Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";

@@ -1,9 +1,9 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { addressService } from "@/lib/services/addressService";
-import { handleError } from "@/lib/errors/errorHandler";
-import { validateData } from "@/lib/validations/validate";
-import { saveAddressSchema } from "@/lib/validations/schemas";
+import { addressService } from "@/core/services/addressService";
+import { handleError } from "@/errors/errorHandler";
+import { validateData } from "@/core/validations/validate";
+import { saveAddressSchema } from "@/core/validations/schemas";
 
 export async function POST(request) {
   try {

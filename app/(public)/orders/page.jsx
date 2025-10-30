@@ -1,11 +1,11 @@
 "use client";
-import PageTitle from "@/components/PageTitle";
-import { useEffect, useState } from "react";
-import OrderItem from "@/components/OrderItem";
+import PageTitle from "@/components/layout/PageTitle";
+import OrderItem from "@/components/features/Order/OrderItem";
+import Loading from "@/components/layout/Loading";
 import { useAuth, useUser } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import Loading from "@/components/Loading";
 import toast from "react-hot-toast";
 
 export default function Orders() {

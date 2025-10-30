@@ -1,7 +1,7 @@
 "use client";
-import { dummyAdminDashboardData } from "@/assets/assets";
-import Loading from "@/components/Loading";
-import OrdersAreaChart from "@/components/OrdersAreaChart";
+import { dummyAdminDashboardData } from "@/data/assets";
+import Loading from "@/components/layout/Loading";
+import OrdersAreaChart from "@/components/store/OrdersAreaChart";
 import { useAuth } from "@clerk/nextjs";
 import axios from "axios";
 import {

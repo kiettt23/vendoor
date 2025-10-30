@@ -1,9 +1,9 @@
-import authAdmin from "@/middlewares/authAdmin";
 import { getAuth } from "@clerk/nextjs/server";
+import authAdmin from "@/auth/authAdmin";
 import { NextResponse } from "next/server";
-import { handleError } from "@/lib/errors/errorHandler";
-import { UnauthorizedError } from "@/lib/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { handleError } from "@/errors/errorHandler";
+import { UnauthorizedError } from "@/errors/AppError";
+import { ERROR_MESSAGES } from "@/constants/AppError";
 
 export async function GET(request) {
   try {

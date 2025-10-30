@@ -1,11 +1,11 @@
 "use client";
-import { storesDummyData } from "@/assets/assets";
 import StoreInfo from "@/components/admin/StoreInfo";
-import Loading from "@/components/Loading";
+import Loading from "@/components/layout/Loading";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useUser, useAuth } from "@clerk/nextjs";
 import axios from "axios";
+import { storesDummyData } from "@/data/assets";
 
 export default function AdminStores() {
   const { user } = useUser();

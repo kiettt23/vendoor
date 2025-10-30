@@ -1,9 +1,9 @@
 "use client";
-import ProductCard from "@/components/ProductCard";
+import ProductCard from "@/components/features/Product/ProductCard";
+import Loading from "@/components/layout/Loading";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MailIcon, MapPinIcon } from "lucide-react";
-import Loading from "@/components/Loading";
 import Image from "next/image";
 import axios from "axios";
 import toast from "react-hot-toast";

@@ -1,10 +1,10 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import authAdmin from "@/middlewares/authAdmin";
-import prisma from "@/lib/prisma";
-import { handleError } from "@/lib/errors/errorHandler";
-import { UnauthorizedError } from "@/lib/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import authAdmin from "@/auth/authAdmin";
+import prisma from "@/infra/prisma";
+import { handleError } from "@/errors/errorHandler";
+import { UnauthorizedError } from "@/errors/AppError";
+import { ERROR_MESSAGES } from "@/constants/AppError";
 
 export async function GET(request) {
   try {
