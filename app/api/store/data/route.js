@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { storeService } from "@/core/Store/storeService";
 import { handleError } from "@/errors/errorHandler";
 import { BadRequestError } from "@/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/AppError";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { getCacheOrFetch } from "@/infra/cache";
 
 export async function GET(request) {

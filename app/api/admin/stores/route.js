@@ -1,10 +1,10 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import authAdmin from "@/auth/authAdmin";
-import { storeService } from "@/core/Store/storeService";
+import { storeService } from "@/core/services/storeService";
 import { handleError } from "@/errors/errorHandler";
 import { UnauthorizedError } from "@/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/AppError";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 export async function GET(request) {
   try {

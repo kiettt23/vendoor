@@ -15,7 +15,7 @@
     "test:coverage:watch": "vitest --coverage --watch"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.33.1",
+    "@clerk/nextjs": "^6.34.1",
     "@neondatabase/serverless": "^1.0.2",
     "@prisma/adapter-neon": "^6.16.3",
     "@prisma/client": "^6.16.3",

@@ -7,7 +7,7 @@ import { orderService } from "@/core/services/orderService";
 import { cartService } from "@/core/services/cartService";
 import { handleError } from "@/errors/errorHandler";
 import { UnauthorizedError } from "@/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/AppError";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { validateData } from "@/core/validation/validateData";
 import { createOrderSchema } from "@/core/validations/schemas";
 

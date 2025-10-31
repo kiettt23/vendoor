@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { productService } from "@/core/services/productService";
 import { handleError } from "@/errors/errorHandler";
 import { UnauthorizedError, BadRequestError } from "@/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/AppError";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 export async function POST(request) {
   try {

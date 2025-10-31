@@ -4,7 +4,7 @@ import Loading from "@/components/layout/Loading";
 import { useAuth } from "@clerk/nextjs";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { orderDummyData } from "@/data/orderDummyData";
+import { orderDummyData } from "@/data/assets";
 
 export default function StoreOrders() {
   const [orders, setOrders] = useState([]);

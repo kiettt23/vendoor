@@ -1,6 +1,6 @@
 "use client";
 import { assets } from "@/data/assets";
-import { PRODUCT_CATEGORIES } from "@/constants/productCategories";
+import { PRODUCT_CATEGORIES } from "@/constants/categories";
 import { useAuth } from "@clerk/nextjs";
 import axios from "axios";
 import Image from "next/image";

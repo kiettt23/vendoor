@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
 import Loading from "@/components/layout/Loading";
-import { productDummyData } from "@/data/productDummyData";
+import { productDummyData } from "@/data/assets";
 import { useAuth, useUser } from "@clerk/nextjs";
 import axios from "axios";
 

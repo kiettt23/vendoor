@@ -1,10 +1,10 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import imagekit from "@/infra/imageKit";
-import { storeService } from "@/core/Store/storeService";
+import { storeService } from "@/core/services/storeService";
 import { handleError } from "@/errors/errorHandler";
 import { BadRequestError } from "@/errors/AppError";
-import { ERROR_MESSAGES } from "@/constants/AppError";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 export async function POST(request) {
   try {
