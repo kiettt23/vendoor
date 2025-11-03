@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useUser, useClerk, UserButton, Protect } from "@clerk/nextjs";
+import { vi } from "@/lib/i18n";
 
 const Navbar = () => {
   const { user } = useUser();
@@ -37,10 +38,10 @@ const Navbar = () => {
 
           {/* Desktop Menu */}
           <div className="hidden sm:flex items-center gap-4 lg:gap-8 text-slate-600">
-            <Link href="/">Home</Link>
-            <Link href="/shop">Shop</Link>
-            <Link href="/">About</Link>
-            <Link href="/">Contact</Link>
+            <Link href="/">{vi.nav.home}</Link>
+            <Link href="/shop">{vi.nav.shop}</Link>
+            <Link href="/">{vi.nav.about}</Link>
+            <Link href="/">{vi.nav.contact}</Link>
 
             <form
               onSubmit={handleSearch}
@@ -50,7 +51,7 @@ const Navbar = () => {
               <input
                 className="w-full bg-transparent outline-none placeholder-slate-600"
                 type="text"
-                placeholder="Search products"
+                placeholder={vi.nav.searchPlaceholder}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 required
@@ -62,7 +63,7 @@ const Navbar = () => {
               className="relative flex items-center gap-2 text-slate-600"
             >
               <ShoppingCart size={18} />
-              Cart
+              {vi.nav.cart}
               <button className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">
                 {cartCount}
               </button>
@@ -73,14 +74,14 @@ const Navbar = () => {
                 onClick={openSignIn}
                 className="px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full"
               >
-                Login
+                {vi.nav.login}
               </button>
             ) : (
               <UserButton>
                 <UserButton.MenuItems>
                   <UserButton.Action
                     labelIcon={<PackageIcon size={16} />}
-                    label="My Orders"
+                    label={vi.nav.myOrders}
                     onClick={() => router.push("/orders")}
                   ></UserButton.Action>
                 </UserButton.MenuItems>
@@ -96,7 +97,7 @@ const Navbar = () => {
                   <UserButton.MenuItems>
                     <UserButton.Action
                       labelIcon={<ShoppingCart size={16} />}
-                      label="Cart"
+                      label={vi.nav.cart}
                       onClick={() => router.push("/cart")}
                     ></UserButton.Action>
                   </UserButton.MenuItems>
@@ -107,7 +108,7 @@ const Navbar = () => {
                 onClick={openSignIn}
                 className="px-7 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-sm transition text-white rounded-full"
               >
-                Login
+                {vi.nav.login}
               </button>
             )}
           </div>

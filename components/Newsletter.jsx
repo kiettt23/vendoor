@@ -1,10 +1,10 @@
 import React from "react";
-import Title from "./Title";
+import ViewMore from "./ViewMore";
 
 const Newsletter = () => {
   return (
     <div className="flex flex-col items-center mx-4 my-36">
-      <Title
+      <ViewMore
         title="Join Newsletter"
         description="Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio non et sit, nam eum incidunt!"
         visibleButton={false}

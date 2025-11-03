@@ -1,7 +1,8 @@
 "use client";
-import Title from "./Title";
+import ViewMore from "./ViewMore";
 import ProductCard from "./ProductCard";
 import { useSelector } from "react-redux";
+import { vi } from "@/lib/i18n";
 
 const BestSelling = () => {
   const displayQuantity = 8;
@@ -9,11 +10,11 @@ const BestSelling = () => {
 
   return (
     <div className="px-6 my-30 max-w-6xl mx-auto">
-      <Title
-        title="Best Selling"
-        description={`Showing ${
+      <ViewMore
+        title={vi.product.bestSelling}
+        description={`Hiển thị ${
           products.length < displayQuantity ? products.length : displayQuantity
-        } of ${products.length} products`}
+        } trong ${products.length} sản phẩm`}
         href="/shop"
       />
       <div className="mt-12  grid grid-cols-2 sm:flex flex-wrap gap-6 xl:gap-12">

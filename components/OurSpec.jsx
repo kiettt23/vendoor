@@ -1,11 +1,11 @@
 import React from "react";
-import Title from "./Title";
+import ViewMore from "./ViewMore";
 import { ourSpecsData } from "@/assets/assets";
 
 const OurSpecs = () => {
   return (
     <div className="px-6 my-20 max-w-6xl mx-auto">
-      <Title
+      <ViewMore
         visibleButton={false}
         title="Our Specifications"
         description="Lorem ipsum, dolor sit amet consectetur adipisicing elit. Natus porro quidem magni?"

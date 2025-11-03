@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { vi } from "@/lib/i18n";
 
 const Footer = () => {
   const MailIcon = () => (
@@ -151,25 +152,25 @@ const Footer = () => {
 
   const linkSections = [
     {
-      title: "PRODUCTS",
+      title: "SẢN PHẨM",
       links: [
-        { text: "Earphones", path: "/", icon: null },
-        { text: "Headphones", path: "/", icon: null },
-        { text: "Smartphones", path: "/", icon: null },
-        { text: "Laptops", path: "/", icon: null },
+        { text: "Tai nghe", path: "/", icon: null },
+        { text: "Điện thoại", path: "/", icon: null },
+        { text: "Laptop", path: "/", icon: null },
+        { text: "Phụ kiện", path: "/", icon: null },
       ],
     },
     {
       title: "WEBSITE",
       links: [
-        { text: "Home", path: "/", icon: null },
-        { text: "Privacy Policy", path: "/", icon: null },
-        { text: "Become Plus Member", path: "/pricing", icon: null },
-        { text: "Create Your Store", path: "/create-store", icon: null },
+        { text: vi.nav.home, path: "/", icon: null },
+        { text: "Chính sách bảo mật", path: "/", icon: null },
+        { text: "Trở thành thành viên Plus", path: "/pricing", icon: null },
+        { text: "Tạo cửa hàng của bạn", path: "/create-store", icon: null },
       ],
     },
     {
-      title: "CONTACT",
+      title: "LIÊN HỆ",
       links: [
         { text: "kiettt23@gmail.com", path: "/", icon: MailIcon },
         { text: "0912.444.449", path: "/", icon: PhoneIcon },
@@ -194,10 +195,9 @@ const Footer = () => {
               <span className="text-purple-600">Ven</span>door
             </Link>
             <p className="max-w-[410px] mt-6 text-sm">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Natus
-              porro quidem magni? Consequatur iusto, a similique cumque facere
-              praesentium nisi assumenda asperiores animi sed ullam quibusdam,
-              laborum architecto minus incidunt.
+              Vendoor - Nền tảng thương mại điện tử hàng đầu Việt Nam. Mua sắm
+              dễ dàng, bán hàng hiệu quả. Kết nối người mua và người bán trong
+              một hệ sinh thái đáng tin cậy với hàng ngàn sản phẩm chất lượng.
             </p>
             <div className="flex items-center gap-3 mt-5">
               {socialIcons.map((item, i) => (
@@ -235,7 +235,7 @@ const Footer = () => {
           </div>
         </div>
         <p className="py-4 text-sm text-slate-500 text-center">
-          © 2025 Vendoor | All Right Reserved.
+          © 2025 Vendoor | Bản quyền thuộc về Vendoor.
         </p>
       </div>
     </footer>

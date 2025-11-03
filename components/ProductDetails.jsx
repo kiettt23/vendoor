@@ -13,10 +13,10 @@ import { useState } from "react";
 import Image from "next/image";
 import Counter from "./Counter";
 import { useDispatch, useSelector } from "react-redux";
+import { vi, formatPrice } from "@/lib/i18n";
 
 const ProductDetails = ({ product }) => {
   const productId = product.id;
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
 
   const cart = useSelector((state) => state.cart.cartItems);
   const dispatch = useDispatch();
@@ -73,32 +73,29 @@ const ProductDetails = ({ product }) => {
               />
             ))}
           <p className="text-sm ml-3 text-slate-500">
-            {product.rating.length} Reviews
+            {product.rating.length} {vi.product.reviews}
           </p>
         </div>
         <div className="flex items-start my-6 gap-3 text-2xl font-semibold text-slate-800">
-          <p>
-            {" "}
-            {product.price}
-            {currency}{" "}
-          </p>
+          <p>{formatPrice(product.price)}</p>
           <p className="text-xl text-slate-500 line-through">
-            {product.mrp}
-            {currency}
+            {formatPrice(product.mrp)}
           </p>
         </div>
         <div className="flex items-center gap-2 text-slate-500">
           <TagIcon size={14} />
           <p>
-            Save{" "}
+            Tiết kiệm{" "}
             {(((product.mrp - product.price) / product.mrp) * 100).toFixed(0)}%
-            right now
+            ngay bây giờ
           </p>
         </div>
         <div className="flex items-end gap-5 mt-10">
           {cart[productId] && (
             <div className="flex flex-col gap-3">
-              <p className="text-lg text-slate-800 font-semibold">Quantity</p>
+              <p className="text-lg text-slate-800 font-semibold">
+                {vi.product.quantity}
+              </p>
               <Counter productId={productId} />
             </div>
           )}
@@ -108,22 +105,24 @@ const ProductDetails = ({ product }) => {
             }
             className="bg-slate-800 text-white px-10 py-3 text-sm font-medium rounded hover:bg-slate-900 active:scale-95 transition"
           >
-            {!cart[productId] ? "Add to Cart" : "View Cart"}
+            {!cart[productId] ? vi.product.addToCart : "Xem giỏ hàng"}
           </button>
         </div>
         <hr className="border-gray-300 my-5" />
         <div className="flex flex-col gap-4 text-slate-500">
           <p className="flex gap-3">
             {" "}
-            <EarthIcon className="text-slate-400" /> Free shipping worldwide{" "}
+            <EarthIcon className="text-slate-400" /> Miễn phí vận chuyển toàn
+            quốc{" "}
           </p>
           <p className="flex gap-3">
             {" "}
-            <CreditCardIcon className="text-slate-400" /> 100% Secured Payment{" "}
+            <CreditCardIcon className="text-slate-400" /> Thanh toán an toàn
+            100%{" "}
           </p>
           <p className="flex gap-3">
             {" "}
-            <UserIcon className="text-slate-400" /> Trusted by top brands{" "}
+            <UserIcon className="text-slate-400" /> Đánh giá cao từ khách hàng{" "}
           </p>
         </div>
       </div>

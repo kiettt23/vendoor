@@ -2,6 +2,7 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import { vi } from "@/lib/i18n";
 
 const ViewMore = ({ title, description, visibleButton = true, href = "" }) => {
   return (
@@ -14,7 +15,7 @@ const ViewMore = ({ title, description, visibleButton = true, href = "" }) => {
         <p className="max-w-lg text-center">{description}</p>
         {visibleButton && (
           <button className="text-purple-500 flex items-center gap-1">
-            View more <ArrowRight size={14} />
+            {vi.common.viewAll} <ArrowRight size={14} />
           </button>
         )}
       </Link>
