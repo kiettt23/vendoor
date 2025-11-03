@@ -25,7 +25,7 @@ export async function POST(request) {
       });
     });
 
-    return NextResponse.json({ message: "Coupon added successfully" });
+    return NextResponse.json({ message: "Đã thêm mã giảm giá thành công" });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
@@ -50,7 +50,7 @@ export async function DELETE(request) {
 
     await prisma.coupon.delete({ where: { code } });
 
-    return NextResponse.json({ message: "Coupon deleted successfully" });
+    return NextResponse.json({ message: "Đã xóa mã giảm giá" });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

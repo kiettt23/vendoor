@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
-import { DeleteIcon } from "lucide-react";
+import { DeleteIcon, Check, Ban } from "lucide-react";
 import { couponDummyData } from "@/assets/assets";
 import { vi, formatPrice } from "@/lib/i18n";
 import { useAuth } from "@clerk/nextjs";
@@ -62,7 +62,7 @@ export default function AdminCoupons() {
   const deleteCoupon = async (code) => {
     try {
       const confirm = window.confirm(
-        "Are you sure you want to delete this coupon?"
+        "Bạn có chắc chắn muốn xóa mã giảm giá này?"
       );
       if (!confirm) return;
 
@@ -71,7 +71,7 @@ export default function AdminCoupons() {
         headers: { Authorization: `Bearer ${token}` },
       });
       await fetchCoupons();
-      toast.success("Coupon deleted successfully");
+      toast.success("Đã xóa mã giảm giá thành công");
     } catch (error) {
       toast.error(error?.response?.data?.error || error.message);
     }
@@ -86,17 +86,19 @@ export default function AdminCoupons() {
       {/* Add Coupon */}
       <form
         onSubmit={(e) =>
-          toast.promise(handleAddCoupon(e), { loading: "Adding coupon..." })
+          toast.promise(handleAddCoupon(e), {
+            loading: "Đang thêm mã giảm giá...",
+          })
         }
         className="max-w-sm text-sm"
       >
         <h2 className="text-2xl">
-          Add <span className="text-slate-800 font-medium">Coupons</span>
+          Thêm <span className="text-slate-800 font-medium">Mã giảm giá</span>
         </h2>
         <div className="flex gap-2 max-sm:flex-col mt-2">
           <input
             type="text"
-            placeholder="Coupon Code"
+            placeholder="Mã giảm giá"
             className="w-full mt-2 p-2 border border-slate-200 outline-slate-400 rounded-md"
             name="code"
             value={newCoupon.code}
@@ -105,7 +107,7 @@ export default function AdminCoupons() {
           />
           <input
             type="number"
-            placeholder="Coupon Discount (%)"
+            placeholder="Giảm giá (%)"
             min={1}
             max={100}
             className="w-full mt-2 p-2 border border-slate-200 outline-slate-400 rounded-md"
@@ -117,7 +119,7 @@ export default function AdminCoupons() {
         </div>
         <input
           type="text"
-          placeholder="Coupon Description"
+          placeholder="Mô tả mã giảm giá"
           className="w-full mt-2 p-2 border border-slate-200 outline-slate-400 rounded-md"
           name="description"
           value={newCoupon.description}
@@ -126,10 +128,10 @@ export default function AdminCoupons() {
         />
 
         <label>
-          <p className="mt-3">Coupon Expiry Date</p>
+          <p className="mt-3">Ngày hết hạn</p>
           <input
             type="date"
-            placeholder="Coupon Expires At"
+            placeholder="Ngày hết hạn"
             className="w-full mt-1 p-2 border border-slate-200 outline-slate-400 rounded-md"
             name="expiresAt"
             value={format(newCoupon.expiresAt, "yyyy-MM-dd")}
@@ -152,7 +154,7 @@ export default function AdminCoupons() {
               <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-green-600 transition-colors duration-200"></div>
               <span className="dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
             </label>
-            <p>For New User</p>
+            <p>Dành cho người mới</p>
           </div>
           <div className="flex gap-2 mt-3">
             <label className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3">
@@ -168,43 +170,44 @@ export default function AdminCoupons() {
               <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-green-600 transition-colors duration-200"></div>
               <span className="dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
             </label>
-            <p>For Member</p>
+            <p>Dành cho thành viên</p>
           </div>
         </div>
         <button className="mt-4 p-2 px-10 rounded bg-slate-700 text-white active:scale-95 transition">
-          Add Coupon
+          Thêm mã giảm giá
         </button>
       </form>
 
       {/* List Coupons */}
       <div className="mt-14">
         <h2 className="text-2xl">
-          List <span className="text-slate-800 font-medium">Coupons</span>
+          Danh sách{" "}
+          <span className="text-slate-800 font-medium">Mã giảm giá</span>
         </h2>
         <div className="overflow-x-auto mt-4 rounded-lg border border-slate-200 max-w-4xl">
           <table className="min-w-full bg-white text-sm">
             <thead className="bg-slate-50">
               <tr>
                 <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  Code
+                  Mã
                 </th>
                 <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  Description
+                  Mô tả
                 </th>
                 <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  Discount
+                  Giảm giá
                 </th>
                 <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  Expires At
+                  Hết hạn
                 </th>
                 <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  New User
+                  Người mới
                 </th>
                 <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  For Member
+                  Thành viên
                 </th>
                 <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  Action
+                  Thao tác
                 </th>
               </tr>
             </thead>
@@ -224,16 +227,24 @@ export default function AdminCoupons() {
                     {format(coupon.expiresAt, "yyyy-MM-dd")}
                   </td>
                   <td className="py-3 px-4 text-slate-800">
-                    {coupon.forNewUser ? "Yes" : "No"}
+                    {coupon.forNewUser ? (
+                      <Check color="#29b339" />
+                    ) : (
+                      <Ban color="#b23838" />
+                    )}
                   </td>
                   <td className="py-3 px-4 text-slate-800">
-                    {coupon.forMember ? "Yes" : "No"}
+                    {coupon.forMember ? (
+                      <Check color="#29b339" />
+                    ) : (
+                      <Ban color="#b23838" />
+                    )}
                   </td>
                   <td className="py-3 px-4 text-slate-800">
                     <DeleteIcon
                       onClick={() =>
                         toast.promise(deleteCoupon(coupon.code), {
-                          loading: "Deleting coupon...",
+                          loading: "Đang xóa mã giảm giá...",
                         })
                       }
                       className="w-5 h-5 text-red-500 hover:text-red-800 cursor-pointer"

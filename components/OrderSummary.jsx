@@ -15,8 +15,6 @@ const OrderSummary = ({ totalPrice, items }) => {
   const { getToken } = useAuth();
   const dispatch = useDispatch();
 
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
-
   const router = useRouter();
 
   const addressList = useSelector((state) => state.address.list);

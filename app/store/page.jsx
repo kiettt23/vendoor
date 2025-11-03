@@ -18,8 +18,6 @@ import { vi, formatPrice, formatDate } from "@/lib/i18n";
 export default function Dashboard() {
   const { getToken } = useAuth();
 
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
-
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);

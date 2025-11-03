@@ -10,8 +10,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { vi, formatPrice } from "@/lib/i18n";
 
 export default function Cart() {
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
-
   const { cartItems } = useSelector((state) => state.cart);
   const products = useSelector((state) => state.product.list);
 

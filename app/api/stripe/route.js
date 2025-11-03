@@ -68,13 +68,12 @@ export async function POST(request) {
       }
 
       default:
-        console.log("Unhandled event type:", event.type);
+        // Unhandled event type
         break;
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error(error);
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

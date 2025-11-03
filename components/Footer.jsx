@@ -157,6 +157,7 @@ const Footer = () => {
         { text: "Tai nghe", path: "/shop", icon: null },
         { text: "Điện thoại", path: "/shop", icon: null },
         { text: "Laptop", path: "/shop", icon: null },
+        { text: "Loa", path: "/shop", icon: null },
         { text: "Phụ kiện", path: "/shop", icon: null },
       ],
     },

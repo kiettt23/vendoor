@@ -25,7 +25,7 @@ const StoreLayout = ({ children }) => {
       setIsSeller(data.isSeller);
       setStoreInfo(data.storeInfo);
     } catch (error) {
-      console.log(error);
+      // Error fetching seller status
     } finally {
       setLoading(false);
     }

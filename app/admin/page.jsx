@@ -17,8 +17,6 @@ import { vi, formatPrice } from "@/lib/i18n";
 export default function AdminDashboard() {
   const { getToken } = useAuth();
 
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
-
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({
     products: 0,
