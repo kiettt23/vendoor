@@ -20,6 +20,7 @@ import { ClockFadingIcon, HeadsetIcon, SendIcon } from "lucide-react";
 import profile_pic1 from "./profile_pic1.jpg";
 import profile_pic2 from "./profile_pic2.jpg";
 import profile_pic3 from "./profile_pic3.jpg";
+import { getAllCategoryNamesVi } from "@/configs/categories";
 
 export const assets = {
   upload_area,
@@ -41,14 +42,7 @@ export const assets = {
   product_img12,
 };
 
-export const categories = [
-  "Tai nghe",
-  "Loa",
-  "Đồng hồ",
-  "Tai nghe nhét tai",
-  "Chuột",
-  "Trang trí",
-];
+export const categories = getAllCategoryNamesVi();
 
 export const dummyRatingsData = [
   {

@@ -1,4 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
+const { CATEGORIES } = require("../configs/categories.js");
 const prisma = new PrismaClient();
 
 async function main() {
@@ -161,7 +162,7 @@ async function main() {
           "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500",
           "https://images.unsplash.com/photo-1695048133082-ff50e1eb8b43?w=500",
         ],
-        category: "Electronics",
+        category: CATEGORIES[0].nameEn, // Electronics
         inStock: true,
         storeId: stores[0].id,
       },
@@ -177,7 +178,7 @@ async function main() {
           "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500",
           "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500",
         ],
-        category: "Electronics",
+        category: CATEGORIES[0].nameEn, // Electronics
         inStock: true,
         storeId: stores[0].id,
       },
@@ -193,7 +194,7 @@ async function main() {
           "https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=500",
           "https://images.unsplash.com/photo-1610438235354-a6ae5528385c?w=500",
         ],
-        category: "Electronics",
+        category: CATEGORIES[0].nameEn, // Electronics
         inStock: true,
         storeId: stores[0].id,
       },
@@ -209,7 +210,7 @@ async function main() {
           "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500",
           "https://images.unsplash.com/photo-1561154464-82e9adf32764?w=500",
         ],
-        category: "Electronics",
+        category: CATEGORIES[0].nameEn, // Electronics
         inStock: true,
         storeId: stores[0].id,
       },
@@ -226,7 +227,7 @@ async function main() {
           "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500",
           "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=500",
         ],
-        category: "Electronics",
+        category: CATEGORIES[0].nameEn, // Electronics
         inStock: false, // Hết hàng
         storeId: stores[0].id,
       },
@@ -242,7 +243,7 @@ async function main() {
           "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=500",
           "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=500",
         ],
-        category: "Electronics",
+        category: CATEGORIES[0].nameEn, // Electronics
         inStock: false, // Hết hàng
         storeId: stores[0].id,
       },
@@ -260,7 +261,7 @@ async function main() {
           "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500",
           "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500",
         ],
-        category: "Fashion",
+        category: CATEGORIES[1].nameEn, // Fashion
         inStock: true,
         storeId: stores[1].id,
       },
@@ -276,7 +277,7 @@ async function main() {
           "https://images.unsplash.com/photo-1542272604-787c3835535d?w=500",
           "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=500",
         ],
-        category: "Fashion",
+        category: CATEGORIES[1].nameEn, // Fashion
         inStock: true,
         storeId: stores[1].id,
       },
@@ -292,7 +293,7 @@ async function main() {
           "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500",
           "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500",
         ],
-        category: "Fashion",
+        category: CATEGORIES[1].nameEn, // Fashion
         inStock: true,
         storeId: stores[1].id,
       },
@@ -308,7 +309,7 @@ async function main() {
           "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=500",
           "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500",
         ],
-        category: "Accessories",
+        category: CATEGORIES[2].nameEn, // Accessories
         inStock: true,
         storeId: stores[1].id,
       },
@@ -324,7 +325,7 @@ async function main() {
           "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500",
           "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=500",
         ],
-        category: "Shoes",
+        category: CATEGORIES[3].nameEn, // Shoes
         inStock: true,
         storeId: stores[1].id,
       },
@@ -340,7 +341,7 @@ async function main() {
           "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500",
           "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=500",
         ],
-        category: "Fashion",
+        category: CATEGORIES[1].nameEn, // Fashion
         inStock: true,
         storeId: stores[1].id,
       },
@@ -358,7 +359,7 @@ async function main() {
           "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=500",
           "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=500",
         ],
-        category: "Home & Living",
+        category: CATEGORIES[4].nameEn, // Home & Living
         inStock: true,
         storeId: stores[2].id,
       },
@@ -374,7 +375,7 @@ async function main() {
           "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500",
           "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=500",
         ],
-        category: "Home & Living",
+        category: CATEGORIES[4].nameEn, // Home & Living
         inStock: true,
         storeId: stores[2].id,
       },
