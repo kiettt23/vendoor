@@ -1,6 +1,7 @@
 "use client";
 import { assets } from "@/assets/assets";
 import { getAllCategoryNamesEn } from "@/configs/categories";
+import { vi } from "@/lib/i18n";
 import { useAuth } from "@clerk/nextjs";
 import axios from "axios";
 import Image from "next/image";
@@ -46,7 +47,7 @@ export default function StoreAddProduct() {
               { headers: { Authorization: `Bearer ${token}` } }
             ),
             {
-              loading: "Analyzing image with AI...",
+              loading: "🤖 Đang phân tích hình ảnh...",
               success: (res) => {
                 const data = res.data;
                 if (data.name && data.description) {
@@ -56,9 +57,9 @@ export default function StoreAddProduct() {
                     description: data.description,
                   }));
                   setAiUsed(true);
-                  return " AI filled product info 👌";
+                  return "✨ Đã cập nhật thông tin.";
                 }
-                return "AI could not analyze the image";
+                return "💀 AI không thể phân tích hình ảnh.";
               },
               error: (err) => err?.response?.data?.error || err.message,
             }

@@ -40,8 +40,8 @@ const Navbar = () => {
           <div className="hidden sm:flex items-center gap-4 lg:gap-8 text-slate-600">
             <Link href="/">{vi.nav.home}</Link>
             <Link href="/shop">{vi.nav.shop}</Link>
-            <Link href="/">{vi.nav.about}</Link>
-            <Link href="/">{vi.nav.contact}</Link>
+            <Link href="/create-store">{vi.nav.store}</Link>
+            <Link href="/pricing">{vi.nav.member}</Link>
 
             <form
               onSubmit={handleSearch}

@@ -154,10 +154,10 @@ const Footer = () => {
     {
       title: "SẢN PHẨM",
       links: [
-        { text: "Tai nghe", path: "/", icon: null },
-        { text: "Điện thoại", path: "/", icon: null },
-        { text: "Laptop", path: "/", icon: null },
-        { text: "Phụ kiện", path: "/", icon: null },
+        { text: "Tai nghe", path: "/shop", icon: null },
+        { text: "Điện thoại", path: "/shop", icon: null },
+        { text: "Laptop", path: "/shop", icon: null },
+        { text: "Phụ kiện", path: "/shop", icon: null },
       ],
     },
     {
@@ -167,6 +167,7 @@ const Footer = () => {
         { text: "Chính sách bảo mật", path: "/", icon: null },
         { text: "Trở thành thành viên Plus", path: "/pricing", icon: null },
         { text: "Tạo cửa hàng của bạn", path: "/create-store", icon: null },
+        { text: "Quản trị viên", path: "/admin", icon: null },
       ],
     },
     {

@@ -8,19 +8,24 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { vi } from "@/lib/i18n";
 
 const StoreSidebar = ({ storeInfo }) => {
   const pathname = usePathname();
 
   const sidebarLinks = [
-    { name: "Dashboard", href: "/store", icon: HomeIcon },
-    { name: "Add Product", href: "/store/add-product", icon: SquarePlusIcon },
+    { name: vi.store.dashboard, href: "/store", icon: HomeIcon },
     {
-      name: "Manage Product",
+      name: vi.store.addProduct,
+      href: "/store/add-product",
+      icon: SquarePlusIcon,
+    },
+    {
+      name: vi.store.manageProduct,
       href: "/store/manage-product",
       icon: SquarePenIcon,
     },
-    { name: "Orders", href: "/store/orders", icon: LayoutListIcon },
+    { name: vi.store.orders, href: "/store/orders", icon: LayoutListIcon },
   ];
 
   return (

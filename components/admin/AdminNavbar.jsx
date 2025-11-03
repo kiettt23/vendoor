@@ -1,6 +1,7 @@
 "use client";
 import { useUser, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
+import { vi } from "@/lib/i18n";
 
 const AdminNavbar = () => {
   const { user } = useUser();
@@ -10,11 +11,13 @@ const AdminNavbar = () => {
       <Link href="/" className="relative text-4xl font-semibold text-slate-700">
         <span className="text-purple-600">Ven</span>door
         <p className="absolute text-xs font-semibold -top-1 -right-11 px-3 p-0.5 rounded-full flex items-center gap-2 text-white bg-purple-500">
-          admin
+          {vi.admin.admin}
         </p>
       </Link>
       <div className="flex items-center gap-3">
-        <p>Hi, {user?.firstName}</p>
+        <p>
+          {vi.common.hi}, {user?.firstName}
+        </p>
         <UserButton></UserButton>
       </div>
     </div>

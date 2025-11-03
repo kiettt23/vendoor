@@ -29,7 +29,7 @@ function ShopContent() {
         >
           {search && <MoveLeftIcon size={20} />}
           {vi.categories.all}{" "}
-          <span className="text-slate-700 font-medium">{vi.product.name}</span>
+          <span className="text-slate-700 font-medium">sản phẩm</span>
         </h1>
         <div className="grid grid-cols-2 sm:flex flex-wrap gap-6 xl:gap-12 mx-auto mb-32">
           {filteredProducts.map((product) => (

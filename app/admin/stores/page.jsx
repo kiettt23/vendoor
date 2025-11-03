@@ -2,6 +2,7 @@
 import { storesDummyData } from "@/assets/assets";
 import StoreInfo from "@/components/admin/StoreInfo";
 import Loading from "@/components/Loading";
+import { vi } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useUser, useAuth } from "@clerk/nextjs";
@@ -52,7 +53,8 @@ export default function AdminStores() {
   return !loading ? (
     <div className="text-slate-500 mb-28">
       <h1 className="text-2xl">
-        Live <span className="text-slate-800 font-medium">Stores</span>
+        {vi.admin.stores}{" "}
+        <span className="text-slate-800 font-medium">{vi.admin.live}</span>
       </h1>
 
       {stores.length ? (
@@ -67,14 +69,14 @@ export default function AdminStores() {
 
               {/* Actions */}
               <div className="flex items-center gap-3 pt-2 flex-wrap">
-                <p>Active</p>
+                <p>{vi.admin.active}</p>
                 <label className="relative inline-flex items-center cursor-pointer text-gray-900">
                   <input
                     type="checkbox"
                     className="sr-only peer"
                     onChange={() =>
                       toast.promise(toggleIsActive(store.id), {
-                        loading: "Updating data...",
+                        loading: vi.common.updating,
                       })
                     }
                     checked={store.isActive}
@@ -89,7 +91,7 @@ export default function AdminStores() {
       ) : (
         <div className="flex items-center justify-center h-80">
           <h1 className="text-3xl text-slate-400 font-medium">
-            No stores Available
+            {vi.admin.noStores}
           </h1>
         </div>
       )}

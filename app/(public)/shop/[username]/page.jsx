@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { MailIcon, MapPinIcon } from "lucide-react";
 import Loading from "@/components/Loading";
 import Image from "next/image";
+import { vi } from "@/lib/i18n";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -66,7 +67,10 @@ export default function StoreShop() {
       {/* Products */}
       <div className=" max-w-7xl mx-auto mb-40">
         <h1 className="text-2xl mt-12">
-          Shop <span className="text-slate-800 font-medium">Products</span>
+          {vi.nav.shop}{" "}
+          <span className="text-slate-800 font-medium">
+            {vi.product.products}
+          </span>
         </h1>
         <div className="mt-5 grid grid-cols-2 sm:flex flex-wrap gap-6 xl:gap-12 mx-auto">
           {products.map((product) => (

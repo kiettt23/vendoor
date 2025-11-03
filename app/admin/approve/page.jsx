@@ -2,6 +2,7 @@
 import { storesDummyData } from "@/assets/assets";
 import StoreInfo from "@/components/admin/StoreInfo";
 import Loading from "@/components/Loading";
+import { vi } from "@/lib/i18n";
 import { useUser, useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -50,7 +51,8 @@ export default function AdminApprove() {
   return !loading ? (
     <div className="text-slate-500 mb-28">
       <h1 className="text-2xl">
-        Approve <span className="text-slate-800 font-medium">Stores</span>
+        {vi.admin.approve}{" "}
+        <span className="text-slate-800 font-medium">{vi.admin.stores}</span>
       </h1>
 
       {stores.length ? (
@@ -69,23 +71,23 @@ export default function AdminApprove() {
                   onClick={() =>
                     toast.promise(
                       handleApprove({ storeId: store.id, status: "approved" }),
-                      { loading: "approving" }
+                      { loading: vi.admin.approving }
                     )
                   }
                   className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
                 >
-                  Approve
+                  {vi.admin.approve}
                 </button>
                 <button
                   onClick={() =>
                     toast.promise(
                       handleApprove({ storeId: store.id, status: "rejected" }),
-                      { loading: "rejecting" }
+                      { loading: vi.admin.rejecting }
                     )
                   }
                   className="px-4 py-2 bg-slate-500 text-white rounded hover:bg-slate-600 text-sm"
                 >
-                  Reject
+                  {vi.admin.reject}
                 </button>
               </div>
             </div>
@@ -94,7 +96,7 @@ export default function AdminApprove() {
       ) : (
         <div className="flex items-center justify-center h-80">
           <h1 className="text-3xl text-slate-400 font-medium">
-            No Application Pending
+            {vi.admin.noApplications}
           </h1>
         </div>
       )}

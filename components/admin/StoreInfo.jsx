@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { MapPin, Mail, Phone } from "lucide-react";
+import { vi } from "@/lib/i18n";
 
 const StoreInfo = ({ store }) => {
   return (
@@ -42,11 +43,11 @@ const StoreInfo = ({ store }) => {
         <Mail size={16} /> {store.email}
       </p>
       <p className="text-slate-700 mt-5">
-        Applied on{" "}
+        {vi.admin.appliedOn}{" "}
         <span className="text-xs">
           {new Date(store.createdAt).toLocaleDateString()}
         </span>{" "}
-        by
+        {vi.admin.by}
       </p>
       <div className="flex items-center gap-2 text-sm ">
         <Image

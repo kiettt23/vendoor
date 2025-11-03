@@ -12,6 +12,7 @@ import Link from "next/link";
 import { assets } from "@/assets/assets";
 import { useUser } from "@clerk/nextjs";
 import { use } from "react";
+import { vi } from "@/lib/i18n";
 
 const AdminSidebar = () => {
   const { user } = useUser();
@@ -19,10 +20,14 @@ const AdminSidebar = () => {
   const pathname = usePathname();
 
   const sidebarLinks = [
-    { name: "Dashboard", href: "/admin", icon: HomeIcon },
-    { name: "Stores", href: "/admin/stores", icon: StoreIcon },
-    { name: "Approve Store", href: "/admin/approve", icon: ShieldCheckIcon },
-    { name: "Coupons", href: "/admin/coupons", icon: TicketPercentIcon },
+    { name: vi.admin.dashboard, href: "/admin", icon: HomeIcon },
+    { name: vi.admin.stores, href: "/admin/stores", icon: StoreIcon },
+    {
+      name: vi.admin.approveStore,
+      href: "/admin/approve",
+      icon: ShieldCheckIcon,
+    },
+    { name: vi.admin.coupons, href: "/admin/coupons", icon: TicketPercentIcon },
   ];
 
   return (
