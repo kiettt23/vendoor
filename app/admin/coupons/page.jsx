@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { DeleteIcon, Check, Ban } from "lucide-react";
-import { couponDummyData } from "@/assets/assets";
-import { vi, formatPrice } from "@/lib/i18n";
 import { useAuth } from "@clerk/nextjs";
 import axios from "axios";
 

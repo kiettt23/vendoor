@@ -9,9 +9,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { assets } from "@/assets/assets";
 import { useUser } from "@clerk/nextjs";
-import { use } from "react";
 import { vi } from "@/lib/i18n";
 
 const AdminSidebar = () => {

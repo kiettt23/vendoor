@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
 import Loading from "@/components/ui/Loading";
-import { productDummyData } from "@/assets/assets";
-import { vi, formatPrice } from "@/lib/i18n";
 import { useAuth, useUser } from "@clerk/nextjs";
 import axios from "axios";
 

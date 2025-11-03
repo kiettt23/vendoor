@@ -1,7 +1,5 @@
 "use client";
-import { assets } from "@/assets/assets";
 import { getAllCategoryNamesEn } from "@/configs/categories";
-import { vi } from "@/lib/i18n";
 import { useAuth } from "@clerk/nextjs";
 import axios from "axios";
 import Image from "next/image";
@@ -138,7 +136,7 @@ export default function StoreAddProduct() {
               src={
                 images[key]
                   ? URL.createObjectURL(images[key])
-                  : assets.upload_area
+                  : "/images/upload_area.svg"
               }
               alt=""
             />

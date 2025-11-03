@@ -1,5 +1,4 @@
 "use client";
-import { assets } from "@/assets/assets";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -8,7 +7,6 @@ import { useUser } from "@clerk/nextjs";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { SwatchBook } from "lucide-react";
 import { vi } from "@/lib/i18n";
 
 export default function CreateStore() {
@@ -146,7 +144,7 @@ export default function CreateStore() {
                 src={
                   storeInfo.image
                     ? URL.createObjectURL(storeInfo.image)
-                    : assets.upload_area
+                    : "/images/upload_area.svg"
                 }
                 className="rounded-lg mt-2 h-16 w-auto"
                 alt=""

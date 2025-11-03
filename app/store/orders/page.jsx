@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import Loading from "@/components/ui/Loading";
-import { orderDummyData } from "@/assets/assets";
-import { vi, formatPrice, formatDate, getOrderStatusText } from "@/lib/i18n";
 import { useAuth } from "@clerk/nextjs";
 import axios from "axios";
 import toast from "react-hot-toast";

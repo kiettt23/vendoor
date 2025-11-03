@@ -1,5 +1,4 @@
 "use client";
-import { assets } from "@/assets/assets";
 import { ArrowRightIcon, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
 import React from "react";
@@ -27,7 +26,7 @@ const Hero = () => {
             </h2>
             <div className="text-slate-800 text-sm font-medium mt-4 sm:mt-8">
               <p>Chỉ từ</p>
-              <p className="text-3xl">{formatPrice(69000)}</p>
+              <p className="text-3xl">{formatPrice(200000)}</p>
             </div>
             <button className="bg-slate-800 text-white text-sm py-2.5 px-7 sm:py-5 sm:px-12 mt-4 sm:mt-10 rounded-md hover:bg-slate-900 hover:scale-103 active:scale-95 transition">
               XEM THÊM
@@ -35,8 +34,10 @@ const Hero = () => {
           </div>
           <Image
             className="sm:absolute bottom-0 right-0 md:right-10 w-full sm:max-w-sm"
-            src={assets.hero_model_img}
+            src="/images/hero_model_img.png"
             alt="Hero"
+            width={400}
+            height={400}
           />
         </div>
 
@@ -56,8 +57,10 @@ const Hero = () => {
             </div>
             <Image
               className="w-35"
-              src={assets.hero_product_img1}
+              src="/images/hero_product_img1.png"
               alt="Product"
+              width={140}
+              height={140}
             />
           </div>
 
@@ -76,8 +79,10 @@ const Hero = () => {
             </div>
             <Image
               className="w-35"
-              src={assets.hero_product_img2}
+              src="/images/hero_product_img2.png"
               alt="Product"
+              width={140}
+              height={140}
             />
           </div>
         </div>

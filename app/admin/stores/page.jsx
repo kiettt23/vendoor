@@ -1,5 +1,4 @@
 "use client";
-import { storesDummyData } from "@/assets/assets";
 import StoreInfo from "@/components/admin/StoreInfo";
 import Loading from "@/components/ui/Loading";
 import { vi } from "@/lib/i18n";

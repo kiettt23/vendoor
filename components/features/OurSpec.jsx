@@ -1,9 +1,32 @@
 import React from "react";
-import ViewMore from "../ui/ViewMore";
-import { ourSpecsData } from "@/assets/assets";
-import { vi } from "@/lib/i18n";
+import ViewMore from "@/components/ui/ViewMore";
+import { ClockIcon, HeadsetIcon, TruckIcon } from "lucide-react";
 
 const OurSpecs = () => {
+  const ourSpecsData = [
+    {
+      title: "Miễn phí vận chuyển",
+      description:
+        "Giao hàng nhanh chóng, miễn phí cho mọi đơn hàng. Không điều kiện, chỉ có sự tin cậy.",
+      icon: TruckIcon,
+      accent: "#05DF72",
+    },
+    {
+      title: "Đổi trả dễ dàng trong 7 ngày",
+      description:
+        "Đổi ý? Không sao cả. Đổi trả bất kỳ sản phẩm nào trong 7 ngày.",
+      icon: ClockIcon,
+      accent: "#FF8904",
+    },
+    {
+      title: "Hỗ trợ khách hàng 24/7",
+      description:
+        "Chúng tôi luôn sẵn sàng hỗ trợ. Nhận trợ giúp từ đội ngũ chuyên nghiệp.",
+      icon: HeadsetIcon,
+      accent: "#A684FF",
+    },
+  ];
+
   return (
     <div className="px-6 my-20 max-w-6xl mx-auto">
       <ViewMore
