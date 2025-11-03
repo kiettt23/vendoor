@@ -13,6 +13,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { vi, formatPrice, formatDate } from "@/lib/i18n";
 
 export default function Dashboard() {
   const { getToken } = useAuth();
@@ -31,18 +32,22 @@ export default function Dashboard() {
 
   const dashboardCardsData = [
     {
-      title: "Total Products",
+      title: vi.admin.totalProducts,
       value: dashboardData.totalProducts,
       icon: ShoppingBasketIcon,
     },
     {
-      title: "Total Earnings",
-      value: dashboardData.totalEarnings + currency,
+      title: "Tổng doanh thu",
+      value: formatPrice(dashboardData.totalEarnings),
       icon: CircleDollarSignIcon,
     },
-    { title: "Total Orders", value: dashboardData.totalOrders, icon: TagsIcon },
     {
-      title: "Total Ratings",
+      title: vi.admin.totalOrders,
+      value: dashboardData.totalOrders,
+      icon: TagsIcon,
+    },
+    {
+      title: "Tổng đánh giá",
       value: dashboardData.ratings.length,
       icon: StarIcon,
     },
@@ -69,9 +74,7 @@ export default function Dashboard() {
 
   return (
     <div className=" text-slate-500 mb-28">
-      <h1 className="text-2xl">
-        Seller <span className="text-slate-800 font-medium">Dashboard</span>
-      </h1>
+      <h1 className="text-2xl">{vi.store.storeDashboard}</h1>
 
       <div className="flex flex-wrap gap-5 my-10 mt-4">
         {dashboardCardsData.map((card, index) => (
@@ -93,7 +96,7 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <h2>Total Reviews</h2>
+      <h2>Tất cả đánh giá</h2>
 
       <div className="mt-5">
         {dashboardData.ratings.map((review, index) => (
@@ -113,7 +116,7 @@ export default function Dashboard() {
                 <div>
                   <p className="font-medium">{review.user.name}</p>
                   <p className="font-light text-slate-500">
-                    {new Date(review.createdAt).toDateString()}
+                    {formatDate(review.createdAt)}
                   </p>
                 </div>
               </div>
@@ -144,7 +147,7 @@ export default function Dashboard() {
                 onClick={() => router.push(`/product/${review.product.id}`)}
                 className="bg-slate-100 px-5 py-2 hover:bg-slate-200 rounded transition-all"
               >
-                View Product
+                {vi.product.viewDetails}
               </button>
             </div>
           </div>

@@ -1,14 +1,15 @@
 import React from "react";
 import ViewMore from "./ViewMore";
 import { ourSpecsData } from "@/assets/assets";
+import { vi } from "@/lib/i18n";
 
 const OurSpecs = () => {
   return (
     <div className="px-6 my-20 max-w-6xl mx-auto">
       <ViewMore
         visibleButton={false}
-        title="Our Specifications"
-        description="Lorem ipsum, dolor sit amet consectetur adipisicing elit. Natus porro quidem magni?"
+        title="Cam kết của chúng tôi"
+        description="Mang đến trải nghiệm mua sắm tốt nhất với những cam kết chất lượng"
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 gap-y-10 mt-26">

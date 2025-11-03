@@ -7,6 +7,7 @@ import { Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { vi, formatPrice } from "@/lib/i18n";
 
 export default function Cart() {
   const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
@@ -50,19 +51,19 @@ export default function Cart() {
       <div className="max-w-7xl mx-auto ">
         {/* Title */}
         <PageTitle
-          heading="My Cart"
-          text="items in your cart"
-          linkText="Add more"
+          heading={vi.cart.title}
+          text={`${cartArray.length} sản phẩm trong giỏ hàng`}
+          linkText={vi.cart.continueShopping}
         />
 
         <div className="flex items-start justify-between gap-5 max-lg:flex-col">
           <table className="w-full max-w-4xl text-slate-600 table-auto">
             <thead>
               <tr className="max-sm:text-sm">
-                <th className="text-left">Product</th>
-                <th>Quantity</th>
-                <th>Total Price</th>
-                <th className="max-md:hidden">Remove</th>
+                <th className="text-left">{vi.product.name}</th>
+                <th>{vi.product.quantity}</th>
+                <th>{vi.cart.total}</th>
+                <th className="max-md:hidden">{vi.common.delete}</th>
               </tr>
             </thead>
             <tbody>
@@ -81,18 +82,14 @@ export default function Cart() {
                     <div>
                       <p className="max-sm:text-sm">{item.name}</p>
                       <p className="text-xs text-slate-500">{item.category}</p>
-                      <p>
-                        {item.price}
-                        {currency}
-                      </p>
+                      <p>{formatPrice(item.price)}</p>
                     </div>
                   </td>
                   <td className="text-center">
                     <Counter productId={item.id} />
                   </td>
                   <td className="text-center">
-                    {(item.price * item.quantity).toLocaleString()}
-                    {currency}
+                    {formatPrice(item.price * item.quantity)}
                   </td>
                   <td className="text-center max-md:hidden">
                     <button
@@ -112,7 +109,9 @@ export default function Cart() {
     </div>
   ) : (
     <div className="min-h-[80vh] mx-6 flex items-center justify-center text-slate-400">
-      <h1 className="text-2xl sm:text-4xl font-semibold">Your cart is empty</h1>
+      <h1 className="text-2xl sm:text-4xl font-semibold">
+        {vi.cart.emptyCart}
+      </h1>
     </div>
   );
 }

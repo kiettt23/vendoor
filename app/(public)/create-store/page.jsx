@@ -9,6 +9,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { SwatchBook } from "lucide-react";
+import { vi } from "@/lib/i18n";
 
 export default function CreateStore() {
   const { user } = useUser();
@@ -45,7 +46,7 @@ export default function CreateStore() {
         switch (data.status) {
           case "approved":
             setMessage(
-              "Your store has been approved, you can now add products to your store from dashboard"
+              "Cửa hàng của bạn đã được duyệt. Bạn có thể thêm sản phẩm từ bảng điều khiển"
             );
             setTimeout(() => {
               router.push("/store");
@@ -53,12 +54,12 @@ export default function CreateStore() {
             break;
           case "rejected":
             setMessage(
-              "Your store request has been rejected, contact the admin for more details"
+              "Yêu cầu tạo cửa hàng của bạn đã bị từ chối. Vui lòng liên hệ admin để biết thêm chi tiết"
             );
             break;
           case "pending":
             setMessage(
-              "Your store request is pending, please wait for admin to approve your store"
+              "Yêu cầu tạo cửa hàng đang chờ duyệt. Vui lòng đợi admin phê duyệt"
             );
             break;
 
@@ -77,7 +78,7 @@ export default function CreateStore() {
   const onSubmitHandler = async (e) => {
     e.preventDefault();
     if (!user) {
-      return toast("Please login to continue");
+      return toast(vi.messages.loginRequired);
     }
     try {
       const token = await getToken();
@@ -112,7 +113,7 @@ export default function CreateStore() {
     return (
       <div className="min-h-[80vh] flex mx-6 items-center justify-center text-slate-400">
         <h1 className="text-2xl sm:text-4xl font-semibold">
-          Please <span className="text-slate-500">Login</span> to continue
+          {vi.messages.loginRequired}
         </h1>
       </div>
     );
@@ -125,25 +126,22 @@ export default function CreateStore() {
           <form
             onSubmit={(e) =>
               toast.promise(onSubmitHandler(e), {
-                loading: "Submitting data...",
+                loading: "Đang gửi thông tin...",
               })
             }
             className="max-w-7xl mx-auto flex flex-col items-start gap-3 text-slate-500"
           >
             {/* Title */}
             <div>
-              <h1 className="text-3xl ">
-                Add Your{" "}
-                <span className="text-slate-800 font-medium">Store</span>
-              </h1>
+              <h1 className="text-3xl ">{vi.store.createStore}</h1>
               <p className="max-w-lg">
-                To become a seller on GoCart, submit your store details for
-                review. Your store will be activated after admin verification.
+                Để trở thành người bán trên Vendoor, gửi thông tin cửa hàng để
+                xét duyệt. Cửa hàng sẽ được kích hoạt sau khi admin xác minh.
               </p>
             </div>
 
             <label className="mt-10 cursor-pointer">
-              Store Logo
+              {vi.store.storeLogo}
               <Image
                 src={
                   storeInfo.image
@@ -165,33 +163,33 @@ export default function CreateStore() {
               />
             </label>
 
-            <p>Username</p>
+            <p>{vi.store.storeUsername}</p>
             <input
               name="username"
               onChange={onChangeHandler}
               value={storeInfo.username}
               type="text"
-              placeholder="Enter your store username"
+              placeholder="Nhập tên định danh cửa hàng"
               className="border border-slate-300 outline-slate-400 w-full max-w-lg p-2 rounded"
             />
 
-            <p>Name</p>
+            <p>{vi.store.storeName}</p>
             <input
               name="name"
               onChange={onChangeHandler}
               value={storeInfo.name}
               type="text"
-              placeholder="Enter your store name"
+              placeholder="Nhập tên cửa hàng"
               className="border border-slate-300 outline-slate-400 w-full max-w-lg p-2 rounded"
             />
 
-            <p>Description</p>
+            <p>{vi.store.storeDescription}</p>
             <textarea
               name="description"
               onChange={onChangeHandler}
               value={storeInfo.description}
               rows={5}
-              placeholder="Enter your store description"
+              placeholder="Nhập mô tả cửa hàng"
               className="border border-slate-300 outline-slate-400 w-full max-w-lg p-2 rounded resize-none"
             />
 
@@ -201,32 +199,32 @@ export default function CreateStore() {
               onChange={onChangeHandler}
               value={storeInfo.email}
               type="email"
-              placeholder="Enter your store email"
+              placeholder="Nhập email cửa hàng"
               className="border border-slate-300 outline-slate-400 w-full max-w-lg p-2 rounded"
             />
 
-            <p>Contact Number</p>
+            <p>{vi.address.phone}</p>
             <input
               name="contact"
               onChange={onChangeHandler}
               value={storeInfo.contact}
               type="text"
-              placeholder="Enter your store contact number"
+              placeholder="Nhập số điện thoại liên hệ"
               className="border border-slate-300 outline-slate-400 w-full max-w-lg p-2 rounded"
             />
 
-            <p>Address</p>
+            <p>{vi.address.street}</p>
             <textarea
               name="address"
               onChange={onChangeHandler}
               value={storeInfo.address}
               rows={5}
-              placeholder="Enter your store address"
+              placeholder="Nhập địa chỉ cửa hàng"
               className="border border-slate-300 outline-slate-400 w-full max-w-lg p-2 rounded resize-none"
             />
 
             <button className="bg-slate-800 text-white px-12 py-2 rounded mt-10 mb-40 active:scale-95 hover:bg-slate-900 transition ">
-              Submit
+              {vi.common.submit}
             </button>
           </form>
         </div>
@@ -237,8 +235,8 @@ export default function CreateStore() {
           </p>
           {status === "approved" && (
             <p className="mt-5 text-slate-400">
-              redirecting to dashboard in{" "}
-              <span className="font-semibold">5 seconds</span>
+              Chuyển đến bảng điều khiển trong{" "}
+              <span className="font-semibold">5 giây</span>
             </p>
           )}
         </div>

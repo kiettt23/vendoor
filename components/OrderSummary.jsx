@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Protect, useAuth, useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { fetchCart } from "@/lib/features/cart/cartSlice";
+import { vi, formatPrice } from "@/lib/i18n";
 
 const OrderSummary = ({ totalPrice, items }) => {
   const { user } = useUser();
@@ -29,7 +30,7 @@ const OrderSummary = ({ totalPrice, items }) => {
     event.preventDefault();
     try {
       if (!user) {
-        return toast("Please login to proceed");
+        return toast(vi.messages.loginRequired);
       }
       const token = await getToken();
       const { data } = await axios.post(
@@ -38,7 +39,7 @@ const OrderSummary = ({ totalPrice, items }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCoupon(data.coupon);
-      toast.success("Coupon Aplied");
+      toast.success(vi.messages.couponApplied);
     } catch (error) {
       toast.error(error?.response?.data?.error || error.message);
     }
@@ -48,10 +49,10 @@ const OrderSummary = ({ totalPrice, items }) => {
     e.preventDefault();
     try {
       if (!user) {
-        return toast("Please login to place an order");
+        return toast(vi.messages.loginRequired);
       }
       if (!selectedAddress) {
-        return toast("Please select an address");
+        return toast("Vui lòng chọn địa chỉ giao hàng");
       }
       const token = await getToken();
 
@@ -84,8 +85,10 @@ const OrderSummary = ({ totalPrice, items }) => {
 
   return (
     <div className="w-full max-w-lg lg:max-w-[340px] bg-slate-50/30 border border-slate-200 text-slate-500 text-sm rounded-xl p-7">
-      <h2 className="text-xl font-medium text-slate-600">Payment Summary</h2>
-      <p className="text-slate-400 text-xs my-4">Payment Method</p>
+      <h2 className="text-xl font-medium text-slate-600">
+        {vi.order.orderSummary}
+      </h2>
+      <p className="text-slate-400 text-xs my-4">{vi.payment.paymentMethod}</p>
       <div className="flex gap-2 items-center">
         <input
           type="radio"
@@ -95,7 +98,7 @@ const OrderSummary = ({ totalPrice, items }) => {
           className="accent-gray-500"
         />
         <label htmlFor="COD" className="cursor-pointer">
-          COD
+          {vi.payment.cod}
         </label>
       </div>
       <div className="flex gap-2 items-center mt-1">
@@ -108,11 +111,11 @@ const OrderSummary = ({ totalPrice, items }) => {
           className="accent-gray-500"
         />
         <label htmlFor="STRIPE" className="cursor-pointer">
-          Stripe Payment
+          {vi.payment.stripe}
         </label>
       </div>
       <div className="my-4 py-4 border-y border-slate-200 text-slate-400">
-        <p>Address</p>
+        <p>{vi.address.title}</p>
         {selectedAddress ? (
           <div className="flex gap-2 items-center">
             <p>
@@ -134,7 +137,7 @@ const OrderSummary = ({ totalPrice, items }) => {
                   setSelectedAddress(addressList[e.target.value])
                 }
               >
-                <option value="">Select Address</option>
+                <option value="">{vi.address.selectAddress}</option>
                 {addressList.map((address, index) => (
                   <option key={index} value={index}>
                     {address.name}, {address.city}, {address.state},{" "}
@@ -147,7 +150,7 @@ const OrderSummary = ({ totalPrice, items }) => {
               className="flex items-center gap-1 text-slate-600 mt-1"
               onClick={() => setShowAddressModal(true)}
             >
-              Add Address <PlusIcon size={18} />
+              {vi.address.addAddress} <PlusIcon size={18} />
             </button>
           </div>
         )}
@@ -155,24 +158,19 @@ const OrderSummary = ({ totalPrice, items }) => {
       <div className="pb-4 border-b border-slate-200">
         <div className="flex justify-between">
           <div className="flex flex-col gap-1 text-slate-400">
-            <p>Subtotal:</p>
-            <p>Shipping:</p>
-            {coupon && <p>Coupon:</p>}
+            <p>{vi.cart.subtotal}:</p>
+            <p>{vi.cart.shipping}:</p>
+            {coupon && <p>{vi.coupon.discount}:</p>}
           </div>
           <div className="flex flex-col gap-1 font-medium text-right">
+            <p>{formatPrice(totalPrice)}</p>
             <p>
-              {totalPrice.toLocaleString()}
-              {currency}
-            </p>
-            <p>
-              <Protect plan={"plus"} fallback={`5${currency}`}>
-                Free
+              <Protect plan={"plus"} fallback={formatPrice(5000)}>
+                {vi.cart.freeShipping}
               </Protect>
             </p>
             {coupon && (
-              <p>{`-${currency}${((coupon.discount / 100) * totalPrice).toFixed(
-                2
-              )}`}</p>
+              <p>-{formatPrice((coupon.discount / 100) * totalPrice)}</p>
             )}
           </div>
         </div>
@@ -180,7 +178,7 @@ const OrderSummary = ({ totalPrice, items }) => {
           <form
             onSubmit={(e) =>
               toast.promise(handleCouponCode(e), {
-                loading: "Checking Coupon...",
+                loading: "Đang kiểm tra mã...",
               })
             }
             className="flex justify-center gap-3 mt-3"
@@ -189,17 +187,17 @@ const OrderSummary = ({ totalPrice, items }) => {
               onChange={(e) => setCouponCodeInput(e.target.value)}
               value={couponCodeInput}
               type="text"
-              placeholder="Coupon Code"
+              placeholder={vi.cart.couponCode}
               className="border border-slate-400 p-1.5 rounded w-full outline-none"
             />
             <button className="bg-slate-600 text-white px-3 rounded hover:bg-slate-800 active:scale-95 transition-all">
-              Apply
+              {vi.coupon.apply}
             </button>
           </form>
         ) : (
           <div className="w-full flex items-center justify-center gap-2 text-xs mt-2">
             <p>
-              Code:{" "}
+              {vi.coupon.code}:{" "}
               <span className="font-semibold ml-1">
                 {coupon.code.toUpperCase()}
               </span>
@@ -214,35 +212,31 @@ const OrderSummary = ({ totalPrice, items }) => {
         )}
       </div>
       <div className="flex justify-between py-4">
-        <p>Total:</p>
+        <p>{vi.cart.total}:</p>
         <p className="font-medium text-right">
           <Protect
             plan={"plus"}
-            fallback={`${
+            fallback={formatPrice(
               coupon
-                ? (
-                    totalPrice +
-                    5 -
-                    (coupon.discount / 100) * totalPrice
-                  ).toFixed(2)
-                : (totalPrice + 5).toLocaleString()
-            }
-            ${currency}`}
+                ? totalPrice + 5000 - (coupon.discount / 100) * totalPrice
+                : totalPrice + 5000
+            )}
           >
-            {coupon
-              ? (totalPrice - (coupon.discount / 100) * totalPrice).toFixed(2)
-              : totalPrice.toLocaleString()}
-            {currency}
+            {formatPrice(
+              coupon
+                ? totalPrice - (coupon.discount / 100) * totalPrice
+                : totalPrice
+            )}
           </Protect>
         </p>
       </div>
       <button
         onClick={(e) =>
-          toast.promise(handlePlaceOrder(e), { loading: "placing Order..." })
+          toast.promise(handlePlaceOrder(e), { loading: "Đang đặt hàng..." })
         }
         className="w-full bg-slate-700 text-white py-2.5 rounded hover:bg-slate-900 active:scale-95 transition-all"
       >
-        Place Order
+        {vi.order.orderPlaced.replace("Đã đặt hàng", "Đặt hàng")}
       </button>
 
       {showAddressModal && (

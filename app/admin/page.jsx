@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { vi, formatPrice } from "@/lib/i18n";
 
 export default function AdminDashboard() {
   const { getToken } = useAuth();
@@ -29,17 +30,21 @@ export default function AdminDashboard() {
 
   const dashboardCardsData = [
     {
-      title: "Total Products",
+      title: vi.admin.totalProducts,
       value: dashboardData.products,
       icon: ShoppingBasketIcon,
     },
     {
-      title: "Total Revenue",
-      value: dashboardData.revenue + currency,
+      title: vi.admin.revenue,
+      value: formatPrice(dashboardData.revenue),
       icon: CircleDollarSignIcon,
     },
-    { title: "Total Orders", value: dashboardData.orders, icon: TagsIcon },
-    { title: "Total Stores", value: dashboardData.stores, icon: StoreIcon },
+    {
+      title: vi.admin.totalOrders,
+      value: dashboardData.orders,
+      icon: TagsIcon,
+    },
+    { title: "Tổng cửa hàng", value: dashboardData.stores, icon: StoreIcon },
   ];
 
   const fetchDashboardData = async () => {
@@ -63,9 +68,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="text-slate-500">
-      <h1 className="text-2xl">
-        Admin <span className="text-slate-800 font-medium">Dashboard</span>
-      </h1>
+      <h1 className="text-2xl">{vi.admin.dashboard}</h1>
 
       {/* Cards */}
       <div className="flex flex-wrap gap-5 my-10 mt-4">

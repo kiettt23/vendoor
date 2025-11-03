@@ -8,6 +8,7 @@ import { useAuth } from "@clerk/nextjs";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { addRating } from "@/lib/features/rating/ratingSlice";
+import { vi } from "@/lib/i18n";
 
 const RatingModal = ({ ratingModal, setRatingModal }) => {
   const { getToken } = useAuth();
@@ -17,10 +18,10 @@ const RatingModal = ({ ratingModal, setRatingModal }) => {
 
   const handleSubmit = async () => {
     if (rating < 0 || rating > 5) {
-      return toast("Please select a rating");
+      return toast("Vui lòng chọn số sao đánh giá");
     }
     if (review.length < 5) {
-      return toast("Write a short review");
+      return toast("Vui lòng viết nhận xét ngắn");
     }
     try {
       const token = await getToken();
@@ -54,7 +55,7 @@ const RatingModal = ({ ratingModal, setRatingModal }) => {
           <XIcon size={20} />
         </button>
         <h2 className="text-xl font-medium text-slate-600 mb-4">
-          Rate Product
+          {vi.rating.writeReview}
         </h2>
         <div className="flex items-center justify-center mb-4">
           {Array.from({ length: 5 }, (_, i) => (
@@ -69,18 +70,18 @@ const RatingModal = ({ ratingModal, setRatingModal }) => {
         </div>
         <textarea
           className="w-full p-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-purple-400"
-          placeholder="Write your review (optional)"
+          placeholder={vi.rating.yourReview}
           rows="4"
           value={review}
           onChange={(e) => setReview(e.target.value)}
         ></textarea>
         <button
           onClick={(e) =>
-            toast.promise(handleSubmit(), { loading: "Submitting..." })
+            toast.promise(handleSubmit(), { loading: "Đang gửi đánh giá..." })
           }
           className="w-full bg-purple-500 text-white py-2 rounded-md hover:bg-purple-600 transition"
         >
-          Submit Rating
+          {vi.rating.submitReview}
         </button>
       </div>
     </div>

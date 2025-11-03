@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import Rating from "./Rating";
 import { useState } from "react";
 import RatingModal from "./RatingModal";
+import { vi, formatPrice, formatDate, getOrderStatusText } from "@/lib/i18n";
 
 const OrderItem = ({ order }) => {
   const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "đ";
@@ -33,12 +34,9 @@ const OrderItem = ({ order }) => {
                     {item.product.name}
                   </p>
                   <p>
-                    {item.price}
-                    {currency} Qty : {item.quantity}{" "}
+                    {formatPrice(item.price)} | Số lượng: {item.quantity}{" "}
                   </p>
-                  <p className="mb-1">
-                    {new Date(order.createdAt).toDateString()}
-                  </p>
+                  <p className="mb-1">{formatDate(order.createdAt)}</p>
                   <div>
                     {ratings.find(
                       (rating) =>
@@ -66,7 +64,7 @@ const OrderItem = ({ order }) => {
                           order.status !== "DELIVERED" && "hidden"
                         }`}
                       >
-                        Rate Product
+                        {vi.rating.writeReview}
                       </button>
                     )}
                   </div>
@@ -83,8 +81,7 @@ const OrderItem = ({ order }) => {
         </td>
 
         <td className="text-center max-md:hidden">
-          {order.total}
-          {currency}
+          {formatPrice(order.total)}
         </td>
 
         <td className="text-left max-md:hidden">
@@ -101,15 +98,17 @@ const OrderItem = ({ order }) => {
         <td className="text-left space-y-2 text-sm max-md:hidden">
           <div
             className={`flex items-center justify-center gap-1 rounded-full p-1 ${
-              order.status === "confirmed"
+              order.status === "PROCESSING"
                 ? "text-yellow-500 bg-yellow-100"
-                : order.status === "delivered"
+                : order.status === "DELIVERED"
                 ? "text-green-500 bg-green-100"
+                : order.status === "SHIPPED"
+                ? "text-blue-500 bg-blue-100"
                 : "text-slate-500 bg-slate-100"
             }`}
           >
             <DotIcon size={10} className="scale-250" />
-            {order.status.split("_").join(" ").toLowerCase()}
+            {getOrderStatusText(order.status)}
           </div>
         </td>
       </tr>
@@ -127,7 +126,7 @@ const OrderItem = ({ order }) => {
           <br />
           <div className="flex items-center">
             <span className="text-center mx-auto px-6 py-1.5 rounded bg-purple-100 text-purple-700">
-              {order.status.replace(/_/g, " ").toLowerCase()}
+              {getOrderStatusText(order.status)}
             </span>
           </div>
         </td>

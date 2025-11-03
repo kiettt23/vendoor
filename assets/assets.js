@@ -42,12 +42,12 @@ export const assets = {
 };
 
 export const categories = [
-  "Headphones",
-  "Speakers",
-  "Watch",
-  "Earbuds",
-  "Mouse",
-  "Decoration",
+  "Tai nghe",
+  "Loa",
+  "Đồng hồ",
+  "Tai nghe nhét tai",
+  "Chuột",
+  "Trang trí",
 ];
 
 export const dummyRatingsData = [
@@ -364,22 +364,23 @@ export const productDummyData = [
 
 export const ourSpecsData = [
   {
-    title: "Free Shipping",
+    title: "Miễn phí vận chuyển",
     description:
-      "Enjoy fast, free delivery on every order no conditions, just reliable doorstep.",
+      "Giao hàng nhanh chóng, miễn phí cho mọi đơn hàng. Không điều kiện, chỉ có sự tin cậy.",
     icon: SendIcon,
     accent: "#05DF72",
   },
   {
-    title: "7 Days easy Return",
-    description: "Change your mind? No worries. Return any item within 7 days.",
+    title: "Đổi trả dễ dàng trong 7 ngày",
+    description:
+      "Đổi ý? Không sao cả. Đổi trả bất kỳ sản phẩm nào trong 7 ngày.",
     icon: ClockFadingIcon,
     accent: "#FF8904",
   },
   {
-    title: "24/7 Customer Support",
+    title: "Hỗ trợ khách hàng 24/7",
     description:
-      "We're here for you. Get expert help with our customer support.",
+      "Chúng tôi luôn sẵn sàng hỗ trợ. Nhận trợ giúp từ đội ngũ chuyên nghiệp.",
     icon: HeadsetIcon,
     accent: "#A684FF",
   },

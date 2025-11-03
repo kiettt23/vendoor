@@ -1,13 +1,14 @@
 "use client";
 import React from "react";
 import toast from "react-hot-toast";
+import { vi } from "@/lib/i18n";
 
 export default function Banner() {
   const [isOpen, setIsOpen] = React.useState(true);
 
   const handleClaim = () => {
     setIsOpen(false);
-    toast.success("Coupon copied to clipboard!");
+    toast.success("Đã sao chép mã giảm giá!");
     navigator.clipboard.writeText("NEW20");
   };
 
@@ -15,14 +16,14 @@ export default function Banner() {
     isOpen && (
       <div className="w-full px-6 py-1 font-medium text-sm text-white text-center bg-gradient-to-r from-violet-500 via-[#9938CA] to-[#E0724A]">
         <div className="flex items-center justify-between max-w-7xl  mx-auto">
-          <p>Get 10% OFF on Your First Order!</p>
+          <p>Giảm 10% cho đơn hàng đầu tiên!</p>
           <div className="flex items-center space-x-6">
             <button
               onClick={handleClaim}
               type="button"
               className="font-normal text-gray-800 bg-white px-7 py-2 rounded-full max-sm:hidden"
             >
-              Claim Offer
+              Nhận ưu đãi
             </button>
             <button
               onClick={() => setIsOpen(false)}

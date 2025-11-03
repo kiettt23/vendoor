@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { addAddress } from "@/lib/features/address/addressSlice";
+import { vi } from "@/lib/i18n";
 
 const AddressModal = ({ setShowAddressModal }) => {
   const { getToken } = useAuth();
@@ -51,21 +52,19 @@ const AddressModal = ({ setShowAddressModal }) => {
   return (
     <form
       onSubmit={(e) =>
-        toast.promise(handleSubmit(e), { loading: "Adding Address..." })
+        toast.promise(handleSubmit(e), { loading: "Đang thêm địa chỉ..." })
       }
       className="fixed inset-0 z-50 bg-white/60 backdrop-blur h-screen flex items-center justify-center"
     >
       <div className="flex flex-col gap-5 text-slate-700 w-full max-w-sm mx-6">
-        <h2 className="text-3xl ">
-          Add New <span className="font-semibold">Address</span>
-        </h2>
+        <h2 className="text-3xl ">{vi.address.addAddress}</h2>
         <input
           name="name"
           onChange={handleAddressChange}
           value={address.name}
           className="p-2 px-4 outline-none border border-slate-200 rounded w-full"
           type="text"
-          placeholder="Enter your name"
+          placeholder={vi.address.name}
           required
         />
         <input
@@ -74,7 +73,7 @@ const AddressModal = ({ setShowAddressModal }) => {
           value={address.email}
           className="p-2 px-4 outline-none border border-slate-200 rounded w-full"
           type="email"
-          placeholder="Email address"
+          placeholder={vi.address.email}
           required
         />
         <input
@@ -83,7 +82,7 @@ const AddressModal = ({ setShowAddressModal }) => {
           value={address.street}
           className="p-2 px-4 outline-none border border-slate-200 rounded w-full"
           type="text"
-          placeholder="Street"
+          placeholder={vi.address.street}
           required
         />
         <div className="flex gap-4">
@@ -93,7 +92,7 @@ const AddressModal = ({ setShowAddressModal }) => {
             value={address.city}
             className="p-2 px-4 outline-none border border-slate-200 rounded w-full"
             type="text"
-            placeholder="City"
+            placeholder={vi.address.city}
             required
           />
           <input
@@ -102,7 +101,7 @@ const AddressModal = ({ setShowAddressModal }) => {
             value={address.state}
             className="p-2 px-4 outline-none border border-slate-200 rounded w-full"
             type="text"
-            placeholder="State"
+            placeholder={vi.address.state}
             required
           />
         </div>
@@ -113,7 +112,7 @@ const AddressModal = ({ setShowAddressModal }) => {
             value={address.zip}
             className="p-2 px-4 outline-none border border-slate-200 rounded w-full"
             type="number"
-            placeholder="Zip code"
+            placeholder={vi.address.zip}
             required
           />
           <input
@@ -122,7 +121,7 @@ const AddressModal = ({ setShowAddressModal }) => {
             value={address.country}
             className="p-2 px-4 outline-none border border-slate-200 rounded w-full"
             type="text"
-            placeholder="Country"
+            placeholder={vi.address.country}
             required
           />
         </div>
@@ -132,11 +131,11 @@ const AddressModal = ({ setShowAddressModal }) => {
           value={address.phone}
           className="p-2 px-4 outline-none border border-slate-200 rounded w-full"
           type="text"
-          placeholder="Phone"
+          placeholder={vi.address.phone}
           required
         />
         <button className="bg-slate-800 text-white text-sm font-medium py-2.5 rounded-md hover:bg-slate-900 active:scale-95 transition-all">
-          SAVE ADDRESS
+          {vi.common.save.toUpperCase()}
         </button>
       </div>
       <XIcon
