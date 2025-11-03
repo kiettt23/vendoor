@@ -1,7 +1,7 @@
 "use client";
-import Banner from "@/components/Banner";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Banner from "@/components/layout/Banner";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "@/lib/features/product/productSlice";

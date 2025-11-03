@@ -1,7 +1,7 @@
 "use client";
 import { storesDummyData } from "@/assets/assets";
 import StoreInfo from "@/components/admin/StoreInfo";
-import Loading from "@/components/Loading";
+import Loading from "@/components/ui/Loading";
 import { vi } from "@/lib/i18n";
 import { useUser, useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";

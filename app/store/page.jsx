@@ -1,6 +1,6 @@
 "use client";
 import { dummyStoreDashboardData } from "@/assets/assets";
-import Loading from "@/components/Loading";
+import Loading from "@/components/ui/Loading";
 import { useAuth } from "@clerk/nextjs";
 import axios from "axios";
 import {

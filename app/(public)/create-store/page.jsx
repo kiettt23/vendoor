@@ -3,7 +3,7 @@ import { assets } from "@/assets/assets";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import Loading from "@/components/Loading";
+import Loading from "@/components/ui/Loading";
 import { useUser } from "@clerk/nextjs";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";

@@ -1,5 +1,5 @@
 "use client";
-import ViewMore from "./ViewMore";
+import ViewMore from "@/components/ui/ViewMore";
 import ProductCard from "./ProductCard";
 import { useSelector } from "react-redux";
 import { vi } from "@/lib/i18n";

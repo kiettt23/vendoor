@@ -1,11 +1,11 @@
 "use client";
-import PageTitle from "@/components/PageTitle";
+import PageTitle from "@/components/ui/PageTitle";
 import { useEffect, useState } from "react";
-import OrderItem from "@/components/OrderItem";
+import OrderItem from "@/components/features/OrderItem";
 import { useAuth, useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import Loading from "@/components/Loading";
+import Loading from "@/components/ui/Loading";
 import toast from "react-hot-toast";
 import { vi } from "@/lib/i18n";
 

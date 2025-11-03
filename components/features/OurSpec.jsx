@@ -1,5 +1,5 @@
 import React from "react";
-import ViewMore from "./ViewMore";
+import ViewMore from "../ui/ViewMore";
 import { ourSpecsData } from "@/assets/assets";
 import { vi } from "@/lib/i18n";
 

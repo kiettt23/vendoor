@@ -1,5 +1,5 @@
 import React from "react";
-import ViewMore from "./ViewMore";
+import ViewMore from "@/components/ui/ViewMore";
 import { vi } from "@/lib/i18n";
 
 const Newsletter = () => {

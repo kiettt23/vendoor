@@ -11,7 +11,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
-import Counter from "./Counter";
+import Counter from "@/components/ui/Counter";
 import { useDispatch, useSelector } from "react-redux";
 import { vi, formatPrice } from "@/lib/i18n";
 
