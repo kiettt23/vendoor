@@ -30,14 +30,13 @@ export async function GET(request) {
       totalRevenue += order.total;
     });
 
-    const revenue = totalRevenue.toFixed(2);
     // total products on app
     const products = await prisma.product.count();
     const dashboardData = {
       orders,
       stores,
       products,
-      revenue,
+      revenue: totalRevenue, // Trả về số nguyên, formatPrice sẽ format phía frontend
       allOrders,
     };
 

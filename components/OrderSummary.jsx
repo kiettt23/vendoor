@@ -8,6 +8,7 @@ import { Protect, useAuth, useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { fetchCart } from "@/lib/features/cart/cartSlice";
 import { vi, formatPrice } from "@/lib/i18n";
+import { APP_CONFIG } from "@/configs/app";
 
 const OrderSummary = ({ totalPrice, items }) => {
   const { user } = useUser();
@@ -165,7 +166,10 @@ const OrderSummary = ({ totalPrice, items }) => {
           <div className="flex flex-col gap-1 font-medium text-right">
             <p>{formatPrice(totalPrice)}</p>
             <p>
-              <Protect plan={"plus"} fallback={formatPrice(5000)}>
+              <Protect
+                plan={"plus"}
+                fallback={formatPrice(APP_CONFIG.SHIPPING_FEE)}
+              >
                 {vi.cart.freeShipping}
               </Protect>
             </p>

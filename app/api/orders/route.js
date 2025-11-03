@@ -4,6 +4,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import { PaymentMethod } from "@prisma/client";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { APP_CONFIG } from "@/configs/app";
 
 export async function POST(request) {
   try {
@@ -97,7 +98,7 @@ export async function POST(request) {
         total -= (total * coupon.discount) / 100;
       }
       if (!isPlusMember && !isShippingFeeAdded) {
-        total += 5;
+        total += APP_CONFIG.SHIPPING_FEE;
         isShippingFeeAdded = true;
       }
 
