@@ -1,29 +1,41 @@
-"use client";
-import Loading from "@/components/ui/Loading";
 import OrdersAreaChart from "@/components/features/OrdersAreaChart";
-import { useAuth } from "@clerk/nextjs";
-import axios from "axios";
 import {
   CircleDollarSignIcon,
   ShoppingBasketIcon,
   StoreIcon,
   TagsIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import { vi, formatPrice } from "@/lib/i18n";
+import prisma from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function AdminDashboard() {
-  const { getToken } = useAuth();
+// ✅ Server Component - Fetch dashboard data directly from DB
+export default async function AdminDashboard() {
+  // ✅ Check auth on server
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
 
-  const [loading, setLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState({
-    products: 0,
-    revenue: 0,
-    orders: 0,
-    stores: 0,
-    allOrders: [],
-  });
+  // ✅ Fetch dashboard data directly from database
+  const [products, orders, stores] = await Promise.all([
+    prisma.product.count(),
+    prisma.order.findMany({
+      include: {
+        orderItems: true,
+      },
+    }),
+    prisma.store.count(),
+  ]);
+
+  const revenue = orders.reduce((total, order) => total + order.totalAmount, 0);
+
+  const dashboardData = {
+    products,
+    revenue,
+    orders: orders.length,
+    stores,
+    allOrders: orders,
+  };
 
   const dashboardCardsData = [
     {
@@ -43,25 +55,6 @@ export default function AdminDashboard() {
     },
     { title: "Tổng cửa hàng", value: dashboardData.stores, icon: StoreIcon },
   ];
-
-  const fetchDashboardData = async () => {
-    try {
-      const token = await getToken();
-      const { data } = await axios.get("/api/admin/dashboard", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setDashboardData(data.dashboardData);
-    } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  if (loading) return <Loading />;
 
   return (
     <div className="text-slate-500">
