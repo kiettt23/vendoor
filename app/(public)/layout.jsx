@@ -17,7 +17,7 @@ export default function PublicLayout({ children }) {
   const { cartItems } = useSelector((state) => state.cart);
 
   // ✅ Removed: fetchProducts - now using Server Components
-  
+
   useEffect(() => {
     if (user) {
       dispatch(fetchCart({ getToken }));

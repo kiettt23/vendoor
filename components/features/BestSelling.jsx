@@ -1,12 +1,16 @@
 "use client";
 import ViewMore from "@/components/ui/ViewMore";
 import ProductCard from "./ProductCard";
-import { useSelector } from "react-redux";
 import { vi } from "@/lib/i18n";
 
-const BestSelling = () => {
+const BestSelling = ({ products }) => {
   const displayQuantity = 8;
-  const products = useSelector((state) => state.product.list);
+
+  // ✅ Products come from Server Component
+  const bestSellingProducts = products
+    .slice()
+    .sort((a, b) => b.rating.length - a.rating.length)
+    .slice(0, displayQuantity);
 
   return (
     <div className="px-6 my-30 max-w-6xl mx-auto">
@@ -18,13 +22,9 @@ const BestSelling = () => {
         href="/shop"
       />
       <div className="mt-12  grid grid-cols-2 sm:flex flex-wrap gap-6 xl:gap-12">
-        {products
-          .slice()
-          .sort((a, b) => b.rating.length - a.rating.length)
-          .slice(0, displayQuantity)
-          .map((product, index) => (
-            <ProductCard key={index} product={product} />
-          ))}
+        {bestSellingProducts.map((product, index) => (
+          <ProductCard key={index} product={product} />
+        ))}
       </div>
     </div>
   );

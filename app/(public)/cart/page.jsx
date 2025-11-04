@@ -1,115 +1,44 @@
-"use client";
-import Counter from "@/components/ui/Counter";
-import OrderSummary from "@/components/features/OrderSummary";
-import PageTitle from "@/components/ui/PageTitle";
-import { deleteItemFromCart } from "@/lib/features/cart/cartSlice";
-import { Trash2Icon } from "lucide-react";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { vi, formatPrice } from "@/lib/i18n";
+import { auth } from "@clerk/nextjs/server";
+import prisma from "@/lib/prisma";
+import CartClient from "./CartClient";
 
-export default function Cart() {
-  const { cartItems } = useSelector((state) => state.cart);
-  const products = useSelector((state) => state.product.list);
+// ✅ Server Component - Fetch cart products
+export default async function Cart() {
+  const { userId } = await auth();
 
-  const dispatch = useDispatch();
+  if (!userId) {
+    // Not logged in - show empty cart (client will handle localStorage)
+    return <CartClient products={[]} />;
+  }
 
-  const [cartArray, setCartArray] = useState([]);
-  const [totalPrice, setTotalPrice] = useState(0);
+  // ✅ Fetch user's cart
+  const cart = await prisma.cart.findUnique({
+    where: { userId },
+  });
 
-  const createCartArray = () => {
-    setTotalPrice(0);
-    const cartArray = [];
-    for (const [key, value] of Object.entries(cartItems)) {
-      const product = products.find((product) => product.id === key);
-      if (product) {
-        cartArray.push({
-          ...product,
-          quantity: value,
-        });
-        setTotalPrice((prev) => prev + product.price * value);
-      }
-    }
-    setCartArray(cartArray);
-  };
+  if (!cart || !cart.items || Object.keys(cart.items).length === 0) {
+    return <CartClient products={[]} />;
+  }
 
-  const handleDeleteItemFromCart = (productId) => {
-    dispatch(deleteItemFromCart({ productId }));
-  };
+  // ✅ Get product IDs from cart
+  const productIds = Object.keys(cart.items);
 
-  useEffect(() => {
-    if (products.length > 0) {
-      createCartArray();
-    }
-  }, [cartItems, products]);
+  // ✅ Fetch products in cart
+  const products = await prisma.product.findMany({
+    where: {
+      id: {
+        in: productIds,
+      },
+    },
+    include: {
+      store: {
+        select: {
+          name: true,
+          username: true,
+        },
+      },
+    },
+  });
 
-  return cartArray.length > 0 ? (
-    <div className="min-h-screen mx-6 text-slate-800">
-      <div className="max-w-7xl mx-auto ">
-        {/* Title */}
-        <PageTitle
-          heading={vi.cart.title}
-          text={`${cartArray.length} sản phẩm trong giỏ hàng`}
-          linkText={vi.cart.continueShopping}
-        />
-
-        <div className="flex items-start justify-between gap-5 max-lg:flex-col">
-          <table className="w-full max-w-4xl text-slate-600 table-auto">
-            <thead>
-              <tr className="max-sm:text-sm">
-                <th className="text-left">{vi.product.name}</th>
-                <th>{vi.product.quantity}</th>
-                <th>{vi.cart.total}</th>
-                <th className="max-md:hidden">{vi.common.delete}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cartArray.map((item, index) => (
-                <tr key={index} className="space-x-2">
-                  <td className="flex gap-3 my-4">
-                    <div className="flex gap-3 items-center justify-center bg-slate-100 size-18 rounded-md">
-                      <Image
-                        src={item.images[0]}
-                        className="h-14 w-auto"
-                        alt=""
-                        width={45}
-                        height={45}
-                      />
-                    </div>
-                    <div>
-                      <p className="max-sm:text-sm">{item.name}</p>
-                      <p className="text-xs text-slate-500">{item.category}</p>
-                      <p>{formatPrice(item.price)}</p>
-                    </div>
-                  </td>
-                  <td className="text-center">
-                    <Counter productId={item.id} />
-                  </td>
-                  <td className="text-center">
-                    {formatPrice(item.price * item.quantity)}
-                  </td>
-                  <td className="text-center max-md:hidden">
-                    <button
-                      onClick={() => handleDeleteItemFromCart(item.id)}
-                      className=" text-red-500 hover:bg-red-50 p-2.5 rounded-full active:scale-95 transition-all"
-                    >
-                      <Trash2Icon size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <OrderSummary totalPrice={totalPrice} items={cartArray} />
-        </div>
-      </div>
-    </div>
-  ) : (
-    <div className="min-h-[80vh] mx-6 flex items-center justify-center text-slate-400">
-      <h1 className="text-2xl sm:text-4xl font-semibold">
-        {vi.cart.emptyCart}
-      </h1>
-    </div>
-  );
+  return <CartClient products={products} />;
 }
