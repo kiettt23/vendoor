@@ -1,41 +1,62 @@
-"use client";
+import prisma from "@/lib/prisma";
 import ProductDescription from "@/components/features/ProductDescription";
 import ProductDetails from "@/components/features/ProductDetails";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { vi } from "@/lib/i18n";
+import { notFound } from "next/navigation";
 
-export default function Product() {
-  const { productId } = useParams();
-  const [product, setProduct] = useState();
-  const products = useSelector((state) => state.product.list);
+// ✅ Server Component - Fetch product directly from DB
+export default async function Product({ params }) {
+  // ✅ Await params (Next.js 15)
+  const { productId } = await params;
 
-  const fetchProduct = async () => {
-    const product = products.find((product) => product.id === productId);
-    setProduct(product);
-  };
+  // ✅ Fetch product directly from database
+  const product = await prisma.product.findUnique({
+    where: {
+      id: productId,
+    },
+    include: {
+      rating: {
+        include: {
+          user: {
+            select: {
+              name: true,
+              image: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+      store: {
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          logo: true,
+        },
+      },
+    },
+  });
 
-  useEffect(() => {
-    if (products.length > 0) {
-      fetchProduct();
-    }
-    scrollTo(0, 0);
-  }, [productId, products]);
+  // ✅ Handle not found
+  if (!product) {
+    notFound();
+  }
 
   return (
     <div className="mx-6">
       <div className="max-w-7xl mx-auto">
-        {/* Breadcrums */}
-        <div className="  text-gray-600 text-sm mt-8 mb-5">
-          {vi.nav.home} / {vi.admin.products} / {product?.category}
+        {/* Breadcrumbs */}
+        <div className="text-gray-600 text-sm mt-8 mb-5">
+          {vi.nav.home} / {vi.admin.products} / {product.category}
         </div>
 
         {/* Product Details */}
-        {product && <ProductDetails product={product} />}
+        <ProductDetails product={product} />
 
         {/* Description & Reviews */}
-        {product && <ProductDescription product={product} />}
+        <ProductDescription product={product} />
       </div>
     </div>
   );
