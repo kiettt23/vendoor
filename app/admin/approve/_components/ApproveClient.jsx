@@ -1,27 +1,28 @@
 "use client";
 import StoreInfo from "../../_components/StoreInfo";
 import { vi } from "@/lib/i18n";
-import { useAuth } from "@clerk/nextjs";
 import toast from "react-hot-toast";
-import axios from "axios";
-import { useRouter } from "next/navigation";
+import { approveStore, rejectStore } from "../actions";
 
 export default function ApproveClient({ stores: initialStores }) {
-  const { getToken } = useAuth();
-  const router = useRouter();
+  // ✅ NO MORE: useAuth, axios, getToken
+  // Server Actions handle auth internally
 
-  const handleApprove = async ({ storeId, status }) => {
+  const handleApprove = async (storeId) => {
     try {
-      const token = await getToken();
-      await axios.post(
-        "/api/admin/approve-store",
-        { storeId, status },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success(status === "approved" ? "Đã phê duyệt" : "Đã từ chối");
-      router.refresh(); // Refresh server component data
+      const result = await approveStore(storeId);
+      toast.success(result.message);
     } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error.message);
+    }
+  };
+
+  const handleReject = async (storeId) => {
+    try {
+      const result = await rejectStore(storeId);
+      toast.success(result.message);
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
@@ -46,10 +47,9 @@ export default function ApproveClient({ stores: initialStores }) {
               <div className="flex gap-3 pt-2 flex-wrap">
                 <button
                   onClick={() =>
-                    toast.promise(
-                      handleApprove({ storeId: store.id, status: "approved" }),
-                      { loading: vi.admin.approving }
-                    )
+                    toast.promise(handleApprove(store.id), {
+                      loading: vi.admin.approving,
+                    })
                   }
                   className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
                 >
@@ -57,10 +57,9 @@ export default function ApproveClient({ stores: initialStores }) {
                 </button>
                 <button
                   onClick={() =>
-                    toast.promise(
-                      handleApprove({ storeId: store.id, status: "rejected" }),
-                      { loading: vi.admin.rejecting }
-                    )
+                    toast.promise(handleReject(store.id), {
+                      loading: vi.admin.rejecting,
+                    })
                   }
                   className="px-4 py-2 bg-slate-500 text-white rounded hover:bg-slate-600 text-sm"
                 >

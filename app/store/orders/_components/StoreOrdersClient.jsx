@@ -1,28 +1,18 @@
 "use client";
 import { useState } from "react";
-import { useAuth } from "@clerk/nextjs";
-import axios from "axios";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { updateOrderStatus } from "../actions";
 
 export default function StoreOrdersClient({ orders: initialOrders }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { getToken } = useAuth();
-  const router = useRouter();
 
-  const updateOrderStatus = async (orderId, status) => {
+  const handleUpdateOrderStatus = async (orderId, status) => {
     try {
-      const token = await getToken();
-      await axios.post(
-        "/api/store/orders",
-        { orderId, status },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success("Order status updated!");
-      router.refresh(); // Refresh server component data
+      const result = await updateOrderStatus(orderId, status);
+      toast.success(result.message);
     } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error.message);
     }
   };
 
@@ -94,7 +84,7 @@ export default function StoreOrdersClient({ orders: initialOrders }) {
                     <select
                       value={order.status}
                       onChange={(e) =>
-                        updateOrderStatus(order.id, e.target.value)
+                        handleUpdateOrderStatus(order.id, e.target.value)
                       }
                       className="border-gray-300 rounded-md text-sm focus:ring focus:ring-blue-200"
                     >

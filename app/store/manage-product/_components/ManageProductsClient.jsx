@@ -1,28 +1,17 @@
 "use client";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
-import { useAuth } from "@clerk/nextjs";
-import axios from "axios";
-import { useRouter } from "next/navigation";
+import { toggleProductStock } from "../actions";
 
 const currency = "đ";
 
 export default function ManageProductsClient({ products: initialProducts }) {
-  const { getToken } = useAuth();
-  const router = useRouter();
-
-  const toggleStock = async (productId) => {
+  const handleToggleStock = async (productId) => {
     try {
-      const token = await getToken();
-      const { data } = await axios.post(
-        "/api/store/stock-toggle",
-        { productId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success(data.message);
-      router.refresh(); // Refresh server component data
+      const result = await toggleProductStock(productId);
+      toast.success(result.message);
     } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error.message);
     }
   };
 
@@ -74,7 +63,7 @@ export default function ManageProductsClient({ products: initialProducts }) {
                     type="checkbox"
                     className="sr-only peer"
                     onChange={() =>
-                      toast.promise(toggleStock(product.id), {
+                      toast.promise(handleToggleStock(product.id), {
                         loading: "Updating data...",
                       })
                     }

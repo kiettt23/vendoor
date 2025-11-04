@@ -2,28 +2,15 @@
 import StoreInfo from "../../_components/StoreInfo";
 import { vi } from "@/lib/i18n";
 import toast from "react-hot-toast";
-import { useAuth } from "@clerk/nextjs";
-import axios from "axios";
-import { useRouter } from "next/navigation";
+import { toggleStoreActive } from "../actions";
 
 export default function StoresClient({ stores: initialStores }) {
-  const { getToken } = useAuth();
-  const router = useRouter();
-
-  const toggleIsActive = async (storeId) => {
+  const handleToggle = async (storeId) => {
     try {
-      const token = await getToken();
-      const { data } = await axios.post(
-        "/api/admin/toggle-store",
-        { storeId },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      toast.success(data.message);
-      router.refresh(); // Refresh server component data
+      const result = await toggleStoreActive(storeId);
+      toast.success(result.message);
     } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error.message);
     }
   };
 
@@ -52,7 +39,7 @@ export default function StoresClient({ stores: initialStores }) {
                     type="checkbox"
                     className="sr-only peer"
                     onChange={() =>
-                      toast.promise(toggleIsActive(store.id), {
+                      toast.promise(handleToggle(store.id), {
                         loading: vi.common.updating,
                       })
                     }

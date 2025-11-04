@@ -3,14 +3,9 @@ import { useState } from "react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { DeleteIcon, Check, Ban } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
-import axios from "axios";
-import { useRouter } from "next/navigation";
+import { createCoupon, deleteCoupon } from "../actions";
 
 export default function CouponsClient({ coupons: initialCoupons }) {
-  const { getToken } = useAuth();
-  const router = useRouter();
-
   const [newCoupon, setNewCoupon] = useState({
     code: "",
     description: "",
@@ -24,21 +19,14 @@ export default function CouponsClient({ coupons: initialCoupons }) {
   const handleAddCoupon = async (e) => {
     e.preventDefault();
     try {
-      const token = await getToken();
-
       const couponData = {
         ...newCoupon,
         discount: Number(newCoupon.discount),
         expiresAt: new Date(newCoupon.expiresAt),
       };
 
-      const { data } = await axios.post(
-        "/api/admin/coupon",
-        { coupon: couponData },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success(data.message);
-      router.refresh(); // Refresh server component data
+      const result = await createCoupon(couponData);
+      toast.success(result.message);
 
       // Reset form
       setNewCoupon({
@@ -51,7 +39,7 @@ export default function CouponsClient({ coupons: initialCoupons }) {
         expiresAt: new Date(),
       });
     } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error.message);
     }
   };
 
@@ -59,21 +47,17 @@ export default function CouponsClient({ coupons: initialCoupons }) {
     setNewCoupon({ ...newCoupon, [e.target.name]: e.target.value });
   };
 
-  const deleteCoupon = async (code) => {
+  const handleDeleteCoupon = async (code) => {
     try {
       const confirm = window.confirm(
         "Bạn có chắc chắn muốn xóa mã giảm giá này?"
       );
       if (!confirm) return;
 
-      const token = await getToken();
-      await axios.delete(`/api/admin/coupon?code=${code}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Đã xóa mã giảm giá thành công");
-      router.refresh(); // Refresh server component data
+      const result = await deleteCoupon(code);
+      toast.success(result.message);
     } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error.message);
     }
   };
 
@@ -239,7 +223,7 @@ export default function CouponsClient({ coupons: initialCoupons }) {
                   <td className="py-3 px-4 text-slate-800">
                     <DeleteIcon
                       onClick={() =>
-                        toast.promise(deleteCoupon(coupon.code), {
+                        toast.promise(handleDeleteCoupon(coupon.code), {
                           loading: "Đang xóa mã giảm giá...",
                         })
                       }

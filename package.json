@@ -8,9 +8,6 @@
     "start": "next start",
     "lint": "eslint"
   },
-  "prisma": {
-    "seed": "node prisma/seed.js"
-  },
   "dependencies": {
     "@clerk/nextjs": "^6.33.1",
     "@neondatabase/serverless": "^1.0.2",
