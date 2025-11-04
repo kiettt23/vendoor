@@ -166,8 +166,8 @@ const Footer = () => {
       links: [
         { text: vi.nav.home, path: "/", icon: null },
         { text: "Chính sách bảo mật", path: "/", icon: null },
-        { text: "Trở thành thành viên Plus", path: "/pricing", icon: null },
-        { text: "Tạo cửa hàng của bạn", path: "/create-store", icon: null },
+        { text: "Thành viên Plus", path: "/pricing", icon: null },
+        { text: "Cửa hàng của bạn", path: "/store", icon: null },
         { text: "Quản trị viên", path: "/admin", icon: null },
       ],
     },
