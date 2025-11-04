@@ -4,17 +4,15 @@ import AddressModal from "./AddressModal";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Protect, useAuth, useUser } from "@clerk/nextjs";
-import axios from "axios";
+import { Protect, useUser } from "@clerk/nextjs";
 import { fetchCart } from "@/lib/features/cart/cartSlice";
 import { vi, formatPrice } from "@/lib/i18n";
 import { APP_CONFIG } from "@/configs/app";
+import { applyCoupon, createOrder } from "./actions/order";
 
 const OrderSummary = ({ totalPrice, items }) => {
   const { user } = useUser();
-  const { getToken } = useAuth();
   const dispatch = useDispatch();
-
   const router = useRouter();
 
   const addressList = useSelector((state) => state.address.list);
@@ -31,16 +29,11 @@ const OrderSummary = ({ totalPrice, items }) => {
       if (!user) {
         return toast(vi.messages.loginRequired);
       }
-      const token = await getToken();
-      const { data } = await axios.post(
-        "/api/coupon",
-        { code: couponCodeInput },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setCoupon(data.coupon);
+      const result = await applyCoupon(couponCodeInput);
+      setCoupon(result.coupon);
       toast.success(vi.messages.couponApplied);
     } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error.message);
     }
   };
 
@@ -53,7 +46,6 @@ const OrderSummary = ({ totalPrice, items }) => {
       if (!selectedAddress) {
         return toast("Vui lòng chọn địa chỉ giao hàng");
       }
-      const token = await getToken();
 
       const orderData = {
         addressId: selectedAddress.id,
@@ -65,20 +57,18 @@ const OrderSummary = ({ totalPrice, items }) => {
         orderData.couponCode = coupon.code;
       }
 
-      // Create order
-      const { data } = await axios.post("/api/orders", orderData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const result = await createOrder(orderData);
 
-      if (paymentMethod === "STRIPE") {
-        window.location.href = data.session.url;
+      if (paymentMethod === "STRIPE" && result.session) {
+        window.location.href = result.session.url;
       } else {
-        toast.success(data.message);
+        toast.success(result.message);
         router.push("/orders");
-        dispatch(fetchCart({ getToken }));
+        // Refresh cart (note: may need to adjust this)
+        window.location.reload();
       }
     } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error.message);
     }
   };
 

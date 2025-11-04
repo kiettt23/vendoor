@@ -4,44 +4,29 @@ import { Star } from "lucide-react";
 import React, { useState } from "react";
 import { XIcon } from "lucide-react";
 import toast from "react-hot-toast";
-import { useAuth } from "@clerk/nextjs";
-import axios from "axios";
 import { useDispatch } from "react-redux";
 import { addRating } from "@/lib/features/rating/ratingSlice";
 import { vi } from "@/lib/i18n";
+import { submitRating } from "./actions/rating";
 
 const RatingModal = ({ ratingModal, setRatingModal }) => {
-  const { getToken } = useAuth();
   const dispatch = useDispatch();
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
 
   const handleSubmit = async () => {
-    if (rating < 0 || rating > 5) {
-      return toast("Vui lòng chọn số sao đánh giá");
-    }
-    if (review.length < 5) {
-      return toast("Vui lòng viết nhận xét ngắn");
-    }
     try {
-      const token = await getToken();
-      const { data } = await axios.post(
-        "/api/rating",
-        {
-          productId: ratingModal.productId,
-          orderId: ratingModal.orderId,
-          rating,
-          review,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      dispatch(addRating(data.rating));
-      toast.success(data.message);
+      const result = await submitRating({
+        productId: ratingModal.productId,
+        orderId: ratingModal.orderId,
+        rating,
+        review,
+      });
+      dispatch(addRating(result.rating));
+      toast.success(result.message);
       setRatingModal(null);
     } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error.message);
     }
   };
 
