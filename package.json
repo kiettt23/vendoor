@@ -3,11 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo & start http://localhost:3000",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "seed": "node prisma/seed.js"
+    "lint": "eslint"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -39,7 +38,6 @@
     "@types/ws": "^8.18.1",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
-    "open-cli": "^8.0.0",
     "prisma": "^6.16.3",
     "tailwindcss": "^4.1.13"
   }

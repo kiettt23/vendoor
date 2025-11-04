@@ -1,5 +1,5 @@
 "use client";
-import StoreInfo from "../_components/StoreInfo";
+import StoreInfo from "../../_components/StoreInfo";
 import { vi } from "@/lib/i18n";
 import { useAuth } from "@clerk/nextjs";
 import toast from "react-hot-toast";
