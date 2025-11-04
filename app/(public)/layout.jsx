@@ -4,7 +4,6 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "@/lib/features/product/productSlice";
 import { useUser, useAuth } from "@clerk/nextjs";
 import { fetchCart, uploadCart } from "@/lib/features/cart/cartSlice";
 import { fetchAddress } from "@/lib/features/address/addressSlice";
@@ -17,10 +16,8 @@ export default function PublicLayout({ children }) {
 
   const { cartItems } = useSelector((state) => state.cart);
 
-  useEffect(() => {
-    dispatch(fetchProducts({}));
-  }, []);
-
+  // ✅ Removed: fetchProducts - now using Server Components
+  
   useEffect(() => {
     if (user) {
       dispatch(fetchCart({ getToken }));
