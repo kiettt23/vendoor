@@ -4,15 +4,13 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import Loading from "@/components/ui/Loading";
 import { useUser } from "@clerk/nextjs";
-import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { vi } from "@/lib/i18n";
+import { createStore, getSellerStatus } from "./actions";
 
 export default function CreateStore() {
   const { user } = useUser();
   const router = useRouter();
-  const { getToken } = useAuth();
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
@@ -33,15 +31,12 @@ export default function CreateStore() {
   };
 
   const fetchSellerStatus = async () => {
-    const token = await getToken();
     try {
-      const { data } = await axios.get("/api/store/create", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (["approved", "rejected", "pending"].includes(data.status)) {
-        setStatus(data.status);
+      const { status } = await getSellerStatus();
+      if (["approved", "rejected", "pending"].includes(status)) {
+        setStatus(status);
         setAlreadySubmitted(true);
-        switch (data.status) {
+        switch (status) {
           case "approved":
             setMessage(
               "Cửa hàng của bạn đã được duyệt. Bạn có thể thêm sản phẩm từ bảng điều khiển"
@@ -68,7 +63,7 @@ export default function CreateStore() {
         setAlreadySubmitted(false);
       }
     } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error.message);
     }
     setLoading(false);
   };
@@ -79,7 +74,6 @@ export default function CreateStore() {
       return toast(vi.messages.loginRequired);
     }
     try {
-      const token = await getToken();
       const formData = new FormData();
       formData.append("name", storeInfo.name);
       formData.append("description", storeInfo.description);
@@ -89,15 +83,11 @@ export default function CreateStore() {
       formData.append("address", storeInfo.address);
       formData.append("image", storeInfo.image);
 
-      const { data } = await axios.post("/api/store/create", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      toast.success(data.message);
+      const result = await createStore(formData);
+      toast.success(result.message);
       await fetchSellerStatus();
     } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error.message);
     }
   };
 

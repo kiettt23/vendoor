@@ -6,23 +6,18 @@ import { ArrowRightIcon } from "lucide-react";
 import AdminNavbar from "./AdminNavbar";
 import AdminSidebar from "./AdminSidebar";
 import { vi } from "@/lib/i18n";
-import { useUser, useAuth } from "@clerk/nextjs";
-import axios from "axios";
+import { useUser } from "@clerk/nextjs";
+import { checkIsAdmin } from "./actions";
 
 const AdminLayout = ({ children }) => {
   const { user } = useUser();
-  const { getToken } = useAuth();
-
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchIsAdmin = async () => {
     try {
-      const token = await getToken();
-      const { data } = await axios.get("/api/admin/is-admin", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setIsAdmin(data.isAdmin);
+      const { isAdmin } = await checkIsAdmin();
+      setIsAdmin(isAdmin);
     } catch (error) {
       // Error fetching admin status
     } finally {

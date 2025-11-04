@@ -6,23 +6,18 @@ import { ArrowRightIcon } from "lucide-react";
 import StoreNavbar from "./StoreNavbar";
 import StoreSidebar from "./StoreSidebar";
 import { vi } from "@/lib/i18n";
-import { useAuth } from "@clerk/nextjs";
-import axios from "axios";
+import { checkIsSeller } from "./actions";
 
 const StoreLayout = ({ children }) => {
-  const { getToken } = useAuth();
   const [isSeller, setIsSeller] = useState(false);
   const [loading, setLoading] = useState(true);
   const [storeInfo, setStoreInfo] = useState(null);
 
   const fetchIsSeller = async () => {
     try {
-      const token = await getToken();
-      const { data } = await axios.get("/api/store/is-seller", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setIsSeller(data.isSeller);
-      setStoreInfo(data.storeInfo);
+      const { isSeller, storeInfo } = await checkIsSeller();
+      setIsSeller(isSeller);
+      setStoreInfo(storeInfo);
     } catch (error) {
       // Error fetching seller status
     } finally {

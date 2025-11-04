@@ -1,10 +1,9 @@
 "use client";
 import { getAllCategoryNamesEn } from "@/configs/categories";
-import { useAuth } from "@clerk/nextjs";
-import axios from "axios";
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
+import { createProduct } from "./actions";
 
 export default function StoreAddProduct() {
   const categories = getAllCategoryNamesEn();
@@ -20,8 +19,6 @@ export default function StoreAddProduct() {
   const [loading, setLoading] = useState(false);
   const [aiUsed, setAiUsed] = useState(false);
 
-  const { getToken } = useAuth();
-
   const onChangeHandler = (e) => {
     setProductInfo({ ...productInfo, [e.target.name]: e.target.value });
   };
@@ -29,25 +26,24 @@ export default function StoreAddProduct() {
   const handleImageUpload = async (key, file) => {
     setImages((prev) => ({ ...prev, [key]: file }));
 
+    // AI analysis for first image only
     if (key === "1" && file && !aiUsed) {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = async () => {
         const base64String = reader.result.split(",")[1];
         const mimeType = file.type;
-        const token = await getToken();
 
         try {
           await toast.promise(
-            axios.post(
-              "/api/store/ai",
-              { base64Image: base64String, mimeType },
-              { headers: { Authorization: `Bearer ${token}` } }
-            ),
+            (async () => {
+              // Call AI analysis Server Action
+              const { analyzeProductImage } = await import("./actions");
+              return await analyzeProductImage(base64String, mimeType);
+            })(),
             {
               loading: "🤖 Đang phân tích hình ảnh...",
-              success: (res) => {
-                const data = res.data;
+              success: (data) => {
                 if (data.name && data.description) {
                   setProductInfo((prev) => ({
                     ...prev,
@@ -59,7 +55,7 @@ export default function StoreAddProduct() {
                 }
                 return "💀 AI không thể phân tích hình ảnh.";
               },
-              error: (err) => err?.response?.data?.error || err.message,
+              error: (err) => err.message || "Lỗi phân tích AI",
             }
           );
         } catch (error) {
@@ -90,11 +86,8 @@ export default function StoreAddProduct() {
         images[key] && formData.append("images", images[key]);
       });
 
-      const token = await getToken();
-      const { data } = await axios.post("/api/store/product", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success(data.message);
+      const result = await createProduct(formData);
+      toast.success(result.message);
 
       // Reset form
       setProductInfo({
@@ -108,7 +101,7 @@ export default function StoreAddProduct() {
       // Reset images
       setImages({ 1: null, 2: null, 3: null, 4: null });
     } catch (error) {
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }

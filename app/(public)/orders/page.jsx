@@ -2,31 +2,27 @@
 import PageTitle from "@/components/ui/PageTitle";
 import { useEffect, useState } from "react";
 import OrderItem from "@/components/features/OrderItem";
-import { useAuth, useUser } from "@clerk/nextjs";
-import axios from "axios";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/ui/Loading";
 import toast from "react-hot-toast";
 import { vi } from "@/lib/i18n";
+import { getUserOrders } from "./actions";
 
 export default function Orders() {
-  const { getToken } = useAuth();
   const { user, isLoaded } = useUser();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  const router = useRouter;
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const token = await getToken();
-        const { data } = await axios.get("/api/orders", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setOrders(data.orders);
+        const data = await getUserOrders();
+        setOrders(data);
         setLoading(false);
       } catch (error) {
-        toast.error(error?.response?.data?.error || error.message);
+        toast.error(error.message);
       }
     };
     if (isLoaded) {
@@ -36,7 +32,7 @@ export default function Orders() {
         router.push("/");
       }
     }
-  }, [isLoaded, user, getToken, router]);
+  }, [isLoaded, user, router]);
 
   if (!isLoaded || loading) {
     return <Loading></Loading>;
