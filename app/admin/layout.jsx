@@ -1,4 +1,4 @@
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout from "./_components/AdminLayout";
 import { SignedIn, SignedOut, SignIn } from "@clerk/nextjs";
 
 export const metadata = {

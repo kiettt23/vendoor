@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import Loading from "../ui/Loading";
+import Loading from "@/components/ui/Loading";
 import Link from "next/link";
 import { ArrowRightIcon } from "lucide-react";
 import AdminNavbar from "./AdminNavbar";

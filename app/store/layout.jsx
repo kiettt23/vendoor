@@ -1,4 +1,4 @@
-import StoreLayout from "@/components/store/StoreLayout";
+import StoreLayout from "./_components/StoreLayout";
 import { SignedIn, SignedOut, SignIn } from "@clerk/nextjs";
 
 export const metadata = {
