@@ -11,17 +11,18 @@ export default async function Cart() {
     return <CartClient products={[]} />;
   }
 
-  // ✅ Fetch user's cart
-  const cart = await prisma.cart.findUnique({
-    where: { userId },
+  // ✅ Fetch user's cart from User.cart (Json field)
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { cart: true },
   });
 
-  if (!cart || !cart.items || Object.keys(cart.items).length === 0) {
+  if (!user || !user.cart || Object.keys(user.cart).length === 0) {
     return <CartClient products={[]} />;
   }
 
   // ✅ Get product IDs from cart
-  const productIds = Object.keys(cart.items);
+  const productIds = Object.keys(user.cart);
 
   // ✅ Fetch products in cart
   const products = await prisma.product.findMany({
