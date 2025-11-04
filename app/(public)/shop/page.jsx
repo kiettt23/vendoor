@@ -1,52 +1,42 @@
-"use client";
-import { Suspense } from "react";
-import ProductCard from "@/components/features/ProductCard";
-import { MoveLeftIcon } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useSelector } from "react-redux";
-import { vi } from "@/lib/i18n";
+import prisma from "@/lib/prisma";
+import ShopClient from "./ShopClient";
 
-function ShopContent() {
-  // get query params ?search=abc
-  const searchParams = useSearchParams();
-  const search = searchParams.get("search");
-  const router = useRouter();
+// ✅ Server Component - Fetch data directly from DB
+export default async function Shop({ searchParams }) {
+  // ✅ Await searchParams (Next.js 15 requirement)
+  const params = await searchParams;
+  const search = params?.search || "";
 
-  const products = useSelector((state) => state.product.list);
+  // ✅ Fetch products directly from database
+  const products = await prisma.product.findMany({
+    where: {
+      inStock: true,
+      // Filter active stores only
+      store: {
+        isActive: true,
+      },
+    },
+    include: {
+      rating: {
+        select: {
+          rating: true,
+          review: true,
+          createdAt: true,
+          user: {
+            select: {
+              name: true,
+              image: true,
+            },
+          },
+        },
+      },
+      store: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
-  const filteredProducts = search
-    ? products.filter((product) =>
-        product.name.toLowerCase().includes(search.toLowerCase())
-      )
-    : products;
-
-  return (
-    <div className="min-h-[70vh] mx-6">
-      <div className=" max-w-7xl mx-auto">
-        <h1
-          onClick={() => router.push("/shop")}
-          className="text-2xl text-slate-500 my-6 flex items-center gap-2 cursor-pointer"
-        >
-          {search && <MoveLeftIcon size={20} />}
-          {vi.categories.all}{" "}
-          <span className="text-slate-700 font-medium">
-            {vi.product.products}
-          </span>
-        </h1>
-        <div className="grid grid-cols-2 sm:flex flex-wrap gap-6 xl:gap-12 mx-auto mb-32">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function Shop() {
-  return (
-    <Suspense fallback={<div>{vi.common.loading}</div>}>
-      <ShopContent />
-    </Suspense>
-  );
+  // ✅ Pass data to Client Component
+  return <ShopClient products={products} initialSearch={search} />;
 }
