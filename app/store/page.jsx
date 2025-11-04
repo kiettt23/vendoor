@@ -2,7 +2,7 @@ import { vi, formatPrice } from "@/lib/i18n";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import StoreDashboardClient from "./StoreDashboardClient";
+import StoreDashboardClient from "./_components/StoreDashboardClient";
 
 // ✅ Server Component - Fetch store dashboard data
 export default async function Dashboard() {

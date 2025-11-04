@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import ShopClient from "./ShopClient";
+import ShopClient from "./_components/ShopClient";
 
 // ✅ Server Component - Fetch data directly from DB
 export default async function Shop({ searchParams }) {

@@ -27,7 +27,8 @@ export default async function AdminDashboard() {
     prisma.store.count(),
   ]);
 
-  const revenue = orders.reduce((total, order) => total + order.totalAmount, 0);
+  // ✅ Calculate revenue from order.total (not totalAmount)
+  const revenue = orders.reduce((total, order) => total + order.total, 0);
 
   const dashboardData = {
     products,

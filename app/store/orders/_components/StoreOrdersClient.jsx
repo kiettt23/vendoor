@@ -73,7 +73,7 @@ export default function StoreOrdersClient({ orders: initialOrders }) {
                   <td className="pl-6 text-purple-600">{index + 1}</td>
                   <td className="px-4 py-3">{order.user?.name}</td>
                   <td className="px-4 py-3 font-medium text-slate-800">
-                    {order.totalAmount}đ
+                    {order.total}đ
                   </td>
                   <td className="px-4 py-3">{order.paymentMethod}</td>
                   <td className="px-4 py-3">

@@ -42,6 +42,7 @@ const Navbar = () => {
             <Link href="/shop">{vi.nav.shop}</Link>
             <Link href="/create-store">{vi.nav.store}</Link>
             <Link href="/pricing">{vi.nav.member}</Link>
+            <Link href="/orders">{vi.nav.orders}</Link>
 
             <form
               onSubmit={handleSearch}
@@ -63,7 +64,6 @@ const Navbar = () => {
               className="relative flex items-center gap-2 text-slate-600"
             >
               <ShoppingCart size={18} />
-              {vi.nav.cart}
               <button className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">
                 {cartCount}
               </button>

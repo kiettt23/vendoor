@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
-import CartClient from "./CartClient";
+import CartClient from "./_components/CartClient";
 
 // ✅ Server Component - Fetch cart products
 export default async function Cart() {

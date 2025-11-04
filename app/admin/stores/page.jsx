@@ -2,7 +2,7 @@ import { vi } from "@/lib/i18n";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
-import StoresClient from "./StoresClient";
+import StoresClient from "./_components/StoresClient";
 
 // ✅ Server Component - Fetch approved stores
 export default async function AdminStores() {

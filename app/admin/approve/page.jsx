@@ -2,7 +2,7 @@ import { vi } from "@/lib/i18n";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
-import ApproveClient from "./ApproveClient";
+import ApproveClient from "./_components/ApproveClient";
 
 // ✅ Server Component - Fetch pending stores
 export default async function AdminApprove() {

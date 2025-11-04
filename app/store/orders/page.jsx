@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import StoreOrdersClient from "./StoreOrdersClient";
+import StoreOrdersClient from "./_components/StoreOrdersClient";
 
 // ✅ Server Component - Fetch store orders
 export default async function StoreOrders() {

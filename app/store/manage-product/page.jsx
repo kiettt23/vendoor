@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import ManageProductsClient from "./ManageProductsClient";
+import ManageProductsClient from "./_components/ManageProductsClient";
 
 // ✅ Server Component - Fetch store products
 export default async function StoreManageProducts() {
