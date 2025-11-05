@@ -3,8 +3,14 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import type { Address, AddressActionResponse, SerializedAddress } from "@/types";
 
-export async function getUserAddresses() {
+/**
+ * Get all addresses của user hiện tại
+ * 
+ * @returns Object chứa array addresses đã serialize
+ */
+export async function getUserAddresses(): Promise<{ addresses: SerializedAddress[] }> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -16,8 +22,8 @@ export async function getUserAddresses() {
       orderBy: { createdAt: "desc" },
     });
 
-    // Serialize for Redux
-    const serializedAddresses = addresses.map((addr) => ({
+    // Serialize for Redux - Convert Date → string
+    const serializedAddresses: SerializedAddress[] = addresses.map((addr) => ({
       ...addr,
       createdAt: addr.createdAt.toISOString(),
     }));
@@ -29,7 +35,15 @@ export async function getUserAddresses() {
   }
 }
 
-export async function addAddress(addressData) {
+/**
+ * Thêm địa chỉ mới
+ * 
+ * @param addressData - Thông tin địa chỉ (không cần id, userId)
+ * @returns Response với newAddress nếu thành công
+ */
+export async function addAddress(
+  addressData: Omit<Address, 'id' | 'userId' | 'createdAt'>
+): Promise<AddressActionResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -90,7 +104,17 @@ export async function addAddress(addressData) {
   }
 }
 
-export async function updateAddress(addressId, addressData) {
+/**
+ * Cập nhật địa chỉ hiện có
+ * 
+ * @param addressId - ID của address cần update
+ * @param addressData - Data mới (không cần id, userId, createdAt)
+ * @returns Response với address đã update
+ */
+export async function updateAddress(
+  addressId: string,
+  addressData: Omit<Address, 'id' | 'userId' | 'createdAt'>
+): Promise<AddressActionResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -163,7 +187,13 @@ export async function updateAddress(addressId, addressData) {
   }
 }
 
-export async function deleteAddress(addressId) {
+/**
+ * Xóa địa chỉ
+ * 
+ * @param addressId - ID của address cần xóa
+ * @returns Response với deletedId nếu thành công
+ */
+export async function deleteAddress(addressId: string): Promise<AddressActionResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
