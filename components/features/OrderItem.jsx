@@ -4,6 +4,7 @@ import { DotIcon } from "lucide-react";
 import { useSelector } from "react-redux";
 import Rating from "@/components/ui/Rating";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import RatingModal from "./RatingModal";
 import { vi, formatPrice, formatDate, getOrderStatusText } from "@/lib/i18n";
 
@@ -53,12 +54,15 @@ const OrderItem = ({ order }) => {
                       />
                     ) : (
                       <button
-                        onClick={() =>
+                        onClick={() => {
+                          if (!item.product || !item.product.id) {
+                            return toast.error("Sản phẩm không tồn tại");
+                          }
                           setRatingModal({
                             orderId: order.id,
                             productId: item.product.id,
-                          })
-                        }
+                          });
+                        }}
                         className={`text-purple-500 hover:bg-purple-50 transition ${
                           order.status !== "DELIVERED" && "hidden"
                         }`}

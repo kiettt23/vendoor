@@ -19,6 +19,7 @@ export async function getUserOrders() {
           include: {
             product: {
               select: {
+                id: true,
                 name: true,
                 images: true,
                 price: true,

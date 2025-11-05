@@ -1,6 +1,6 @@
-import { PlusIcon, SquarePenIcon, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 import React, { useState } from "react";
-import AddressModal from "./AddressModal";
+import AddressManager from "./AddressManager";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -15,11 +15,8 @@ const OrderSummary = ({ totalPrice, items }) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const addressList = useSelector((state) => state.address.list);
-
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [showAddressModal, setShowAddressModal] = useState(false);
   const [couponCodeInput, setCouponCodeInput] = useState("");
   const [coupon, setCoupon] = useState("");
 
@@ -30,10 +27,15 @@ const OrderSummary = ({ totalPrice, items }) => {
         return toast(vi.messages.loginRequired);
       }
       const result = await applyCoupon(couponCodeInput);
+
+      if (!result.success) {
+        return toast.error(result.error);
+      }
+
       setCoupon(result.coupon);
       toast.success(vi.messages.couponApplied);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || "Có lỗi xảy ra");
     }
   };
 
@@ -103,47 +105,12 @@ const OrderSummary = ({ totalPrice, items }) => {
           {vi.payment.stripe}
         </label>
       </div>
-      <div className="my-4 py-4 border-y border-slate-200 text-slate-400">
-        <p>{vi.address.title}</p>
-        {selectedAddress ? (
-          <div className="flex gap-2 items-center">
-            <p>
-              {selectedAddress.name}, {selectedAddress.city},{" "}
-              {selectedAddress.state}, {selectedAddress.zip}
-            </p>
-            <SquarePenIcon
-              onClick={() => setSelectedAddress(null)}
-              className="cursor-pointer"
-              size={18}
-            />
-          </div>
-        ) : (
-          <div>
-            {addressList.length > 0 && (
-              <select
-                className="border border-slate-400 p-2 w-full my-3 outline-none rounded"
-                onChange={(e) =>
-                  setSelectedAddress(addressList[e.target.value])
-                }
-              >
-                <option value="">{vi.address.selectAddress}</option>
-                {addressList.map((address, index) => (
-                  <option key={index} value={index}>
-                    {address.name}, {address.city}, {address.state},{" "}
-                    {address.zip}
-                  </option>
-                ))}
-              </select>
-            )}
-            <button
-              className="flex items-center gap-1 text-slate-600 mt-1"
-              onClick={() => setShowAddressModal(true)}
-            >
-              {vi.address.addAddress} <PlusIcon size={18} />
-            </button>
-          </div>
-        )}
-      </div>
+
+      <AddressManager
+        selectedAddress={selectedAddress}
+        setSelectedAddress={setSelectedAddress}
+      />
+
       <div className="pb-4 border-b border-slate-200">
         <div className="flex justify-between">
           <div className="flex flex-col gap-1 text-slate-400">
@@ -230,10 +197,6 @@ const OrderSummary = ({ totalPrice, items }) => {
       >
         {vi.order.orderPlaced.replace("Đã đặt hàng", "Đặt hàng")}
       </button>
-
-      {showAddressModal && (
-        <AddressModal setShowAddressModal={setShowAddressModal} />
-      )}
     </div>
   );
 };

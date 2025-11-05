@@ -8,11 +8,11 @@ export async function applyCoupon(code) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      throw new Error("Unauthorized: Please sign in");
+      return { success: false, error: "Vui lòng đăng nhập" };
     }
 
     if (!code) {
-      throw new Error("Vui lòng nhập mã giảm giá");
+      return { success: false, error: "Vui lòng nhập mã giảm giá" };
     }
 
     // Find coupon
@@ -21,12 +21,12 @@ export async function applyCoupon(code) {
     });
 
     if (!coupon) {
-      throw new Error("Mã giảm giá không tồn tại");
+      return { success: false, error: "Mã giảm giá không tồn tại" };
     }
 
     // Check expiration
     if (new Date(coupon.expiresAt) < new Date()) {
-      throw new Error("Mã giảm giá đã hết hạn");
+      return { success: false, error: "Mã giảm giá đã hết hạn" };
     }
 
     // Check if public or user-specific
@@ -38,7 +38,10 @@ export async function applyCoupon(code) {
       });
 
       if (!user) {
-        throw new Error("Bạn không đủ điều kiện sử dụng mã này");
+        return {
+          success: false,
+          error: "Bạn không đủ điều kiện sử dụng mã này",
+        };
       }
 
       // Additional checks for forNewUser, forMember can be added here
@@ -50,9 +53,13 @@ export async function applyCoupon(code) {
     };
   } catch (error) {
     console.error("Error applying coupon:", error);
-    throw new Error(
-      error instanceof Error ? error.message : "Không thể áp dụng mã giảm giá"
-    );
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Không thể áp dụng mã giảm giá",
+    };
   }
 }
 
@@ -82,13 +89,20 @@ export async function createOrder(orderData) {
     // Calculate total for each store
     const storeOrders = {};
     for (const item of items) {
+      // Support both item.id and item.productId
+      const productId = item.productId || item.id;
+
+      if (!productId) {
+        throw new Error("Thiếu thông tin sản phẩm trong giỏ hàng");
+      }
+
       const product = await prisma.product.findUnique({
-        where: { id: item.productId },
+        where: { id: productId },
         select: { price: true, storeId: true, inStock: true },
       });
 
       if (!product || !product.inStock) {
-        throw new Error(`Sản phẩm ${item.productId} không còn hàng`);
+        throw new Error(`Sản phẩm không còn hàng`);
       }
 
       if (!storeOrders[product.storeId]) {
@@ -99,7 +113,7 @@ export async function createOrder(orderData) {
       }
 
       storeOrders[product.storeId].items.push({
-        productId: item.productId,
+        productId: productId,
         quantity: item.quantity,
         price: product.price,
       });
@@ -189,6 +203,48 @@ export async function createOrder(orderData) {
     console.error("Error creating order:", error);
     throw new Error(
       error instanceof Error ? error.message : "Không thể đặt hàng"
+    );
+  }
+}
+
+export async function cancelOrder(orderId) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      throw new Error("Unauthorized: Please sign in");
+    }
+
+    // Get order
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order || order.userId !== userId) {
+      throw new Error("Không tìm thấy đơn hàng hoặc bạn không có quyền hủy");
+    }
+
+    // Only allow cancel if order is not shipped
+    if (order.status === "Shipped" || order.status === "Delivered") {
+      throw new Error("Không thể hủy đơn hàng đã giao hoặc đang vận chuyển");
+    }
+
+    // Update order status
+    const canceledOrder = await prisma.order.update({
+      where: { id: orderId },
+      data: { status: "Cancelled" },
+    });
+
+    revalidatePath("/orders");
+
+    return {
+      success: true,
+      message: "Đã hủy đơn hàng thành công!",
+      order: canceledOrder,
+    };
+  } catch (error) {
+    console.error("Error canceling order:", error);
+    throw new Error(
+      error instanceof Error ? error.message : "Không thể hủy đơn hàng"
     );
   }
 }

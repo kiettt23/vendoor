@@ -4,11 +4,36 @@ import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
+export async function getUserAddresses() {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { addresses: [] };
+    }
+
+    const addresses = await prisma.address.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    // Serialize for Redux
+    const serializedAddresses = addresses.map((addr) => ({
+      ...addr,
+      createdAt: addr.createdAt.toISOString(),
+    }));
+
+    return { addresses: serializedAddresses };
+  } catch (error) {
+    console.error("Get addresses error:", error);
+    return { addresses: [] };
+  }
+}
+
 export async function addAddress(addressData) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      throw new Error("Unauthorized: Please sign in");
+      return { success: false, error: "Vui lòng đăng nhập" };
     }
 
     const { name, email, street, city, state, zip, country, phone } =
@@ -25,7 +50,7 @@ export async function addAddress(addressData) {
       !country ||
       !phone
     ) {
-      throw new Error("Vui lòng điền đầy đủ thông tin");
+      return { success: false, error: "Vui lòng điền đầy đủ thông tin" };
     }
 
     // Create address
@@ -45,15 +70,135 @@ export async function addAddress(addressData) {
 
     revalidatePath("/cart");
 
+    // Serialize for Redux
+    const serializedAddress = {
+      ...newAddress,
+      createdAt: newAddress.createdAt.toISOString(),
+    };
+
     return {
       success: true,
       message: "Đã thêm địa chỉ thành công!",
-      newAddress,
+      newAddress: serializedAddress,
     };
   } catch (error) {
     console.error("Error adding address:", error);
-    throw new Error(
-      error instanceof Error ? error.message : "Không thể thêm địa chỉ"
-    );
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Không thể thêm địa chỉ",
+    };
+  }
+}
+
+export async function updateAddress(addressId, addressData) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: "Vui lòng đăng nhập" };
+    }
+
+    const { name, email, street, city, state, zip, country, phone } =
+      addressData;
+
+    // Validate required fields
+    if (
+      !name ||
+      !email ||
+      !street ||
+      !city ||
+      !state ||
+      !zip ||
+      !country ||
+      !phone
+    ) {
+      return { success: false, error: "Vui lòng điền đầy đủ thông tin" };
+    }
+
+    // Check ownership
+    const existingAddress = await prisma.address.findUnique({
+      where: { id: addressId },
+    });
+
+    if (!existingAddress || existingAddress.userId !== userId) {
+      return {
+        success: false,
+        error: "Không tìm thấy địa chỉ hoặc bạn không có quyền chỉnh sửa",
+      };
+    }
+
+    // Update address
+    const updatedAddress = await prisma.address.update({
+      where: { id: addressId },
+      data: {
+        name,
+        email,
+        street,
+        city,
+        state,
+        zip,
+        country,
+        phone,
+      },
+    });
+
+    revalidatePath("/cart");
+
+    const serializedAddress = {
+      ...updatedAddress,
+      createdAt: updatedAddress.createdAt.toISOString(),
+    };
+
+    return {
+      success: true,
+      message: "Đã cập nhật địa chỉ thành công!",
+      address: serializedAddress,
+    };
+  } catch (error) {
+    console.error("Error updating address:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Không thể cập nhật địa chỉ",
+    };
+  }
+}
+
+export async function deleteAddress(addressId) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: "Vui lòng đăng nhập" };
+    }
+
+    // Check ownership
+    const existingAddress = await prisma.address.findUnique({
+      where: { id: addressId },
+    });
+
+    if (!existingAddress || existingAddress.userId !== userId) {
+      return {
+        success: false,
+        error: "Không tìm thấy địa chỉ hoặc bạn không có quyền xóa",
+      };
+    }
+
+    // Delete address
+    await prisma.address.delete({
+      where: { id: addressId },
+    });
+
+    revalidatePath("/cart");
+
+    return {
+      success: true,
+      message: "Đã xóa địa chỉ thành công!",
+      deletedId: addressId,
+    };
+  } catch (error) {
+    console.error("Error deleting address:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Không thể xóa địa chỉ",
+    };
   }
 }

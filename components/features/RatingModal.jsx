@@ -16,17 +16,30 @@ const RatingModal = ({ ratingModal, setRatingModal }) => {
 
   const handleSubmit = async () => {
     try {
+      // Debug
+      console.log("Rating data:", {
+        productId: ratingModal.productId,
+        orderId: ratingModal.orderId,
+        rating,
+        review,
+      });
+
       const result = await submitRating({
         productId: ratingModal.productId,
         orderId: ratingModal.orderId,
         rating,
         review,
       });
+
+      if (!result.success) {
+        return toast.error(result.error);
+      }
+
       dispatch(addRating(result.rating));
       toast.success(result.message);
       setRatingModal(null);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || "Có lỗi xảy ra");
     }
   };
 

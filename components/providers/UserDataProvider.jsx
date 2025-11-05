@@ -3,8 +3,10 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useUser, useAuth } from "@clerk/nextjs";
 import { fetchCart, uploadCart } from "@/lib/features/cart/cartSlice";
-import { fetchAddress } from "@/lib/features/address/addressSlice";
-import { fetchUserRatings } from "@/lib/features/rating/ratingSlice";
+import { setAddresses } from "@/lib/features/address/addressSlice";
+import { setRatings } from "@/lib/features/rating/ratingSlice";
+import { getUserAddresses } from "@/components/features/actions/address";
+import { getUserRatings } from "@/components/features/actions/rating";
 
 export default function UserDataProvider({ children }) {
   const dispatch = useDispatch();
@@ -15,8 +17,16 @@ export default function UserDataProvider({ children }) {
   useEffect(() => {
     if (user) {
       dispatch(fetchCart({ getToken }));
-      dispatch(fetchAddress({ getToken }));
-      dispatch(fetchUserRatings({ getToken }));
+
+      // Fetch addresses
+      getUserAddresses().then(({ addresses }) => {
+        dispatch(setAddresses(addresses));
+      });
+
+      // Fetch ratings
+      getUserRatings().then(({ ratings }) => {
+        dispatch(setRatings(ratings));
+      });
     }
   }, [user]);
 
