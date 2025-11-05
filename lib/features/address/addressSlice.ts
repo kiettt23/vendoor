@@ -1,15 +1,20 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { SerializedAddress } from "@/types";
+
+interface AddressState {
+  list: SerializedAddress[];
+}
 
 const addressSlice = createSlice({
   name: "address",
   initialState: {
     list: [],
-  },
+  } as AddressState,
   reducers: {
-    setAddresses: (state, action) => {
+    setAddresses: (state, action: PayloadAction<SerializedAddress[]>) => {
       state.list = action.payload;
     },
-    addAddress: (state, action) => {
+    addAddress: (state, action: PayloadAction<SerializedAddress>) => {
       // Serialize the address before adding to state
       const serializedAddress = {
         ...action.payload,

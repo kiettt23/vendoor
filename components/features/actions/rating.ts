@@ -5,12 +5,9 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import type { Rating, RatingActionResponse, SerializedRating } from "@/types";
 
-/**
- * Get all ratings của user hiện tại
- * 
- * @returns Object chứa array ratings đã serialize
- */
-export async function getUserRatings(): Promise<{ ratings: SerializedRating[] }> {
+export async function getUserRatings(): Promise<{
+  ratings: SerializedRating[];
+}> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -52,12 +49,6 @@ export async function getUserRatings(): Promise<{ ratings: SerializedRating[] }>
   }
 }
 
-/**
- * Submit rating cho sản phẩm
- * 
- * @param ratingData - Object chứa productId, orderId, rating (1-5), review
- * @returns Response với rating mới nếu thành công
- */
 export async function submitRating(ratingData: {
   productId: string;
   orderId: string;
@@ -148,13 +139,6 @@ export async function submitRating(ratingData: {
   }
 }
 
-/**
- * Update rating hiện có
- * 
- * @param ratingId - ID của rating cần update
- * @param updateData - Data mới (rating và/hoặc review)
- * @returns Response với rating đã update
- */
 export async function updateRating(
   ratingId: string,
   updateData: {
@@ -236,12 +220,6 @@ export async function updateRating(
   }
 }
 
-/**
- * Xóa rating
- * 
- * @param ratingId - ID của rating cần xóa
- * @returns Response xác nhận xóa thành công
- */
 export async function deleteRating(
   ratingId: string
 ): Promise<RatingActionResponse> {

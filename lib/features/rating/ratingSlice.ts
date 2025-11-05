@@ -1,15 +1,20 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { SerializedRating } from "@/types";
+
+interface RatingState {
+  ratings: SerializedRating[];
+}
 
 const ratingSlice = createSlice({
   name: "rating",
   initialState: {
     ratings: [],
-  },
+  } as RatingState,
   reducers: {
-    setRatings: (state, action) => {
+    setRatings: (state, action: PayloadAction<SerializedRating[]>) => {
       state.ratings = action.payload;
     },
-    addRating: (state, action) => {
+    addRating: (state, action: PayloadAction<SerializedRating>) => {
       // Serialize the rating before adding to state
       const serializedRating = {
         ...action.payload,

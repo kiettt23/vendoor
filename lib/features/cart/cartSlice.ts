@@ -1,16 +1,20 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
-import { act } from "react";
 
-let debounceTimer = null;
+interface CartState {
+  total: number;
+  cartItems: Record<string, number>; // productId -> quantity
+}
+
+let debounceTimer: NodeJS.Timeout | null = null;
 
 export const uploadCart = createAsyncThunk(
   "cart/uploadCart",
-  async ({ getToken }, thunkAPI) => {
+  async ({ getToken }: { getToken: () => Promise<string | null> }, thunkAPI) => {
     try {
-      clearTimeout(debounceTimer);
+      clearTimeout(debounceTimer as NodeJS.Timeout);
       debounceTimer = setTimeout(async () => {
-        const { cartItems } = thunkAPI.getState().cart;
+        const { cartItems } = (thunkAPI.getState() as any).cart;
         const token = await getToken();
         await axios.post(
           "/api/cart",
@@ -18,7 +22,7 @@ export const uploadCart = createAsyncThunk(
           { headers: { Authorization: `Bearer ${token}` } }
         );
       }, 1000);
-    } catch (error) {
+    } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -26,14 +30,14 @@ export const uploadCart = createAsyncThunk(
 
 export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
-  async ({ getToken }, thunkAPI) => {
+  async ({ getToken }: { getToken: () => Promise<string | null> }, thunkAPI) => {
     try {
       const token = await getToken();
       const { data } = await axios.get("/api/cart", {
         headers: { Authorization: `Bearer ${token}` },
       });
       return data;
-    } catch (error) {
+    } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
@@ -44,9 +48,9 @@ const cartSlice = createSlice({
   initialState: {
     total: 0,
     cartItems: {},
-  },
+  } as CartState,
   reducers: {
-    addToCart: (state, action) => {
+    addToCart: (state, action: PayloadAction<{ productId: string }>) => {
       const { productId } = action.payload;
       if (state.cartItems[productId]) {
         state.cartItems[productId]++;
@@ -55,7 +59,7 @@ const cartSlice = createSlice({
       }
       state.total += 1;
     },
-    removeFromCart: (state, action) => {
+    removeFromCart: (state, action: PayloadAction<{ productId: string }>) => {
       const { productId } = action.payload;
       if (state.cartItems[productId]) {
         state.cartItems[productId]--;
@@ -65,7 +69,7 @@ const cartSlice = createSlice({
       }
       state.total -= 1;
     },
-    deleteItemFromCart: (state, action) => {
+    deleteItemFromCart: (state, action: PayloadAction<{ productId: string }>) => {
       const { productId } = action.payload;
       state.total -= state.cartItems[productId]
         ? state.cartItems[productId]
@@ -80,8 +84,8 @@ const cartSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(fetchCart.fulfilled, (state, action) => {
       state.cartItems = action.payload.cart;
-      state.total = Object.values(action.payload.cart).reduce(
-        (acc, item) => acc + item,
+      state.total = Object.values(action.payload.cart as Record<string, number>).reduce(
+        (acc: number, item: number) => acc + item,
         0
       );
     });
