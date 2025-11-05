@@ -1,8 +1,8 @@
-import BestSelling from "@/components/features/BestSelling";
+import BestSelling from "@/components/features/product/BestSelling";
 import Hero from "@/components/layout/Hero";
-import Newsletter from "@/components/features/Newsletter";
-import OurSpec from "@/components/features/OurSpec";
-import LatestProducts from "@/components/features/LatestProducts";
+import Newsletter from "@/components/features/marketing/Newsletter";
+import OurSpec from "@/components/features/marketing/OurSpec";
+import LatestProducts from "@/components/features/product/LatestProducts";
 import prisma from "@/lib/prisma";
 
 // ✅ Server Component - Fetch products for homepage

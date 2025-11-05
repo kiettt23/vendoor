@@ -2,27 +2,41 @@
 import StoreInfo from "../../_components/StoreInfo";
 import { vi } from "@/lib/i18n";
 import toast from "react-hot-toast";
-import { approveStore, rejectStore } from "../actions";
+import { approveStore, rejectStore } from "@/lib/actions/admin/store.action";
 
-export default function ApproveClient({ stores: initialStores }) {
-  // ✅ NO MORE: useAuth, axios, getToken
-  // Server Actions handle auth internally
+interface Store {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  contact: string;
+  address: string;
+  description: string;
+  image?: string;
+}
 
-  const handleApprove = async (storeId) => {
+interface ApproveClientProps {
+  stores: Store[];
+}
+
+export default function ApproveClient({
+  stores: initialStores,
+}: ApproveClientProps) {
+  const handleApprove = async (storeId: string) => {
     try {
       const result = await approveStore(storeId);
       toast.success(result.message);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error instanceof Error ? error.message : "Có lỗi xảy ra");
     }
   };
 
-  const handleReject = async (storeId) => {
+  const handleReject = async (storeId: string) => {
     try {
       const result = await rejectStore(storeId);
       toast.success(result.message);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error instanceof Error ? error.message : "Có lỗi xảy ra");
     }
   };
 

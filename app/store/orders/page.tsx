@@ -49,6 +49,10 @@ export default async function StoreOrders() {
   const serializedOrders = orders.map((order) => ({
     ...order,
     createdAt: order.createdAt.toISOString(),
+    address: {
+      ...order.address,
+      createdAt: order.address.createdAt.toISOString(),
+    },
   }));
 
   return <StoreOrdersClient orders={serializedOrders} />;

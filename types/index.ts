@@ -214,8 +214,8 @@ export interface AddressActionResponse extends ActionResponse {
  * Response cho Rating actions
  */
 export interface RatingActionResponse extends ActionResponse {
-  rating?: Rating;
-  ratings?: Rating[];
+  rating?: SerializedRating;
+  ratings?: SerializedRating[];
   deletedId?: string;
 }
 

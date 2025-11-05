@@ -1,101 +1,66 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import Loading from "@/components/ui/Loading";
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import { vi } from "@/lib/i18n";
-import { createStore, getSellerStatus } from "./actions";
+import { createStore } from "@/lib/actions/user/create-store.action";
+import { useSellerStatus } from "@/lib/hooks/useSellerStatus";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
+import { storeSchema, type StoreFormData } from "@/lib/validations";
 
 export default function CreateStore() {
   const { user } = useUser();
-  const router = useRouter();
-  const [alreadySubmitted, setAlreadySubmitted] = useState(false);
-  const [status, setStatus] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const { alreadySubmitted, status, loading, message, fetchStatus } =
+    useSellerStatus();
 
-  const [storeInfo, setStoreInfo] = useState({
-    name: "",
-    username: "",
-    description: "",
-    email: "",
-    contact: "",
-    address: "",
-    image: "",
+  const form = useForm<StoreFormData>({
+    resolver: zodResolver(storeSchema),
+    defaultValues: {
+      name: "",
+      username: "",
+      description: "",
+      email: "",
+      contact: "",
+      address: "",
+    },
   });
 
-  const onChangeHandler = (e) => {
-    setStoreInfo({ ...storeInfo, [e.target.name]: e.target.value });
-  };
-
-  const fetchSellerStatus = async () => {
-    try {
-      const { status } = await getSellerStatus();
-      if (["approved", "rejected", "pending"].includes(status)) {
-        setStatus(status);
-        setAlreadySubmitted(true);
-        switch (status) {
-          case "approved":
-            setMessage(
-              "Cửa hàng của bạn đã được duyệt. Bạn có thể thêm sản phẩm từ bảng điều khiển"
-            );
-            setTimeout(() => {
-              router.push("/store");
-            }, 5000);
-            break;
-          case "rejected":
-            setMessage(
-              "Yêu cầu tạo cửa hàng của bạn đã bị từ chối. Vui lòng liên hệ admin để biết thêm chi tiết"
-            );
-            break;
-          case "pending":
-            setMessage(
-              "Yêu cầu tạo cửa hàng đang chờ duyệt. Vui lòng đợi admin phê duyệt"
-            );
-            break;
-
-          default:
-            break;
-        }
-      } else {
-        setAlreadySubmitted(false);
-      }
-    } catch (error) {
-      toast.error(error.message);
+  const onSubmit = async (data: StoreFormData) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("description", data.description || "");
+    formData.append("username", data.username);
+    formData.append("email", data.email);
+    formData.append("contact", data.contact);
+    formData.append("address", data.address);
+    if (data.image) {
+      formData.append("image", data.image);
     }
-    setLoading(false);
-  };
 
-  const onSubmitHandler = async (e) => {
-    e.preventDefault();
-    if (!user) {
-      return toast(vi.messages.loginRequired);
-    }
-    try {
-      const formData = new FormData();
-      formData.append("name", storeInfo.name);
-      formData.append("description", storeInfo.description);
-      formData.append("username", storeInfo.username);
-      formData.append("email", storeInfo.email);
-      formData.append("contact", storeInfo.contact);
-      formData.append("address", storeInfo.address);
-      formData.append("image", storeInfo.image);
-
-      const result = await createStore(formData);
-      toast.success(result.message);
-      await fetchSellerStatus();
-    } catch (error) {
-      toast.error(error.message);
-    }
+    const result = await createStore(formData);
+    toast.success(result.message);
+    await fetchStatus();
   };
 
   useEffect(() => {
     if (user) {
-      fetchSellerStatus();
+      fetchStatus();
     }
-  }, [user]);
+  }, [user, fetchStatus]);
 
   if (!user) {
     return (
@@ -107,130 +72,153 @@ export default function CreateStore() {
     );
   }
 
-  return !loading ? (
-    <>
-      {!alreadySubmitted ? (
-        <div className="mx-6 min-h-[70vh] my-16">
-          <form
-            onSubmit={(e) =>
-              toast.promise(onSubmitHandler(e), {
-                loading: "Đang gửi thông tin...",
-              })
-            }
-            className="max-w-7xl mx-auto flex flex-col items-start gap-3 text-slate-500"
-          >
-            {/* Title */}
-            <div>
-              <h1 className="text-3xl ">{vi.store.createStore}</h1>
-              <p className="max-w-lg">
-                Để trở thành người bán trên Vendoor, gửi thông tin cửa hàng để
-                xét duyệt. Cửa hàng sẽ được kích hoạt sau khi admin xác minh.
-              </p>
-            </div>
+  if (loading) return <Loading />;
 
-            <label className="mt-10 cursor-pointer">
-              {vi.store.storeLogo}
+  if (alreadySubmitted) {
+    return (
+      <div className="min-h-[80vh] flex flex-col items-center justify-center">
+        <p className="sm:text-2xl lg:text-3xl mx-5 font-semibold text-slate-500 text-center max-w-2xl">
+          {message}
+        </p>
+        {status === "approved" && (
+          <p className="mt-5 text-slate-400">
+            Chuyển đến bảng điều khiển trong{" "}
+            <span className="font-semibold">5 giây</span>
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-6 min-h-[70vh] my-16">
+      <form
+        onSubmit={form.handleSubmit((data) =>
+          toast.promise(onSubmit(data), {
+            loading: "Đang gửi thông tin...",
+          })
+        )}
+        className="max-w-7xl mx-auto"
+      >
+        <FieldSet>
+          <div className="mb-6">
+            <h1 className="text-3xl text-slate-500">{vi.store.createStore}</h1>
+            <p className="max-w-lg text-slate-500 mt-2">
+              Để trở thành người bán trên Vendoor, gửi thông tin cửa hàng để xét
+              duyệt. Cửa hàng sẽ được kích hoạt sau khi admin xác minh.
+            </p>
+          </div>
+
+          <Field className="mb-6">
+            <FieldLabel>{vi.store.storeLogo}</FieldLabel>
+            <label className="cursor-pointer block">
               <Image
-                src={
-                  storeInfo.image
-                    ? URL.createObjectURL(storeInfo.image)
-                    : "/images/upload_area.svg"
-                }
+                src={imagePreview || "/images/upload_area.svg"}
                 className="rounded-lg mt-2 h-16 w-auto"
-                alt=""
+                alt="Store logo preview"
                 width={150}
                 height={100}
               />
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) =>
-                  setStoreInfo({ ...storeInfo, image: e.target.files[0] })
-                }
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    form.setValue("image", file);
+                    setImagePreview(URL.createObjectURL(file));
+                  }
+                }}
                 hidden
               />
             </label>
+          </Field>
 
-            <p>{vi.store.storeUsername}</p>
-            <input
-              name="username"
-              onChange={onChangeHandler}
-              value={storeInfo.username}
-              type="text"
-              placeholder="Nhập tên định danh cửa hàng"
-              className="border border-slate-300 outline-slate-400 w-full max-w-lg p-2 rounded"
-            />
+          <FieldGroup className="max-w-lg space-y-4">
+            <Field data-invalid={!!form.formState.errors.username}>
+              <FieldLabel htmlFor="username">
+                {vi.store.storeUsername}
+              </FieldLabel>
+              <Input
+                id="username"
+                placeholder="Nhập tên định danh cửa hàng"
+                aria-invalid={!!form.formState.errors.username}
+                {...form.register("username")}
+              />
+              <FieldError errors={[form.formState.errors.username]} />
+            </Field>
 
-            <p>{vi.store.storeName}</p>
-            <input
-              name="name"
-              onChange={onChangeHandler}
-              value={storeInfo.name}
-              type="text"
-              placeholder="Nhập tên cửa hàng"
-              className="border border-slate-300 outline-slate-400 w-full max-w-lg p-2 rounded"
-            />
+            <Field data-invalid={!!form.formState.errors.name}>
+              <FieldLabel htmlFor="name">{vi.store.storeName}</FieldLabel>
+              <Input
+                id="name"
+                placeholder="Nhập tên cửa hàng"
+                aria-invalid={!!form.formState.errors.name}
+                {...form.register("name")}
+              />
+              <FieldError errors={[form.formState.errors.name]} />
+            </Field>
 
-            <p>{vi.store.storeDescription}</p>
-            <textarea
-              name="description"
-              onChange={onChangeHandler}
-              value={storeInfo.description}
-              rows={5}
-              placeholder="Nhập mô tả cửa hàng"
-              className="border border-slate-300 outline-slate-400 w-full max-w-lg p-2 rounded resize-none"
-            />
+            <Field data-invalid={!!form.formState.errors.description}>
+              <FieldLabel htmlFor="description">
+                {vi.store.storeDescription}
+              </FieldLabel>
+              <Textarea
+                id="description"
+                rows={5}
+                placeholder="Nhập mô tả cửa hàng"
+                aria-invalid={!!form.formState.errors.description}
+                {...form.register("description")}
+              />
+              <FieldError errors={[form.formState.errors.description]} />
+            </Field>
 
-            <p>Email</p>
-            <input
-              name="email"
-              onChange={onChangeHandler}
-              value={storeInfo.email}
-              type="email"
-              placeholder="Nhập email cửa hàng"
-              className="border border-slate-300 outline-slate-400 w-full max-w-lg p-2 rounded"
-            />
+            <Field data-invalid={!!form.formState.errors.email}>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Nhập email cửa hàng"
+                aria-invalid={!!form.formState.errors.email}
+                {...form.register("email")}
+              />
+              <FieldError errors={[form.formState.errors.email]} />
+            </Field>
 
-            <p>{vi.address.phone}</p>
-            <input
-              name="contact"
-              onChange={onChangeHandler}
-              value={storeInfo.contact}
-              type="text"
-              placeholder="Nhập số điện thoại liên hệ"
-              className="border border-slate-300 outline-slate-400 w-full max-w-lg p-2 rounded"
-            />
+            <Field data-invalid={!!form.formState.errors.contact}>
+              <FieldLabel htmlFor="contact">{vi.address.phone}</FieldLabel>
+              <Input
+                id="contact"
+                type="text"
+                placeholder="Nhập số điện thoại liên hệ"
+                aria-invalid={!!form.formState.errors.contact}
+                {...form.register("contact")}
+              />
+              <FieldError errors={[form.formState.errors.contact]} />
+            </Field>
 
-            <p>{vi.address.street}</p>
-            <textarea
-              name="address"
-              onChange={onChangeHandler}
-              value={storeInfo.address}
-              rows={5}
-              placeholder="Nhập địa chỉ cửa hàng"
-              className="border border-slate-300 outline-slate-400 w-full max-w-lg p-2 rounded resize-none"
-            />
+            <Field data-invalid={!!form.formState.errors.address}>
+              <FieldLabel htmlFor="address">{vi.address.street}</FieldLabel>
+              <Textarea
+                id="address"
+                rows={5}
+                placeholder="Nhập địa chỉ cửa hàng"
+                aria-invalid={!!form.formState.errors.address}
+                {...form.register("address")}
+              />
+              <FieldError errors={[form.formState.errors.address]} />
+            </Field>
 
-            <button className="bg-slate-800 text-white px-12 py-2 rounded mt-10 mb-40 active:scale-95 hover:bg-slate-900 transition ">
-              {vi.common.submit}
-            </button>
-          </form>
-        </div>
-      ) : (
-        <div className="min-h-[80vh] flex flex-col items-center justify-center">
-          <p className="sm:text-2xl lg:text-3xl mx-5 font-semibold text-slate-500 text-center max-w-2xl">
-            {message}
-          </p>
-          {status === "approved" && (
-            <p className="mt-5 text-slate-400">
-              Chuyển đến bảng điều khiển trong{" "}
-              <span className="font-semibold">5 giây</span>
-            </p>
-          )}
-        </div>
-      )}
-    </>
-  ) : (
-    <Loading />
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="w-full mt-6"
+            >
+              {form.formState.isSubmitting ? "Đang gửi..." : vi.common.submit}
+            </Button>
+          </FieldGroup>
+        </FieldSet>
+      </form>
+    </div>
   );
 }

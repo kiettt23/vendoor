@@ -1,13 +1,13 @@
 "use client";
 import PageTitle from "@/components/ui/PageTitle";
 import { useEffect, useState } from "react";
-import OrderItem from "@/components/features/OrderItem";
+import OrderItem from "@/components/features/order/OrderItem";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/ui/Loading";
 import toast from "react-hot-toast";
 import { vi } from "@/lib/i18n";
-import { getUserOrders } from "./actions";
+import { getUserOrders } from "@/lib/actions/user/order.action";
 
 export default function Orders() {
   const { user, isLoaded } = useUser();

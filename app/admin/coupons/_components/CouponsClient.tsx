@@ -1,230 +1,204 @@
 "use client";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { DeleteIcon, Check, Ban } from "lucide-react";
-import { createCoupon, deleteCoupon } from "../actions";
+import { createCoupon, deleteCoupon } from "@/lib/actions/admin/coupon.action";
+import { couponSchema, type CouponFormData } from "@/lib/validations";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 
 export default function CouponsClient({ coupons: initialCoupons }) {
-  const [newCoupon, setNewCoupon] = useState({
-    code: "",
-    description: "",
-    discount: "",
-    forNewUser: false,
-    forMember: false,
-    isPublic: false,
-    expiresAt: new Date(),
+  const form = useForm<CouponFormData>({
+    resolver: zodResolver(couponSchema),
+    defaultValues: {
+      code: "",
+      description: "",
+      discount: 0,
+      forNewUser: false,
+      forMember: false,
+      isPublic: true,
+      expiresAt: new Date(),
+    },
   });
 
-  const handleAddCoupon = async (e) => {
-    e.preventDefault();
-    try {
-      const couponData = {
-        ...newCoupon,
-        discount: Number(newCoupon.discount),
-        expiresAt: new Date(newCoupon.expiresAt),
-      };
-
-      const result = await createCoupon(couponData);
-      toast.success(result.message);
-
-      // Reset form
-      setNewCoupon({
-        code: "",
-        description: "",
-        discount: "",
-        forNewUser: false,
-        forMember: false,
-        isPublic: false,
-        expiresAt: new Date(),
-      });
-    } catch (error) {
-      toast.error(error.message);
-    }
+  const onSubmit = async (data: CouponFormData) => {
+    const result = await createCoupon(data);
+    toast.success(result.message);
+    form.reset();
   };
 
-  const handleChange = (e) => {
-    setNewCoupon({ ...newCoupon, [e.target.name]: e.target.value });
-  };
+  const handleDeleteCoupon = async (code: string) => {
+    const confirm = window.confirm(
+      "Bạn có chắc chắn muốn xóa mã giảm giá này?"
+    );
+    if (!confirm) return;
 
-  const handleDeleteCoupon = async (code) => {
-    try {
-      const confirm = window.confirm(
-        "Bạn có chắc chắn muốn xóa mã giảm giá này?"
-      );
-      if (!confirm) return;
-
-      const result = await deleteCoupon(code);
-      toast.success(result.message);
-    } catch (error) {
-      toast.error(error.message);
-    }
+    const result = await deleteCoupon(code);
+    toast.success(result.message);
   };
 
   return (
     <div className="text-slate-500 mb-40">
-      {/* Add Coupon */}
       <form
-        onSubmit={(e) =>
-          toast.promise(handleAddCoupon(e), {
+        onSubmit={form.handleSubmit((data) =>
+          toast.promise(onSubmit(data), {
             loading: "Đang thêm mã giảm giá...",
           })
-        }
-        className="max-w-sm text-sm"
+        )}
+        className="max-w-sm"
       >
-        <h2 className="text-2xl">
+        <h2 className="text-2xl mb-4">
           Thêm <span className="text-slate-800 font-medium">Mã giảm giá</span>
         </h2>
-        <div className="flex gap-2 max-sm:flex-col mt-2">
-          <input
-            type="text"
-            placeholder="Mã giảm giá"
-            className="w-full mt-2 p-2 border border-slate-200 outline-slate-400 rounded-md"
-            name="code"
-            value={newCoupon.code}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="number"
-            placeholder="Giảm giá (%)"
-            min={1}
-            max={100}
-            className="w-full mt-2 p-2 border border-slate-200 outline-slate-400 rounded-md"
-            name="discount"
-            value={newCoupon.discount}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <input
-          type="text"
-          placeholder="Mô tả mã giảm giá"
-          className="w-full mt-2 p-2 border border-slate-200 outline-slate-400 rounded-md"
-          name="description"
-          value={newCoupon.description}
-          onChange={handleChange}
-          required
-        />
 
-        <label>
-          <p className="mt-3">Ngày hết hạn</p>
-          <input
-            type="date"
-            placeholder="Ngày hết hạn"
-            className="w-full mt-1 p-2 border border-slate-200 outline-slate-400 rounded-md"
-            name="expiresAt"
-            value={format(newCoupon.expiresAt, "yyyy-MM-dd")}
-            onChange={handleChange}
-          />
-        </label>
+        <FieldGroup className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Field data-invalid={!!form.formState.errors.code}>
+              <FieldLabel htmlFor="code">Mã</FieldLabel>
+              <Input
+                id="code"
+                placeholder="SALE50"
+                aria-invalid={!!form.formState.errors.code}
+                {...form.register("code")}
+              />
+              <FieldError errors={[form.formState.errors.code]} />
+            </Field>
 
-        <div className="mt-5">
-          <div className="flex gap-2 mt-3">
-            <label className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3">
+            <Field data-invalid={!!form.formState.errors.discount}>
+              <FieldLabel htmlFor="discount">Giảm (%)</FieldLabel>
+              <Input
+                id="discount"
+                type="number"
+                min={1}
+                max={100}
+                placeholder="0"
+                aria-invalid={!!form.formState.errors.discount}
+                {...form.register("discount", { valueAsNumber: true })}
+              />
+              <FieldError errors={[form.formState.errors.discount]} />
+            </Field>
+          </div>
+
+          <Field data-invalid={!!form.formState.errors.description}>
+            <FieldLabel htmlFor="description">Mô tả</FieldLabel>
+            <Input
+              id="description"
+              placeholder="Mô tả mã giảm giá"
+              aria-invalid={!!form.formState.errors.description}
+              {...form.register("description")}
+            />
+            <FieldError errors={[form.formState.errors.description]} />
+          </Field>
+
+          <Field data-invalid={!!form.formState.errors.expiresAt}>
+            <FieldLabel htmlFor="expiresAt">Ngày hết hạn</FieldLabel>
+            <Input
+              id="expiresAt"
+              type="date"
+              aria-invalid={!!form.formState.errors.expiresAt}
+              {...form.register("expiresAt", {
+                setValueAs: (v) => (v ? new Date(v) : new Date()),
+              })}
+            />
+            <FieldError errors={[form.formState.errors.expiresAt]} />
+          </Field>
+
+          <div className="flex gap-4 flex-wrap text-sm">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                className="sr-only peer"
-                name="forNewUser"
-                checked={newCoupon.forNewUser}
-                onChange={(e) =>
-                  setNewCoupon({ ...newCoupon, forNewUser: e.target.checked })
-                }
+                {...form.register("isPublic")}
+                className="w-4 h-4"
               />
-              <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-green-600 transition-colors duration-200"></div>
-              <span className="dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
+              <span>Công khai</span>
             </label>
-            <p>Dành cho người mới</p>
-          </div>
-          <div className="flex gap-2 mt-3">
-            <label className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3">
+
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                className="sr-only peer"
-                name="forMember"
-                checked={newCoupon.forMember}
-                onChange={(e) =>
-                  setNewCoupon({ ...newCoupon, forMember: e.target.checked })
-                }
+                {...form.register("forNewUser")}
+                className="w-4 h-4"
               />
-              <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-green-600 transition-colors duration-200"></div>
-              <span className="dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
+              <span>Người mới</span>
             </label>
-            <p>Dành cho thành viên</p>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                {...form.register("forMember")}
+                className="w-4 h-4"
+              />
+              <span>Thành viên</span>
+            </label>
           </div>
-        </div>
-        <button className="mt-4 p-2 px-10 rounded bg-slate-700 text-white active:scale-95 transition">
-          Thêm mã giảm giá
-        </button>
+
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+            className="w-full"
+          >
+            {form.formState.isSubmitting ? "Đang thêm..." : "Thêm mã giảm giá"}
+          </Button>
+        </FieldGroup>
       </form>
 
       {/* List Coupons */}
-      <div className="mt-14">
-        <h2 className="text-2xl">
+      <div className="mt-10">
+        <h2 className="text-2xl mb-4">
           Danh sách{" "}
           <span className="text-slate-800 font-medium">Mã giảm giá</span>
         </h2>
-        <div className="overflow-x-auto mt-4 rounded-lg border border-slate-200 max-w-4xl">
+        <div className="overflow-x-auto rounded-lg border border-slate-200 max-w-4xl">
           <table className="min-w-full bg-white text-sm">
             <thead className="bg-slate-50">
               <tr>
-                <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  Mã
-                </th>
-                <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  Mô tả
-                </th>
-                <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  Giảm giá
-                </th>
-                <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  Hết hạn
-                </th>
-                <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  Người mới
-                </th>
-                <th className="py-3 px-4 text-left font-semibold text-slate-600">
+                <th className="py-3 px-4 text-left font-semibold">Mã</th>
+                <th className="py-3 px-4 text-left font-semibold">Mô tả</th>
+                <th className="py-3 px-4 text-left font-semibold">Giảm</th>
+                <th className="py-3 px-4 text-left font-semibold">Hết hạn</th>
+                <th className="py-3 px-4 text-left font-semibold">Người mới</th>
+                <th className="py-3 px-4 text-left font-semibold">
                   Thành viên
                 </th>
-                <th className="py-3 px-4 text-left font-semibold text-slate-600">
-                  Thao tác
-                </th>
+                <th className="py-3 px-4 text-left font-semibold">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {initialCoupons.map((coupon) => (
                 <tr key={coupon.code} className="hover:bg-slate-50">
-                  <td className="py-3 px-4 font-medium text-slate-800">
-                    {coupon.code}
+                  <td className="py-3 px-4 font-medium">{coupon.code}</td>
+                  <td className="py-3 px-4">{coupon.description}</td>
+                  <td className="py-3 px-4">{coupon.discount}%</td>
+                  <td className="py-3 px-4">
+                    {format(coupon.expiresAt, "dd/MM/yyyy")}
                   </td>
-                  <td className="py-3 px-4 text-slate-800">
-                    {coupon.description}
-                  </td>
-                  <td className="py-3 px-4 text-slate-800">
-                    {coupon.discount}%
-                  </td>
-                  <td className="py-3 px-4 text-slate-800">
-                    {format(coupon.expiresAt, "yyyy-MM-dd")}
-                  </td>
-                  <td className="py-3 px-4 text-slate-800">
+                  <td className="py-3 px-4">
                     {coupon.forNewUser ? (
-                      <Check color="#29b339" />
+                      <Check color="#29b339" size={18} />
                     ) : (
-                      <Ban color="#b23838" />
+                      <Ban color="#b23838" size={18} />
                     )}
                   </td>
-                  <td className="py-3 px-4 text-slate-800">
+                  <td className="py-3 px-4">
                     {coupon.forMember ? (
-                      <Check color="#29b339" />
+                      <Check color="#29b339" size={18} />
                     ) : (
-                      <Ban color="#b23838" />
+                      <Ban color="#b23838" size={18} />
                     )}
                   </td>
-                  <td className="py-3 px-4 text-slate-800">
+                  <td className="py-3 px-4">
                     <DeleteIcon
                       onClick={() =>
                         toast.promise(handleDeleteCoupon(coupon.code), {
-                          loading: "Đang xóa mã giảm giá...",
+                          loading: "Đang xóa...",
                         })
                       }
                       className="w-5 h-5 text-red-500 hover:text-red-800 cursor-pointer"

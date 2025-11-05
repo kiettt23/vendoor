@@ -1,228 +1,212 @@
 "use client";
-import { getAllCategoryNamesEn } from "@/configs/categories";
-import Image from "next/image";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 import { toast } from "react-hot-toast";
-import { createProduct } from "./actions";
+import { getAllCategoryNamesEn } from "@/configs/categories";
+import { createProduct } from "@/lib/actions/seller/product.action";
+import { productSchema, type ProductFormData } from "@/lib/validations";
+import { useAIImageAnalysis } from "@/lib/hooks/useAIImageAnalysis";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 
 export default function StoreAddProduct() {
   const categories = getAllCategoryNamesEn();
-
-  const [images, setImages] = useState({ 1: null, 2: null, 3: null, 4: null });
-  const [productInfo, setProductInfo] = useState({
-    name: "",
-    description: "",
-    mrp: 0,
-    price: 0,
-    category: "",
+  const [images, setImages] = useState<Record<string, File | null>>({
+    "1": null,
+    "2": null,
+    "3": null,
+    "4": null,
   });
-  const [loading, setLoading] = useState(false);
-  const [aiUsed, setAiUsed] = useState(false);
 
-  const onChangeHandler = (e) => {
-    setProductInfo({ ...productInfo, [e.target.name]: e.target.value });
-  };
+  const { analyzeImage } = useAIImageAnalysis();
 
-  const handleImageUpload = async (key, file) => {
+  const form = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      mrp: 0,
+      price: 0,
+      category: "",
+    },
+  });
+
+  const handleImageUpload = async (key: string, file: File | null) => {
+    if (!file) return;
+
     setImages((prev) => ({ ...prev, [key]: file }));
 
     // AI analysis for first image only
-    if (key === "1" && file && !aiUsed) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = async () => {
-        const base64String = reader.result.split(",")[1];
-        const mimeType = file.type;
-
-        try {
-          await toast.promise(
-            (async () => {
-              // Call AI analysis Server Action
-              const { analyzeProductImage } = await import("./actions");
-              return await analyzeProductImage(base64String, mimeType);
-            })(),
-            {
-              loading: "🤖 Đang phân tích hình ảnh...",
-              success: (data) => {
-                if (data.name && data.description) {
-                  setProductInfo((prev) => ({
-                    ...prev,
-                    name: data.name,
-                    description: data.description,
-                  }));
-                  setAiUsed(true);
-                  return "✨ Đã cập nhật thông tin.";
-                }
-                return "💀 AI không thể phân tích hình ảnh.";
-              },
-              error: (err) => err.message || "Lỗi phân tích AI",
-            }
-          );
-        } catch (error) {
-          console.error(error);
-        }
-      };
+    if (key === "1") {
+      const result = await analyzeImage(file);
+      if (result) {
+        if (result.name) form.setValue("name", result.name);
+        if (result.description)
+          form.setValue("description", result.description);
+        if (result.category) form.setValue("category", result.category);
+        if (result.mrp) form.setValue("mrp", result.mrp);
+        if (result.price) form.setValue("price", result.price);
+      }
     }
   };
 
-  const onSubmitHandler = async (e) => {
-    e.preventDefault();
-    try {
-      // If no images are uploaded then return
-      if (!images[1] && !images[2] && !images[3] && !images[4]) {
-        return toast.error("Please upload at least one image");
-      }
-      setLoading(true);
-
-      const formData = new FormData();
-      formData.append("name", productInfo.name);
-      formData.append("description", productInfo.description);
-      formData.append("mrp", productInfo.mrp);
-      formData.append("price", productInfo.price);
-      formData.append("category", productInfo.category);
-
-      // Adding Images to FormData
-      Object.keys(images).forEach((key) => {
-        images[key] && formData.append("images", images[key]);
-      });
-
-      const result = await createProduct(formData);
-      toast.success(result.message);
-
-      // Reset form
-      setProductInfo({
-        name: "",
-        description: "",
-        mrp: 0,
-        price: 0,
-        category: "",
-      });
-
-      // Reset images
-      setImages({ 1: null, 2: null, 3: null, 4: null });
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setLoading(false);
+  const onSubmit = async (data: ProductFormData) => {
+    // Validate images
+    const hasImages = Object.values(images).some((img) => img !== null);
+    if (!hasImages) {
+      throw new Error("Vui lòng tải lên ít nhất 1 hình ảnh");
     }
+
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("description", data.description);
+    formData.append("mrp", data.mrp.toString());
+    formData.append("price", data.price.toString());
+    formData.append("category", data.category);
+
+    // Add images
+    Object.values(images).forEach((img) => {
+      if (img) formData.append("images", img);
+    });
+
+    const result = await createProduct(formData);
+    toast.success(result.message);
+
+    // Reset form
+    form.reset();
+    setImages({ "1": null, "2": null, "3": null, "4": null });
   };
 
   return (
     <form
-      onSubmit={(e) =>
-        toast.promise(onSubmitHandler(e), { loading: "Adding Product..." })
-      }
+      onSubmit={form.handleSubmit((data) =>
+        toast.promise(onSubmit(data), { loading: "Đang thêm sản phẩm..." })
+      )}
       className="text-slate-500 mb-28"
     >
       <h1 className="text-2xl">
-        Add New <span className="text-slate-800 font-medium">Products</span>
+        Thêm <span className="text-slate-800 font-medium">Sản Phẩm Mới</span>
       </h1>
-      <p className="mt-7">Product Images</p>
 
-      <div htmlFor="" className="flex gap-3 mt-4">
-        {Object.keys(images).map((key) => (
-          <label key={key} htmlFor={`images${key}`}>
-            <Image
-              width={300}
-              height={300}
-              className="h-15 w-auto border border-slate-200 rounded cursor-pointer"
-              src={
-                images[key]
-                  ? URL.createObjectURL(images[key])
-                  : "/images/upload_area.svg"
-              }
-              alt=""
-            />
-            <input
-              type="file"
-              accept="image/*"
-              id={`images${key}`}
-              onChange={(e) => handleImageUpload(key, e.target.files[0])}
-              hidden
-            />
-          </label>
-        ))}
+      <div className="mt-7">
+        <p className="mb-4">Hình ảnh sản phẩm</p>
+        <div className="flex gap-3">
+          {Object.keys(images).map((key) => (
+            <label
+              key={key}
+              htmlFor={`images${key}`}
+              className="cursor-pointer"
+            >
+              <Image
+                width={300}
+                height={300}
+                className="h-15 w-auto border border-slate-200 rounded"
+                src={
+                  images[key]
+                    ? URL.createObjectURL(images[key]!)
+                    : "/images/upload_area.svg"
+                }
+                alt={`Product image ${key}`}
+              />
+              <input
+                type="file"
+                accept="image/*"
+                id={`images${key}`}
+                onChange={(e) =>
+                  handleImageUpload(key, e.target.files?.[0] || null)
+                }
+                hidden
+              />
+            </label>
+          ))}
+        </div>
       </div>
 
-      <label htmlFor="" className="flex flex-col gap-2 my-6 ">
-        Name
-        <input
-          type="text"
-          name="name"
-          onChange={onChangeHandler}
-          value={productInfo.name}
-          placeholder="Enter product name"
-          className="w-full max-w-sm p-2 px-4 outline-none border border-slate-200 rounded"
-          required
-        />
-      </label>
-
-      <label htmlFor="" className="flex flex-col gap-2 my-6 ">
-        Description
-        <textarea
-          name="description"
-          onChange={onChangeHandler}
-          value={productInfo.description}
-          placeholder="Enter product description"
-          rows={5}
-          className="w-full max-w-sm p-2 px-4 outline-none border border-slate-200 rounded resize-none"
-          required
-        />
-      </label>
-
-      <div className="flex gap-5">
-        <label htmlFor="" className="flex flex-col gap-2 ">
-          Actual Price (đ)
-          <input
-            type="number"
-            name="mrp"
-            onChange={onChangeHandler}
-            value={productInfo.mrp}
-            placeholder="0"
-            rows={5}
-            className="w-full max-w-45 p-2 px-4 outline-none border border-slate-200 rounded resize-none"
-            required
+      <FieldGroup className="max-w-sm mt-6 space-y-6">
+        <Field data-invalid={!!form.formState.errors.name}>
+          <FieldLabel htmlFor="name">Tên sản phẩm</FieldLabel>
+          <Input
+            id="name"
+            placeholder="Nhập tên sản phẩm"
+            aria-invalid={!!form.formState.errors.name}
+            {...form.register("name")}
           />
-        </label>
-        <label htmlFor="" className="flex flex-col gap-2 ">
-          Offer Price (đ)
-          <input
-            type="number"
-            name="price"
-            onChange={onChangeHandler}
-            value={productInfo.price}
-            placeholder="0"
+          <FieldError errors={[form.formState.errors.name]} />
+        </Field>
+
+        <Field data-invalid={!!form.formState.errors.description}>
+          <FieldLabel htmlFor="description">Mô tả</FieldLabel>
+          <Textarea
+            id="description"
             rows={5}
-            className="w-full max-w-45 p-2 px-4 outline-none border border-slate-200 rounded resize-none"
-            required
+            placeholder="Nhập mô tả sản phẩm"
+            aria-invalid={!!form.formState.errors.description}
+            {...form.register("description")}
           />
-        </label>
-      </div>
+          <FieldError errors={[form.formState.errors.description]} />
+        </Field>
 
-      <select
-        onChange={(e) =>
-          setProductInfo({ ...productInfo, category: e.target.value })
-        }
-        value={productInfo.category}
-        className="w-full max-w-sm p-2 px-4 my-6 outline-none border border-slate-200 rounded"
-        required
-      >
-        <option value="">Select a category</option>
-        {categories.map((category) => (
-          <option key={category} value={category}>
-            {category}
-          </option>
-        ))}
-      </select>
+        <div className="grid grid-cols-2 gap-4">
+          <Field data-invalid={!!form.formState.errors.mrp}>
+            <FieldLabel htmlFor="mrp">Giá gốc (đ)</FieldLabel>
+            <Input
+              id="mrp"
+              type="number"
+              placeholder="0"
+              aria-invalid={!!form.formState.errors.mrp}
+              {...form.register("mrp", { valueAsNumber: true })}
+            />
+            <FieldError errors={[form.formState.errors.mrp]} />
+          </Field>
 
-      <br />
+          <Field data-invalid={!!form.formState.errors.price}>
+            <FieldLabel htmlFor="price">Giá bán (đ)</FieldLabel>
+            <Input
+              id="price"
+              type="number"
+              placeholder="0"
+              aria-invalid={!!form.formState.errors.price}
+              {...form.register("price", { valueAsNumber: true })}
+            />
+            <FieldError errors={[form.formState.errors.price]} />
+          </Field>
+        </div>
 
-      <button
-        disabled={loading}
-        className="bg-slate-800 text-white px-6 mt-7 py-2 hover:bg-slate-900 rounded transition"
-      >
-        Add Product
-      </button>
+        <Field data-invalid={!!form.formState.errors.category}>
+          <FieldLabel htmlFor="category">Danh mục</FieldLabel>
+          <select
+            id="category"
+            className="w-full p-2 px-4 outline-none border border-slate-200 rounded"
+            aria-invalid={!!form.formState.errors.category}
+            {...form.register("category")}
+          >
+            <option value="">Chọn danh mục</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <FieldError errors={[form.formState.errors.category]} />
+        </Field>
+
+        <Button
+          type="submit"
+          disabled={form.formState.isSubmitting}
+          className="w-full"
+        >
+          {form.formState.isSubmitting ? "Đang thêm..." : "Thêm Sản Phẩm"}
+        </Button>
+      </FieldGroup>
     </form>
   );
 }

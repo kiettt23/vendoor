@@ -3,7 +3,8 @@ import { PackageIcon, Search, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useAppSelector } from "@/lib/store";
+import type { RootState } from "@/lib/store";
 import { useUser, useClerk, UserButton, Protect } from "@clerk/nextjs";
 import { vi } from "@/lib/i18n";
 
@@ -13,9 +14,9 @@ const Navbar = () => {
   const router = useRouter();
 
   const [search, setSearch] = useState("");
-  const cartCount = useSelector((state) => state.cart.total);
+  const cartCount = useAppSelector((state: RootState) => state.cart.total);
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     router.push(`/shop?search=${search}`);
   };
@@ -71,7 +72,7 @@ const Navbar = () => {
 
             {!user ? (
               <button
-                onClick={openSignIn}
+                onClick={() => openSignIn()}
                 className="px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full"
               >
                 {vi.nav.login}
@@ -105,7 +106,7 @@ const Navbar = () => {
               </div>
             ) : (
               <button
-                onClick={openSignIn}
+                onClick={() => openSignIn()}
                 className="px-7 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-sm transition text-white rounded-full"
               >
                 {vi.nav.login}

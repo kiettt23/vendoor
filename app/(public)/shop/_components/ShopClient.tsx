@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import ProductCard from "@/components/features/ProductCard";
+import ProductCard from "@/components/features/product/ProductCard";
 import { MoveLeftIcon } from "lucide-react";
 import { vi } from "@/lib/i18n";
 

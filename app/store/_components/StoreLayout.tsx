@@ -6,7 +6,7 @@ import { ArrowRightIcon } from "lucide-react";
 import StoreNavbar from "./StoreNavbar";
 import StoreSidebar from "./StoreSidebar";
 import { vi } from "@/lib/i18n";
-import { checkIsSeller } from "./actions";
+import { checkIsSeller } from "@/lib/auth/check-seller";
 
 const StoreLayout = ({ children }) => {
   const [isSeller, setIsSeller] = useState(false);

@@ -74,6 +74,7 @@ export const vi = {
     specifications: "Thông số kỹ thuật",
     writeReview: "Viết đánh giá",
     noReviews: "Chưa có đánh giá",
+    viewDetails: "Xem chi tiết",
   },
 
   // Cart
@@ -119,6 +120,7 @@ export const vi = {
 
   // Payment
   payment: {
+    paymentMethod: "Phương thức thanh toán",
     cod: "Thanh toán khi nhận hàng",
     stripe: "Thanh toán online",
     paid: "Đã thanh toán",
@@ -174,7 +176,6 @@ export const vi = {
     createStoreNow: "Tạo cửa hàng ngay",
     store: "cửa hàng",
     dashboard: "Bảng điều khiển",
-    addProduct: "Thêm sản phẩm",
     manageProduct: "Quản lý sản phẩm",
     orders: "Đơn hàng",
   },
@@ -183,7 +184,6 @@ export const vi = {
   admin: {
     dashboard: "Bảng điều khiển",
     users: "Người dùng",
-    stores: "Cửa hàng",
     products: "Sản phẩm",
     orders: "Đơn hàng",
     coupons: "Mã giảm giá",
@@ -323,50 +323,5 @@ export const vi = {
     yearsAgo: "năm trước",
   },
 };
-
-// Format tiền tệ VND
-export function formatPrice(price) {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(price);
-}
-
-// Format số lượng
-export function formatNumber(number) {
-  return new Intl.NumberFormat("vi-VN").format(number);
-}
-
-// Format ngày tháng
-export function formatDate(date) {
-  return new Intl.DateTimeFormat("vi-VN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(new Date(date));
-}
-
-// Format ngày giờ
-export function formatDateTime(date) {
-  return new Intl.DateTimeFormat("vi-VN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(date));
-}
-
-// Helper: Map order status to Vietnamese
-export function getOrderStatusText(status) {
-  const statusMap = {
-    ORDER_PLACED: vi.order.orderPlaced,
-    PROCESSING: vi.order.processing,
-    SHIPPED: vi.order.shipped,
-    DELIVERED: vi.order.delivered,
-    CANCELLED: vi.order.cancelled,
-  };
-  return statusMap[status] || status;
-}
 
 export default vi;

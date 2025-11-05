@@ -1,45 +1,58 @@
 "use client";
 import Counter from "@/components/ui/Counter";
-import OrderSummary from "@/components/features/OrderSummary";
+import OrderSummary from "@/components/features/order/OrderSummary";
 import PageTitle from "@/components/ui/PageTitle";
-import { deleteItemFromCart } from "@/lib/features/cart/cartSlice";
+import { deleteItemFromCart } from "@/lib/features/cart/cart-slice";
 import { Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "@/lib/store";
+import type { RootState } from "@/lib/store";
 
-export default function CartClient({ products }) {
-  const { cartItems } = useSelector((state) => state.cart);
-  const dispatch = useDispatch();
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  images: string[];
+  [key: string]: any;
+}
 
-  const [cartArray, setCartArray] = useState([]);
+interface CartItem extends Product {
+  quantity: number;
+}
+
+interface CartClientProps {
+  products: Product[];
+}
+
+export default function CartClient({ products }: CartClientProps) {
+  const { cartItems } = useAppSelector((state: RootState) => state.cart);
+  const dispatch = useAppDispatch();
+
+  const [cartArray, setCartArray] = useState<CartItem[]>([]);
   const [totalPrice, setTotalPrice] = useState(0);
-
-  const createCartArray = () => {
-    setTotalPrice(0);
-    const cartArray = [];
-    for (const [key, value] of Object.entries(cartItems)) {
-      const product = products.find((product) => product.id === key);
-      if (product) {
-        cartArray.push({
-          ...product,
-          quantity: value,
-        });
-        setTotalPrice((prev) => prev + product.price * value);
-      }
-    }
-    setCartArray(cartArray);
-  };
-
-  const handleDeleteItemFromCart = (productId) => {
-    dispatch(deleteItemFromCart({ productId }));
-  };
 
   useEffect(() => {
     if (products.length > 0) {
-      createCartArray();
+      setTotalPrice(0);
+      const newCartArray: CartItem[] = [];
+      for (const [key, value] of Object.entries(cartItems)) {
+        const product = products.find((product) => product.id === key);
+        if (product) {
+          newCartArray.push({
+            ...product,
+            quantity: value as number,
+          });
+          setTotalPrice((prev) => prev + product.price * (value as number));
+        }
+      }
+      setCartArray(newCartArray);
     }
   }, [cartItems, products]);
+
+  const handleDeleteItemFromCart = (productId: string) => {
+    dispatch(deleteItemFromCart({ productId }));
+  };
 
   return cartArray.length > 0 ? (
     <div className="min-h-screen mx-6 text-slate-800">
@@ -106,7 +119,15 @@ export default function CartClient({ products }) {
               ))}
             </tbody>
           </table>
-          <OrderSummary totalPrice={totalPrice} items={cartArray} />
+          <OrderSummary
+            totalPrice={totalPrice}
+            items={cartArray.map((item) => ({
+              id: item.id,
+              productId: item.id,
+              quantity: item.quantity,
+              price: item.price,
+            }))}
+          />
         </div>
       </div>
     </div>

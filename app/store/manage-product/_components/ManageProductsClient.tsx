@@ -1,17 +1,33 @@
 "use client";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
-import { toggleProductStock } from "../actions";
+import { toggleProductStock } from "@/lib/actions/seller/product.action";
 
 const currency = "đ";
 
-export default function ManageProductsClient({ products: initialProducts }) {
-  const handleToggleStock = async (productId) => {
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  mrp: number;
+  images: string[];
+  inStock: boolean;
+}
+
+interface ManageProductsClientProps {
+  products: Product[];
+}
+
+export default function ManageProductsClient({
+  products: initialProducts,
+}: ManageProductsClientProps) {
+  const handleToggleStock = async (productId: string) => {
     try {
       const result = await toggleProductStock(productId);
       toast.success(result.message);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error instanceof Error ? error.message : "Có lỗi xảy ra");
     }
   };
 

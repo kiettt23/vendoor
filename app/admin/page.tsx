@@ -1,11 +1,12 @@
-import OrdersAreaChart from "@/components/features/OrdersAreaChart";
+import OrdersAreaChart from "@/components/features/order/OrdersAreaChart";
 import {
   CircleDollarSignIcon,
   ShoppingBasketIcon,
   StoreIcon,
   TagsIcon,
 } from "lucide-react";
-import { vi, formatPrice } from "@/lib/i18n";
+import { vi } from "@/lib/i18n";
+import { formatPrice } from "@/lib/utils/format/currency";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";

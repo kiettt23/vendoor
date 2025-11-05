@@ -1,0 +1,13 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Chạy TypeScript check
+echo "🔍 Checking TypeScript..."
+npx tsc --noEmit
+
+# Chạy ESLint
+echo "🔍 Running ESLint..."
+npm run lint
+
+# Chạy lint-staged (nếu có staged files)
+npx lint-staged

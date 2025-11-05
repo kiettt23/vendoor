@@ -7,7 +7,7 @@ import AdminNavbar from "./AdminNavbar";
 import AdminSidebar from "./AdminSidebar";
 import { vi } from "@/lib/i18n";
 import { useUser } from "@clerk/nextjs";
-import { checkIsAdmin } from "./actions";
+import { checkIsAdmin } from "@/lib/auth/check-admin";
 
 const AdminLayout = ({ children }) => {
   const { user } = useUser();

@@ -2,8 +2,8 @@
 import { ArrowRightIcon, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
 import React from "react";
-import CategoriesMarquee from "../features/CategoriesMarquee";
-import { formatPrice } from "@/lib/i18n";
+import CategoriesMarquee from "../features/marketing/CategoriesMarquee";
+import { formatPrice } from "@/lib/utils/format/currency";
 
 const Hero = () => {
   return (

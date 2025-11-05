@@ -1,0 +1,23 @@
+import { z } from "zod";
+
+/**
+ * Validation schema cho Store
+ * Dùng chung cho: create-store, edit-store, admin approval
+ */
+export const storeSchema = z.object({
+  name: z.string().min(3, "Tên cửa hàng phải có ít nhất 3 ký tự"),
+  username: z
+    .string()
+    .min(3, "Username phải có ít nhất 3 ký tự")
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      "Username chỉ chứa chữ cái, số, dấu gạch ngang và gạch dưới"
+    ),
+  description: z.string().optional(),
+  email: z.string().email("Email không hợp lệ"),
+  contact: z.string().min(10, "Số điện thoại phải có ít nhất 10 số"),
+  address: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
+  image: z.instanceof(File).optional(),
+});
+
+export type StoreFormData = z.infer<typeof storeSchema>;

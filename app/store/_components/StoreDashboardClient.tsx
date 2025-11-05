@@ -1,5 +1,6 @@
 "use client";
-import { vi, formatDate } from "@/lib/i18n";
+import { vi } from "@/lib/i18n";
+import { formatDate } from "@/lib/utils/format/date";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {

@@ -1,0 +1,156 @@
+"use client";
+import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/store";
+import type { RootState } from "@/lib/store";
+import { Trash2Icon, EditIcon, PlusIcon } from "lucide-react";
+import toast from "react-hot-toast";
+import { vi } from "@/lib/i18n";
+import { setAddresses } from "@/lib/features/address/address-slice";
+import {
+  deleteAddress,
+  updateAddress,
+  addAddress,
+} from "@/lib/actions/user/address.action";
+import AddressModal from "./AddressModal";
+
+interface AddressData {
+  id: string;
+  name: string;
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  phone: string;
+}
+
+interface AddressManagerProps {
+  selectedAddress: AddressData | null;
+  setSelectedAddress: (address: AddressData | null) => void;
+}
+
+const AddressManager = ({
+  selectedAddress,
+  setSelectedAddress,
+}: AddressManagerProps) => {
+  const dispatch = useAppDispatch();
+  const addressList = useAppSelector((state: RootState) => state.address.list);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
+
+  const handleDelete = async (addressId) => {
+    if (!confirm("Bạn có chắc muốn xóa địa chỉ này?")) return;
+
+    try {
+      const result = await deleteAddress(addressId);
+
+      if (!result.success) {
+        return toast.error(result.error);
+      }
+
+      // Update Redux
+      const updatedList = addressList.filter((addr) => addr.id !== addressId);
+      dispatch(setAddresses(updatedList));
+
+      // Clear selection if deleted
+      if (selectedAddress?.id === addressId) {
+        setSelectedAddress(null);
+      }
+
+      toast.success(result.message);
+    } catch (error) {
+      toast.error(error.message || "Không thể xóa địa chỉ");
+    }
+  };
+
+  return (
+    <div className="my-4 py-4 border-y border-slate-200 text-slate-400">
+      <p className="font-medium mb-2">{vi.address.title}</p>
+
+      {selectedAddress ? (
+        <div className="flex gap-2 items-center justify-between bg-purple-50 p-3 rounded">
+          <p className="text-slate-600">
+            <span className="font-medium">{selectedAddress.name}</span>
+            <br />
+            {selectedAddress.street}, {selectedAddress.city},{" "}
+            {selectedAddress.state}, {selectedAddress.zip}
+            <br />
+            {selectedAddress.phone}
+          </p>
+          <button
+            onClick={() => setSelectedAddress(null)}
+            className="text-purple-500 hover:text-purple-700"
+          >
+            Thay đổi
+          </button>
+        </div>
+      ) : (
+        <div>
+          {addressList.length > 0 && (
+            <div className="space-y-2 mb-3">
+              {addressList.map((address) => (
+                <div
+                  key={address.id}
+                  className="flex items-center justify-between border border-slate-300 p-3 rounded hover:bg-slate-50"
+                >
+                  <div
+                    onClick={() => setSelectedAddress(address)}
+                    className="flex-1 cursor-pointer"
+                  >
+                    <p className="font-medium text-slate-600">{address.name}</p>
+                    <p className="text-sm">
+                      {address.street}, {address.city}, {address.state},{" "}
+                      {address.zip}
+                    </p>
+                    <p className="text-sm">{address.phone}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setEditingAddress(address);
+                        setShowAddressModal(true);
+                      }}
+                      className="text-blue-500 hover:text-blue-700 p-1"
+                      title="Chỉnh sửa"
+                    >
+                      <EditIcon size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(address.id)}
+                      className="text-red-500 hover:text-red-700 p-1"
+                      title="Xóa"
+                    >
+                      <Trash2Icon size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button
+            className="flex items-center gap-1 text-purple-600 hover:text-purple-800 mt-2"
+            onClick={() => {
+              setEditingAddress(null);
+              setShowAddressModal(true);
+            }}
+          >
+            <PlusIcon size={18} />
+            {addressList.length > 0
+              ? "Thêm địa chỉ mới"
+              : vi.address.addAddress}
+          </button>
+        </div>
+      )}
+
+      {showAddressModal && (
+        <AddressModal
+          setShowAddressModal={setShowAddressModal}
+          editingAddress={editingAddress}
+        />
+      )}
+    </div>
+  );
+};
+
+export default AddressManager;

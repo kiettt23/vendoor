@@ -1,23 +1,61 @@
 "use client";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { updateOrderStatus } from "../actions";
+import { updateOrderStatus } from "@/lib/actions/seller/order.action";
 import OrderModal from "./OrderModal";
 
-export default function StoreOrdersClient({ orders: initialOrders }) {
-  const [selectedOrder, setSelectedOrder] = useState(null);
+type OrderStatus = "ORDER_PLACED" | "PROCESSING" | "SHIPPED" | "DELIVERED";
+
+interface OrderItem {
+  productId: string;
+  orderId: string;
+  quantity: number;
+  price: number;
+  product?: {
+    name: string;
+    price: number;
+    images: string[];
+  };
+}
+
+interface Order {
+  id: string;
+  total: number;
+  paymentMethod: string;
+  status: string;
+  createdAt: string;
+  isCouponUsed: boolean;
+  user?: {
+    name: string;
+  };
+  coupon?: any;
+  address: {
+    createdAt: string;
+    [key: string]: any;
+  };
+  orderItems: OrderItem[];
+}
+
+interface StoreOrdersClientProps {
+  orders: Order[];
+}
+
+export default function StoreOrdersClient({
+  orders: initialOrders,
+}: StoreOrdersClientProps) {
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleUpdateOrderStatus = async (orderId, status) => {
+  const handleUpdateOrderStatus = async (orderId: string, status: string) => {
     try {
-      const result = await updateOrderStatus(orderId, status);
+      const result = await updateOrderStatus(orderId, status as OrderStatus);
       toast.success(result.message);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error instanceof Error ? error.message : "Có lỗi xảy ra");
     }
   };
 
-  const openModal = (order) => {
+  const openModal = (order: Order) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
   };
