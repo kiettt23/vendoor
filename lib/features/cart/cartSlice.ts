@@ -10,7 +10,10 @@ let debounceTimer: NodeJS.Timeout | null = null;
 
 export const uploadCart = createAsyncThunk(
   "cart/uploadCart",
-  async ({ getToken }: { getToken: () => Promise<string | null> }, thunkAPI) => {
+  async (
+    { getToken }: { getToken: () => Promise<string | null> },
+    thunkAPI
+  ) => {
     try {
       clearTimeout(debounceTimer as NodeJS.Timeout);
       debounceTimer = setTimeout(async () => {
@@ -30,7 +33,10 @@ export const uploadCart = createAsyncThunk(
 
 export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
-  async ({ getToken }: { getToken: () => Promise<string | null> }, thunkAPI) => {
+  async (
+    { getToken }: { getToken: () => Promise<string | null> },
+    thunkAPI
+  ) => {
     try {
       const token = await getToken();
       const { data } = await axios.get("/api/cart", {
@@ -69,7 +75,10 @@ const cartSlice = createSlice({
       }
       state.total -= 1;
     },
-    deleteItemFromCart: (state, action: PayloadAction<{ productId: string }>) => {
+    deleteItemFromCart: (
+      state,
+      action: PayloadAction<{ productId: string }>
+    ) => {
       const { productId } = action.payload;
       state.total -= state.cartItems[productId]
         ? state.cartItems[productId]
@@ -84,10 +93,9 @@ const cartSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(fetchCart.fulfilled, (state, action) => {
       state.cartItems = action.payload.cart;
-      state.total = Object.values(action.payload.cart as Record<string, number>).reduce(
-        (acc: number, item: number) => acc + item,
-        0
-      );
+      state.total = Object.values(
+        action.payload.cart as Record<string, number>
+      ).reduce((acc: number, item: number) => acc + item, 0);
     });
   },
 });

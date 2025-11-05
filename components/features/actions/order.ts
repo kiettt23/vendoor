@@ -5,15 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import type { Coupon, CouponActionResponse } from "@/types";
 
-/**
- * Áp dụng mã giảm giá (coupon)
- * 
- * @param code - Mã coupon cần kiểm tra
- * @returns Response với thông tin coupon nếu hợp lệ
- */
-export async function applyCoupon(
-  code: string
-): Promise<CouponActionResponse> {
+export async function applyCoupon(code: string): Promise<CouponActionResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -72,12 +64,6 @@ export async function applyCoupon(
   }
 }
 
-/**
- * Tạo đơn hàng mới
- * 
- * @param orderData - Thông tin đơn hàng (địa chỉ, items, payment method, coupon)
- * @returns Response với session Stripe (nếu thanh toán online) hoặc thông báo thành công
- */
 export async function createOrder(orderData: {
   addressId: string;
   items: Array<{
@@ -243,12 +229,6 @@ export async function createOrder(orderData: {
   }
 }
 
-/**
- * Hủy đơn hàng
- * 
- * @param orderId - ID của đơn hàng cần hủy
- * @returns Response với thông tin đơn hàng đã hủy
- */
 export async function cancelOrder(orderId: string): Promise<{
   success: boolean;
   message: string;

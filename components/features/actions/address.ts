@@ -3,14 +3,15 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import type { Address, AddressActionResponse, SerializedAddress } from "@/types";
+import type {
+  Address,
+  AddressActionResponse,
+  SerializedAddress,
+} from "@/types";
 
-/**
- * Get all addresses của user hiện tại
- * 
- * @returns Object chứa array addresses đã serialize
- */
-export async function getUserAddresses(): Promise<{ addresses: SerializedAddress[] }> {
+export async function getUserAddresses(): Promise<{
+  addresses: SerializedAddress[];
+}> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -35,14 +36,8 @@ export async function getUserAddresses(): Promise<{ addresses: SerializedAddress
   }
 }
 
-/**
- * Thêm địa chỉ mới
- * 
- * @param addressData - Thông tin địa chỉ (không cần id, userId)
- * @returns Response với newAddress nếu thành công
- */
 export async function addAddress(
-  addressData: Omit<Address, 'id' | 'userId' | 'createdAt'>
+  addressData: Omit<Address, "id" | "userId" | "createdAt">
 ): Promise<AddressActionResponse> {
   try {
     const { userId } = await auth();
@@ -104,16 +99,9 @@ export async function addAddress(
   }
 }
 
-/**
- * Cập nhật địa chỉ hiện có
- * 
- * @param addressId - ID của address cần update
- * @param addressData - Data mới (không cần id, userId, createdAt)
- * @returns Response với address đã update
- */
 export async function updateAddress(
   addressId: string,
-  addressData: Omit<Address, 'id' | 'userId' | 'createdAt'>
+  addressData: Omit<Address, "id" | "userId" | "createdAt">
 ): Promise<AddressActionResponse> {
   try {
     const { userId } = await auth();
@@ -187,13 +175,9 @@ export async function updateAddress(
   }
 }
 
-/**
- * Xóa địa chỉ
- * 
- * @param addressId - ID của address cần xóa
- * @returns Response với deletedId nếu thành công
- */
-export async function deleteAddress(addressId: string): Promise<AddressActionResponse> {
+export async function deleteAddress(
+  addressId: string
+): Promise<AddressActionResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {

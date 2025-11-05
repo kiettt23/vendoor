@@ -21,7 +21,7 @@ const globalForPrisma = global as typeof globalThis & {
 // Fix: Tạo 2 instances riêng biệt thay vì conditional
 const prisma =
   globalForPrisma.prisma ||
-  (process.env.NEXT_RUNTIME === "edge" 
+  (process.env.NEXT_RUNTIME === "edge"
     ? new PrismaClient({ adapter })
     : new PrismaClient());
 
