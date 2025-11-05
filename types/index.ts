@@ -137,13 +137,14 @@ export interface OrderItem {
  * Coupon model - Mã giảm giá
  */
 export interface Coupon {
-  id: string;
-  code: string;
+  code: string; // This is the primary key (@id in Prisma)
+  description: string;
   discount: number; // Percentage (0-100)
   expiresAt: Date | string;
   isPublic: boolean;
   forNewUser: boolean;
   forMember: boolean;
+  createdAt: Date | string;
 }
 
 // ============================================

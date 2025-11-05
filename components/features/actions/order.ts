@@ -3,8 +3,17 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import type { Coupon, CouponActionResponse } from "@/types";
 
-export async function applyCoupon(code) {
+/**
+ * Áp dụng mã giảm giá (coupon)
+ * 
+ * @param code - Mã coupon cần kiểm tra
+ * @returns Response với thông tin coupon nếu hợp lệ
+ */
+export async function applyCoupon(
+  code: string
+): Promise<CouponActionResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -63,7 +72,28 @@ export async function applyCoupon(code) {
   }
 }
 
-export async function createOrder(orderData) {
+/**
+ * Tạo đơn hàng mới
+ * 
+ * @param orderData - Thông tin đơn hàng (địa chỉ, items, payment method, coupon)
+ * @returns Response với session Stripe (nếu thanh toán online) hoặc thông báo thành công
+ */
+export async function createOrder(orderData: {
+  addressId: string;
+  items: Array<{
+    id?: string;
+    productId?: string;
+    quantity: number;
+    name?: string;
+    price: number;
+  }>;
+  paymentMethod: "COD" | "STRIPE";
+  couponCode?: string;
+}): Promise<{
+  success: boolean;
+  message: string;
+  session?: any; // Stripe session type
+}> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -87,7 +117,13 @@ export async function createOrder(orderData) {
     }
 
     // Calculate total for each store
-    const storeOrders = {};
+    const storeOrders: Record<
+      string,
+      {
+        items: Array<{ productId: string; quantity: number; price: number }>;
+        total: number;
+      }
+    > = {};
     for (const item of items) {
       // Support both item.id and item.productId
       const productId = item.productId || item.id;
@@ -207,7 +243,17 @@ export async function createOrder(orderData) {
   }
 }
 
-export async function cancelOrder(orderId) {
+/**
+ * Hủy đơn hàng
+ * 
+ * @param orderId - ID của đơn hàng cần hủy
+ * @returns Response với thông tin đơn hàng đã hủy
+ */
+export async function cancelOrder(orderId: string): Promise<{
+  success: boolean;
+  message: string;
+  order?: any; // Will be typed when we migrate order response types
+}> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -224,14 +270,14 @@ export async function cancelOrder(orderId) {
     }
 
     // Only allow cancel if order is not shipped
-    if (order.status === "Shipped" || order.status === "Delivered") {
+    if (order.status === "SHIPPED" || order.status === "DELIVERED") {
       throw new Error("Không thể hủy đơn hàng đã giao hoặc đang vận chuyển");
     }
 
     // Update order status
     const canceledOrder = await prisma.order.update({
       where: { id: orderId },
-      data: { status: "Cancelled" },
+      data: { status: "CANCELLED" },
     });
 
     revalidatePath("/orders");
