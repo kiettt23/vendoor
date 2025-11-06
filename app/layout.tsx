@@ -1,7 +1,8 @@
 import "./globals.css";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "@/components/ui/sonner";
 import StoreProvider from "@/app/StoreProvider";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ThemeProvider } from "next-themes";
 
 export const metadata = {
   title: "Vendoor",
@@ -11,12 +12,19 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body>
-          <StoreProvider>
-            <Toaster />
-            {children}
-          </StoreProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <StoreProvider>
+              {children}
+              <Toaster />
+            </StoreProvider>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

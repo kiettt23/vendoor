@@ -3,11 +3,8 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import type {
-  Address,
-  AddressActionResponse,
-  SerializedAddress,
-} from "@/types";
+import type { AddressActionResponse, SerializedAddress } from "@/types";
+import type { AddressFormData } from "@/lib/validations";
 
 export async function getUserAddresses(): Promise<{
   addresses: SerializedAddress[];
@@ -37,7 +34,7 @@ export async function getUserAddresses(): Promise<{
 }
 
 export async function addAddress(
-  addressData: Omit<Address, "id" | "userId" | "createdAt">
+  addressData: AddressFormData
 ): Promise<AddressActionResponse> {
   try {
     const { userId } = await auth();
@@ -45,20 +42,10 @@ export async function addAddress(
       return { success: false, error: "Vui lòng đăng nhập" };
     }
 
-    const { name, email, street, city, state, zip, country, phone } =
-      addressData;
+    const { name, email, street, city, state, phone } = addressData;
 
     // Validate required fields
-    if (
-      !name ||
-      !email ||
-      !street ||
-      !city ||
-      !state ||
-      !zip ||
-      !country ||
-      !phone
-    ) {
+    if (!name || !email || !street || !city || !state || !phone) {
       return { success: false, error: "Vui lòng điền đầy đủ thông tin" };
     }
 
@@ -70,8 +57,6 @@ export async function addAddress(
         street,
         city,
         state,
-        zip,
-        country,
         phone,
         userId,
       },
@@ -101,7 +86,7 @@ export async function addAddress(
 
 export async function updateAddress(
   addressId: string,
-  addressData: Omit<Address, "id" | "userId" | "createdAt">
+  addressData: AddressFormData
 ): Promise<AddressActionResponse> {
   try {
     const { userId } = await auth();
@@ -109,20 +94,10 @@ export async function updateAddress(
       return { success: false, error: "Vui lòng đăng nhập" };
     }
 
-    const { name, email, street, city, state, zip, country, phone } =
-      addressData;
+    const { name, email, street, city, state, phone } = addressData;
 
     // Validate required fields
-    if (
-      !name ||
-      !email ||
-      !street ||
-      !city ||
-      !state ||
-      !zip ||
-      !country ||
-      !phone
-    ) {
+    if (!name || !email || !street || !city || !state || !phone) {
       return { success: false, error: "Vui lòng điền đầy đủ thông tin" };
     }
 
@@ -147,8 +122,6 @@ export async function updateAddress(
         street,
         city,
         state,
-        zip,
-        country,
         phone,
       },
     });

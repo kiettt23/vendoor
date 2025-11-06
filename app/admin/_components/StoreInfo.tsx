@@ -9,9 +9,9 @@ const StoreInfo = ({ store }) => {
       <Image
         width={100}
         height={100}
-        src={store.logo}
+        src={store.logo || "/images/gs_logo.jpg"}
         alt={store.name}
-        className="max-w-20 max-h-20 object-contain shadow rounded-full max-sm:mx-auto"
+        className="max-w-20 max-h-20 object-cover shadow rounded-full max-sm:mx-auto"
       />
       <div className="flex flex-col sm:flex-row gap-3 items-center">
         <h3 className="text-xl font-semibold text-slate-800"> {store.name} </h3>

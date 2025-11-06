@@ -4,7 +4,7 @@
  */
 
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { applyCoupon, createOrder } from "@/lib/actions/user/order.action";

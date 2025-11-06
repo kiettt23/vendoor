@@ -11,8 +11,6 @@ export const addressSchema = z.object({
   street: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
   city: z.string().min(1, "Vui lòng nhập thành phố"),
   state: z.string().min(1, "Vui lòng nhập quận/huyện"),
-  zip: z.string().min(1, "Vui lòng nhập mã bưu điện"),
-  country: z.string().min(1, "Vui lòng nhập quốc gia"),
 });
 
 export type AddressFormData = z.infer<typeof addressSchema>;

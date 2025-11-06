@@ -8,11 +8,10 @@ datasource db {
     directUrl = env("DIRECT_URL")
 }
 
-// Required for creating a User: id, name, email, image, cart (optional JSON string)
 model User {
     id    String @id
     name  String
-    email String
+    email String @unique
     image String
     cart  Json   @default("{}")
 
@@ -21,9 +20,10 @@ model User {
     Address     Address[]
     store       Store?
     buyerOrders Order[]   @relation("BuyerRelation")
+
+    @@index([email])
 }
 
-// Required for creating a Product: name, description, mrp, price, images, category, storeId
 model Product {
     id          String   @id @default(cuid())
     name        String
@@ -41,6 +41,11 @@ model Product {
     store      Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
     orderItems OrderItem[]
     rating     Rating[]
+
+    @@index([storeId])
+    @@index([category])
+    @@index([createdAt])
+    @@index([storeId, category])
 }
 
 enum OrderStatus {
@@ -56,7 +61,6 @@ enum PaymentMethod {
     STRIPE
 }
 
-// Required for creating an Order: total, userId, storeId, addressId, isPaid, paymentMethod, isCouponUsed, coupon (JSON), orderItems (nested)
 model Order {
     id            String        @id @default(cuid())
     total         Float
@@ -76,9 +80,15 @@ model Order {
     user    User    @relation("BuyerRelation", fields: [userId], references: [id])
     store   Store   @relation(fields: [storeId], references: [id])
     address Address @relation(fields: [addressId], references: [id])
+
+    @@index([userId])
+    @@index([storeId])
+    @@index([status])
+    @@index([createdAt])
+    @@index([userId, status])
+    @@index([storeId, status])
 }
 
-// Required for creating an OrderItem: orderId, productId, quantity, price
 model OrderItem {
     orderId   String
     productId String
@@ -92,7 +102,6 @@ model OrderItem {
     @@id([orderId, productId])
 }
 
-// Required for creating a Rating: rating, review, userId, productId
 model Rating {
     id        String   @id @default(cuid())
     rating    Int
@@ -108,9 +117,11 @@ model Rating {
     product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
     @@unique([userId, productId, orderId])
+    @@index([productId])
+    @@index([userId])
+    @@index([orderId])
 }
 
-// Required for creating an Address: userId, name, email, street, city, state, zip, country, phone
 model Address {
     id        String   @id @default(cuid())
     userId    String
@@ -119,17 +130,16 @@ model Address {
     street    String
     city      String
     state     String
-    zip       String
-    country   String
     phone     String
     createdAt DateTime @default(now())
 
     // Relations
     Order Order[]
     user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
 }
 
-// Required for creating a Coupon: code, description, discount, forNewUser, isPublic, expiresAt
 model Coupon {
     code        String   @id
     description String
@@ -139,9 +149,12 @@ model Coupon {
     isPublic    Boolean
     expiresAt   DateTime
     createdAt   DateTime @default(now())
+
+    @@index([isPublic])
+    @@index([expiresAt])
+    @@index([forNewUser])
 }
 
-// Required for creating a Store: userId, name, username, email, contact, logo, description, address (optional: , status, isActive)
 model Store {
     id          String   @id @default(cuid())
     userId      String   @unique
@@ -160,4 +173,9 @@ model Store {
     Product Product[]
     Order   Order[]
     user    User      @relation(fields: [userId], references: [id])
+
+    @@index([username])
+    @@index([status])
+    @@index([isActive])
+    @@index([status, isActive])
 }

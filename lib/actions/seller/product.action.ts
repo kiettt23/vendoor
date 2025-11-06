@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { requireSeller } from "@/lib/auth/check-seller";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { put } from "@vercel/blob";
+import imagekit from "@/configs/image-kit";
 
 interface ActionResponse {
   success: boolean;
@@ -58,19 +58,35 @@ export async function createProduct(
       throw new Error("Giá bán không thể cao hơn giá gốc");
     }
 
-    // Upload images to Vercel Blob
+    // Upload images to ImageKit
     const imageUrls: string[] = [];
-    for (const file of imageFiles) {
+    for (let i = 0; i < imageFiles.length; i++) {
+      const file = imageFiles[i];
       if (file && file.size > 0) {
-        const blob = await put(file.name, file, {
-          access: "public",
-        });
-        imageUrls.push(blob.url);
+        try {
+          // Convert File to Buffer
+          const bytes = await file.arrayBuffer();
+          const buffer = Buffer.from(bytes);
+
+          // Upload to ImageKit
+          const uploadResponse = await imagekit.upload({
+            file: buffer,
+            fileName: `product-${name.replace(/\s+/g, "-")}-${
+              i + 1
+            }-${Date.now()}.${file.name.split(".").pop()}`,
+            folder: "/products",
+          });
+
+          imageUrls.push(uploadResponse.url);
+        } catch (uploadError) {
+          console.error(`Failed to upload image ${i + 1}:`, uploadError);
+          // Continue with other images
+        }
       }
     }
 
     if (imageUrls.length === 0) {
-      throw new Error("Không thể tải lên hình ảnh");
+      throw new Error("Không thể tải lên hình ảnh. Vui lòng thử lại.");
     }
 
     // Create product in database
@@ -104,7 +120,6 @@ export async function createProduct(
 
 // Update an existing product
 export async function updateProduct(
-  productId: string,
   formData: FormData
 ): Promise<ActionResponse> {
   try {
@@ -112,6 +127,8 @@ export async function updateProduct(
     if (!userId) {
       throw new Error("Unauthorized");
     }
+
+    const productId = formData.get("productId") as string;
 
     // Verify ownership
     const product = await prisma.product.findUnique({
@@ -123,20 +140,66 @@ export async function updateProduct(
       throw new Error("Unauthorized: You don't own this product");
     }
 
-    // Extract and update data
+    // Extract data
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const mrp = parseFloat(formData.get("mrp") as string);
     const price = parseFloat(formData.get("price") as string);
     const category = formData.get("category") as string;
+    const existingImagesStr = formData.get("existingImages") as string;
+    const existingImages = existingImagesStr
+      ? JSON.parse(existingImagesStr)
+      : [];
 
+    // Validate prices
     if (price > mrp) {
       throw new Error("Giá bán không thể cao hơn giá gốc");
     }
 
+    // Upload new images to ImageKit
+    const imageFiles = formData.getAll("images") as File[];
+    const newImageUrls: string[] = [];
+
+    for (let i = 0; i < imageFiles.length; i++) {
+      const file = imageFiles[i];
+      if (file && file.size > 0) {
+        try {
+          const bytes = await file.arrayBuffer();
+          const buffer = Buffer.from(bytes);
+
+          const uploadResponse = await imagekit.upload({
+            file: buffer,
+            fileName: `product-${name.replace(/\s+/g, "-")}-${Date.now()}-${
+              i + 1
+            }.${file.name.split(".").pop()}`,
+            folder: "/products",
+          });
+
+          newImageUrls.push(uploadResponse.url);
+        } catch (uploadError) {
+          console.error(`Failed to upload image ${i + 1}:`, uploadError);
+        }
+      }
+    }
+
+    // Combine existing and new images
+    const allImages = [...existingImages, ...newImageUrls];
+
+    if (allImages.length === 0) {
+      throw new Error("Vui lòng tải lên ít nhất 1 hình ảnh");
+    }
+
+    // Update product
     await prisma.product.update({
       where: { id: productId },
-      data: { name, description, mrp, price, category },
+      data: {
+        name,
+        description,
+        mrp,
+        price,
+        category,
+        images: allImages,
+      },
     });
 
     revalidatePath("/store/manage-product");

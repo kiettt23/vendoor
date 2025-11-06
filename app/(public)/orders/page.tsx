@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import OrderItem from "@/components/features/order/OrderItem";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import Loading from "@/components/ui/Loading";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { vi } from "@/lib/i18n";
 import { getUserOrders } from "@/lib/actions/user/order.action";
+import { OrderListSkeleton } from "@/components/ui/OrderSkeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { PackageIcon } from "lucide-react";
 
 export default function Orders() {
   const { user, isLoaded } = useUser();
@@ -35,7 +37,16 @@ export default function Orders() {
   }, [isLoaded, user, router]);
 
   if (!isLoaded || loading) {
-    return <Loading></Loading>;
+    return (
+      <div className="min-h-[70vh] my-20 max-w-7xl mx-auto px-6">
+        <PageTitle
+          heading={vi.order.myOrders}
+          text="Đang tải..."
+          linkText={vi.nav.home}
+        />
+        <OrderListSkeleton count={3} />
+      </div>
+    );
   }
 
   return (
@@ -65,11 +76,17 @@ export default function Orders() {
           </table>
         </div>
       ) : (
-        <div className="min-h-[80vh] mx-6 flex items-center justify-center text-slate-400">
-          <h1 className="text-2xl sm:text-4xl font-semibold">
-            {vi.order.noOrders}
-          </h1>
-        </div>
+        <Card className="min-h-[60vh] flex items-center justify-center">
+          <CardContent className="text-center py-16">
+            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 mx-auto">
+              <PackageIcon size={40} className="text-slate-400" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-slate-800 mb-2">
+              {vi.order.noOrders}
+            </h1>
+            <p className="text-slate-500">Bạn chưa có đơn hàng nào</p>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

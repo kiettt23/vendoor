@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { put } from "@vercel/blob";
+import imagekit from "@/configs/image-kit";
 
 export async function createStore(formData) {
   try {
@@ -45,13 +45,29 @@ export async function createStore(formData) {
       throw new Error("Tên định danh cửa hàng đã tồn tại");
     }
 
-    // 6. Upload store logo to Vercel Blob
+    // 6. Upload store logo to ImageKit
     let logoUrl = "";
     if (imageFile && imageFile.size > 0) {
-      const blob = await put(imageFile.name, imageFile, {
-        access: "public",
-      });
-      logoUrl = blob.url;
+      try {
+        // Convert File to Buffer
+        const bytes = await imageFile.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        // Upload to ImageKit
+        const uploadResponse = await imagekit.upload({
+          file: buffer,
+          fileName: `store-${username}-${Date.now()}.${imageFile.name
+            .split(".")
+            .pop()}`,
+          folder: "/stores",
+        });
+
+        logoUrl = uploadResponse.url;
+      } catch (uploadError) {
+        console.error("Failed to upload image to ImageKit:", uploadError);
+        // Continue without image - don't fail the entire store creation
+        logoUrl = "";
+      }
     }
 
     // 7. Create store in database with pending status

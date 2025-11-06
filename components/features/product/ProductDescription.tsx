@@ -87,9 +87,9 @@ const ProductDescription = ({ product }: ProductDescriptionProps) => {
       {/* Store Page */}
       <div className="flex gap-3 mt-14">
         <Image
-          src={product.store.logo}
+          src={product.store.logo || "/images/gs_logo.jpg"}
           alt={product.store.name}
-          className="size-11 rounded-full ring ring-slate-400"
+          className="size-11 rounded-full ring ring-slate-400 object-cover"
           width={100}
           height={100}
         />

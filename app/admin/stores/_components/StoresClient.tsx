@@ -1,7 +1,7 @@
 "use client";
 import StoreInfo from "../../_components/StoreInfo";
 import { vi } from "@/lib/i18n";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { toggleStoreActive } from "@/lib/actions/admin/store.action";
 
 export default function StoresClient({ stores: initialStores }) {

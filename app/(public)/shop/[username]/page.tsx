@@ -40,7 +40,7 @@ export default async function StoreShop({ params }) {
       {/* Store Info Banner */}
       <div className="max-w-7xl mx-auto bg-slate-50 rounded-xl p-6 md:p-10 mt-6 flex flex-col md:flex-row items-center gap-6 shadow-xs">
         <Image
-          src={store.logo}
+          src={store.logo || "/images/gs_logo.jpg"}
           alt={store.name}
           className="size-32 sm:size-38 object-cover border-2 border-slate-100 rounded-md"
           width={200}

@@ -3,7 +3,7 @@
 import { Star } from "lucide-react";
 import React, { useState } from "react";
 import { XIcon } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useAppDispatch } from "@/lib/store";
 import { addRating } from "@/lib/features/rating/rating-slice";
 import { vi } from "@/lib/i18n";

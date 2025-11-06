@@ -73,8 +73,6 @@ export interface Address {
   street: string;
   city: string;
   state: string;
-  zip: string;
-  country: string;
   phone: string;
   userId: string;
   createdAt: Date | string;
@@ -204,9 +202,9 @@ export interface ActionResponse<T = any> {
  * Response cho Address actions
  */
 export interface AddressActionResponse extends ActionResponse {
-  newAddress?: Address;
-  address?: Address;
-  addresses?: Address[];
+  newAddress?: SerializedAddress;
+  address?: SerializedAddress;
+  addresses?: SerializedAddress[];
   deletedId?: string;
 }
 

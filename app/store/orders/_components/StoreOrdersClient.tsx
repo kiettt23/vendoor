@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { updateOrderStatus } from "@/lib/actions/seller/order.action";
 import OrderModal from "./OrderModal";
 

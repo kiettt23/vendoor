@@ -1,7 +1,6 @@
 import { XIcon } from "lucide-react";
-import React from "react";
 import AddressManager from "../address/AddressManager";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Protect } from "@clerk/nextjs";
 import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";

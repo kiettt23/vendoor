@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store";
 import type { RootState } from "@/lib/store";
 import { Trash2Icon, EditIcon, PlusIcon } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { vi } from "@/lib/i18n";
 import { setAddresses } from "@/lib/features/address/address-slice";
 import {
@@ -12,21 +12,11 @@ import {
   addAddress,
 } from "@/lib/actions/user/address.action";
 import AddressModal from "./AddressModal";
-
-interface AddressData {
-  id: string;
-  name: string;
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-  phone: string;
-}
+import type { SerializedAddress } from "@/types";
 
 interface AddressManagerProps {
-  selectedAddress: AddressData | null;
-  setSelectedAddress: (address: AddressData | null) => void;
+  selectedAddress: SerializedAddress | null;
+  setSelectedAddress: (address: SerializedAddress | null) => void;
 }
 
 const AddressManager = ({
@@ -73,7 +63,7 @@ const AddressManager = ({
             <span className="font-medium">{selectedAddress.name}</span>
             <br />
             {selectedAddress.street}, {selectedAddress.city},{" "}
-            {selectedAddress.state}, {selectedAddress.zip}
+            {selectedAddress.state}
             <br />
             {selectedAddress.phone}
           </p>
@@ -99,8 +89,7 @@ const AddressManager = ({
                   >
                     <p className="font-medium text-slate-600">{address.name}</p>
                     <p className="text-sm">
-                      {address.street}, {address.city}, {address.state},{" "}
-                      {address.zip}
+                      {address.street}, {address.city}, {address.state}
                     </p>
                     <p className="text-sm">{address.phone}</p>
                   </div>

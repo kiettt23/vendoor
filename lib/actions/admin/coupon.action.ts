@@ -68,8 +68,11 @@ export async function createCoupon(
 
     // Validate expiration date
     const expirationDate = new Date(expiresAt);
-    if (expirationDate <= new Date()) {
-      throw new Error("Ngày hết hạn phải sau ngày hiện tại");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset to start of day
+
+    if (expirationDate < today) {
+      throw new Error("Ngày hết hạn phải từ hôm nay trở đi");
     }
 
     // Create coupon

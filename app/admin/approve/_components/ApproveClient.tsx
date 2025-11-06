@@ -1,8 +1,11 @@
 "use client";
 import StoreInfo from "../../_components/StoreInfo";
 import { vi } from "@/lib/i18n";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { approveStore, rejectStore } from "@/lib/actions/admin/store.action";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle2Icon, XCircleIcon, StoreIcon } from "lucide-react";
 
 interface Store {
   id: string;
@@ -41,55 +44,65 @@ export default function ApproveClient({
   };
 
   return (
-    <div className="text-slate-500 mb-28">
-      <h1 className="text-2xl">
-        {vi.admin.approve}{" "}
-        <span className="text-slate-800 font-medium">{vi.admin.stores}</span>
-      </h1>
-
-      {initialStores.length ? (
-        <div className="flex flex-col gap-4 mt-4">
-          {initialStores.map((store) => (
-            <div
-              key={store.id}
-              className="bg-white border rounded-lg shadow-sm p-6 flex max-md:flex-col gap-4 md:items-end max-w-4xl"
-            >
-              {/* Store Info */}
-              <StoreInfo store={store} />
-
-              {/* Actions */}
-              <div className="flex gap-3 pt-2 flex-wrap">
-                <button
-                  onClick={() =>
-                    toast.promise(handleApprove(store.id), {
-                      loading: vi.admin.approving,
-                    })
-                  }
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-                >
-                  {vi.admin.approve}
-                </button>
-                <button
-                  onClick={() =>
-                    toast.promise(handleReject(store.id), {
-                      loading: vi.admin.rejecting,
-                    })
-                  }
-                  className="px-4 py-2 bg-slate-500 text-white rounded hover:bg-slate-600 text-sm"
-                >
-                  {vi.admin.reject}
-                </button>
-              </div>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl flex items-center gap-2">
+            <CheckCircle2Icon size={24} className="text-green-600" />
+            {vi.admin.approve} {vi.admin.stores}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {initialStores.length ? (
+            <div className="flex flex-col gap-4">
+              {initialStores.map((store) => (
+                <Card key={store.id}>
+                  <CardContent className="p-6 flex max-md:flex-col gap-4 md:items-end">
+                    <StoreInfo store={store} />
+                    <div className="flex gap-3 pt-2 flex-wrap">
+                      <Button
+                        onClick={() =>
+                          toast.promise(handleApprove(store.id), {
+                            loading: vi.admin.approving,
+                          })
+                        }
+                        variant="default"
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle2Icon size={16} className="mr-2" />
+                        {vi.admin.approve}
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          toast.promise(handleReject(store.id), {
+                            loading: vi.admin.rejecting,
+                          })
+                        }
+                        variant="secondary"
+                      >
+                        <XCircleIcon size={16} className="mr-2" />
+                        {vi.admin.reject}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="flex items-center justify-center h-80">
-          <h1 className="text-3xl text-slate-400 font-medium">
-            {vi.admin.noApplications}
-          </h1>
-        </div>
-      )}
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                <StoreIcon size={40} className="text-slate-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-800 mb-2">
+                Không có đơn đăng ký nào
+              </h3>
+              <p className="text-slate-500">
+                Chưa có cửa hàng nào chờ phê duyệt
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

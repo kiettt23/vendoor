@@ -2,7 +2,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { DeleteIcon, Check, Ban } from "lucide-react";
 import { createCoupon, deleteCoupon } from "@/lib/actions/admin/coupon.action";
 import { couponSchema, type CouponFormData } from "@/lib/validations";

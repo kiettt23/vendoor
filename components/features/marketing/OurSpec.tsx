@@ -1,6 +1,7 @@
 import React from "react";
 import ViewMore from "@/components/ui/ViewMore";
 import { ClockIcon, HeadsetIcon, TruckIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const OurSpecs = () => {
   const ourSpecsData = [
@@ -10,6 +11,7 @@ const OurSpecs = () => {
         "Giao hàng nhanh chóng, miễn phí cho mọi đơn hàng. Không điều kiện, chỉ có sự tin cậy.",
       icon: TruckIcon,
       accent: "#05DF72",
+      bgGradient: "from-green-50 to-emerald-50",
     },
     {
       title: "Đổi trả dễ dàng trong 7 ngày",
@@ -17,6 +19,7 @@ const OurSpecs = () => {
         "Đổi ý? Không sao cả. Đổi trả bất kỳ sản phẩm nào trong 7 ngày.",
       icon: ClockIcon,
       accent: "#FF8904",
+      bgGradient: "from-orange-50 to-amber-50",
     },
     {
       title: "Hỗ trợ khách hàng 24/7",
@@ -24,6 +27,7 @@ const OurSpecs = () => {
         "Chúng tôi luôn sẵn sàng hỗ trợ. Nhận trợ giúp từ đội ngũ chuyên nghiệp.",
       icon: HeadsetIcon,
       accent: "#A684FF",
+      bgGradient: "from-purple-50 to-violet-50",
     },
   ];
 
@@ -35,26 +39,28 @@ const OurSpecs = () => {
         description="Mang đến trải nghiệm mua sắm tốt nhất với những cam kết chất lượng"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 gap-y-10 mt-26">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-16">
         {ourSpecsData.map((spec, index) => {
           return (
-            <div
-              className="relative h-44 px-8 flex flex-col items-center justify-center w-full text-center border rounded-lg group"
-              style={{
-                backgroundColor: spec.accent + 10,
-                borderColor: spec.accent + 30,
-              }}
+            <Card
               key={index}
+              className={`relative overflow-hidden border-2 bg-gradient-to-br ${spec.bgGradient} hover:shadow-xl transition-all duration-300 group`}
             >
-              <h3 className="text-slate-800 font-medium">{spec.title}</h3>
-              <p className="text-sm text-slate-600 mt-3">{spec.description}</p>
-              <div
-                className="absolute -top-5 text-white size-10 flex items-center justify-center rounded-md group-hover:scale-105 transition"
-                style={{ backgroundColor: spec.accent }}
-              >
-                <spec.icon size={20} />
-              </div>
-            </div>
+              <CardContent className="p-8 pt-12 text-center">
+                <div
+                  className="absolute -top-6 left-1/2 -translate-x-1/2 text-white size-12 flex items-center justify-center rounded-xl shadow-lg group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300"
+                  style={{ backgroundColor: spec.accent }}
+                >
+                  <spec.icon size={24} />
+                </div>
+                <h3 className="text-slate-800 font-semibold text-lg mb-3">
+                  {spec.title}
+                </h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  {spec.description}
+                </p>
+              </CardContent>
+            </Card>
           );
         })}
       </div>

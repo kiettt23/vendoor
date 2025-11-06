@@ -1,8 +1,28 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import ViewMore from "@/components/ui/ViewMore";
 import { vi } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { MailIcon } from "lucide-react";
 
 const Newsletter = () => {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    toast.success("Đã đăng ký nhận tin thành công!");
+    setEmail("");
+    setLoading(false);
+  };
+
   return (
     <div className="flex flex-col items-center mx-4 my-36">
       <ViewMore
@@ -10,16 +30,28 @@ const Newsletter = () => {
         description={vi.footer.subscribeMessage}
         visibleButton={false}
       />
-      <div className="flex bg-slate-100 text-sm p-1 rounded-full w-full max-w-xl my-10 border-2 border-white ring ring-slate-200">
-        <input
-          className="flex-1 pl-5 outline-none"
-          type="text"
-          placeholder={vi.footer.enterEmail}
-        />
-        <button className="font-medium bg-purple-500 text-white px-7 py-3 rounded-full hover:scale-103 active:scale-95 transition">
-          {vi.footer.subscribe}
-        </button>
-      </div>
+      <form
+        onSubmit={handleSubscribe}
+        className="flex gap-2 w-full max-w-xl my-10"
+      >
+        <div className="relative flex-1">
+          <MailIcon
+            size={18}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+          <Input
+            type="email"
+            placeholder={vi.footer.enterEmail}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="pl-12 h-12"
+          />
+        </div>
+        <Button type="submit" disabled={loading} size="lg" className="px-8">
+          {loading ? "Đang gửi..." : vi.footer.subscribe}
+        </Button>
+      </form>
     </div>
   );
 };

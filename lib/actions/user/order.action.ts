@@ -245,6 +245,15 @@ export async function createOrder(
     if (paymentMethod === "STRIPE") {
       const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
+      // Get base URL with protocol
+      const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+      const successUrl = baseUrl.startsWith("http")
+        ? `${baseUrl}/orders?success=true`
+        : `https://${baseUrl}/orders?success=true`;
+      const cancelUrl = baseUrl.startsWith("http")
+        ? `${baseUrl}/cart?canceled=true`
+        : `https://${baseUrl}/cart?canceled=true`;
+
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: items.map((item) => ({
@@ -258,8 +267,8 @@ export async function createOrder(
           quantity: item.quantity,
         })),
         mode: "payment",
-        success_url: `${process.env.NEXT_PUBLIC_URL}/orders?success=true`,
-        cancel_url: `${process.env.NEXT_PUBLIC_URL}/cart?canceled=true`,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
       });
 
       return {

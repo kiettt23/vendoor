@@ -5,7 +5,7 @@ import { useAppSelector } from "@/lib/store";
 import type { RootState } from "@/lib/store";
 import Rating from "@/components/ui/Rating";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import RatingModal from "../rating/RatingModal";
 import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";

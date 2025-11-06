@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import Loading from "@/components/ui/Loading";
 import { useUser } from "@clerk/nextjs";
 import { vi } from "@/lib/i18n";

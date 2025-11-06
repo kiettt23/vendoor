@@ -1,7 +1,30 @@
 "use client";
-import { toast } from "react-hot-toast";
+import { useState } from "react";
+import { toast } from "sonner";
 import Image from "next/image";
-import { toggleProductStock } from "@/lib/actions/seller/product.action";
+import {
+  Trash2Icon,
+  EditIcon,
+  EyeIcon,
+  EyeOffIcon,
+  PlusIcon,
+} from "lucide-react";
+import {
+  toggleProductStock,
+  deleteProduct,
+} from "@/lib/actions/seller/product.action";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const currency = "đ";
 
@@ -11,6 +34,7 @@ interface Product {
   description: string;
   price: number;
   mrp: number;
+  category: string;
   images: string[];
   inStock: boolean;
 }
@@ -22,77 +46,216 @@ interface ManageProductsClientProps {
 export default function ManageProductsClient({
   products: initialProducts,
 }: ManageProductsClientProps) {
+  const router = useRouter();
+  const [products, setProducts] = useState(initialProducts);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
   const handleToggleStock = async (productId: string) => {
     try {
       const result = await toggleProductStock(productId);
+
+      // Update local state
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId ? { ...p, inStock: result.inStock! } : p
+        )
+      );
+
       toast.success(result.message);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Có lỗi xảy ra");
     }
   };
 
+  const handleEdit = (productId: string) => {
+    router.push(`/store/manage-product/edit/${productId}`);
+  };
+
+  const handleDelete = async (productId: string, productName: string) => {
+    if (!confirm(`Bạn có chắc muốn xóa sản phẩm "${productName}"?`)) {
+      return;
+    }
+
+    setDeletingId(productId);
+
+    try {
+      await deleteProduct(productId);
+
+      // Remove from local state
+      setProducts((prev) => prev.filter((p) => p.id !== productId));
+
+      toast.success("Đã xóa sản phẩm thành công!");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Không thể xóa sản phẩm"
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  if (products.length === 0) {
+    return (
+      <Card className="text-center py-12">
+        <CardContent className="pt-6">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center">
+              <EyeOffIcon size={40} className="text-slate-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-slate-800 mb-2">
+                Chưa có sản phẩm nào
+              </h2>
+              <p className="text-slate-600 mb-4">
+                Bắt đầu bán hàng bằng cách thêm sản phẩm đầu tiên
+              </p>
+            </div>
+            <Button onClick={() => router.push("/store/add-product")} size="lg">
+              <PlusIcon size={18} className="mr-2" />
+              Thêm sản phẩm đầu tiên
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <>
-      <h1 className="text-2xl text-slate-500 mb-5">
-        Manage <span className="text-slate-800 font-medium">Products</span>
-      </h1>
-      <table className="w-full max-w-4xl text-left  ring ring-slate-200  rounded overflow-hidden text-sm">
-        <thead className="bg-slate-50 text-gray-700 uppercase tracking-wider">
-          <tr>
-            <th className="px-4 py-3">Name</th>
-            <th className="px-4 py-3 hidden md:table-cell">Description</th>
-            <th className="px-4 py-3 hidden md:table-cell">MRP</th>
-            <th className="px-4 py-3">Price</th>
-            <th className="px-4 py-3">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="text-slate-700">
-          {initialProducts.map((product) => (
-            <tr
-              key={product.id}
-              className="border-t border-gray-200 hover:bg-gray-50"
-            >
-              <td className="px-4 py-3">
-                <div className="flex gap-2 items-center">
-                  <Image
-                    width={40}
-                    height={40}
-                    className="p-1 shadow rounded cursor-pointer"
-                    src={product.images[0]}
-                    alt=""
-                  />
-                  {product.name}
-                </div>
-              </td>
-              <td className="px-4 py-3 max-w-md text-slate-600 hidden md:table-cell truncate">
-                {product.description}
-              </td>
-              <td className="px-4 py-3 hidden md:table-cell">
-                {product.mrp.toLocaleString()} {currency}
-              </td>
-              <td className="px-4 py-3">
-                {product.price.toLocaleString()} {currency}
-              </td>
-              <td className="px-4 py-3 text-center">
-                <label className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    onChange={() =>
-                      toast.promise(handleToggleStock(product.id), {
-                        loading: "Updating data...",
-                      })
-                    }
-                    checked={product.inStock}
-                  />
-                  <div className="w-9 h-5 bg-slate-300 rounded-full peer peer-checked:bg-green-600 transition-colors duration-200"></div>
-                  <span className="dot absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-4"></span>
-                </label>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-2xl">Quản lý Sản phẩm</CardTitle>
+            <Button onClick={() => router.push("/store/add-product")}>
+              <PlusIcon size={18} className="mr-2" />
+              Thêm sản phẩm
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Sản phẩm</TableHead>
+                  <TableHead className="hidden lg:table-cell">Mô tả</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Danh mục
+                  </TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Giá gốc
+                  </TableHead>
+                  <TableHead>Giá bán</TableHead>
+                  <TableHead className="text-center">Trạng thái</TableHead>
+                  <TableHead className="text-center">Thao tác</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <div className="flex gap-3 items-center">
+                        <div className="relative w-12 h-12 flex-shrink-0 rounded-md overflow-hidden">
+                          <Image
+                            fill
+                            className="object-cover"
+                            src={product.images[0]}
+                            alt={product.name}
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-medium truncate">{product.name}</p>
+                          <p className="text-xs text-slate-500 md:hidden">
+                            {product.category}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="max-w-md hidden lg:table-cell">
+                      <p
+                        className="truncate text-slate-600"
+                        title={product.description}
+                      >
+                        {product.description}
+                      </p>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <Badge variant="secondary">{product.category}</Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-slate-500 line-through">
+                      {product.mrp.toLocaleString()} {currency}
+                    </TableCell>
+                    <TableCell className="font-medium text-purple-600">
+                      {product.price.toLocaleString()} {currency}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            toast.promise(handleToggleStock(product.id), {
+                              loading: "Đang cập nhật...",
+                            })
+                          }
+                          className="gap-2"
+                        >
+                          {product.inStock ? (
+                            <>
+                              <EyeIcon size={16} className="text-green-600" />
+                              <Badge variant="success">Còn hàng</Badge>
+                            </>
+                          ) : (
+                            <>
+                              <EyeOffIcon
+                                size={16}
+                                className="text-slate-400"
+                              />
+                              <Badge variant="secondary">Hết hàng</Badge>
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2 justify-center">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(product.id)}
+                          title="Chỉnh sửa"
+                        >
+                          <EditIcon size={18} className="text-blue-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(product.id, product.name)}
+                          disabled={deletingId === product.id}
+                          title="Xóa"
+                        >
+                          {deletingId === product.id ? (
+                            <div className="w-[18px] h-[18px] border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Trash2Icon size={18} className="text-red-600" />
+                          )}
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="mt-4 text-sm text-slate-500 text-center md:text-right">
+            Tổng số:{" "}
+            <span className="font-medium text-slate-700">
+              {products.length}
+            </span>{" "}
+            sản phẩm
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { getSellerStatus } from "@/lib/actions/user/create-store.action";
 
 export function useSellerStatus() {
