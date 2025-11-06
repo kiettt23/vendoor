@@ -5,6 +5,7 @@ import {
   LayoutListIcon,
   SquarePenIcon,
   SquarePlusIcon,
+  SettingsIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,6 +27,7 @@ const StoreSidebar = ({ storeInfo }) => {
       icon: SquarePenIcon,
     },
     { name: vi.store.orders, href: "/store/orders", icon: LayoutListIcon },
+    { name: "Cài đặt", href: "/store/settings", icon: SettingsIcon },
   ];
 
   return (
@@ -33,7 +35,7 @@ const StoreSidebar = ({ storeInfo }) => {
       <div className="flex flex-col gap-3 justify-center items-center pt-8 max-sm:hidden">
         <Image
           className="w-14 h-14 rounded-full shadow-md object-cover"
-          src={storeInfo?.logo || "/images/gs_logo.jpg"}
+          src={storeInfo?.logo || "/images/avatar_placeholder.png"}
           alt={storeInfo?.name || "Store"}
           width={80}
           height={80}

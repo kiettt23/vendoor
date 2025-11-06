@@ -21,3 +21,16 @@ export const storeSchema = z.object({
 });
 
 export type StoreFormData = z.infer<typeof storeSchema>;
+
+/**
+ * Validation schema cho Update Store (không bao gồm username)
+ */
+export const storeUpdateSchema = z.object({
+  name: z.string().min(3, "Tên cửa hàng phải có ít nhất 3 ký tự"),
+  description: z.string().min(1, "Vui lòng nhập mô tả"),
+  email: z.string().email("Email không hợp lệ"),
+  contact: z.string().min(10, "Số điện thoại phải có ít nhất 10 số"),
+  address: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
+});
+
+export type StoreUpdateFormData = z.infer<typeof storeUpdateSchema>;
