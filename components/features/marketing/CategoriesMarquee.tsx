@@ -1,4 +1,5 @@
 import { getAllCategoryNamesEn } from "@/configs/categories";
+import Link from "next/link";
 
 const CategoriesMarquee = () => {
   const categories = getAllCategoryNamesEn();
@@ -9,12 +10,13 @@ const CategoriesMarquee = () => {
       <div className="flex min-w-[200%] animate-[marqueeScroll_10s_linear_infinite] sm:animate-[marqueeScroll_40s_linear_infinite] group-hover:[animation-play-state:paused] gap-4 whitespace-nowrap">
         {[...categories, ...categories, ...categories, ...categories].map(
           (category, index) => (
-            <button
+            <Link
               key={index}
+              href="/shop"
               className="px-5 py-2 bg-slate-100 rounded-lg text-slate-500 text-xs sm:text-sm hover:bg-slate-600 hover:text-white active:scale-95 transition-all duration-300 whitespace-nowrap flex-shrink-0"
             >
               {category}
-            </button>
+            </Link>
           )
         )}
       </div>

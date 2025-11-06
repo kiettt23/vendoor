@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
           >
             <StoreProvider>
               {children}
-              <Toaster />
+              <Toaster position="top-center" />
             </StoreProvider>
           </ThemeProvider>
         </body>

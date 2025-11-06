@@ -37,6 +37,8 @@ export default async function Shop({ searchParams }) {
     },
   });
 
+  console.log(`[SHOP PAGE] Found ${products.length} products`);
+
   // ✅ Pass data to Client Component
   return <ShopClient products={products} initialSearch={search} />;
 }

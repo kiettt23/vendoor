@@ -14,9 +14,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
       product.rating.length
   );
 
-  const hasDiscount = product.salePrice && product.salePrice < product.price;
+  // Calculate discount percentage (mrp vs price)
+  const hasDiscount = product.mrp > product.price;
   const discountPercent = hasDiscount
-    ? Math.round(((product.price - product.salePrice) / product.price) * 100)
+    ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
     : 0;
 
   return (
@@ -34,10 +35,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             alt={product.name}
           />
           {hasDiscount && (
-            <Badge
-              variant="destructive"
-              className="absolute top-2 right-2 font-bold"
-            >
+            <Badge className="absolute top-2 right-2 font-semibold bg-orange-500 hover:bg-orange-600 text-white border-0">
               -{discountPercent}%
             </Badge>
           )}
@@ -69,19 +67,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 </span>
               </div>
             </div>
-            <div className="text-right flex flex-col justify-start">
-              {hasDiscount ? (
-                <>
-                  <p className="font-bold text-purple-600 whitespace-nowrap text-sm">
-                    {formatPrice(product.salePrice)}
-                  </p>
-                  <p className="text-xs text-slate-400 line-through">
-                    {formatPrice(product.price)}
-                  </p>
-                </>
-              ) : (
-                <p className="font-semibold text-slate-800 whitespace-nowrap text-sm">
-                  {formatPrice(product.price)}
+            <div className="text-right flex flex-col justify-start gap-0.5">
+              <p className="font-semibold text-slate-800 whitespace-nowrap">
+                {formatPrice(product.price)}
+              </p>
+              {hasDiscount && (
+                <p className="text-xs text-slate-400 line-through">
+                  {formatPrice(product.mrp)}
                 </p>
               )}
             </div>

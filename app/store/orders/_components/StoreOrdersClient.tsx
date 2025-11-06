@@ -47,6 +47,18 @@ export default function StoreOrdersClient({
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Debug: Log each order's coupon data
+  initialOrders.forEach((order, index) => {
+    console.log(`[ORDER ${index + 1}]`, {
+      id: order.id,
+      isCouponUsed: order.isCouponUsed,
+      coupon: order.coupon,
+      couponType: typeof order.coupon,
+      couponStringified: JSON.stringify(order.coupon),
+      hasCode: order.coupon?.code,
+    });
+  });
+
   const handleUpdateOrderStatus = async (orderId: string, status: string) => {
     try {
       const result = await updateOrderStatus(orderId, status as OrderStatus);
@@ -107,10 +119,7 @@ export default function StoreOrdersClient({
                   </td>
                   <td className="px-4 py-3">{order.paymentMethod}</td>
                   <td className="px-4 py-3">
-                    {order.isCouponUsed &&
-                    order.coupon &&
-                    Object.keys(order.coupon).length > 0 &&
-                    order.coupon.code ? (
+                    {order.isCouponUsed && order.coupon && order.coupon.code ? (
                       <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">
                         {order.coupon.code}
                       </span>
@@ -129,7 +138,17 @@ export default function StoreOrdersClient({
                       onChange={(e) =>
                         handleUpdateOrderStatus(order.id, e.target.value)
                       }
-                      className="border-gray-300 rounded-md text-sm focus:ring focus:ring-blue-200"
+                      className={`border-none rounded-full px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-offset-1 ${
+                        order.status === "ORDER_PLACED"
+                          ? "bg-slate-100 text-slate-700 focus:ring-slate-300"
+                          : order.status === "PROCESSING"
+                          ? "bg-yellow-100 text-yellow-700 focus:ring-yellow-300"
+                          : order.status === "SHIPPED"
+                          ? "bg-blue-100 text-blue-700 focus:ring-blue-300"
+                          : order.status === "DELIVERED"
+                          ? "bg-green-100 text-green-700 focus:ring-green-300"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
                     >
                       <option value="ORDER_PLACED">Đã đặt hàng</option>
                       <option value="PROCESSING">Đang xử lý</option>

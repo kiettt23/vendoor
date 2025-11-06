@@ -93,7 +93,14 @@ const OrderItem = ({ order }: OrderItemProps) => {
         </td>
 
         <td className="text-center max-md:hidden">
-          {formatPrice(order.total)}
+          <div>
+            <p className="font-medium">{formatPrice(order.total)}</p>
+            {order.isCouponUsed && order.coupon && order.coupon.code && (
+              <p className="text-xs text-green-600 mt-1">
+                Đã dùng mã: {order.coupon.code} (-{order.coupon.discount}%)
+              </p>
+            )}
+          </div>
         </td>
 
         <td className="text-left max-md:hidden">

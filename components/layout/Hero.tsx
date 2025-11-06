@@ -1,6 +1,7 @@
 "use client";
 import { ArrowRightIcon, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 import CategoriesMarquee from "../features/marketing/CategoriesMarquee";
 import { formatPrice } from "@/lib/utils/format/currency";
@@ -28,9 +29,11 @@ const Hero = () => {
               <p>Chỉ từ</p>
               <p className="text-3xl">{formatPrice(200000)}</p>
             </div>
-            <button className="bg-slate-800 text-white text-sm py-2.5 px-7 sm:py-5 sm:px-12 mt-4 sm:mt-10 rounded-md hover:bg-slate-900 hover:scale-103 active:scale-95 transition">
-              XEM THÊM
-            </button>
+            <Link href="/shop">
+              <button className="bg-slate-800 text-white text-sm py-2.5 px-7 sm:py-5 sm:px-12 mt-4 sm:mt-10 rounded-md hover:bg-slate-900 hover:scale-103 active:scale-95 transition">
+                XEM THÊM
+              </button>
+            </Link>
           </div>
           <Image
             className="sm:absolute bottom-0 right-0 md:right-10 w-full sm:max-w-sm"
@@ -42,7 +45,10 @@ const Hero = () => {
         </div>
 
         <div className="flex flex-col md:flex-row xl:flex-col gap-5 w-full xl:max-w-sm text-sm text-slate-600">
-          <div className="flex-1 flex items-center justify-between w-full bg-orange-200 rounded-3xl p-6 px-8 group">
+          <Link
+            href="/shop"
+            className="flex-1 flex items-center justify-between w-full bg-orange-200 rounded-3xl p-6 px-8 group cursor-pointer hover:scale-102 transition"
+          >
             <div>
               <p className="text-3xl font-medium bg-linear-to-r from-slate-800 to-[#FFAD51] bg-clip-text text-transparent max-w-40">
                 Sản phẩm tốt nhất
@@ -62,9 +68,12 @@ const Hero = () => {
               width={140}
               height={140}
             />
-          </div>
+          </Link>
 
-          <div className="flex-1 flex items-center justify-between w-full bg-blue-200 rounded-3xl p-6 px-8 group">
+          <Link
+            href="/shop"
+            className="flex-1 flex items-center justify-between w-full bg-blue-200 rounded-3xl p-6 px-8 group cursor-pointer hover:scale-102 transition"
+          >
             <div>
               <p className="text-3xl font-medium bg-linear-to-r from-slate-800 to-[#78B2FF] bg-clip-text text-transparent max-w-40">
                 Giảm giá 10%
@@ -84,7 +93,7 @@ const Hero = () => {
               width={140}
               height={140}
             />
-          </div>
+          </Link>
         </div>
       </div>
       <CategoriesMarquee />

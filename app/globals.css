@@ -86,6 +86,16 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+
+  /* Lighter placeholder color */
+  ::placeholder {
+    @apply text-slate-400 opacity-60;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-slate-400 opacity-60;
+  }
 }
 
 .no-scrollbar::-webkit-scrollbar {

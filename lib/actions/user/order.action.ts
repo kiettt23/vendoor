@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import type { Coupon, CouponActionResponse } from "@/types";
 import {
@@ -10,6 +10,7 @@ import {
   type OrderFormData,
   type CouponCodeFormData,
 } from "@/lib/validations";
+import { APP_CONFIG } from "@/configs/app";
 
 interface OrderResponse {
   success: boolean;
@@ -26,7 +27,14 @@ export async function getOrders() {
   }
 
   const orders = await prisma.order.findMany({
-    where: { userId },
+    where: {
+      userId,
+      // Only show paid orders (COD or successful Stripe payments)
+      OR: [
+        { paymentMethod: "COD" },
+        { AND: [{ paymentMethod: "STRIPE" }, { isPaid: true }] },
+      ],
+    },
     include: {
       orderItems: {
         include: {
@@ -53,7 +61,36 @@ export async function getOrders() {
     },
   });
 
-  return orders;
+  // Parse coupon JSON for each order
+  const ordersWithParsedCoupon = orders.map((order) => {
+    let parsedCoupon = order.coupon;
+
+    // Handle both string (old orders) and object (Prisma default)
+    if (typeof order.coupon === "string") {
+      try {
+        parsedCoupon = JSON.parse(order.coupon);
+      } catch (e) {
+        console.error("Failed to parse coupon:", e);
+        parsedCoupon = null;
+      }
+    }
+
+    // If coupon is empty object {}, set to null for cleaner UI
+    if (
+      parsedCoupon &&
+      typeof parsedCoupon === "object" &&
+      Object.keys(parsedCoupon).length === 0
+    ) {
+      parsedCoupon = null;
+    }
+
+    return {
+      ...order,
+      coupon: parsedCoupon,
+    };
+  });
+
+  return ordersWithParsedCoupon;
 }
 
 // Alias for backward compatibility
@@ -89,6 +126,35 @@ export async function applyCoupon(code: string): Promise<CouponActionResponse> {
     // Check expiration
     if (new Date(coupon.expiresAt) < new Date()) {
       return { success: false, error: "Mã giảm giá đã hết hạn" };
+    }
+
+    // Get user info from Clerk to check membership status
+    const { clerkClient } = await import("@clerk/nextjs/server");
+    const client = await clerkClient();
+    const clerkUser = await client.users.getUser(userId);
+
+    // Check if user has any orders (for forNewUser check)
+    const userOrderCount = await prisma.order.count({
+      where: { userId },
+    });
+
+    const isNewUser = userOrderCount === 0;
+    const isPlusMember = clerkUser.publicMetadata?.isPlusMember === true;
+
+    // Check forNewUser restriction
+    if (coupon.forNewUser && !isNewUser) {
+      return {
+        success: false,
+        error: "Mã giảm giá này chỉ dành cho người dùng mới",
+      };
+    }
+
+    // Check forMember restriction
+    if (coupon.forMember && !isPlusMember) {
+      return {
+        success: false,
+        error: "Mã giảm giá này chỉ dành cho thành viên Plus",
+      };
     }
 
     // Check if public or user-specific
@@ -152,14 +218,14 @@ export async function createOrder(
       throw new Error("Địa chỉ không hợp lệ");
     }
 
-    // Calculate total for each store
-    const storeOrders: Record<
-      string,
-      {
-        items: Array<{ productId: string; quantity: number; price: number }>;
-        total: number;
-      }
-    > = {};
+    // Calculate total and collect all items in a single order
+    let totalPrice = 0;
+    const allItems: Array<{
+      productId: string;
+      quantity: number;
+      price: number;
+    }> = [];
+    let mainStoreId = "";
 
     for (const item of items) {
       const productId = item.productId;
@@ -180,20 +246,18 @@ export async function createOrder(
         throw new Error("Sản phẩm không còn hàng");
       }
 
-      if (!storeOrders[product.storeId]) {
-        storeOrders[product.storeId] = {
-          items: [],
-          total: 0,
-        };
+      // Use first product's store as main store
+      if (!mainStoreId) {
+        mainStoreId = product.storeId;
       }
 
-      storeOrders[product.storeId].items.push({
+      allItems.push({
         productId,
         quantity: item.quantity,
         price: product.price,
       });
 
-      storeOrders[product.storeId].total += product.price * item.quantity;
+      totalPrice += product.price * item.quantity;
     }
 
     // Apply coupon if provided
@@ -203,43 +267,30 @@ export async function createOrder(
       coupon = couponResult.coupon;
     }
 
-    // Create orders for each store
-    const createdOrders = [];
-    for (const [storeId, orderInfo] of Object.entries(storeOrders)) {
-      let total = orderInfo.total;
-
-      // Apply coupon discount
-      if (coupon) {
-        total = total - (total * coupon.discount) / 100;
-      }
-
-      const order = await prisma.order.create({
-        data: {
-          total,
-          userId,
-          storeId,
-          addressId,
-          paymentMethod,
-          isPaid: paymentMethod === "STRIPE",
-          isCouponUsed: !!coupon,
-          coupon: coupon ? JSON.stringify(coupon) : {},
-          orderItems: {
-            create: orderInfo.items,
-          },
-        },
-      });
-
-      createdOrders.push(order);
+    // Apply coupon discount
+    let finalTotal = totalPrice;
+    if (coupon) {
+      finalTotal = finalTotal - (finalTotal * coupon.discount) / 100;
     }
 
-    // Clear user cart
-    await prisma.user.update({
-      where: { id: userId },
-      data: { cart: {} },
+    // Create single order for all items
+    const order = await prisma.order.create({
+      data: {
+        total: finalTotal,
+        userId,
+        storeId: mainStoreId,
+        addressId,
+        paymentMethod,
+        isPaid: paymentMethod === "STRIPE",
+        isCouponUsed: !!coupon,
+        coupon: coupon || null,
+        orderItems: {
+          create: allItems,
+        },
+      },
     });
 
-    revalidatePath("/cart");
-    revalidatePath("/orders");
+    const createdOrders = [order];
 
     // Handle Stripe payment
     if (paymentMethod === "STRIPE") {
@@ -254,21 +305,49 @@ export async function createOrder(
         ? `${baseUrl}/cart?canceled=true`
         : `https://${baseUrl}/cart?canceled=true`;
 
+      // Calculate total amount with coupon and shipping
+      const client = await clerkClient();
+      const clerkUser = await client.users.getUser(userId);
+      const isPlusMember = clerkUser.publicMetadata?.isPlusMember === true;
+
+      let subtotal = 0;
+      for (const item of items) {
+        subtotal += item.price * item.quantity;
+      }
+
+      // Apply discount
+      const discountAmount = coupon ? (coupon.discount / 100) * subtotal : 0;
+
+      // Add shipping fee (free for Plus members)
+      const shippingFee = isPlusMember ? 0 : APP_CONFIG.SHIPPING_FEE;
+
+      // Calculate final total
+      const finalTotal = subtotal + shippingFee - discountAmount;
+
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
-        line_items: items.map((item) => ({
-          price_data: {
-            currency: "vnd",
-            product_data: {
-              name: item.name || "Product",
+        line_items: [
+          {
+            price_data: {
+              currency: "vnd",
+              product_data: {
+                name:
+                  "Tổng đơn hàng" +
+                  (coupon ? ` (Mã giảm giá: ${coupon.code})` : ""),
+              },
+              unit_amount: Math.round(finalTotal),
             },
-            unit_amount: Math.round(item.price),
+            quantity: 1,
           },
-          quantity: item.quantity,
-        })),
+        ],
         mode: "payment",
         success_url: successUrl,
         cancel_url: cancelUrl,
+        metadata: {
+          orderIds: createdOrders.map((order) => order.id).join(","),
+          userId,
+          appId: "vendoor",
+        },
       });
 
       return {
@@ -277,6 +356,15 @@ export async function createOrder(
         session,
       };
     }
+
+    // Clear cart for COD orders only (Stripe cart cleared via webhook)
+    await prisma.user.update({
+      where: { id: userId },
+      data: { cart: {} },
+    });
+
+    revalidatePath("/cart");
+    revalidatePath("/orders");
 
     return {
       success: true,

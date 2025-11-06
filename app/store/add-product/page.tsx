@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { toast } from "sonner";
-import { getAllCategoryNamesEn } from "@/configs/categories";
+import { CATEGORIES } from "@/configs/categories";
 import { createProduct } from "@/lib/actions/seller/product.action";
 import { productSchema, type ProductFormData } from "@/lib/validations";
 import { useAIImageAnalysis } from "@/lib/hooks/useAIImageAnalysis";
@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/field";
 
 export default function StoreAddProduct() {
-  const categories = getAllCategoryNamesEn();
   const [images, setImages] = useState<Record<string, File | null>>({
     "1": null,
     "2": null,
@@ -27,15 +26,15 @@ export default function StoreAddProduct() {
     "4": null,
   });
 
-  const { analyzeImage, analyzing, aiUsed } = useAIImageAnalysis();
+  const { analyzeImage, analyzing, aiUsed, resetAI } = useAIImageAnalysis();
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
       description: "",
-      mrp: 0,
-      price: 0,
+      mrp: undefined,
+      price: undefined,
       category: "",
     },
   });
@@ -84,6 +83,7 @@ export default function StoreAddProduct() {
     // Reset form
     form.reset();
     setImages({ "1": null, "2": null, "3": null, "4": null });
+    resetAI(); // Reset AI state để có thể dùng lại cho sản phẩm tiếp theo
   };
 
   return (
@@ -165,6 +165,11 @@ export default function StoreAddProduct() {
               aria-invalid={!!form.formState.errors.mrp}
               {...form.register("mrp", { valueAsNumber: true })}
             />
+            {form.watch("mrp") > 0 && (
+              <p className="text-xs text-slate-400 mt-1">
+                {form.watch("mrp").toLocaleString("vi-VN")} đ
+              </p>
+            )}
             <FieldError errors={[form.formState.errors.mrp]} />
           </Field>
 
@@ -177,6 +182,22 @@ export default function StoreAddProduct() {
               aria-invalid={!!form.formState.errors.price}
               {...form.register("price", { valueAsNumber: true })}
             />
+            {form.watch("price") > 0 && (
+              <p className="text-xs text-slate-400 mt-1">
+                {form.watch("price").toLocaleString("vi-VN")} đ
+                {form.watch("mrp") > form.watch("price") && (
+                  <span className="ml-2 text-green-600 font-medium">
+                    (Giảm{" "}
+                    {Math.round(
+                      ((form.watch("mrp") - form.watch("price")) /
+                        form.watch("mrp")) *
+                        100
+                    )}
+                    %)
+                  </span>
+                )}
+              </p>
+            )}
             <FieldError errors={[form.formState.errors.price]} />
           </Field>
         </div>
@@ -190,9 +211,9 @@ export default function StoreAddProduct() {
             {...form.register("category")}
           >
             <option value="">Chọn danh mục</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
+            {CATEGORIES.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.nameVi}
               </option>
             ))}
           </select>

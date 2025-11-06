@@ -11,6 +11,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Table,
   TableBody,
   TableCell,
@@ -19,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getCategoryNameVi } from "@/configs/categories";
 
 const currency = "đ";
 
@@ -66,26 +72,42 @@ export default function ManageProductsClient({
   };
 
   const handleDelete = async (productId: string, productName: string) => {
-    if (!confirm(`Bạn có chắc muốn xóa sản phẩm "${productName}"?`)) {
-      return;
-    }
+    toast(`Bạn có chắc muốn xóa sản phẩm "${productName}"?`, {
+      action: {
+        label: "Xóa",
+        onClick: async () => {
+          setDeletingId(productId);
 
-    setDeletingId(productId);
+          try {
+            const result = await deleteProduct(productId);
 
-    try {
-      await deleteProduct(productId);
-
-      // Remove from local state
-      setProducts((prev) => prev.filter((p) => p.id !== productId));
-
-      toast.success("Đã xóa sản phẩm thành công!");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Không thể xóa sản phẩm"
-      );
-    } finally {
-      setDeletingId(null);
-    }
+            if (result.success) {
+              // Remove from local state only if actually deleted
+              setProducts((prev) => prev.filter((p) => p.id !== productId));
+              toast.success(result.message);
+            } else {
+              // Product not deleted, just marked as out of stock
+              setProducts((prev) =>
+                prev.map((p) =>
+                  p.id === productId ? { ...p, inStock: false } : p
+                )
+              );
+              toast.warning(result.message);
+            }
+          } catch (error) {
+            toast.error(
+              error instanceof Error ? error.message : "Không thể xóa sản phẩm"
+            );
+          } finally {
+            setDeletingId(null);
+          }
+        },
+      },
+      cancel: {
+        label: "Hủy",
+        onClick: () => {},
+      },
+    });
   };
 
   if (products.length === 0) {
@@ -160,7 +182,7 @@ export default function ManageProductsClient({
                         <div className="min-w-0">
                           <p className="font-medium truncate">{product.name}</p>
                           <p className="text-xs text-slate-500 md:hidden">
-                            {product.category}
+                            {getCategoryNameVi(product.category)}
                           </p>
                         </div>
                       </div>
@@ -174,7 +196,9 @@ export default function ManageProductsClient({
                       </p>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      <Badge variant="secondary">{product.category}</Badge>
+                      <Badge variant="secondary">
+                        {getCategoryNameVi(product.category)}
+                      </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell text-slate-500 line-through">
                       {product.mrp.toLocaleString()} {currency}
@@ -183,32 +207,40 @@ export default function ManageProductsClient({
                       {product.price.toLocaleString()} {currency}
                     </TableCell>
                     <TableCell>
-                      <div className="flex justify-center items-center">
-                        <button
-                          onClick={() =>
-                            toast.promise(handleToggleStock(product.id), {
-                              loading: "Đang cập nhật...",
-                            })
-                          }
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                            product.inStock ? "bg-green-600" : "bg-slate-300"
-                          }`}
-                          title={
-                            product.inStock
-                              ? "Click để ẩn sản phẩm"
-                              : "Click để hiển thị sản phẩm"
-                          }
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              product.inStock
-                                ? "translate-x-6"
-                                : "translate-x-1"
-                            }`}
-                          />
-                        </button>
+                      <div className="flex justify-center items-center gap-2">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() =>
+                                toast.promise(handleToggleStock(product.id), {
+                                  loading: "Đang cập nhật...",
+                                })
+                              }
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                                product.inStock
+                                  ? "bg-green-600"
+                                  : "bg-slate-300"
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                  product.inStock
+                                    ? "translate-x-6"
+                                    : "translate-x-1"
+                                }`}
+                              />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              {product.inStock
+                                ? "Ẩn sản phẩm (đánh dấu hết hàng)"
+                                : "Hiển thị sản phẩm (đánh dấu còn hàng)"}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
                         <span
-                          className={`ml-2 text-xs font-medium ${
+                          className={`text-xs font-medium ${
                             product.inStock
                               ? "text-green-600"
                               : "text-slate-500"
@@ -220,27 +252,48 @@ export default function ManageProductsClient({
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2 justify-center">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(product.id)}
-                          title="Chỉnh sửa"
-                        >
-                          <EditIcon size={18} className="text-blue-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(product.id, product.name)}
-                          disabled={deletingId === product.id}
-                          title="Xóa"
-                        >
-                          {deletingId === product.id ? (
-                            <div className="w-[18px] h-[18px] border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <Trash2Icon size={18} className="text-red-600" />
-                          )}
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEdit(product.id)}
+                            >
+                              <EditIcon size={18} className="text-blue-600" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Chỉnh sửa sản phẩm</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() =>
+                                handleDelete(product.id, product.name)
+                              }
+                              disabled={deletingId === product.id}
+                            >
+                              {deletingId === product.id ? (
+                                <div className="w-[18px] h-[18px] border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <Trash2Icon
+                                  size={18}
+                                  className="text-red-600"
+                                />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              {product.inStock
+                                ? "Xóa sản phẩm (nếu có đơn hàng → chuyển sang 'Hết hàng')"
+                                : "Xóa sản phẩm"}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     </TableCell>
                   </TableRow>

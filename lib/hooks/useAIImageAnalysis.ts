@@ -108,9 +108,15 @@ export function useAIImageAnalysis() {
     }
   };
 
+  const resetAI = () => {
+    setAiUsed(false);
+    setAnalyzing(false);
+  };
+
   return {
     analyzeImage,
     aiUsed,
     analyzing,
+    resetAI,
   };
 }

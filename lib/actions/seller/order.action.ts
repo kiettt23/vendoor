@@ -76,7 +76,36 @@ export async function getOrders() {
     orderBy: { createdAt: "desc" },
   });
 
-  return orders;
+  // Parse coupon JSON for each order
+  const ordersWithParsedCoupon = orders.map((order) => {
+    let parsedCoupon = order.coupon;
+
+    // Handle both string (old orders) and object (Prisma default)
+    if (typeof order.coupon === "string") {
+      try {
+        parsedCoupon = JSON.parse(order.coupon);
+      } catch (e) {
+        console.error("Failed to parse coupon:", e);
+        parsedCoupon = null;
+      }
+    }
+
+    // If coupon is empty object {}, set to null for cleaner UI
+    if (
+      parsedCoupon &&
+      typeof parsedCoupon === "object" &&
+      Object.keys(parsedCoupon).length === 0
+    ) {
+      parsedCoupon = null;
+    }
+
+    return {
+      ...order,
+      coupon: parsedCoupon,
+    };
+  });
+
+  return ordersWithParsedCoupon;
 }
 
 // Update order status

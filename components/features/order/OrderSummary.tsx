@@ -22,6 +22,19 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
     removeCoupon,
   } = useOrderManagement();
 
+  // Calculate shipping fee (0 for Plus members, 30000 for regular users)
+  const shippingFee = 0; // Will be determined by Protect component
+
+  // Calculate discount amount
+  const discountAmount = coupon ? (coupon.discount / 100) * totalPrice : 0;
+
+  // Calculate final total (for Plus members)
+  const totalWithoutShipping = totalPrice - discountAmount;
+
+  // Calculate final total (for regular users)
+  const totalWithShipping =
+    totalPrice + APP_CONFIG.SHIPPING_FEE - discountAmount;
+
   return (
     <div className="w-full max-w-lg lg:max-w-[340px] bg-slate-50/30 border border-slate-200 text-slate-500 text-sm rounded-xl p-7">
       <h2 className="text-xl font-medium text-slate-600">
@@ -77,7 +90,7 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
               </Protect>
             </p>
             {coupon && (
-              <p>-{formatPrice((coupon.discount / 100) * totalPrice)}</p>
+              <p className="text-green-600">-{formatPrice(discountAmount)}</p>
             )}
           </div>
         </div>
@@ -121,19 +134,8 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
       <div className="flex justify-between py-4">
         <p>{vi.cart.total}:</p>
         <p className="font-medium text-right">
-          <Protect
-            plan={"plus"}
-            fallback={formatPrice(
-              coupon
-                ? totalPrice + 5000 - (coupon.discount / 100) * totalPrice
-                : totalPrice + 5000
-            )}
-          >
-            {formatPrice(
-              coupon
-                ? totalPrice - (coupon.discount / 100) * totalPrice
-                : totalPrice
-            )}
+          <Protect plan={"plus"} fallback={formatPrice(totalWithShipping)}>
+            {formatPrice(totalWithoutShipping)}
           </Protect>
         </p>
       </div>

@@ -279,7 +279,16 @@ export async function deleteProduct(
     // Get product and verify ownership
     const product = await prisma.product.findUnique({
       where: { id: productId },
-      include: { store: { select: { userId: true } } },
+      include: {
+        store: { select: { userId: true } },
+        orderItems: {
+          include: {
+            order: {
+              select: { status: true, createdAt: true },
+            },
+          },
+        },
+      },
     });
 
     if (!product) {
@@ -290,7 +299,44 @@ export async function deleteProduct(
       throw new Error("Unauthorized: You don't own this product");
     }
 
-    // Delete product
+    // Check if product has been ordered
+    if (product.orderItems.length > 0) {
+      // Check for pending orders
+      const pendingOrders = product.orderItems.filter(
+        (item) =>
+          item.order.status === "ORDER_PLACED" ||
+          item.order.status === "PROCESSING" ||
+          item.order.status === "SHIPPED"
+      );
+
+      const hasDeliveredOrders = product.orderItems.some(
+        (item) => item.order.status === "DELIVERED"
+      );
+
+      let message = "";
+      if (pendingOrders.length > 0) {
+        message = `Không thể xóa! Sản phẩm này có ${pendingOrders.length} đơn hàng đang xử lý. Sản phẩm đã được đánh dấu "Hết hàng" (bạn có thể bật lại bằng nút toggle).`;
+      } else if (hasDeliveredOrders) {
+        message = `Không thể xóa! Sản phẩm này đã có trong lịch sử đơn hàng. Sản phẩm đã được đánh dấu "Hết hàng" (bạn có thể bật lại bằng nút toggle).`;
+      } else {
+        message = `Không thể xóa! Sản phẩm này đã có trong đơn hàng. Đã đánh dấu "Hết hàng".`;
+      }
+
+      // Soft delete: mark as out of stock instead of deleting
+      await prisma.product.update({
+        where: { id: productId },
+        data: { inStock: false },
+      });
+
+      revalidatePath("/store/manage-product");
+
+      return {
+        success: false,
+        message,
+      };
+    }
+
+    // If never ordered, can safely delete
     await prisma.product.delete({
       where: { id: productId },
     });

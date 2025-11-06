@@ -2,8 +2,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
+import { vi } from "date-fns/locale";
 import { toast } from "sonner";
-import { DeleteIcon, Check, Ban } from "lucide-react";
+import { DeleteIcon, UserPlusIcon, CrownIcon, XCircleIcon } from "lucide-react";
 import { createCoupon, deleteCoupon } from "@/lib/actions/admin/coupon.action";
 import { couponSchema, type CouponFormData } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ export default function CouponsClient({ coupons: initialCoupons }) {
     defaultValues: {
       code: "",
       description: "",
-      discount: 0,
+      discount: undefined,
       forNewUser: false,
       forMember: false,
       isPublic: true,
@@ -36,13 +37,19 @@ export default function CouponsClient({ coupons: initialCoupons }) {
   };
 
   const handleDeleteCoupon = async (code: string) => {
-    const confirm = window.confirm(
-      "Bạn có chắc chắn muốn xóa mã giảm giá này?"
-    );
-    if (!confirm) return;
-
-    const result = await deleteCoupon(code);
-    toast.success(result.message);
+    toast(`Bạn có chắc chắn muốn xóa mã giảm giá "${code}"?`, {
+      action: {
+        label: "Xóa",
+        onClick: async () => {
+          const result = await deleteCoupon(code);
+          toast.success(result.message);
+        },
+      },
+      cancel: {
+        label: "Hủy",
+        onClick: () => {},
+      },
+    });
   };
 
   return (
@@ -65,9 +72,14 @@ export default function CouponsClient({ coupons: initialCoupons }) {
               <FieldLabel htmlFor="code">Mã</FieldLabel>
               <Input
                 id="code"
-                placeholder="SALE50"
+                placeholder="VD: SUMMER2024"
                 aria-invalid={!!form.formState.errors.code}
-                {...form.register("code")}
+                className="uppercase placeholder:normal-case"
+                {...form.register("code", {
+                  onChange: (e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                  },
+                })}
               />
               <FieldError errors={[form.formState.errors.code]} />
             </Field>
@@ -79,7 +91,7 @@ export default function CouponsClient({ coupons: initialCoupons }) {
                 type="number"
                 min={1}
                 max={100}
-                placeholder="0"
+                placeholder="VD: 20"
                 aria-invalid={!!form.formState.errors.discount}
                 {...form.register("discount", { valueAsNumber: true })}
               />
@@ -91,7 +103,7 @@ export default function CouponsClient({ coupons: initialCoupons }) {
             <FieldLabel htmlFor="description">Mô tả</FieldLabel>
             <Input
               id="description"
-              placeholder="Mô tả mã giảm giá"
+              placeholder="VD: Giảm giá mùa hè cho tất cả sản phẩm"
               aria-invalid={!!form.formState.errors.description}
               {...form.register("description")}
             />
@@ -178,20 +190,22 @@ export default function CouponsClient({ coupons: initialCoupons }) {
                   <td className="py-3 px-4">{coupon.description}</td>
                   <td className="py-3 px-4">{coupon.discount}%</td>
                   <td className="py-3 px-4">
-                    {format(coupon.expiresAt, "dd/MM/yyyy")}
+                    {format(coupon.expiresAt, "dd 'tháng' MM, yyyy", {
+                      locale: vi,
+                    })}
                   </td>
                   <td className="py-3 px-4">
                     {coupon.forNewUser ? (
-                      <Check color="#29b339" size={18} />
+                      <UserPlusIcon className="w-5 h-5 text-green-600" />
                     ) : (
-                      <Ban color="#b23838" size={18} />
+                      <XCircleIcon className="w-5 h-5 text-slate-300" />
                     )}
                   </td>
                   <td className="py-3 px-4">
                     {coupon.forMember ? (
-                      <Check color="#29b339" size={18} />
+                      <CrownIcon className="w-5 h-5 text-amber-500" />
                     ) : (
-                      <Ban color="#b23838" size={18} />
+                      <XCircleIcon className="w-5 h-5 text-slate-300" />
                     )}
                   </td>
                   <td className="py-3 px-4">
