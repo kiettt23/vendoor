@@ -27,7 +27,7 @@ export default function StoreAddProduct() {
     "4": null,
   });
 
-  const { analyzeImage } = useAIImageAnalysis();
+  const { analyzeImage, analyzing, aiUsed } = useAIImageAnalysis();
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),

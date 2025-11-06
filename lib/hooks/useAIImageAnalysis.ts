@@ -21,16 +21,7 @@ export function useAIImageAnalysis() {
   const analyzeImage = async (
     file: File | string
   ): Promise<AIAnalysisResult | null> => {
-    let imageUrl: string;
-
-    // Convert File to URL if needed
-    if (file instanceof File) {
-      imageUrl = URL.createObjectURL(file);
-    } else {
-      imageUrl = file;
-    }
-
-    if (!imageUrl) {
+    if (!file) {
       toast.error("Vui lòng tải lên ảnh trước");
       return null;
     }
@@ -44,40 +35,76 @@ export function useAIImageAnalysis() {
 
     setAnalyzing(true);
 
+    // Show loading toast
+    const loadingToast = toast.loading("🤖 Đang phân tích hình ảnh bằng AI...");
+
     try {
-      const response = await fetch("/api/ai/image-analysis", {
+      let base64Image: string;
+      let mimeType: string;
+
+      // Convert File to base64
+      if (file instanceof File) {
+        mimeType = file.type;
+        base64Image = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
+            const base64 = result.split(",")[1];
+            resolve(base64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      } else {
+        // If string URL, fetch and convert to base64
+        const response = await fetch(file);
+        const blob = await response.blob();
+        mimeType = blob.type;
+        base64Image = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            const base64 = result.split(",")[1];
+            resolve(base64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      const response = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl }),
+        body: JSON.stringify({ base64Image, mimeType }),
       });
 
       const data = await response.json();
 
-      if (data.success) {
-        setAiUsed(true);
-        toast.success("Đã phân tích ảnh thành công!");
-
-        return {
-          name: data.analysis.name || "",
-          description: data.analysis.description || "",
-          category: data.analysis.category || "",
-          mrp: data.analysis.mrp || 0,
-          price: data.analysis.price || 0,
-        };
-      } else {
+      if (data.error) {
+        toast.dismiss(loadingToast);
         toast.error(data.error || "Không thể phân tích ảnh");
         return null;
       }
+
+      toast.dismiss(loadingToast);
+      setAiUsed(true);
+      toast.success("✨ Đã phân tích ảnh thành công!");
+
+      return {
+        name: data.name || "",
+        description: data.description || "",
+        category: data.category || "",
+        mrp: data.mrp || 0,
+        price: data.price || 0,
+      };
     } catch (error) {
       console.error("AI Analysis Error:", error);
+      toast.dismiss(loadingToast);
       toast.error("Có lỗi xảy ra khi phân tích ảnh");
       return null;
     } finally {
       setAnalyzing(false);
-      // Cleanup object URL if created
-      if (file instanceof File) {
-        URL.revokeObjectURL(imageUrl);
-      }
     }
   };
 
