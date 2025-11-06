@@ -10,7 +10,7 @@ interface ActionResponse {
   message: string;
 }
 
-const ORDER_STATUS_MESSAGES: Record<OrderStatus, string> = {
+const ORDER_STATUS_MESSAGES: Partial<Record<OrderStatus, string>> = {
   ORDER_PLACED: "Đơn hàng đã được đặt",
   PROCESSING: "Đơn hàng đang xử lý",
   SHIPPED: "Đơn hàng đã giao cho shipper",
@@ -18,13 +18,13 @@ const ORDER_STATUS_MESSAGES: Record<OrderStatus, string> = {
   CANCELLED: "Đơn hàng đã bị hủy",
 };
 
-const VALID_STATUSES: OrderStatus[] = [
+const VALID_STATUSES = [
   "ORDER_PLACED",
   "PROCESSING",
   "SHIPPED",
   "DELIVERED",
   "CANCELLED",
-];
+] as const;
 
 // Get all orders for the seller's store
 export async function getOrders() {
