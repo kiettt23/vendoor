@@ -2,13 +2,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
-import {
-  Trash2Icon,
-  EditIcon,
-  EyeIcon,
-  EyeOffIcon,
-  PlusIcon,
-} from "lucide-react";
+import { Trash2Icon, EditIcon, EyeOffIcon, PlusIcon } from "lucide-react";
 import {
   toggleProductStock,
   deleteProduct,
@@ -185,36 +179,43 @@ export default function ManageProductsClient({
                     <TableCell className="hidden md:table-cell text-slate-500 line-through">
                       {product.mrp.toLocaleString()} {currency}
                     </TableCell>
-                    <TableCell className="font-medium text-purple-600">
+                    <TableCell className="font-medium text-slate-500">
                       {product.price.toLocaleString()} {currency}
                     </TableCell>
                     <TableCell>
-                      <div className="flex justify-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                      <div className="flex justify-center items-center">
+                        <button
                           onClick={() =>
                             toast.promise(handleToggleStock(product.id), {
                               loading: "Đang cập nhật...",
                             })
                           }
-                          className="gap-2"
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                            product.inStock ? "bg-green-600" : "bg-slate-300"
+                          }`}
+                          title={
+                            product.inStock
+                              ? "Click để ẩn sản phẩm"
+                              : "Click để hiển thị sản phẩm"
+                          }
                         >
-                          {product.inStock ? (
-                            <>
-                              <EyeIcon size={16} className="text-green-600" />
-                              <Badge variant="success">Còn hàng</Badge>
-                            </>
-                          ) : (
-                            <>
-                              <EyeOffIcon
-                                size={16}
-                                className="text-slate-400"
-                              />
-                              <Badge variant="secondary">Hết hàng</Badge>
-                            </>
-                          )}
-                        </Button>
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              product.inStock
+                                ? "translate-x-6"
+                                : "translate-x-1"
+                            }`}
+                          />
+                        </button>
+                        <span
+                          className={`ml-2 text-xs font-medium ${
+                            product.inStock
+                              ? "text-green-600"
+                              : "text-slate-500"
+                          }`}
+                        >
+                          {product.inStock ? "Còn hàng" : "Hết hàng"}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>

@@ -2,7 +2,6 @@
 import { StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 import { formatPrice } from "@/lib/utils/format/currency";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,13 +38,16 @@ const ProductCard = ({ product }: ProductCardProps) => {
     : 0;
 
   return (
-    <Link href={`/product/${product.id}`} className="group max-xl:mx-auto">
-      <Card className="overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300">
-        <div className="relative bg-slate-50 h-40 sm:w-60 sm:h-68 rounded-t-lg flex items-center justify-center overflow-hidden">
+    <Link
+      href={`/product/${product.id}`}
+      className="group max-xl:mx-auto w-full max-w-[240px]"
+    >
+      <Card className="overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col p-0">
+        <div className="relative bg-slate-50 w-full aspect-[4/3] flex items-center justify-center overflow-hidden">
           <Image
             width={500}
             height={500}
-            className="max-h-30 sm:max-h-40 w-auto group-hover:scale-110 transition-transform duration-500 ease-out"
+            className="max-h-[75%] w-auto group-hover:scale-110 transition-transform duration-500 ease-out object-contain"
             src={product.images[0]}
             alt={product.name}
           />
@@ -63,13 +65,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </Badge>
           )}
         </div>
-        <div className="p-3 space-y-1">
-          <div className="flex justify-between gap-3 text-sm">
-            <div className="flex-1 min-w-0">
+        <div className="p-3 space-y-1 flex-1 flex flex-col">
+          <div className="flex justify-between gap-3 text-sm flex-1">
+            <div className="flex-1 min-w-0 flex flex-col">
               <p className="font-medium text-slate-800 truncate group-hover:text-purple-600 transition-colors">
                 {product.name}
               </p>
-              <div className="flex mt-1">
+              <div className="flex items-center mt-1">
                 {Array(5)
                   .fill("")
                   .map((_, index) => (
@@ -77,7 +79,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                       key={index}
                       size={12}
                       className="text-transparent"
-                      fill={rating >= index + 1 ? "#9938CA" : "#D1D5DB"}
+                      fill={rating >= index + 1 ? "#9333EA" : "#D1D5DB"}
                     />
                   ))}
                 <span className="text-xs text-slate-500 ml-1">
@@ -85,10 +87,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 </span>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right flex flex-col justify-start">
               {hasDiscount ? (
                 <>
-                  <p className="font-bold text-purple-600 whitespace-nowrap">
+                  <p className="font-bold text-purple-600 whitespace-nowrap text-sm">
                     {formatPrice(product.salePrice)}
                   </p>
                   <p className="text-xs text-slate-400 line-through">
@@ -96,7 +98,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                   </p>
                 </>
               ) : (
-                <p className="font-semibold text-slate-800 whitespace-nowrap">
+                <p className="font-semibold text-slate-800 whitespace-nowrap text-sm">
                   {formatPrice(product.price)}
                 </p>
               )}

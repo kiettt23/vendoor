@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { updateOrderStatus } from "@/lib/actions/seller/order.action";
 import OrderModal from "./OrderModal";
+import { formatPrice } from "@/lib/utils/format/currency";
 
 type OrderStatus = "ORDER_PLACED" | "PROCESSING" | "SHIPPED" | "DELIVERED";
 
@@ -25,10 +26,10 @@ interface Order {
   status: string;
   createdAt: string;
   isCouponUsed: boolean;
+  coupon: any; // JSON field from database
   user?: {
     name: string;
   };
-  coupon?: any;
   address: {
     createdAt: string;
     [key: string]: any;
@@ -68,23 +69,23 @@ export default function StoreOrdersClient({
   return (
     <>
       <h1 className="text-2xl text-slate-500 mb-5">
-        Store <span className="text-slate-800 font-medium">Orders</span>
+        Quản lý <span className="text-slate-800 font-medium">Đơn hàng</span>
       </h1>
       {initialOrders.length === 0 ? (
-        <p>No orders found</p>
+        <p>Không có đơn hàng nào</p>
       ) : (
         <div className="overflow-x-auto max-w-4xl rounded-md shadow border border-gray-200">
           <table className="w-full text-sm text-left text-gray-600">
             <thead className="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider">
               <tr>
                 {[
-                  "Sr. No.",
-                  "Customer",
-                  "Total",
-                  "Payment",
-                  "Coupon",
-                  "Status",
-                  "Date",
+                  "STT",
+                  "Khách hàng",
+                  "Tổng tiền",
+                  "Thanh toán",
+                  "Mã giảm giá",
+                  "Trạng thái",
+                  "Ngày đặt",
                 ].map((heading, i) => (
                   <th key={i} className="px-4 py-3">
                     {heading}
@@ -102,13 +103,16 @@ export default function StoreOrdersClient({
                   <td className="pl-6 text-purple-600">{index + 1}</td>
                   <td className="px-4 py-3">{order.user?.name}</td>
                   <td className="px-4 py-3 font-medium text-slate-800">
-                    {order.total}đ
+                    {formatPrice(order.total)}
                   </td>
                   <td className="px-4 py-3">{order.paymentMethod}</td>
                   <td className="px-4 py-3">
-                    {order.isCouponUsed ? (
+                    {order.isCouponUsed &&
+                    order.coupon &&
+                    Object.keys(order.coupon).length > 0 &&
+                    order.coupon.code ? (
                       <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">
-                        {order.coupon?.code || "—"}
+                        {order.coupon.code}
                       </span>
                     ) : (
                       "—"
@@ -127,14 +131,14 @@ export default function StoreOrdersClient({
                       }
                       className="border-gray-300 rounded-md text-sm focus:ring focus:ring-blue-200"
                     >
-                      <option value="ORDER_PLACED">ORDER_PLACED</option>
-                      <option value="PROCESSING">PROCESSING</option>
-                      <option value="SHIPPED">SHIPPED</option>
-                      <option value="DELIVERED">DELIVERED</option>
+                      <option value="ORDER_PLACED">Đã đặt hàng</option>
+                      <option value="PROCESSING">Đang xử lý</option>
+                      <option value="SHIPPED">Đang giao</option>
+                      <option value="DELIVERED">Đã giao</option>
                     </select>
                   </td>
                   <td className="px-4 py-3 text-gray-500">
-                    {new Date(order.createdAt).toLocaleString()}
+                    {new Date(order.createdAt).toLocaleString("vi-VN")}
                   </td>
                 </tr>
               ))}

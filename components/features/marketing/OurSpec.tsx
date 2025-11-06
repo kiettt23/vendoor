@@ -44,16 +44,16 @@ const OurSpecs = () => {
           return (
             <Card
               key={index}
-              className={`relative overflow-hidden border-2 bg-gradient-to-br ${spec.bgGradient} hover:shadow-xl transition-all duration-300 group`}
+              className={`relative border-2 bg-gradient-to-br ${spec.bgGradient} hover:shadow-xl transition-all duration-300 group pt-8`}
             >
-              <CardContent className="p-8 pt-12 text-center">
+              <CardContent className="p-8 pt-4 text-center">
                 <div
                   className="absolute -top-6 left-1/2 -translate-x-1/2 text-white size-12 flex items-center justify-center rounded-xl shadow-lg group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300"
                   style={{ backgroundColor: spec.accent }}
                 >
                   <spec.icon size={24} />
                 </div>
-                <h3 className="text-slate-800 font-semibold text-lg mb-3">
+                <h3 className="text-slate-800 font-semibold text-lg mb-3 mt-4">
                   {spec.title}
                 </h3>
                 <p className="text-sm text-slate-600 leading-relaxed">

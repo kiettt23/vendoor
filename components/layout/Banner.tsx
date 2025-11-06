@@ -1,22 +1,42 @@
 "use client";
 import React from "react";
 import { toast } from "sonner";
-import { vi } from "@/lib/i18n";
+import { getLatestPublicCoupon } from "@/lib/actions/user/coupon.action";
 
 export default function Banner() {
   const [isOpen, setIsOpen] = React.useState(true);
+  const [couponCode, setCouponCode] = React.useState<string | null>(null);
+
+  // Fetch the latest public coupon on mount
+  React.useEffect(() => {
+    const fetchLatestCoupon = async () => {
+      try {
+        const result = await getLatestPublicCoupon();
+        if (result.success && result.coupon) {
+          setCouponCode(result.coupon.code);
+        }
+      } catch (error) {
+        console.error("Error fetching coupon:", error);
+      }
+    };
+    fetchLatestCoupon();
+  }, []);
 
   const handleClaim = () => {
-    setIsOpen(false);
-    toast.success("Đã sao chép mã giảm giá!");
-    navigator.clipboard.writeText("NEW20");
+    if (couponCode) {
+      setIsOpen(false);
+      toast.success("Đã sao chép mã giảm giá!");
+      navigator.clipboard.writeText(couponCode);
+    }
   };
+
+  if (!couponCode) return null;
 
   return (
     isOpen && (
       <div className="w-full px-6 py-1 font-medium text-sm text-white text-center bg-gradient-to-r from-violet-500 via-[#9938CA] to-[#E0724A]">
         <div className="flex items-center justify-between max-w-7xl  mx-auto">
-          <p>Giảm 10% cho đơn hàng đầu tiên!</p>
+          <p>Giảm giá cho đơn hàng đầu tiên với mã: {couponCode}!</p>
           <div className="flex items-center space-x-6">
             <button
               onClick={handleClaim}
