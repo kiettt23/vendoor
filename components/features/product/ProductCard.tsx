@@ -5,25 +5,7 @@ import Link from "next/link";
 import { formatPrice } from "@/lib/utils/format/currency";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-interface ProductRating {
-  rating: number;
-}
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  salePrice?: number;
-  images: string[];
-  rating: ProductRating[];
-  inStock?: boolean;
-  [key: string]: any;
-}
-
-interface ProductCardProps {
-  product: Product;
-}
+import type { ProductCardProps } from "@/types";
 
 const ProductCard = ({ product }: ProductCardProps) => {
   // Calculate the average rating of the product

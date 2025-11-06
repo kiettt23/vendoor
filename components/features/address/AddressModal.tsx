@@ -21,21 +21,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-
-interface AddressData {
-  id?: string;
-  name: string;
-  email: string;
-  street: string;
-  city: string;
-  state: string;
-  phone: string;
-}
-
-interface AddressModalProps {
-  setShowAddressModal: (show: boolean) => void;
-  editingAddress?: AddressData | null;
-}
+import type { AddressModalProps } from "@/types";
 
 export default function AddressModal({
   setShowAddressModal,

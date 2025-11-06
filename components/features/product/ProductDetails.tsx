@@ -16,18 +16,10 @@ import { useAppDispatch, useAppSelector } from "@/lib/store";
 import type { RootState } from "@/lib/store";
 import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";
-
-interface ProductRating {
-  rating: number;
-}
+import type { ProductWithRating } from "@/types";
 
 interface ProductDetailsProps {
-  product: {
-    id: string;
-    images: string[];
-    rating: ProductRating[];
-    [key: string]: any;
-  };
+  product: ProductWithRating;
 }
 
 const ProductDetails = ({ product }: ProductDetailsProps) => {

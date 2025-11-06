@@ -121,12 +121,7 @@ export default function CartClient({ products }: CartClientProps) {
           </table>
           <OrderSummary
             totalPrice={totalPrice}
-            items={cartArray.map((item) => ({
-              id: item.id,
-              productId: item.id,
-              quantity: item.quantity,
-              price: item.price,
-            }))}
+            items={cartArray} // CartArray đã là CartItem[] từ Redux
           />
         </div>
       </div>

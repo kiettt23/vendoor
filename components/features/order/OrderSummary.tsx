@@ -6,20 +6,7 @@ import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";
 import { APP_CONFIG } from "@/configs/app";
 import { useOrderManagement } from "@/lib/hooks/useOrderManagement";
-
-interface OrderItem {
-  id: string;
-  productId: string;
-  quantity: number;
-  price: number;
-  name?: string;
-  [key: string]: any;
-}
-
-interface OrderSummaryProps {
-  totalPrice: number;
-  items: OrderItem[];
-}
+import type { OrderSummaryProps } from "@/types";
 
 const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
   const {

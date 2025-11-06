@@ -3,21 +3,7 @@
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/check-admin";
 import { revalidatePath } from "next/cache";
-
-interface CouponData {
-  code: string;
-  description: string;
-  discount: number;
-  forNewUser: boolean;
-  forMember: boolean;
-  isPublic: boolean;
-  expiresAt: Date | string;
-}
-
-interface ActionResponse {
-  success: boolean;
-  message: string;
-}
+import type { CouponFormData, ActionResponse } from "@/types";
 
 // Get all coupons for admin
 export async function getCoupons() {
@@ -32,7 +18,7 @@ export async function getCoupons() {
 
 // Create a new coupon
 export async function createCoupon(
-  couponData: CouponData
+  couponData: CouponFormData
 ): Promise<ActionResponse> {
   try {
     await requireAdmin();

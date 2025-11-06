@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "prepare": "husky",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next",
+    "type-check:clean": "npm run clean && npm run type-check"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

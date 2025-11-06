@@ -31,7 +31,7 @@ export default function OrderModal({ order, onClose }) {
           </p>
           <p>
             <span className="text-purple-700">Địa chỉ:</span>{" "}
-            {`${order.address?.street}, ${order.address?.city}, ${order.address?.state}, ${order.address?.zip}, ${order.address?.country}`}
+            {`${order.address?.street}, ${order.address?.city}, ${order.address?.state}`}
           </p>
         </div>
 

@@ -14,16 +14,7 @@ import { ratingSchema, type RatingFormData } from "@/lib/validations";
 import { Field } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-
-interface RatingModalData {
-  productId: string;
-  orderId: string;
-}
-
-interface RatingModalProps {
-  ratingModal: RatingModalData | null;
-  setRatingModal: (data: RatingModalData | null) => void;
-}
+import type { RatingModalProps } from "@/types";
 
 const RatingModal = ({ ratingModal, setRatingModal }: RatingModalProps) => {
   const dispatch = useAppDispatch();

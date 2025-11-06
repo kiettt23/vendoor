@@ -1,303 +1,56 @@
 /**
+ * ===================================
  * Type Definitions cho Vendoor App
+ * ===================================
  *
- * Giải thích:
- * - interface: Định nghĩa cấu trúc của object
- * - enum: Tập hợp các giá trị cố định (như OrderStatus)
- * - Generic <T>: Kiểu linh hoạt, có thể thay thế bằng bất kỳ type nào
+ * Centralized type exports
+ * Import các types từ file này: import { Product, Order } from '@/types'
  */
 
 // ============================================
-// DATABASE MODELS (từ Prisma schema)
+// CORE MODELS
 // ============================================
-
-/**
- * User model - Người dùng từ Clerk
- */
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  image: string;
-  cart: Record<string, number>; // { "productId": quantity }
-}
-
-/**
- * Product model - Sản phẩm
- */
-export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  mrp: number; // Market Retail Price (giá gốc)
-  price: number; // Giá bán
-  images: string[];
-  category: string;
-  inStock: boolean;
-  storeId: string;
-  createdAt: Date | string; // Date khi từ DB, string khi serialize
-  updatedAt: Date | string;
-  // Relations (optional - chỉ khi include)
-  store?: Store;
-  orderItems?: OrderItem[];
-  rating?: Rating[];
-}
-
-/**
- * Store model - Cửa hàng
- */
-export interface Store {
-  id: string;
-  name: string;
-  username: string;
-  logo: string;
-  description: string;
-  userId: string;
-  plan: StorePlan;
-  isActive: boolean;
-  isApproved: boolean;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-  // Relations
-  products?: Product[];
-  orders?: Order[];
-}
-
-/**
- * Address model - Địa chỉ giao hàng
- */
-export interface Address {
-  id: string;
-  name: string;
-  email: string;
-  street: string;
-  city: string;
-  state: string;
-  phone: string;
-  userId: string;
-  createdAt: Date | string;
-}
-
-/**
- * Rating model - Đánh giá sản phẩm
- */
-export interface Rating {
-  id: string;
-  rating: number; // 1-5 stars
-  review: string;
-  userId: string;
-  productId: string;
-  orderId: string;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-  // Relations
-  user?: Pick<User, "id" | "name" | "image">; // Chỉ lấy một số field
-  product?: Pick<Product, "id" | "name">;
-}
-
-/**
- * Order model - Đơn hàng
- */
-export interface Order {
-  id: string;
-  total: number;
-  status: OrderStatus;
-  userId: string;
-  storeId: string;
-  addressId: string;
-  isPaid: boolean;
-  paymentMethod: PaymentMethod;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-  isCouponUsed: boolean;
-  coupon: Record<string, any>;
-  // Relations
-  orderItems?: OrderItem[];
-  address?: Address;
-  store?: Pick<Store, "name" | "username">;
-  user?: User;
-}
-
-/**
- * OrderItem model - Chi tiết đơn hàng
- */
-export interface OrderItem {
-  id: string;
-  orderId: string;
-  productId: string;
-  quantity: number;
-  price: number;
-  // Relations
-  product?: Pick<Product, "id" | "name" | "images" | "price">;
-}
-
-/**
- * Coupon model - Mã giảm giá
- */
-export interface Coupon {
-  code: string; // This is the primary key (@id in Prisma)
-  description: string;
-  discount: number; // Percentage (0-100)
-  expiresAt: Date | string;
-  isPublic: boolean;
-  forNewUser: boolean;
-  forMember: boolean;
-  createdAt: Date | string;
-}
+export * from "./user";
+export * from "./product";
+export * from "./store";
+export * from "./order";
+export * from "./cart";
+export * from "./address";
+export * from "./rating";
+export * from "./coupon";
 
 // ============================================
-// ENUMS
+// ACTION RESPONSES
 // ============================================
-
-/**
- * Order status - Trạng thái đơn hàng
- */
-export enum OrderStatus {
-  ORDER_PLACED = "ORDER_PLACED",
-  PROCESSING = "PROCESSING",
-  SHIPPED = "SHIPPED",
-  DELIVERED = "DELIVERED",
-  CANCELLED = "CANCELLED",
-}
-
-/**
- * Payment method - Phương thức thanh toán
- */
-export enum PaymentMethod {
-  COD = "COD", // Cash on Delivery
-  STRIPE = "STRIPE",
-}
-
-/**
- * Store plan - Gói cửa hàng
- */
-export enum StorePlan {
-  FREE = "FREE",
-  PLUS = "PLUS",
-}
-
-// ============================================
-// SERVER ACTION RESPONSES
-// ============================================
-
-/**
- * Generic response từ Server Actions
- *
- * Generic <T> nghĩa là gì?
- * - Thay vì tạo nhiều interface giống nhau, dùng <T> làm placeholder
- * - Khi dùng, thay T bằng type cụ thể: ActionResponse<Address>
- *
- * Example:
- * const res1: ActionResponse<Address> = { success: true, data: address };
- * const res2: ActionResponse<Product[]> = { success: true, data: products };
- */
-export interface ActionResponse<T = any> {
-  success: boolean;
-  error?: string; // Optional - chỉ có khi success = false
-  message?: string; // Optional - message cho user
-  data?: T; // Optional - data trả về (type linh hoạt)
-}
-
-/**
- * Response cho Address actions
- */
-export interface AddressActionResponse extends ActionResponse {
-  newAddress?: SerializedAddress;
-  address?: SerializedAddress;
-  addresses?: SerializedAddress[];
-  deletedId?: string;
-}
-
-/**
- * Response cho Rating actions
- */
-export interface RatingActionResponse extends ActionResponse {
-  rating?: SerializedRating;
-  ratings?: SerializedRating[];
-  deletedId?: string;
-}
-
-/**
- * Response cho Order actions
- */
-export interface OrderActionResponse extends ActionResponse {
-  order?: Order;
-  orders?: Order[];
-  session?: any; // Stripe session
-}
-
-/**
- * Response cho Coupon actions
- */
-export interface CouponActionResponse extends ActionResponse {
-  coupon?: Coupon;
-}
+export * from "./action-response";
 
 // ============================================
 // COMPONENT PROPS
 // ============================================
-
-/**
- * Props cho components
- *
- * Tại sao cần?
- * - TypeScript check props khi dùng component
- * - Auto-complete trong editor
- * - Catch lỗi sai type props
- */
-
-export interface ProductCardProps {
-  product: Product;
-}
-
-export interface RatingModalProps {
-  ratingModal: {
-    productId: string;
-    orderId: string;
-  } | null;
-  setRatingModal: (modal: RatingModalProps["ratingModal"]) => void;
-}
-
-export interface AddressModalProps {
-  setShowAddressModal: (show: boolean) => void;
-  editingAddress?: Address | null;
-}
-
-export interface OrderSummaryProps {
-  totalPrice: number;
-  items: (Product & { quantity: number })[]; // Product + quantity field
-}
+export * from "./component-props";
 
 // ============================================
-// UTILITY TYPES
+// LEGACY EXPORTS (backward compatibility)
+// Giữ lại để không break code cũ
+// TODO: Dần dần migrate sang import từ file riêng
 // ============================================
 
 /**
- * CartItem - Product trong giỏ hàng
+ * @deprecated Import from '@/types/cart' instead
  */
-export interface CartItem extends Product {
-  quantity: number;
-}
+export type { CartItem } from "./cart";
 
 /**
- * SerializedModel - Model đã serialize Date → string
- *
- * Omit<T, K>: Bỏ field K khỏi type T
- * Record<K, V>: Object với key type K và value type V
- *
- * Example:
- * type WithoutDates = Omit<Product, 'createdAt' | 'updatedAt'>
+ * @deprecated Import from '@/types/address' instead
  */
-export type SerializedAddress = Omit<Address, "createdAt"> & {
-  createdAt: string;
-};
+export type { SerializedAddress } from "./address";
 
-export type SerializedRating = Omit<Rating, "createdAt" | "updatedAt"> & {
-  createdAt: string;
-  updatedAt: string;
-};
+/**
+ * @deprecated Import from '@/types/rating' instead
+ */
+export type { SerializedRating } from "./rating";
 
-export type SerializedProduct = Omit<Product, "createdAt" | "updatedAt"> & {
-  createdAt: string;
-  updatedAt: string;
-};
+/**
+ * @deprecated Import from '@/types/product' instead
+ */
+export type { SerializedProduct } from "./product";

@@ -11,9 +11,10 @@ import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";
 import { formatDate } from "@/lib/utils/format/date";
 import { getOrderStatusText } from "@/lib/utils/helpers/order";
+import type { OrderWithDetails } from "@/types";
 
 interface OrderItemProps {
-  order: any; // TODO: Add proper Order type
+  order: OrderWithDetails;
 }
 
 const OrderItem = ({ order }: OrderItemProps) => {
@@ -100,8 +101,7 @@ const OrderItem = ({ order }: OrderItemProps) => {
             {order.address.name}, {order.address.street},
           </p>
           <p>
-            {order.address.city}, {order.address.state}, {order.address.zip},{" "}
-            {order.address.country},
+            {order.address.city}, {order.address.state}
           </p>
           <p>{order.address.phone}</p>
         </td>
@@ -130,8 +130,7 @@ const OrderItem = ({ order }: OrderItemProps) => {
             {order.address.name}, {order.address.street}
           </p>
           <p>
-            {order.address.city}, {order.address.state}, {order.address.zip},{" "}
-            {order.address.country}
+            {order.address.city}, {order.address.state}
           </p>
           <p>{order.address.phone}</p>
           <br />

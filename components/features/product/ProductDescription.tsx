@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { vi } from "@/lib/i18n";
 import { formatDate } from "@/lib/utils/format/date";
+import type { ProductWithRating } from "@/types";
 
 interface ProductDescriptionProps {
-  product: any; // TODO: Add proper Product type
+  product: ProductWithRating;
 }
 
 const ProductDescription = ({ product }: ProductDescriptionProps) => {
