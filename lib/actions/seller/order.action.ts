@@ -1,15 +1,9 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { OrderStatus } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-
-type OrderStatus =
-  | "ORDER_PLACED"
-  | "PROCESSING"
-  | "SHIPPED"
-  | "DELIVERED"
-  | "CANCELLED";
 
 interface ActionResponse {
   success: boolean;
