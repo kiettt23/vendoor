@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth/helpers";
 import { revalidatePath } from "next/cache";
 import type { Rating, RatingActionResponse, SerializedRating } from "@/types";
 import { ratingSchema, type RatingFormData } from "@/lib/validations";
@@ -10,13 +10,13 @@ export async function getUserRatings(): Promise<{
   ratings: SerializedRating[];
 }> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return { ratings: [] };
     }
 
     const ratings = await prisma.rating.findMany({
-      where: { userId },
+      where: { userId: user.id },
       include: {
         user: {
           select: {
@@ -54,8 +54,8 @@ export async function submitRating(
   ratingData: RatingFormData
 ): Promise<RatingActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return { success: false, error: "Vui lòng đăng nhập" };
     }
 
@@ -73,7 +73,7 @@ export async function submitRating(
     // Check if already rated
     const existingRating = await prisma.rating.findFirst({
       where: {
-        userId,
+        userId: user.id,
         productId,
         orderId,
       },
@@ -88,7 +88,7 @@ export async function submitRating(
       data: {
         rating,
         review,
-        userId,
+        userId: user.id,
         productId,
         orderId,
       },
@@ -135,8 +135,8 @@ export async function updateRating(
   }
 ): Promise<RatingActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return { success: false, error: "Vui lòng đăng nhập" };
     }
 
@@ -159,7 +159,7 @@ export async function updateRating(
       where: { id: ratingId },
     });
 
-    if (!existingRating || existingRating.userId !== userId) {
+    if (!existingRating || existingRating.userId !== user.id) {
       return {
         success: false,
         error: "Không tìm thấy đánh giá hoặc bạn không có quyền chỉnh sửa",
@@ -212,8 +212,8 @@ export async function deleteRating(
   ratingId: string
 ): Promise<RatingActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return { success: false, error: "Vui lòng đăng nhập" };
     }
 
@@ -222,7 +222,7 @@ export async function deleteRating(
       where: { id: ratingId },
     });
 
-    if (!existingRating || existingRating.userId !== userId) {
+    if (!existingRating || existingRating.userId !== user.id) {
       return {
         success: false,
         error: "Không tìm thấy đánh giá hoặc bạn không có quyền xóa",

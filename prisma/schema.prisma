@@ -1,181 +1,254 @@
 generator client {
-    provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  SELLER
+  ADMIN
 }
 
 model User {
-    id    String @id
-    name  String
-    email String @unique
-    image String
-    cart  Json   @default("{}")
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime? // Better Auth: Email verified timestamp
+  image         String?
+  role          Role      @default(USER) // Better Auth: User role
+  username      String?   @unique // Better Auth: Display name
+  cart          Json      @default("{}")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-    // Relations
-    ratings     Rating[]
-    Address     Address[]
-    store       Store?
-    buyerOrders Order[]   @relation("BuyerRelation")
+  // Better Auth Relations
+  accounts Account[]
+  sessions Session[]
 
-    @@index([email])
+  // Relations
+  ratings     Rating[]
+  Address     Address[]
+  store       Store?
+  buyerOrders Order[]   @relation("BuyerRelation")
+
+  @@index([email])
+  @@index([role])
 }
 
 model Product {
-    id          String   @id @default(cuid())
-    name        String
-    description String
-    mrp         Float
-    price       Float
-    images      String[]
-    category    String
-    inStock     Boolean  @default(true)
-    storeId     String
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  mrp         Float
+  price       Float
+  images      String[]
+  category    String
+  inStock     Boolean  @default(true)
+  storeId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-    // Relations
-    store      Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
-    orderItems OrderItem[]
-    rating     Rating[]
+  // Relations
+  store      Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+  rating     Rating[]
 
-    @@index([storeId])
-    @@index([category])
-    @@index([createdAt])
-    @@index([storeId, category])
+  @@index([storeId])
+  @@index([category])
+  @@index([createdAt])
+  @@index([storeId, category])
 }
 
 enum OrderStatus {
-    ORDER_PLACED
-    PROCESSING
-    SHIPPED
-    DELIVERED
-    CANCELLED
+  ORDER_PLACED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 enum PaymentMethod {
-    COD
-    STRIPE
+  COD
+  STRIPE
 }
 
 model Order {
-    id            String        @id @default(cuid())
-    total         Float
-    status        OrderStatus   @default(ORDER_PLACED)
-    userId        String
-    storeId       String
-    addressId     String
-    isPaid        Boolean       @default(false)
-    paymentMethod PaymentMethod
-    createdAt     DateTime      @default(now())
-    updatedAt     DateTime      @updatedAt
-    isCouponUsed  Boolean       @default(false)
-    coupon        Json          @default("{}")
-    orderItems    OrderItem[]
+  id            String        @id @default(cuid())
+  total         Float
+  status        OrderStatus   @default(ORDER_PLACED)
+  userId        String
+  storeId       String
+  addressId     String
+  isPaid        Boolean       @default(false)
+  paymentMethod PaymentMethod
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  isCouponUsed  Boolean       @default(false)
+  coupon        Json          @default("{}")
+  orderItems    OrderItem[]
 
-    // Relations
-    user    User    @relation("BuyerRelation", fields: [userId], references: [id])
-    store   Store   @relation(fields: [storeId], references: [id])
-    address Address @relation(fields: [addressId], references: [id])
+  // Relations
+  user    User    @relation("BuyerRelation", fields: [userId], references: [id])
+  store   Store   @relation(fields: [storeId], references: [id])
+  address Address @relation(fields: [addressId], references: [id])
 
-    @@index([userId])
-    @@index([storeId])
-    @@index([status])
-    @@index([createdAt])
-    @@index([userId, status])
-    @@index([storeId, status])
+  @@index([userId])
+  @@index([storeId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId, status])
+  @@index([storeId, status])
 }
 
 model OrderItem {
-    orderId   String
-    productId String
-    quantity  Int
-    price     Float
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
 
-    // Relations
-    order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-    product Product @relation(fields: [productId], references: [id])
+  // Relations
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
 
-    @@id([orderId, productId])
+  @@id([orderId, productId])
 }
 
 model Rating {
-    id        String   @id @default(cuid())
-    rating    Int
-    review    String
-    userId    String
-    productId String
-    orderId   String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id        String   @id @default(cuid())
+  rating    Int
+  review    String
+  userId    String
+  productId String
+  orderId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    // Relations
-    user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-    @@unique([userId, productId, orderId])
-    @@index([productId])
-    @@index([userId])
-    @@index([orderId])
+  @@unique([userId, productId, orderId])
+  @@index([productId])
+  @@index([userId])
+  @@index([orderId])
 }
 
 model Address {
-    id        String   @id @default(cuid())
-    userId    String
-    name      String
-    email     String
-    street    String
-    city      String
-    state     String
-    phone     String
-    createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  email     String
+  street    String
+  city      String
+  state     String
+  phone     String
+  createdAt DateTime @default(now())
 
-    // Relations
-    Order Order[]
-    user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Relations
+  Order Order[]
+  user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@index([userId])
+  @@index([userId])
 }
 
 model Coupon {
-    code        String   @id
-    description String
-    discount    Float
-    forNewUser  Boolean
-    forMember   Boolean  @default(false)
-    isPublic    Boolean
-    expiresAt   DateTime
-    createdAt   DateTime @default(now())
+  code        String   @id
+  description String
+  discount    Float
+  forNewUser  Boolean
+  forMember   Boolean  @default(false)
+  isPublic    Boolean
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
 
-    @@index([isPublic])
-    @@index([expiresAt])
-    @@index([forNewUser])
+  @@index([isPublic])
+  @@index([expiresAt])
+  @@index([forNewUser])
 }
 
 model Store {
-    id          String   @id @default(cuid())
-    userId      String   @unique
-    name        String
-    description String
-    username    String   @unique
-    address     String
-    status      String   @default("pending")
-    isActive    Boolean  @default(false)
-    logo        String
-    email       String
-    contact     String
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  name        String
+  description String
+  username    String   @unique
+  address     String
+  status      String   @default("pending")
+  isActive    Boolean  @default(false)
+  logo        String
+  email       String
+  contact     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-    Product Product[]
-    Order   Order[]
-    user    User      @relation(fields: [userId], references: [id])
+  Product Product[]
+  Order   Order[]
+  user    User      @relation(fields: [userId], references: [id])
 
-    @@index([username])
-    @@index([status])
-    @@index([isActive])
-    @@index([status, isActive])
+  @@index([username])
+  @@index([status])
+  @@index([isActive])
+  @@index([status, isActive])
+}
+
+// ============================================
+// Better Auth Tables
+// ============================================
+
+// Account: OAuth connections (Google, Facebook, etc.)
+// Mỗi user có thể có nhiều accounts (Google + Facebook)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String // "oauth", "oidc", "email"
+  provider          String // "google", "facebook"
+  providerAccountId String // User ID từ provider
+  refresh_token     String? @db.Text // Token để renew access token
+  access_token      String? @db.Text // Token để call provider API
+  expires_at        Int? // Timestamp khi token hết hạn
+  token_type        String? // "Bearer"
+  scope             String? // "email profile"
+  id_token          String? @db.Text // JWT token từ provider
+  session_state     String? // OAuth session state
+
+  // Link to User
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Unique constraint: 1 user chỉ có 1 account per provider
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// Session: Phiên đăng nhập
+// Mỗi lần login tạo 1 session mới
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @db.Text // Random token (lưu trong cookie)
+  userId       String
+  expires      DateTime // Hết hạn khi nào? (default: 7 days)
+  createdAt    DateTime @default(now())
+
+  // Link to User
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expires]) // Index để dễ clean expired sessions
+}
+
+// VerificationToken: OTP codes và email verification
+// Dùng cho phone OTP, email verification, password reset
+model VerificationToken {
+  identifier String // Phone number hoặc email
+  token      String   @unique // OTP code (vd: "123456") hoặc random token
+  expires    DateTime // Hết hạn sau X phút
+
+  // Composite primary key: (identifier + token)
+  // Vì 1 identifier có thể có nhiều tokens (retry OTP)
+  @@unique([identifier, token])
+  @@index([expires]) // Index để dễ clean expired tokens
 }

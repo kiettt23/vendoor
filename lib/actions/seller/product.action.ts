@@ -1,8 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { requireSeller } from "@/lib/auth/check-seller";
-import { auth } from "@clerk/nextjs/server";
+import { requireSeller } from "@/lib/auth/helpers";
 import { revalidatePath } from "next/cache";
 import imagekit from "@/configs/image-kit";
 
@@ -19,10 +18,20 @@ interface AIAnalysisResult {
 
 // Get all products for the seller's store
 export async function getProducts() {
-  const storeId = await requireSeller();
+  const user = await requireSeller();
+
+  // Get seller's store
+  const store = await prisma.store.findUnique({
+    where: { userId: user.id },
+    select: { id: true },
+  });
+
+  if (!store) {
+    throw new Error("Store not found");
+  }
 
   const products = await prisma.product.findMany({
-    where: { storeId },
+    where: { storeId: store.id },
     orderBy: { createdAt: "desc" },
   });
 
@@ -34,7 +43,17 @@ export async function createProduct(
   formData: FormData
 ): Promise<ActionResponse> {
   try {
-    const storeId = await requireSeller();
+    const user = await requireSeller();
+
+    // Get seller's store
+    const store = await prisma.store.findUnique({
+      where: { userId: user.id },
+      select: { id: true },
+    });
+
+    if (!store) {
+      throw new Error("Store not found");
+    }
 
     // Extract form data
     const name = formData.get("name") as string;
@@ -98,7 +117,7 @@ export async function createProduct(
         price,
         category,
         images: imageUrls,
-        storeId,
+        storeId: store.id,
         inStock: true,
       },
     });
@@ -123,10 +142,7 @@ export async function updateProduct(
   formData: FormData
 ): Promise<ActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
+    const user = await requireSeller();
 
     const productId = formData.get("productId") as string;
 
@@ -136,7 +152,7 @@ export async function updateProduct(
       include: { store: { select: { userId: true } } },
     });
 
-    if (!product || product.store.userId !== userId) {
+    if (!product || product.store.userId !== user.id) {
       throw new Error("Unauthorized: You don't own this product");
     }
 
@@ -219,10 +235,7 @@ export async function updateProduct(
 // Toggle product stock status
 export async function toggleStock(productId: string): Promise<ActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
+    const user = await requireSeller();
 
     // Get product and verify ownership
     const product = await prisma.product.findUnique({
@@ -234,7 +247,7 @@ export async function toggleStock(productId: string): Promise<ActionResponse> {
       throw new Error("Product not found");
     }
 
-    if (product.store.userId !== userId) {
+    if (product.store.userId !== user.id) {
       throw new Error("Unauthorized: You don't own this product");
     }
 
@@ -271,10 +284,7 @@ export async function deleteProduct(
   productId: string
 ): Promise<ActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
+    const user = await requireSeller();
 
     // Get product and verify ownership
     const product = await prisma.product.findUnique({
@@ -295,7 +305,7 @@ export async function deleteProduct(
       throw new Error("Product not found");
     }
 
-    if (product.store.userId !== userId) {
+    if (product.store.userId !== user.id) {
       throw new Error("Unauthorized: You don't own this product");
     }
 
@@ -361,10 +371,7 @@ export async function analyzeProductImage(
   mimeType: string
 ): Promise<AIAnalysisResult> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
+    await requireSeller();
 
     // Check if OpenAI is configured
     if (!process.env.OPENAI_API_KEY) {

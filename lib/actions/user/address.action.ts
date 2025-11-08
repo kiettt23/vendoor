@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth/helpers";
 import { revalidatePath } from "next/cache";
 import type { AddressActionResponse, SerializedAddress } from "@/types";
 import type { AddressFormData } from "@/lib/validations";
@@ -10,13 +10,13 @@ export async function getUserAddresses(): Promise<{
   addresses: SerializedAddress[];
 }> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return { addresses: [] };
     }
 
     const addresses = await prisma.address.findMany({
-      where: { userId },
+      where: { userId: user.id },
       orderBy: { createdAt: "desc" },
     });
 
@@ -37,8 +37,8 @@ export async function addAddress(
   addressData: AddressFormData
 ): Promise<AddressActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return { success: false, error: "Vui lòng đăng nhập" };
     }
 
@@ -58,7 +58,7 @@ export async function addAddress(
         city,
         state,
         phone,
-        userId,
+        userId: user.id,
       },
     });
 
@@ -89,8 +89,8 @@ export async function updateAddress(
   addressData: AddressFormData
 ): Promise<AddressActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return { success: false, error: "Vui lòng đăng nhập" };
     }
 
@@ -106,7 +106,7 @@ export async function updateAddress(
       where: { id: addressId },
     });
 
-    if (!existingAddress || existingAddress.userId !== userId) {
+    if (!existingAddress || existingAddress.userId !== user.id) {
       return {
         success: false,
         error: "Không tìm thấy địa chỉ hoặc bạn không có quyền chỉnh sửa",
@@ -152,8 +152,8 @@ export async function deleteAddress(
   addressId: string
 ): Promise<AddressActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return { success: false, error: "Vui lòng đăng nhập" };
     }
 
@@ -162,7 +162,7 @@ export async function deleteAddress(
       where: { id: addressId },
     });
 
-    if (!existingAddress || existingAddress.userId !== userId) {
+    if (!existingAddress || existingAddress.userId !== user.id) {
       return {
         success: false,
         error: "Không tìm thấy địa chỉ hoặc bạn không có quyền xóa",

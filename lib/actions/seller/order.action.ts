@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { OrderStatus } from "@prisma/client";
-import { auth } from "@clerk/nextjs/server";
+import { requireSeller } from "@/lib/auth/helpers";
 import { revalidatePath } from "next/cache";
 
 interface ActionResponse {
@@ -28,14 +28,11 @@ const VALID_STATUSES = [
 
 // Get all orders for the seller's store
 export async function getOrders() {
-  const { userId } = await auth();
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
+  const user = await requireSeller();
 
   // Get seller's store
   const store = await prisma.store.findUnique({
-    where: { userId },
+    where: { userId: user.id },
     select: { id: true },
   });
 
@@ -108,10 +105,7 @@ export async function updateOrderStatus(
   status: OrderStatus
 ): Promise<ActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new Error("Unauthorized: Please sign in");
-    }
+    const user = await requireSeller();
 
     // Validate input
     if (!orderId || !status) {
@@ -137,7 +131,7 @@ export async function updateOrderStatus(
       throw new Error("Order not found");
     }
 
-    if (order.store.userId !== userId) {
+    if (order.store.userId !== user.id) {
       throw new Error("Unauthorized: You don't own this order");
     }
 

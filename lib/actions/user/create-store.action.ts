@@ -1,21 +1,21 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth/helpers";
 import { revalidatePath } from "next/cache";
 import imagekit from "@/configs/image-kit";
 
 export async function createStore(formData) {
   try {
     // 1. Check authentication
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       throw new Error("Unauthorized: Please sign in");
     }
 
     // 2. Check if user already has a store
     const existingStore = await prisma.store.findUnique({
-      where: { userId },
+      where: { userId: user.id },
     });
 
     if (existingStore) {
@@ -80,7 +80,7 @@ export async function createStore(formData) {
         contact,
         address,
         logo: logoUrl,
-        userId,
+        userId: user.id,
         status: "pending",
         isActive: false,
       },
@@ -105,14 +105,14 @@ export async function createStore(formData) {
 export async function getSellerStatus() {
   try {
     // 1. Check authentication
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       throw new Error("Unauthorized: Please sign in");
     }
 
     // 2. Get store status
     const store = await prisma.store.findUnique({
-      where: { userId },
+      where: { userId: user.id },
       select: {
         status: true,
         isActive: true,

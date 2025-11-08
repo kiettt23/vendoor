@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { requireSeller } from "@/lib/auth/helpers";
 import prisma from "@/lib/prisma";
 import { uploadToImageKit } from "@/configs/image-kit";
 import { revalidatePath } from "next/cache";
@@ -24,13 +24,11 @@ export async function getStoreInfo(): Promise<
   }>
 > {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { success: false, message: "Unauthorized" };
-    }
+    // requireSeller() throws error if not authenticated or not a seller
+    const user = await requireSeller();
 
     const store = await prisma.store.findUnique({
-      where: { userId },
+      where: { userId: user.id },
       select: {
         id: true,
         name: true,
@@ -75,14 +73,11 @@ export async function updateStoreLogo(formData: FormData): Promise<
   }>
 > {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { success: false, message: "Unauthorized" };
-    }
+    const user = await requireSeller();
 
     // Get seller's store
     const store = await prisma.store.findUnique({
-      where: { userId },
+      where: { userId: user.id },
       select: { id: true },
     });
 
@@ -161,14 +156,11 @@ export async function updateStoreInfo(data: {
   }>
 > {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { success: false, message: "Unauthorized" };
-    }
+    const user = await requireSeller();
 
     // Get seller's store
     const store = await prisma.store.findUnique({
-      where: { userId },
+      where: { userId: user.id },
       select: { id: true },
     });
 

@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth/helpers";
 import { revalidatePath } from "next/cache";
 import type { Coupon, CouponActionResponse } from "@/types";
 import {
@@ -21,14 +21,14 @@ interface OrderResponse {
 
 // Get all orders for the current user
 export async function getOrders() {
-  const { userId } = await auth();
-  if (!userId) {
+  const user = await getCurrentUser();
+  if (!user) {
     throw new Error("Unauthorized: Please sign in");
   }
 
   const orders = await prisma.order.findMany({
     where: {
-      userId,
+      userId: user.id,
       // Only show paid orders (COD or successful Stripe payments)
       OR: [
         { paymentMethod: "COD" },
@@ -99,8 +99,8 @@ export { getOrders as getUserOrders };
 // Apply a coupon code
 export async function applyCoupon(code: string): Promise<CouponActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return { success: false, error: "Vui lòng đăng nhập" };
     }
 
@@ -128,18 +128,17 @@ export async function applyCoupon(code: string): Promise<CouponActionResponse> {
       return { success: false, error: "Mã giảm giá đã hết hạn" };
     }
 
-    // Get user info from Clerk to check membership status
-    const { clerkClient } = await import("@clerk/nextjs/server");
-    const client = await clerkClient();
-    const clerkUser = await client.users.getUser(userId);
-
     // Check if user has any orders (for forNewUser check)
     const userOrderCount = await prisma.order.count({
-      where: { userId },
+      where: { userId: user.id },
     });
 
     const isNewUser = userOrderCount === 0;
-    const isPlusMember = clerkUser.publicMetadata?.isPlusMember === true;
+
+    // TODO: Implement Plus membership feature
+    // Option 1: Add `isPlusMember` field to User model
+    // Option 2: Create separate Membership table
+    const isPlusMember = false; // Temporary: Always false until membership is implemented
 
     // Check forNewUser restriction
     if (coupon.forNewUser && !isNewUser) {
@@ -159,11 +158,8 @@ export async function applyCoupon(code: string): Promise<CouponActionResponse> {
 
     // Check if public or user-specific
     if (!coupon.isPublic) {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { id: true },
-      });
-
+      // User already retrieved from getCurrentUser()
+      // No need to query again
       if (!user) {
         return {
           success: false,
@@ -193,8 +189,8 @@ export async function createOrder(
   orderData: OrderFormData
 ): Promise<OrderResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return { success: false, message: "Vui lòng đăng nhập" };
     }
 
@@ -214,7 +210,7 @@ export async function createOrder(
       where: { id: addressId },
     });
 
-    if (!address || address.userId !== userId) {
+    if (!address || address.userId !== user.id) {
       throw new Error("Địa chỉ không hợp lệ");
     }
 
@@ -277,7 +273,7 @@ export async function createOrder(
     const order = await prisma.order.create({
       data: {
         total: finalTotal,
-        userId,
+        userId: user.id,
         storeId: mainStoreId,
         addressId,
         paymentMethod,
@@ -306,9 +302,8 @@ export async function createOrder(
         : `https://${baseUrl}/cart?canceled=true`;
 
       // Calculate total amount with coupon and shipping
-      const client = await clerkClient();
-      const clerkUser = await client.users.getUser(userId);
-      const isPlusMember = clerkUser.publicMetadata?.isPlusMember === true;
+      // TODO: Implement Plus membership feature
+      const isPlusMember = false; // Temporary: Always false until membership is implemented
 
       let subtotal = 0;
       for (const item of items) {
@@ -345,7 +340,7 @@ export async function createOrder(
         cancel_url: cancelUrl,
         metadata: {
           orderIds: createdOrders.map((order) => order.id).join(","),
-          userId,
+          userId: user.id,
           appId: "vendoor",
         },
       });
@@ -359,7 +354,7 @@ export async function createOrder(
 
     // Clear cart for COD orders only (Stripe cart cleared via webhook)
     await prisma.user.update({
-      where: { id: userId },
+      where: { id: user.id },
       data: { cart: {} },
     });
 
@@ -381,8 +376,8 @@ export async function createOrder(
 // Cancel an order
 export async function cancelOrder(orderId: string): Promise<OrderResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       throw new Error("Unauthorized: Please sign in");
     }
 
@@ -391,7 +386,7 @@ export async function cancelOrder(orderId: string): Promise<OrderResponse> {
       where: { id: orderId },
     });
 
-    if (!order || order.userId !== userId) {
+    if (!order || order.userId !== user.id) {
       throw new Error("Không tìm thấy đơn hàng hoặc bạn không có quyền hủy");
     }
 
