@@ -1,14 +1,12 @@
 import { vi } from "@/lib/i18n";
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import StoresClient from "./_components/StoresClient";
 
 // ✅ Server Component - Fetch approved stores
 export default async function AdminStores() {
   // ✅ Check auth on server
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+  await requireAdmin();
 
   // ✅ Fetch approved stores directly from database
   const stores = await prisma.store.findMany({

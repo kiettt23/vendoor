@@ -8,14 +8,12 @@ import {
 import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";
 import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/auth";
 
 // ✅ Server Component - Fetch dashboard data directly from DB
 export default async function AdminDashboard() {
   // ✅ Check auth on server
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+  await requireAdmin();
 
   // ✅ Fetch dashboard data directly from database
   const [products, orders, stores] = await Promise.all([

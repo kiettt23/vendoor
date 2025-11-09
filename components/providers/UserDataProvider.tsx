@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store";
-import { useUser, useAuth } from "@clerk/nextjs";
+import { useSession } from "@/lib/auth/";
 import { fetchCart, uploadCart } from "@/lib/features/cart/cart-slice";
 import { setAddresses } from "@/lib/features/address/address-slice";
 import { setRatings } from "@/lib/features/rating/rating-slice";
@@ -14,12 +14,20 @@ interface UserDataProviderProps {
 
 export default function UserDataProvider({ children }: UserDataProviderProps) {
   const dispatch = useAppDispatch();
-  const { user } = useUser();
-  const { getToken } = useAuth();
+  const { data: session, isPending } = useSession();
   const { cartItems } = useAppSelector((state) => state.cart);
 
+  const user = session?.user;
+
+  // Create a mock getToken function for compatibility
+  // Better Auth doesn't use tokens the same way as Clerk
+  const getToken = async () => {
+    // Return empty string or implement proper token fetching if needed
+    return "";
+  };
+
   useEffect(() => {
-    if (user) {
+    if (user && !isPending) {
       dispatch(fetchCart({ getToken }));
 
       // Fetch addresses
@@ -32,13 +40,13 @@ export default function UserDataProvider({ children }: UserDataProviderProps) {
         dispatch(setRatings(ratings));
       });
     }
-  }, [user, dispatch, getToken]);
+  }, [user, dispatch, isPending]);
 
   useEffect(() => {
-    if (user) {
+    if (user && !isPending) {
       dispatch(uploadCart({ getToken }));
     }
-  }, [cartItems, user, dispatch, getToken]);
+  }, [cartItems, user, dispatch, isPending]);
 
   return children;
 }

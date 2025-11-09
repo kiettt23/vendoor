@@ -6,13 +6,15 @@ import { ArrowRightIcon } from "lucide-react";
 import AdminNavbar from "./AdminNavbar";
 import AdminSidebar from "./AdminSidebar";
 import { vi } from "@/lib/i18n";
-import { useUser } from "@clerk/nextjs";
-import { checkIsAdmin } from "@/lib/auth/check-admin";
+import { useSession } from "@/lib/auth/";
+import { checkIsAdmin } from "@/lib/auth/";
 
 const AdminLayout = ({ children }) => {
-  const { user } = useUser();
+  const { data: session, isPending } = useSession();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const user = session?.user;
 
   const fetchIsAdmin = async () => {
     try {
@@ -26,10 +28,12 @@ const AdminLayout = ({ children }) => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && !isPending) {
       fetchIsAdmin();
+    } else if (!isPending) {
+      setLoading(false);
     }
-  }, [user]);
+  }, [user, isPending]);
 
   return loading ? (
     <Loading />

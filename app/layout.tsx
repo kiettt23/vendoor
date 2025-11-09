@@ -1,7 +1,6 @@
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import StoreProvider from "@/app/StoreProvider";
-import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "next-themes";
 
 export const metadata = {
@@ -11,22 +10,20 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <StoreProvider>
-              {children}
-              <Toaster position="top-center" />
-            </StoreProvider>
-          </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <StoreProvider>
+            {children}
+            <Toaster position="top-center" />
+          </StoreProvider>
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }

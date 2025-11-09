@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { toast } from "sonner";
 import Loading from "@/components/ui/Loading";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "@/lib/auth/client";
 import { vi } from "@/lib/i18n";
 import { createStore } from "@/lib/actions/user/create-store.action";
 import { useSellerStatus } from "@/lib/hooks/useSellerStatus";
@@ -22,7 +22,8 @@ import {
 import { storeSchema, type StoreFormData } from "@/lib/validations";
 
 export default function CreateStore() {
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const user = session?.user;
   const [imagePreview, setImagePreview] = useState<string>("");
   const { alreadySubmitted, status, loading, message, fetchStatus } =
     useSellerStatus();

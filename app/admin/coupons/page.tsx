@@ -1,13 +1,11 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import CouponsClient from "./_components/CouponsClient";
 
 // ✅ Server Component - Fetch coupons
 export default async function AdminCoupons() {
   // ✅ Check auth on server
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+  await requireAdmin();
 
   // ✅ Fetch coupons directly from database
   const coupons = await prisma.coupon.findMany({

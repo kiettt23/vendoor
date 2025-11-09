@@ -9,11 +9,12 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "@/lib/auth/";
 import { vi } from "@/lib/i18n";
 
 const AdminSidebar = () => {
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const user = session?.user;
 
   const pathname = usePathname();
 
@@ -34,12 +35,12 @@ const AdminSidebar = () => {
         <div className="flex flex-col gap-3 justify-center items-center pt-8 max-sm:hidden">
           <Image
             className="w-14 h-14 rounded-full"
-            src={user.imageUrl}
-            alt=""
+            src={user.image || "/images/default-avatar.png"}
+            alt={user.name || "Admin"}
             width={80}
             height={80}
           />
-          <p className="text-slate-700">{user.fullName}</p>
+          <p className="text-slate-700">{user.name}</p>
         </div>
 
         <div className="max-sm:mt-6">

@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { requireSeller } from "@/lib/auth/check-seller";
+import { requireSellerWithStore } from "@/lib/auth/";
 import EditProductForm from "./_components/EditProductForm";
 
 export default async function EditProductPage({
@@ -14,7 +14,8 @@ export default async function EditProductPage({
   // Check if user is seller and get storeId
   let storeId: string;
   try {
-    storeId = await requireSeller();
+    const { storeId: id } = await requireSellerWithStore();
+    storeId = id;
   } catch (error) {
     redirect("/create-store");
   }

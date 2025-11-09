@@ -1,15 +1,14 @@
-import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";
 import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import StoreDashboardClient from "./_components/StoreDashboardClient";
 
 // ✅ Server Component - Fetch store dashboard data
 export default async function Dashboard() {
   // ✅ Check auth on server
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+  const user = await requireAuth();
+  const userId = user.id;
 
   // ✅ Get user's store
   const store = await prisma.store.findUnique({

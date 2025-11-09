@@ -1,7 +1,7 @@
 import { XIcon } from "lucide-react";
 import AddressManager from "../address/AddressManager";
 import { toast } from "sonner";
-import { Protect } from "@clerk/nextjs";
+import { useSession } from "@/lib/auth/client";
 import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";
 import { APP_CONFIG } from "@/configs/app";
@@ -9,6 +9,13 @@ import { useOrderManagement } from "@/lib/hooks/useOrderManagement";
 import type { OrderSummaryProps } from "@/types";
 
 const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
+  const { data: session } = useSession();
+  const user = session?.user;
+
+  // TODO: Add subscription/plan field to user schema
+  // For now, assume all users have free shipping (plan === "plus")
+  const hasPlusPlan = true; // user?.plan === "plus"
+
   const {
     paymentMethod,
     setPaymentMethod,
@@ -23,7 +30,7 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
   } = useOrderManagement();
 
   // Calculate shipping fee (0 for Plus members, 30000 for regular users)
-  const shippingFee = 0; // Will be determined by Protect component
+  const shippingFee = hasPlusPlan ? 0 : APP_CONFIG.SHIPPING_FEE;
 
   // Calculate discount amount
   const discountAmount = coupon ? (coupon.discount / 100) * totalPrice : 0;
@@ -82,12 +89,9 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
           <div className="flex flex-col gap-1 font-medium text-right">
             <p>{formatPrice(totalPrice)}</p>
             <p>
-              <Protect
-                plan={"plus"}
-                fallback={formatPrice(APP_CONFIG.SHIPPING_FEE)}
-              >
-                {vi.cart.freeShipping}
-              </Protect>
+              {hasPlusPlan
+                ? vi.cart.freeShipping
+                : formatPrice(APP_CONFIG.SHIPPING_FEE)}
             </p>
             {coupon && (
               <p className="text-green-600">-{formatPrice(discountAmount)}</p>
@@ -134,9 +138,9 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
       <div className="flex justify-between py-4">
         <p>{vi.cart.total}:</p>
         <p className="font-medium text-right">
-          <Protect plan={"plus"} fallback={formatPrice(totalWithShipping)}>
-            {formatPrice(totalWithoutShipping)}
-          </Protect>
+          {hasPlusPlan
+            ? formatPrice(totalWithoutShipping)
+            : formatPrice(totalWithShipping)}
         </p>
       </div>
       <button

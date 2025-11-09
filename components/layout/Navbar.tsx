@@ -1,17 +1,19 @@
 "use client";
-import { PackageIcon, Search, ShoppingCart, XIcon } from "lucide-react";
+import { Search, ShoppingCart, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAppSelector } from "@/lib/store";
 import type { RootState } from "@/lib/store";
-import { useUser, useClerk, UserButton, Protect } from "@clerk/nextjs";
+import { useSession } from "@/lib/auth/";
+import { UserButton } from "@daveyplate/better-auth-ui";
 import { vi } from "@/lib/i18n";
 
 const Navbar = () => {
-  const { user } = useUser();
-  const { openSignIn } = useClerk();
+  const { data: session } = useSession();
   const router = useRouter();
+
+  const user = session?.user;
 
   const [search, setSearch] = useState("");
   const [showMobileSearch, setShowMobileSearch] = useState(false);
@@ -34,11 +36,7 @@ const Navbar = () => {
             className="relative text-4xl font-semibold text-slate-700"
           >
             <span className="text-purple-600">Ven</span>door
-            <Protect plan="plus">
-              <p className="absolute text-xs font-semibold -top-1 -right-8 px-3 p-0.5 rounded-full flex items-center gap-2 text-white bg-purple-500">
-                plus
-              </p>
-            </Protect>
+            {/* TODO: Implement Plus membership feature */}
           </Link>
 
           {/* Desktop Menu */}
@@ -108,22 +106,14 @@ const Navbar = () => {
             </Link>
 
             {!user ? (
-              <button
-                onClick={() => openSignIn()}
+              <Link
+                href="/api/auth/sign-in"
                 className="px-6 xl:px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full whitespace-nowrap flex-shrink-0 text-sm ml-1"
               >
                 {vi.nav.login}
-              </button>
+              </Link>
             ) : (
-              <UserButton>
-                <UserButton.MenuItems>
-                  <UserButton.Action
-                    labelIcon={<PackageIcon size={16} />}
-                    label={vi.nav.myOrders}
-                    onClick={() => router.push("/orders")}
-                  ></UserButton.Action>
-                </UserButton.MenuItems>
-              </UserButton>
+              <UserButton />
             )}
           </div>
 
@@ -136,24 +126,14 @@ const Navbar = () => {
               <Search size={20} />
             </button>
             {user ? (
-              <div>
-                <UserButton>
-                  <UserButton.MenuItems>
-                    <UserButton.Action
-                      labelIcon={<ShoppingCart size={16} />}
-                      label={vi.nav.cart}
-                      onClick={() => router.push("/cart")}
-                    ></UserButton.Action>
-                  </UserButton.MenuItems>
-                </UserButton>
-              </div>
+              <UserButton />
             ) : (
-              <button
-                onClick={() => openSignIn()}
+              <Link
+                href="/api/auth/sign-in"
                 className="px-7 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-sm transition text-white rounded-full"
               >
                 {vi.nav.login}
-              </button>
+              </Link>
             )}
           </div>
         </div>

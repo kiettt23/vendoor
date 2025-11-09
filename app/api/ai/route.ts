@@ -1,5 +1,4 @@
-import { getAuth } from "@clerk/nextjs/server";
-import { checkIsSeller } from "@/lib/auth/check-seller";
+import { checkIsSeller } from "@/lib/auth/";
 import { openai } from "@/configs/openai";
 import { NextRequest, NextResponse } from "next/server";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
@@ -76,7 +75,6 @@ async function main(base64Image: string, mimeType: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
     const { isSeller } = await checkIsSeller();
 
     if (!isSeller) {

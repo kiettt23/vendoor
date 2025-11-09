@@ -1,28 +1,30 @@
-import { auth } from "@clerk/nextjs/server";
+import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import CartClient from "./_components/CartClient";
 
 // ✅ Server Component - Fetch cart products
 export default async function Cart() {
-  const { userId } = await auth();
+  const { user } = await getSession();
 
-  if (!userId) {
+  if (!user) {
     // Not logged in - show empty cart (client will handle localStorage)
     return <CartClient products={[]} />;
   }
 
+  const userId = user.id;
+
   // ✅ Fetch user's cart from User.cart (Json field)
-  const user = await prisma.user.findUnique({
+  const dbUser = await prisma.user.findUnique({
     where: { id: userId },
     select: { cart: true },
   });
 
-  if (!user || !user.cart || Object.keys(user.cart).length === 0) {
+  if (!dbUser || !dbUser.cart || Object.keys(dbUser.cart).length === 0) {
     return <CartClient products={[]} />;
   }
 
   // ✅ Get product IDs from cart
-  const productIds = Object.keys(user.cart);
+  const productIds = Object.keys(dbUser.cart);
 
   // ✅ Fetch products in cart
   const products = await prisma.product.findMany({

@@ -6,7 +6,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "@/lib/auth/client";
 import { applyCoupon, createOrder } from "@/lib/actions/user/order.action";
 import type { Coupon } from "@/types";
 import { vi } from "@/lib/i18n";
@@ -20,7 +20,8 @@ interface OrderItem {
 }
 
 export function useOrderManagement() {
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const user = session?.user;
   const router = useRouter();
 
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "STRIPE">("COD");

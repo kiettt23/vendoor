@@ -2,7 +2,7 @@
 import PageTitle from "@/components/ui/PageTitle";
 import { useEffect, useState } from "react";
 import OrderItem from "@/components/features/order/OrderItem";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { vi } from "@/lib/i18n";
@@ -12,7 +12,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PackageIcon } from "lucide-react";
 
 export default function Orders() {
-  const { user, isLoaded } = useUser();
+  const { data: session, isPending } = useSession();
+  const user = session?.user;
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -27,16 +28,16 @@ export default function Orders() {
         toast.error(error.message);
       }
     };
-    if (isLoaded) {
+    if (!isPending) {
       if (user) {
         fetchOrders();
       } else {
         router.push("/");
       }
     }
-  }, [isLoaded, user, router]);
+  }, [isPending, user, router]);
 
-  if (!isLoaded || loading) {
+  if (isPending || loading) {
     return (
       <div className="min-h-[70vh] my-20 max-w-7xl mx-auto px-6">
         <PageTitle

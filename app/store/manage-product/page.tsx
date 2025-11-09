@@ -1,13 +1,13 @@
 import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import ManageProductsClient from "./_components/ManageProductsClient";
 
 // ✅ Server Component - Fetch store products
 export default async function StoreManageProducts() {
   // ✅ Check auth on server
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+  const user = await requireAuth();
+  const userId = user.id;
 
   // ✅ Get user's store
   const store = await prisma.store.findUnique({
