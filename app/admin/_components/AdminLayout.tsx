@@ -1,43 +1,24 @@
 "use client";
-import { useEffect, useState } from "react";
 import Loading from "@/components/ui/Loading";
-import Link from "next/link";
-import { ArrowRightIcon } from "lucide-react";
 import AdminNavbar from "./AdminNavbar";
 import AdminSidebar from "./AdminSidebar";
-import { vi } from "@/lib/i18n";
-import { useSession } from "@/lib/auth/";
-import { checkIsAdmin } from "@/lib/auth/";
+import { useSession } from "@/lib/auth/client";
 
+/**
+ * Admin Layout - Client Component
+ * 
+ * Security: Server layout (app/admin/layout.tsx) already handles authorization
+ * This component only handles UI rendering, NO authorization logic
+ */
 const AdminLayout = ({ children }) => {
   const { data: session, isPending } = useSession();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  const user = session?.user;
+  if (isPending) {
+    return <Loading />;
+  }
 
-  const fetchIsAdmin = async () => {
-    try {
-      const { isAdmin } = await checkIsAdmin();
-      setIsAdmin(isAdmin);
-    } catch (error) {
-      // Error fetching admin status
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (user && !isPending) {
-      fetchIsAdmin();
-    } else if (!isPending) {
-      setLoading(false);
-    }
-  }, [user, isPending]);
-
-  return loading ? (
-    <Loading />
-  ) : isAdmin ? (
+  // Server already verified admin access - just render UI
+  return (
     <div className="flex flex-col h-screen">
       <AdminNavbar />
       <div className="flex flex-1 items-start h-full overflow-y-scroll no-scrollbar">
@@ -46,18 +27,6 @@ const AdminLayout = ({ children }) => {
           {children}
         </div>
       </div>
-    </div>
-  ) : (
-    <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
-      <h1 className="text-2xl sm:text-4xl font-semibold text-slate-400">
-        {vi.common.unauthorized}
-      </h1>
-      <Link
-        href="/"
-        className="bg-slate-700 text-white flex items-center gap-2 mt-8 p-2 px-6 max-sm:text-sm rounded-full"
-      >
-        {vi.common.goHome} <ArrowRightIcon size={18} />
-      </Link>
     </div>
   );
 };

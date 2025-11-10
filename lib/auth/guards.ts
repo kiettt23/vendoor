@@ -1,60 +1,43 @@
 /**
- * Auth Guards
+ * Auth Guards - Server-side authorization
  *
- * Strict functions that throw errors if conditions not met
- * Use in server actions and API routes
+ * Throw lỗi nếu điều kiện không được thỏa mãn
+ * Chỉ sử dụng trong Server Actions và API Routes
  */
 
 import prisma from "@/lib/prisma";
-import { getCurrentUser, hasRole } from "./utils";
-import type { SellerWithStore } from "./types";
+import { getCurrentUser } from "./utils";
+import { isAdmin, isSeller } from "./authorization";
+import type { AuthUser, SellerWithStore } from "./types";
 
-// Require authenticated user
-export async function requireAuth() {
+// Yêu cầu user đã đăng nhập
+export async function requireAuth(): Promise<AuthUser> {
   const user = await getCurrentUser();
-
   if (!user) {
     throw new Error("Unauthorized - Login required");
   }
-
   return user;
 }
 
-// Require specific role(s)
-export async function requireRole(roles: string | string[]) {
+// Yêu cầu quyền admin
+export async function requireAdmin(): Promise<AuthUser> {
   const user = await requireAuth();
-
-  if (!hasRole(user, roles)) {
-    const roleArray = Array.isArray(roles) ? roles : [roles];
-    throw new Error(`Forbidden - Required role(s): ${roleArray.join(", ")}`);
-  }
-
-  return user;
-}
-
-// Require ADMIN role
-export async function requireAdmin() {
-  const user = await requireAuth();
-
-  if (!hasRole(user, "ADMIN")) {
+  if (!isAdmin(user)) {
     throw new Error("Forbidden - Admin access required");
   }
-
   return user;
 }
 
-// Require SELLER or ADMIN role
-export async function requireSeller() {
+// Yêu cầu quyền seller (hoặc admin)
+export async function requireSeller(): Promise<AuthUser> {
   const user = await requireAuth();
-
-  if (!hasRole(user, ["SELLER", "ADMIN"])) {
+  if (!isSeller(user)) {
     throw new Error("Forbidden - Seller access required");
   }
-
   return user;
 }
 
-// Require seller with approved store
+// Yêu cầu seller có cửa hàng đã được duyệt
 export async function requireSellerWithStore(): Promise<SellerWithStore> {
   const user = await requireSeller();
 

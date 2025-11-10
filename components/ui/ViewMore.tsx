@@ -1,26 +1,65 @@
-"use client";
-import { ArrowRight } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
-import React from "react";
-import { vi } from "@/lib/i18n";
 
-const ViewMore = ({ title, description, visibleButton = true, href = "" }) => {
-  return (
-    <div className="flex flex-col items-center">
-      <h2 className="text-2xl font-semibold text-slate-800">{title}</h2>
-      <Link
-        href={href}
-        className="flex items-center gap-5 text-sm text-slate-600 mt-2"
-      >
-        <p className="max-w-lg text-center">{description}</p>
-        {visibleButton && (
-          <button className="text-purple-500 flex items-center gap-1">
-            {vi.common.viewAll} <ArrowRight size={14} />
-          </button>
+interface ViewMoreProps {
+  href?: string;
+  text?: string;
+  // Section header props
+  title?: string;
+  description?: string;
+  visibleButton?: boolean;
+}
+
+export default function ViewMore({
+  href,
+  text = "Xem thêm",
+  title,
+  description,
+  visibleButton = true,
+}: ViewMoreProps) {
+  // If title provided, render as section header
+  if (title) {
+    return (
+      <div className="text-center">
+        <h2 className="text-3xl sm:text-4xl font-semibold text-slate-800 mb-3">
+          {title}
+        </h2>
+        {description && (
+          <p className="text-slate-600 text-base max-w-2xl mx-auto">
+            {description}
+          </p>
         )}
-      </Link>
-    </div>
-  );
-};
+        {visibleButton && href && (
+          <Link
+            href={href}
+            className="inline-flex items-center gap-2 mt-4 text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors group"
+          >
+            {text}
+            <ArrowRightIcon
+              size={16}
+              className="group-hover:translate-x-1 transition-transform"
+            />
+          </Link>
+        )}
+      </div>
+    );
+  }
 
-export default ViewMore;
+  // Simple link button mode
+  if (!href) {
+    return null;
+  }
+
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-2 text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors group"
+    >
+      {text}
+      <ArrowRightIcon
+        size={16}
+        className="group-hover:translate-x-1 transition-transform"
+      />
+    </Link>
+  );
+}

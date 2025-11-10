@@ -1,6 +1,6 @@
 "use client";
-import { UserButton } from "@daveyplate/better-auth-ui";
-import { useSession } from "@/lib/auth/";
+import { UserButton } from "@/components/auth/UserButton";
+import { useSession } from "@/lib/auth/client";
 import Link from "next/link";
 import { vi } from "@/lib/i18n";
 

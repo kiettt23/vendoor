@@ -2,18 +2,27 @@
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 
-const PageTitle = ({ heading, text, path = "/", linkText }) => {
+interface PageTitleProps {
+  heading: string;
+  text: string;
+  path?: string;
+  linkText?: string;
+}
+
+const PageTitle = ({ heading, text, path = "/", linkText }: PageTitleProps) => {
   return (
     <div className="my-6">
       <h2 className="text-2xl font-semibold">{heading}</h2>
       <div className="flex items-center gap-3">
         <p className="text-slate-600">{text}</p>
-        <Link
-          href={path}
-          className="flex items-center gap-1 text-purple-500 text-sm"
-        >
-          {linkText} <ArrowRightIcon size={14} />
-        </Link>
+        {linkText && (
+          <Link
+            href={path}
+            className="flex items-center gap-1 text-purple-500 text-sm"
+          >
+            {linkText} <ArrowRightIcon size={14} />
+          </Link>
+        )}
       </div>
     </div>
   );

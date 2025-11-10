@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAppSelector } from "@/lib/store";
 import type { RootState } from "@/lib/store";
-import { useSession } from "@/lib/auth/";
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { useSession } from "@/lib/auth/client";
+import { UserButton } from "@/components/auth/UserButton";
 import { vi } from "@/lib/i18n";
 
 const Navbar = () => {
@@ -107,7 +107,7 @@ const Navbar = () => {
 
             {!user ? (
               <Link
-                href="/api/auth/sign-in"
+                href="/sign-in"
                 className="px-6 xl:px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full whitespace-nowrap flex-shrink-0 text-sm ml-1"
               >
                 {vi.nav.login}
@@ -129,7 +129,7 @@ const Navbar = () => {
               <UserButton />
             ) : (
               <Link
-                href="/api/auth/sign-in"
+                href="/sign-in"
                 className="px-7 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-sm transition text-white rounded-full"
               >
                 {vi.nav.login}

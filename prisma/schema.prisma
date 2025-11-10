@@ -18,7 +18,7 @@ model User {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
-  emailVerified DateTime? // Better Auth: Email verified timestamp
+  emailVerified Boolean   @default(false) // Better Auth v1.3: Uses boolean instead of DateTime
   image         String?
   role          Role      @default(USER) // Better Auth: User role
   username      String?   @unique // Better Auth: Display name
@@ -202,53 +202,57 @@ model Store {
 
 // Account: OAuth connections (Google, Facebook, etc.)
 // Mỗi user có thể có nhiều accounts (Google + Facebook)
+// Better Auth Account Schema (Official Docs)
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String // "oauth", "oidc", "email"
-  provider          String // "google", "facebook"
-  providerAccountId String // User ID từ provider
-  refresh_token     String? @db.Text // Token để renew access token
-  access_token      String? @db.Text // Token để call provider API
-  expires_at        Int? // Timestamp khi token hết hạn
-  token_type        String? // "Bearer"
-  scope             String? // "email profile"
-  id_token          String? @db.Text // JWT token từ provider
-  session_state     String? // OAuth session state
+  id                       String    @id @default(cuid())
+  userId                   String
+  accountId                String // Email for credential, provider ID for OAuth
+  providerId               String // "credential", "google", "github"
+  accessToken              String?   @db.Text // OAuth access token or hashed password
+  refreshToken             String?   @db.Text // OAuth refresh token
+  accessTokenExpiresAt     DateTime? // When access token expires
+  refreshTokenExpiresAt    DateTime? // When refresh token expires
+  scope                    String? // OAuth scopes
+  idToken                  String?   @db.Text // OAuth ID token
+  password                 String?   @db.Text // Hashed password for email/password auth
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
 
   // Link to User
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Unique constraint: 1 user chỉ có 1 account per provider
-  @@unique([provider, providerAccountId])
+  // Unique constraint: 1 user per provider
+  @@unique([providerId, accountId])
   @@index([userId])
 }
 
-// Session: Phiên đăng nhập
-// Mỗi lần login tạo 1 session mới
+// Better Auth Session Schema (Official Docs)
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique @db.Text // Random token (lưu trong cookie)
-  userId       String
-  expires      DateTime // Hết hạn khi nào? (default: 7 days)
-  createdAt    DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique @db.Text // Session token stored in cookie
+  expiresAt DateTime // When session expires
+  ipAddress String? // IP address of device
+  userAgent String? // User agent of device
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Link to User
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([expires]) // Index để dễ clean expired sessions
+  @@index([expiresAt]) // For cleaning expired sessions
 }
 
-// VerificationToken: OTP codes và email verification
-// Dùng cho phone OTP, email verification, password reset
-model VerificationToken {
-  identifier String // Phone number hoặc email
-  token      String   @unique // OTP code (vd: "123456") hoặc random token
-  expires    DateTime // Hết hạn sau X phút
+// Better Auth Verification Schema (Official Docs)
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String // Email or phone number
+  value      String // OTP code or verification token
+  expiresAt  DateTime // When verification expires
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  // Composite primary key: (identifier + token)
-  // Vì 1 identifier có thể có nhiều tokens (retry OTP)
-  @@unique([identifier, token])
-  @@index([expires]) // Index để dễ clean expired tokens
+  @@unique([identifier, value])
+  @@index([expiresAt]) // For cleaning expired verifications
 }

@@ -292,14 +292,10 @@ export async function createOrder(
     if (paymentMethod === "STRIPE") {
       const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-      // Get base URL with protocol
-      const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-      const successUrl = baseUrl.startsWith("http")
-        ? `${baseUrl}/orders?success=true`
-        : `https://${baseUrl}/orders?success=true`;
-      const cancelUrl = baseUrl.startsWith("http")
-        ? `${baseUrl}/cart?canceled=true`
-        : `https://${baseUrl}/cart?canceled=true`;
+      // Get base URL from Better Auth config (server-side only)
+      const baseUrl = process.env.BETTER_AUTH_URL;
+      const successUrl = `${baseUrl}/orders?success=true`;
+      const cancelUrl = `${baseUrl}/cart?canceled=true`;
 
       // Calculate total amount with coupon and shipping
       // TODO: Implement Plus membership feature

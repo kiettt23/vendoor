@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store";
-import { useSession } from "@/lib/auth/";
+import { useSession } from "@/lib/auth/client";
 import { fetchCart, uploadCart } from "@/lib/features/cart/cart-slice";
 import { setAddresses } from "@/lib/features/address/address-slice";
 import { setRatings } from "@/lib/features/rating/rating-slice";
