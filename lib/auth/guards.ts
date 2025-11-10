@@ -28,11 +28,13 @@ export async function requireAdmin(): Promise<AuthUser> {
   return user;
 }
 
-// Yêu cầu quyền seller (hoặc admin)
+// Yêu cầu quyền seller (CHỈ SELLER, không bao gồm admin)
 export async function requireSeller(): Promise<AuthUser> {
   const user = await requireAuth();
   if (!isSeller(user)) {
-    throw new Error("Forbidden - Seller access required");
+    throw new Error(
+      "Forbidden - Seller access required. Please register a store first."
+    );
   }
   return user;
 }

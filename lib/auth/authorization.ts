@@ -14,7 +14,8 @@ export function isAdmin(user: AuthUser): boolean {
 
 export function isSeller(user: AuthUser): boolean {
   if (!user || !user.role) return false;
-  return user.role === "SELLER" || user.role === "ADMIN";
+  // CHỈ check SELLER - Admin muốn bán hàng phải đăng ký store
+  return user.role === "SELLER";
 }
 
 export function hasRole(user: AuthUser, roles: string | string[]): boolean {

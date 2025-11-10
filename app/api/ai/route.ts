@@ -1,4 +1,4 @@
-import { checkIsSeller } from "@/lib/auth/";
+import { isSeller } from "@/lib/auth/";
 import { openai } from "@/configs/openai";
 import { NextRequest, NextResponse } from "next/server";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
@@ -75,9 +75,10 @@ async function main(base64Image: string, mimeType: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { isSeller } = await checkIsSeller();
+    const { getCurrentUser } = await import("@/lib/auth");
+    const user = await getCurrentUser();
 
-    if (!isSeller) {
+    if (!isSeller(user)) {
       return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }
 

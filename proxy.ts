@@ -39,28 +39,32 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Seller routes - require SELLER or ADMIN role
+  // Seller routes - CHỈ SELLER role (admin phải đăng ký store)
   if (pathname.startsWith("/store")) {
     if (!isAuthenticated) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
     const userRole = user.role as string;
-    if (userRole !== "SELLER" && userRole !== "ADMIN") {
+    if (userRole !== "SELLER") {
       return NextResponse.redirect(new URL("/create-store", request.url));
     }
 
     return NextResponse.next();
   }
 
-  // Admin routes - require ADMIN role
+  // Admin routes - require ADMIN role HOẶC email trong ADMIN_EMAILS
   if (pathname.startsWith("/admin")) {
     if (!isAuthenticated) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
     const userRole = user.role as string;
-    if (userRole !== "ADMIN") {
+    const adminEmails =
+      process.env.ADMIN_EMAILS?.split(",").map((e) => e.trim()) || [];
+    const isAdmin = userRole === "ADMIN" || adminEmails.includes(user.email);
+
+    if (!isAdmin) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
