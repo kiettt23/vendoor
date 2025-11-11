@@ -10,7 +10,7 @@ import {
   getStoreInfo,
   updateStoreLogo,
   updateStoreInfo,
-} from "@/lib/actions/seller/store.action";
+} from "@/features/stores/index.server";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

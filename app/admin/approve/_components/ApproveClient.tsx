@@ -2,7 +2,7 @@
 import StoreInfo from "../../_components/StoreInfo";
 import { vi } from "@/lib/i18n";
 import { toast } from "sonner";
-import { approveStore, rejectStore } from "@/lib/actions/admin/store.action";
+import { approveStore, rejectStore } from "@/features/stores/index.server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2Icon, XCircleIcon, StoreIcon } from "lucide-react";

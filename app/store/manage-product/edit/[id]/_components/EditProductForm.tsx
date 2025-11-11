@@ -8,7 +8,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { Trash2Icon, UploadIcon } from "lucide-react";
 import { productSchema, type ProductFormData } from "@/lib/validations";
-import { updateProduct } from "@/lib/actions/seller/product.action";
+import { updateProduct } from "@/features/products/index.server";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";

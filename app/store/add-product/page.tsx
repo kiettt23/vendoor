@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { toast } from "sonner";
 import { CATEGORIES } from "@/configs/categories";
-import { createProduct } from "@/lib/actions/seller/product.action";
+import { createProduct } from "@/features/products/index.server";
 import { productSchema, type ProductFormData } from "@/lib/validations";
 import { useAIImageAnalysis } from "@/lib/hooks/useAIImageAnalysis";
 import { Button } from "@/components/ui/button";

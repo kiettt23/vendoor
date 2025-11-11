@@ -6,7 +6,7 @@ import { useSession } from "@/features/auth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { vi } from "@/lib/i18n";
-import { getUserOrders } from "@/lib/actions/user/order.action";
+import { getUserOrders } from "@/features/orders/index.server";
 import { OrderListSkeleton } from "@/components/ui/OrderSkeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { PackageIcon } from "lucide-react";

@@ -2,7 +2,7 @@
 import StoreInfo from "../../_components/StoreInfo";
 import { vi } from "@/lib/i18n";
 import { toast } from "sonner";
-import { toggleStoreActive } from "@/lib/actions/admin/store.action";
+import { toggleStoreActive } from "@/features/stores/index.server";
 
 export default function StoresClient({ stores: initialStores }) {
   const handleToggle = async (storeId) => {

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { updateOrderStatus } from "@/lib/actions/seller/order.action";
+import { updateOrderStatus } from "@/features/orders/index.server";
 import OrderModal from "./OrderModal";
 import { formatPrice } from "@/lib/utils/format/currency";
 

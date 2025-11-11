@@ -6,7 +6,7 @@ import { Trash2Icon, EditIcon, EyeOffIcon, PlusIcon } from "lucide-react";
 import {
   toggleProductStock,
   deleteProduct,
-} from "@/lib/actions/seller/product.action";
+} from "@/features/products/index.server";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

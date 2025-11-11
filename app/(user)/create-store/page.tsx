@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import Loading from "@/components/ui/Loading";
 import { useSession } from "@/features/auth";
 import { vi } from "@/lib/i18n";
-import { createStore } from "@/lib/actions/user/create-store.action";
+import { createStore } from "@/features/stores/index.server";
 import { useSellerStatus } from "@/lib/hooks/useSellerStatus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
