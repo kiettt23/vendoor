@@ -2,7 +2,7 @@
 import PageTitle from "@/components/ui/PageTitle";
 import { useEffect, useState } from "react";
 import OrderItem from "@/components/features/order/OrderItem";
-import { useSession } from "@/lib/auth/client";
+import { useSession } from "@/features/auth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { vi } from "@/lib/i18n";

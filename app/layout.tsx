@@ -2,6 +2,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import StoreProvider from "@/app/StoreProvider";
 import { ThemeProvider } from "next-themes";
+import { AuthRedirectToast } from "@/features/auth";
 
 export const metadata = {
   title: "Vendoor",
@@ -19,6 +20,7 @@ export default function RootLayout({ children }) {
           disableTransitionOnChange
         >
           <StoreProvider>
+            <AuthRedirectToast />
             {children}
             <Toaster position="top-center" />
           </StoreProvider>

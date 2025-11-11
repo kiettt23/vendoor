@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSession } from "@/lib/auth/client";
+import { useSession } from "@/features/auth";
 import { vi } from "@/lib/i18n";
 
 const AdminSidebar = () => {

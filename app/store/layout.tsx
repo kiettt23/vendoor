@@ -1,6 +1,6 @@
 import StoreLayout from "./_components/StoreLayout";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { requireSeller } from "@/lib/auth";
+import { requireSellerWithStore } from "@/features/auth/server";
 
 export const metadata = {
   title: "Vendoor | Store Dashboard",
@@ -8,8 +8,7 @@ export const metadata = {
 };
 
 export default async function RootStoreLayout({ children }) {
-  // Require seller role (has store) - auto redirects if not seller
-  await requireSeller();
+  await requireSellerWithStore();
 
   return (
     <TooltipProvider>

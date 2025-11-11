@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { OrderStatus } from "@prisma/client";
-import { requireSeller } from "@/lib/auth/";
+import { requireSeller } from "@/features/auth/server";
 import { revalidatePath } from "next/cache";
 
 interface ActionResponse {

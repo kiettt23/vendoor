@@ -6,7 +6,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth/client";
+import { useSession } from "@/features/auth";
 import { applyCoupon, createOrder } from "@/lib/actions/user/order.action";
 import type { Coupon } from "@/types";
 import { vi } from "@/lib/i18n";

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { toast } from "sonner";
 import Loading from "@/components/ui/Loading";
-import { useSession } from "@/lib/auth/client";
+import { useSession } from "@/features/auth";
 import { vi } from "@/lib/i18n";
 import { createStore } from "@/lib/actions/user/create-store.action";
 import { useSellerStatus } from "@/lib/hooks/useSellerStatus";

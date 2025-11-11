@@ -15,16 +15,18 @@ enum Role {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified Boolean   @default(false) // Better Auth v1.3: Uses boolean instead of DateTime
-  image         String?
-  role          Role      @default(USER) // Better Auth: User role
-  username      String?   @unique // Better Auth: Display name
-  cart          Json      @default("{}")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  name            String?
+  email           String?   @unique
+  emailVerified   Boolean   @default(false)
+  image           String?
+  role            Role      @default(USER)
+  username        String?   @unique
+  displayUsername String?
+  banned          Boolean   @default(false)
+  cart            Json      @default("{}")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   // Better Auth Relations
   accounts Account[]
@@ -38,6 +40,7 @@ model User {
 
   @@index([email])
   @@index([role])
+  @@index([username])
 }
 
 model Product {

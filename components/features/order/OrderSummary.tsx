@@ -1,7 +1,7 @@
 import { XIcon } from "lucide-react";
 import AddressManager from "../address/AddressManager";
 import { toast } from "sonner";
-import { useSession } from "@/lib/auth/client";
+import { useSession } from "@/features/auth";
 import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";
 import { APP_CONFIG } from "@/configs/app";

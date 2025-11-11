@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Loading from "@/components/ui/Loading";
 import StoreNavbar from "./StoreNavbar";
 import StoreSidebar from "./StoreSidebar";
-import { useSession } from "@/lib/auth/client";
+import { useSession } from "@/features/auth";
 
 /**
  * Store Layout - Client Component

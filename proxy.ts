@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth } from "@/features/auth";
 
 /**
  * Better Auth Proxy (Next.js 16+)
@@ -62,7 +62,9 @@ export default async function proxy(request: NextRequest) {
     const userRole = user.role as string;
     const adminEmails =
       process.env.ADMIN_EMAILS?.split(",").map((e) => e.trim()) || [];
-    const isAdmin = userRole === "ADMIN" || adminEmails.includes(user.email);
+    const isAdmin =
+      userRole === "ADMIN" ||
+      (user.email ? adminEmails.includes(user.email) : false);
 
     if (!isAdmin) {
       return NextResponse.redirect(new URL("/", request.url));

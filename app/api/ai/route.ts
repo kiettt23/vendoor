@@ -1,4 +1,4 @@
-import { isSeller } from "@/lib/auth/";
+import { isSeller } from "@/features/auth/server";
 import { openai } from "@/configs/openai";
 import { NextRequest, NextResponse } from "next/server";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
@@ -75,7 +75,7 @@ async function main(base64Image: string, mimeType: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { getCurrentUser } = await import("@/lib/auth");
+    const { getCurrentUser } = await import("@/features/auth/server");
     const user = await getCurrentUser();
 
     if (!isSeller(user)) {

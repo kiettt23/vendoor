@@ -1,6 +1,6 @@
 "use client";
-import { UserButton } from "@/components/auth/UserButton";
-import { useSession } from "@/lib/auth/client";
+import { UserButton } from "@/features/auth";
+import { useSession } from "@/features/auth";
 import Link from "next/link";
 import { vi } from "@/lib/i18n";
 

@@ -8,7 +8,7 @@ import {
 import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";
 import prisma from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/features/auth/server";
 
 // ✅ Server Component - Fetch dashboard data directly from DB
 export default async function AdminDashboard() {

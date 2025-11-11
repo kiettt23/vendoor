@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth";
+import { requireAuth } from "@/features/auth/server";
 import { redirect } from "next/navigation";
 import StoreOrdersClient from "./_components/StoreOrdersClient";
 

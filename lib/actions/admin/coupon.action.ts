@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth/";
+import { requireAdmin } from "@/features/auth/server";
 import { revalidatePath } from "next/cache";
 import type { CouponFormData, ActionResponse } from "@/types";
 

@@ -1,6 +1,6 @@
 import { formatPrice } from "@/lib/utils/format/currency";
 import prisma from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth";
+import { requireAuth } from "@/features/auth/server";
 import { redirect } from "next/navigation";
 import StoreDashboardClient from "./_components/StoreDashboardClient";
 

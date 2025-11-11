@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAppSelector } from "@/lib/store";
 import type { RootState } from "@/lib/store";
-import { useSession } from "@/lib/auth/client";
-import { UserButton } from "@/components/auth/UserButton";
+import { useSession } from "@/features/auth";
+import { UserButton } from "@/features/auth";
 import { vi } from "@/lib/i18n";
 
 const Navbar = () => {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth/client";
+import { authClient } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,7 @@ import Link from "next/link";
 
 export default function SignInPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,10 +28,10 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      console.log("🔐 Attempting sign in with:", email);
+      console.log("🔐 Attempting sign in with username:", username);
 
-      const result = await authClient.signIn.email({
-        email,
+      const result = await authClient.signIn.username({
+        username,
         password,
       });
 
@@ -39,18 +39,18 @@ export default function SignInPage() {
 
       if (result.error) {
         console.error("❌ Sign in error:", result.error);
-        setError(result.error.message || "Sign in failed");
+        setError(result.error.message || "Sai tên đăng nhập hoặc mật khẩu");
       } else if (result.data) {
         console.log("✅ Sign in success:", result.data);
         router.push("/");
         router.refresh();
       } else {
         console.warn("⚠️ No error but no data either");
-        setError("Sign in failed - please check your credentials");
+        setError("Đăng nhập thất bại - vui lòng kiểm tra thông tin");
       }
     } catch (err) {
       console.error("❌ Exception during sign in:", err);
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : "Đã xảy ra lỗi");
     } finally {
       setLoading(false);
     }
@@ -82,19 +82,19 @@ export default function SignInPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Tên đăng nhập</Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="username123"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Mật khẩu</Label>
               <Input
                 id="password"
                 type="password"
@@ -106,13 +106,8 @@ export default function SignInPage() {
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-              onClick={() => console.log("🖱️ Sign in button clicked!")}
-            >
-              {loading ? "Signing in..." : "Sign In"}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
           </form>
 

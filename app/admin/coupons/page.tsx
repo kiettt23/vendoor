@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/features/auth/server";
 import prisma from "@/lib/prisma";
 import CouponsClient from "./_components/CouponsClient";
 

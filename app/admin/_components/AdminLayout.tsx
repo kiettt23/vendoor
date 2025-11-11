@@ -2,7 +2,7 @@
 import Loading from "@/components/ui/Loading";
 import AdminNavbar from "./AdminNavbar";
 import AdminSidebar from "./AdminSidebar";
-import { useSession } from "@/lib/auth/client";
+import { useSession } from "@/features/auth";
 
 /**
  * Admin Layout - Client Component

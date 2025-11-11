@@ -1,5 +1,5 @@
 import { vi } from "@/lib/i18n";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/features/auth/server";
 import prisma from "@/lib/prisma";
 import StoresClient from "./_components/StoresClient";
 

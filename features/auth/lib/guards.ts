@@ -1,45 +1,33 @@
-/**
- * Auth Guards - Server-side authorization
- *
- * Throw lỗi nếu điều kiện không được thỏa mãn
- * Chỉ sử dụng trong Server Actions và API Routes
- */
-
+import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "./utils";
 import { isAdmin, isSeller } from "./authorization";
-import type { AuthUser, SellerWithStore } from "./types";
+import type { AuthUser, SellerWithStore, StoreInfo } from "./types";
 
-// Yêu cầu user đã đăng nhập
 export async function requireAuth(): Promise<AuthUser> {
   const user = await getCurrentUser();
   if (!user) {
-    throw new Error("Unauthorized - Login required");
+    redirect("/sign-in?error=auth_required");
   }
   return user;
 }
 
-// Yêu cầu quyền admin
 export async function requireAdmin(): Promise<AuthUser> {
   const user = await requireAuth();
   if (!isAdmin(user)) {
-    throw new Error("Forbidden - Admin access required");
+    redirect("/?error=admin_required");
   }
   return user;
 }
 
-// Yêu cầu quyền seller (CHỈ SELLER, không bao gồm admin)
 export async function requireSeller(): Promise<AuthUser> {
   const user = await requireAuth();
   if (!isSeller(user)) {
-    throw new Error(
-      "Forbidden - Seller access required. Please register a store first."
-    );
+    redirect("/create-store?error=seller_required");
   }
   return user;
 }
 
-// Yêu cầu seller có cửa hàng đã được duyệt
 export async function requireSellerWithStore(): Promise<SellerWithStore> {
   const user = await requireSeller();
 
@@ -56,20 +44,20 @@ export async function requireSellerWithStore(): Promise<SellerWithStore> {
   });
 
   if (!store) {
-    throw new Error("Store not found - Please create a store first");
+    redirect("/create-store?error=no_store");
   }
 
   if (store.status !== "approved") {
-    throw new Error(`Store not approved - Current status: ${store.status}`);
+    redirect("/create-store?error=store_pending");
   }
 
   if (!store.isActive) {
-    throw new Error("Store is inactive - Please contact support");
+    redirect("/create-store?error=store_disabled");
   }
 
   return {
     user,
     storeId: store.id,
-    storeInfo: store,
+    storeInfo: store as StoreInfo,
   };
 }

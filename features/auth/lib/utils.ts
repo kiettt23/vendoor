@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { auth } from "./config";
 import prisma from "@/lib/prisma";
-import type { AuthUser, SellerCheckResult } from "./types";
+import type { AuthUser, SellerStoreResult, StoreStatus } from "./types";
 
 export async function getSession() {
   return await auth.api.getSession({ headers: await headers() });
@@ -12,10 +12,7 @@ export async function getCurrentUser(): Promise<AuthUser> {
   return session?.user ?? null;
 }
 
-// Re-export các hàm authorization để tiện sử dụng
-export { isAdmin, isSeller, hasRole } from "./authorization";
-
-export async function getSellerStore(): Promise<SellerCheckResult> {
+export async function getSellerStore(): Promise<SellerStoreResult> {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -38,7 +35,17 @@ export async function getSellerStore(): Promise<SellerCheckResult> {
       return { isSeller: false, storeInfo: null };
     }
 
-    return { isSeller: true, storeInfo: store };
+    return {
+      isSeller: true,
+      storeInfo: {
+        id: store.id,
+        name: store.name,
+        username: store.username,
+        logo: store.logo,
+        status: store.status as StoreStatus,
+        isActive: store.isActive,
+      },
+    };
   } catch (error) {
     console.error("Error fetching seller store:", error);
     return { isSeller: false, storeInfo: null };

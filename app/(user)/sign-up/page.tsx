@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth/client";
+import { authClient } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,7 @@ import Link from "next/link";
 export default function SignUpPage() {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,13 +29,16 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      console.log("📝 Attempting sign up with:", { name, email });
-
-      const result = await authClient.signUp.email({
-        email,
+      const signUpData = {
+        username,
         password,
         name,
-      });
+        email: "",
+      };
+
+      console.log("📝 Attempting sign up with:", signUpData);
+
+      const result = await authClient.signUp.email(signUpData);
 
       console.log("📝 Sign up result:", result);
 
@@ -43,8 +46,8 @@ export default function SignUpPage() {
         console.error("❌ Sign up error:", result.error);
         setError(result.error.message || "Sign up failed");
       } else if (result.data) {
-        console.log("✅ Sign up success:", result.data);
-        router.push("/");
+        console.log("✅ Sign up success - user auto-signed in:", result.data);
+        setError("");
         router.refresh();
       } else {
         console.warn("⚠️ No error but no data either");
@@ -79,37 +82,44 @@ export default function SignUpPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">Tên hiển thị</Label>
               <Input
                 id="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
+                placeholder="Nguyễn Văn A"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">
+                Tên đăng nhập <span className="text-red-500">*</span>
+              </Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="username123"
                 required
+                minLength={3}
+                maxLength={30}
               />
+              <p className="text-xs text-muted-foreground">
+                Chỉ chữ, số, dấu gạch dưới và dấu chấm
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Mật khẩu</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Min 8 characters"
+                placeholder="Tối thiểu 8 ký tự"
                 required
                 minLength={8}
               />
@@ -118,7 +128,7 @@ export default function SignUpPage() {
             {error && <p className="text-sm text-red-500">{error}</p>}
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Sign Up"}
+              {loading ? "Đang tạo tài khoản..." : "Đăng ký"}
             </Button>
           </form>
 
