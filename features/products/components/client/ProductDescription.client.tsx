@@ -1,5 +1,4 @@
 "use client";
-
 import { ArrowRight, StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,7 +11,7 @@ interface ProductDescriptionProps {
   product: ProductWithRating;
 }
 
-export function ProductDescription({ product }: ProductDescriptionProps) {
+const ProductDescription = ({ product }: ProductDescriptionProps) => {
   const [selectedTab, setSelectedTab] = useState("Description");
 
   const tabs = {
@@ -110,4 +109,6 @@ export function ProductDescription({ product }: ProductDescriptionProps) {
       </div>
     </div>
   );
-}
+};
+
+export default ProductDescription;

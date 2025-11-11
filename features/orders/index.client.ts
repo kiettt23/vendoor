@@ -1,5 +1,6 @@
 export { OrderItem } from "./components/client/OrderItem.client";
 export { OrderSummary } from "./components/client/OrderSummary.client";
+export { default as OrdersAreaChart } from "./components/client/OrdersAreaChart.client";
 
 export type {
   Order,

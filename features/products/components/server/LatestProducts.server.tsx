@@ -1,14 +1,10 @@
+"use client";
 import React from "react";
 import ViewMore from "@/components/ui/ViewMore";
-import { ProductCard } from "../client/ProductCard.client";
+import ProductCard from "./ProductCard";
 import { vi } from "@/lib/i18n";
-import type { Product } from "@/types/product";
 
-interface LatestProductsProps {
-  products: Product[];
-}
-
-export function LatestProducts({ products }: LatestProductsProps) {
+const LatestProducts = ({ products }) => {
   const displayQuantity = 4;
 
   // ✅ Products come from Server Component
@@ -36,4 +32,6 @@ export function LatestProducts({ products }: LatestProductsProps) {
       </div>
     </div>
   );
-}
+};
+
+export default LatestProducts;

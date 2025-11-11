@@ -1,7 +1,7 @@
 "use client";
 import PageTitle from "@/components/ui/PageTitle";
 import { useEffect, useState } from "react";
-import OrderItem from "@/components/features/order/OrderItem";
+import OrderItem from "@/features/orders/index.client";
 import { useSession } from "@/features/auth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";

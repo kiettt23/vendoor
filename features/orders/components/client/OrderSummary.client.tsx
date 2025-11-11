@@ -1,15 +1,14 @@
-"use client";
 import { XIcon } from "lucide-react";
-import AddressManager from "@/components/features/address/AddressManager";
+import AddressManager from "../address/AddressManager";
 import { toast } from "sonner";
-import { useSession } from "@/features/auth/index.client";
+import { useSession } from "@/features/auth";
 import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";
 import { APP_CONFIG } from "@/configs/app";
 import { useOrderManagement } from "@/lib/hooks/useOrderManagement";
-import type { OrderSummaryProps } from "@/types/component-props";
+import type { OrderSummaryProps } from "@/types";
 
-export function OrderSummary({ totalPrice, items }: OrderSummaryProps) {
+const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
   const { data: session } = useSession();
   const user = session?.user;
 
@@ -156,4 +155,6 @@ export function OrderSummary({ totalPrice, items }: OrderSummaryProps) {
       </button>
     </div>
   );
-}
+};
+
+export default OrderSummary;

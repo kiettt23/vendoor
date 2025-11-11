@@ -1,13 +1,9 @@
+"use client";
 import ViewMore from "@/components/ui/ViewMore";
-import { ProductCard } from "../client/ProductCard.client";
+import ProductCard from "./ProductCard";
 import { vi } from "@/lib/i18n";
-import type { Product } from "@/types/product";
 
-interface BestSellingProps {
-  products: Product[];
-}
-
-export function BestSelling({ products }: BestSellingProps) {
+const BestSelling = ({ products }) => {
   const displayQuantity = 8;
 
   // ✅ Products come from Server Component
@@ -32,4 +28,6 @@ export function BestSelling({ products }: BestSellingProps) {
       </div>
     </div>
   );
-}
+};
+
+export default BestSelling;

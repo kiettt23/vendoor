@@ -2,7 +2,7 @@
 
 import { useCart, type CartProduct } from "@/features/cart/index.client";
 import { CartCounter } from "./CartCounter.client";
-import OrderSummary from "@/components/features/order/OrderSummary";
+import { OrderSummary } from "@/features/orders/index.client";
 import PageTitle from "@/components/ui/PageTitle";
 import { Trash2Icon } from "lucide-react";
 import Image from "next/image";

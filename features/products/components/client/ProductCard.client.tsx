@@ -1,5 +1,4 @@
 "use client";
-
 import { StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { ProductCardProps } from "@/types";
 
-export function ProductCard({ product }: ProductCardProps) {
+const ProductCard = ({ product }: ProductCardProps) => {
   // Calculate the average rating of the product
   const rating = Math.round(
     product.rating.reduce((acc, curr) => acc + curr.rating, 0) /
@@ -83,4 +82,6 @@ export function ProductCard({ product }: ProductCardProps) {
       </Card>
     </Link>
   );
-}
+};
+
+export default ProductCard;

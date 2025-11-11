@@ -1,4 +1,4 @@
-import OrdersAreaChart from "@/components/features/order/OrdersAreaChart";
+import OrdersAreaChart from "@/features/orders/index.client";
 import {
   CircleDollarSignIcon,
   ShoppingBasketIcon,

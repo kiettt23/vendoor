@@ -6,18 +6,18 @@ import type { RootState } from "@/lib/store";
 import Rating from "@/components/ui/Rating";
 import { useState } from "react";
 import { toast } from "sonner";
-import RatingModal from "@/components/features/rating/RatingModal";
+import RatingModal from "../rating/RatingModal";
 import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";
 import { formatDate } from "@/lib/utils/format/date";
 import { getOrderStatusText } from "@/lib/utils/helpers/order";
-import type { OrderWithDetails } from "../../types/order.types";
+import type { OrderWithDetails } from "@/types";
 
 interface OrderItemProps {
   order: OrderWithDetails;
 }
 
-export function OrderItem({ order }: OrderItemProps) {
+const OrderItem = ({ order }: OrderItemProps) => {
   const [ratingModal, setRatingModal] = useState(null);
 
   const { ratings } = useAppSelector((state: RootState) => state.rating);
@@ -155,4 +155,6 @@ export function OrderItem({ order }: OrderItemProps) {
       </tr>
     </>
   );
-}
+};
+
+export default OrderItem;

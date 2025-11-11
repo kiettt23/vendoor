@@ -1,6 +1,6 @@
 "use client";
 import Counter from "@/components/ui/Counter";
-import OrderSummary from "@/components/features/order/OrderSummary";
+import OrderSummary from "@/features/orders/index.client";
 import PageTitle from "@/components/ui/PageTitle";
 import { deleteItemFromCart } from "@/lib/features/cart/cart-slice";
 import { Trash2Icon } from "lucide-react";
