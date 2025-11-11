@@ -2,12 +2,13 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "./utils";
 import { isAdmin, isSeller } from "./authorization";
+import { AUTH_ROUTES, AUTH_ERROR_PARAMS } from "./constants";
 import type { AuthUser, SellerWithStore, StoreInfo } from "./types";
 
 export async function requireAuth(): Promise<AuthUser> {
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/sign-in?error=auth_required");
+    redirect(`${AUTH_ROUTES.SIGN_IN}?error=${AUTH_ERROR_PARAMS.AUTH_REQUIRED}`);
   }
   return user;
 }
@@ -15,7 +16,7 @@ export async function requireAuth(): Promise<AuthUser> {
 export async function requireAdmin(): Promise<AuthUser> {
   const user = await requireAuth();
   if (!isAdmin(user)) {
-    redirect("/?error=admin_required");
+    redirect(`${AUTH_ROUTES.HOME}?error=${AUTH_ERROR_PARAMS.ADMIN_REQUIRED}`);
   }
   return user;
 }
@@ -23,7 +24,9 @@ export async function requireAdmin(): Promise<AuthUser> {
 export async function requireSeller(): Promise<AuthUser> {
   const user = await requireAuth();
   if (!isSeller(user)) {
-    redirect("/create-store?error=seller_required");
+    redirect(
+      `${AUTH_ROUTES.CREATE_STORE}?error=${AUTH_ERROR_PARAMS.SELLER_REQUIRED}`
+    );
   }
   return user;
 }
@@ -44,15 +47,19 @@ export async function requireSellerWithStore(): Promise<SellerWithStore> {
   });
 
   if (!store) {
-    redirect("/create-store?error=no_store");
+    redirect(`${AUTH_ROUTES.CREATE_STORE}?error=${AUTH_ERROR_PARAMS.NO_STORE}`);
   }
 
   if (store.status !== "approved") {
-    redirect("/create-store?error=store_pending");
+    redirect(
+      `${AUTH_ROUTES.CREATE_STORE}?error=${AUTH_ERROR_PARAMS.STORE_PENDING}`
+    );
   }
 
   if (!store.isActive) {
-    redirect("/create-store?error=store_disabled");
+    redirect(
+      `${AUTH_ROUTES.CREATE_STORE}?error=${AUTH_ERROR_PARAMS.STORE_DISABLED}`
+    );
   }
 
   return {
