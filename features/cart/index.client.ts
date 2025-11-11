@@ -4,7 +4,12 @@ export { CartCounter } from "./components/client/CartCounter.client";
 export { AddToCartButton } from "./components/client/AddToCartButton.client";
 export { CartClient } from "./components/client/CartClient.client";
 
-export type { CartItem, Cart, CartProduct, CartState } from "./types/cart.types";
+export type {
+  CartItem,
+  Cart,
+  CartProduct,
+  CartState,
+} from "./types/cart.types";
 
 export {
   addToCartSchema,

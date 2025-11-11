@@ -3,7 +3,10 @@
 import prisma from "@/lib/prisma";
 import { getSession } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
-import { updateQuantitySchema, type UpdateQuantityInput } from "../schemas/cart.schema";
+import {
+  updateQuantitySchema,
+  type UpdateQuantityInput,
+} from "../schemas/cart.schema";
 import type { ActionResponse } from "@/types/action-response";
 
 export async function updateQuantity(
@@ -28,7 +31,7 @@ export async function updateQuantity(
     });
 
     const currentCart = (dbUser?.cart as Record<string, number>) || {};
-    
+
     if (quantity === 0) {
       delete currentCart[productId];
     } else {
@@ -52,7 +55,8 @@ export async function updateQuantity(
     console.error("Update quantity error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể cập nhật số lượng",
+      error:
+        error instanceof Error ? error.message : "Không thể cập nhật số lượng",
     };
   }
 }

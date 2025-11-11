@@ -6,7 +6,12 @@ export { syncCart } from "./actions/sync-cart.action";
 export { getCart } from "./queries/get-cart.query";
 export { getCartProducts } from "./queries/get-cart-products.query";
 
-export type { CartItem, Cart, CartProduct, CartState } from "./types/cart.types";
+export type {
+  CartItem,
+  Cart,
+  CartProduct,
+  CartState,
+} from "./types/cart.types";
 
 export {
   addToCartSchema,

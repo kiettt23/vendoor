@@ -23,20 +23,32 @@ export function useCart() {
     const loadCart = async () => {
       try {
         const serverCart = await getCart();
-        
+
         const localCart = localStorage.getItem(CART_STORAGE_KEY);
         if (localCart) {
-          const parsedLocalCart = JSON.parse(localCart) as Record<string, number>;
-          
-          if (Object.keys(parsedLocalCart).length > 0 && Object.keys(serverCart.items).length === 0) {
+          const parsedLocalCart = JSON.parse(localCart) as Record<
+            string,
+            number
+          >;
+
+          if (
+            Object.keys(parsedLocalCart).length > 0 &&
+            Object.keys(serverCart.items).length === 0
+          ) {
             await syncCartAction({ items: parsedLocalCart });
             setCart({
               items: parsedLocalCart,
-              total: Object.values(parsedLocalCart).reduce((sum, qty) => sum + qty, 0),
+              total: Object.values(parsedLocalCart).reduce(
+                (sum, qty) => sum + qty,
+                0
+              ),
               isLoading: false,
             });
           } else {
-            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(serverCart.items));
+            localStorage.setItem(
+              CART_STORAGE_KEY,
+              JSON.stringify(serverCart.items)
+            );
             setCart({
               items: serverCart.items,
               total: serverCart.total,
@@ -44,7 +56,10 @@ export function useCart() {
             });
           }
         } else {
-          localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(serverCart.items));
+          localStorage.setItem(
+            CART_STORAGE_KEY,
+            JSON.stringify(serverCart.items)
+          );
           setCart({
             items: serverCart.items,
             total: serverCart.total,
@@ -55,10 +70,16 @@ export function useCart() {
         console.error("Failed to load cart:", error);
         const localCart = localStorage.getItem(CART_STORAGE_KEY);
         if (localCart) {
-          const parsedLocalCart = JSON.parse(localCart) as Record<string, number>;
+          const parsedLocalCart = JSON.parse(localCart) as Record<
+            string,
+            number
+          >;
           setCart({
             items: parsedLocalCart,
-            total: Object.values(parsedLocalCart).reduce((sum, qty) => sum + qty, 0),
+            total: Object.values(parsedLocalCart).reduce(
+              (sum, qty) => sum + qty,
+              0
+            ),
             isLoading: false,
           });
         } else {
@@ -100,7 +121,7 @@ export function useCart() {
   const updateQuantity = useCallback(
     async (productId: string, quantity: number) => {
       const previousItems = cart.items;
-      
+
       const optimisticItems = { ...cart.items };
       if (quantity === 0) {
         delete optimisticItems[productId];
@@ -123,7 +144,7 @@ export function useCart() {
   const removeItem = useCallback(
     async (productId: string) => {
       const previousItems = cart.items;
-      
+
       const optimisticItems = { ...cart.items };
       delete optimisticItems[productId];
       updateLocalCart(optimisticItems);

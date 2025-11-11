@@ -21,7 +21,7 @@ export function CartClient({ products }: CartClientProps) {
     if (products.length > 0) {
       setTotalPrice(0);
       const newCartArray: CartProduct[] = [];
-      
+
       for (const [productId, quantity] of Object.entries(items)) {
         const product = products.find((p) => p.id === productId);
         if (product) {
@@ -32,7 +32,7 @@ export function CartClient({ products }: CartClientProps) {
           setTotalPrice((prev) => prev + product.price * quantity);
         }
       }
-      
+
       setCartArray(newCartArray);
     } else {
       setCartArray([]);
@@ -118,10 +118,7 @@ export function CartClient({ products }: CartClientProps) {
               ))}
             </tbody>
           </table>
-          <OrderSummary
-            totalPrice={totalPrice}
-            items={cartArray}
-          />
+          <OrderSummary totalPrice={totalPrice} items={cartArray} />
         </div>
       </div>
     </div>

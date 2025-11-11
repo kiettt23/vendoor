@@ -62,7 +62,8 @@ export async function addToCart(
     console.error("Add to cart error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể thêm vào giỏ hàng",
+      error:
+        error instanceof Error ? error.message : "Không thể thêm vào giỏ hàng",
     };
   }
 }

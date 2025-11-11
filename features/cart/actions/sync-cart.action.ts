@@ -36,7 +36,8 @@ export async function syncCart(
     console.error("Sync cart error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể đồng bộ giỏ hàng",
+      error:
+        error instanceof Error ? error.message : "Không thể đồng bộ giỏ hàng",
     };
   }
 }

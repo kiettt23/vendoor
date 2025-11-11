@@ -5,7 +5,7 @@ import { getSession } from "@/features/auth/index.server";
 
 export async function getCart() {
   const { user } = await getSession();
-  
+
   if (!user) {
     return { items: {}, total: 0 };
   }
