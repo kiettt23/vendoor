@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import prisma from "@/server/db/prisma";
 import { requireAuth } from "@/features/auth/index.server";
 import { NextResponse } from "next/server";
 

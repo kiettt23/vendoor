@@ -1,6 +1,6 @@
 import { vi } from "@/lib/i18n";
 import { requireAdmin } from "@/features/auth/index.server";
-import prisma from "@/lib/prisma";
+import prisma from "@/server/db/prisma";
 import ApproveClient from "./_components/ApproveClient";
 
 // ✅ Server Component - Fetch pending stores

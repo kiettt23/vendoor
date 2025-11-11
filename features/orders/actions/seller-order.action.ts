@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import prisma from "@/server/db/prisma";
 import { OrderStatus } from "@prisma/client";
 import { requireSeller } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";

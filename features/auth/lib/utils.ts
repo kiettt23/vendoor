@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { auth } from "./config";
-import prisma from "@/lib/prisma";
+import prisma from "@/server/db/prisma";
 import type { AuthUser, SellerStoreResult, StoreStatus } from "./types";
 
 export async function getSession() {

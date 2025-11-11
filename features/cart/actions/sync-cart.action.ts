@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import prisma from "@/server/db/prisma";
 import { getSession } from "@/features/auth/index.server";
 import { syncCartSchema, type SyncCartInput } from "../schemas/cart.schema";
 import type { ActionResponse } from "@/types/action-response";

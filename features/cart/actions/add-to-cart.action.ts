@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import prisma from "@/server/db/prisma";
 import { getSession } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
 import { addToCartSchema, type AddToCartInput } from "../schemas/cart.schema";

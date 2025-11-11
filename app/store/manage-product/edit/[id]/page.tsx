@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
+import prisma from "@/server/db/prisma";
 import { requireSellerWithStore } from "@/features/auth/index.server";
 import EditProductForm from "./_components/EditProductForm";
 

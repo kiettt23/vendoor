@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";
-import prisma from "@/lib/prisma";
+import prisma from "@/server/db/prisma";
 import { requireAdmin } from "@/features/auth/index.server";
 
 // ✅ Server Component - Fetch dashboard data directly from DB

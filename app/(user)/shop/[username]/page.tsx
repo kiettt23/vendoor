@@ -2,7 +2,7 @@ import { ProductCard } from "@/features/products/index.client";
 import { MailIcon, MapPinIcon } from "lucide-react";
 import Image from "next/image";
 import { vi } from "@/lib/i18n";
-import prisma from "@/lib/prisma";
+import prisma from "@/server/db/prisma";
 import { notFound } from "next/navigation";
 
 // ✅ Server Component - Fetch store data directly from DB

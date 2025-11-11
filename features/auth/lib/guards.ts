@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
+import prisma from "@/server/db/prisma";
 import { getCurrentUser } from "./utils";
 import { isAdmin, isSeller } from "./authorization";
 import { AUTH_ROUTES, AUTH_ERROR_PARAMS } from "./constants";

@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/features/auth/index.server";
-import prisma from "@/lib/prisma";
+import prisma from "@/server/db/prisma";
 import CouponsClient from "./_components/CouponsClient";
 
 // ✅ Server Component - Fetch coupons
