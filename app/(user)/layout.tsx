@@ -1,6 +1,6 @@
-import Banner from "@/components/layout/Banner";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import Banner from "@/shared/components/layout/Banner";
+import Navbar from "@/shared/components/layout/Navbar";
+import Footer from "@/shared/components/layout/Footer";
 import UserDataProvider from "@/components/providers/UserDataProvider";
 
 // ✅ Server Component - Layout structure only

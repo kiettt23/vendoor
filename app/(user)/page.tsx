@@ -1,7 +1,7 @@
 import { BestSelling } from "@/features/products/index.server";
-import Hero from "@/components/layout/Hero";
-import Newsletter from "@/components/features/marketing/Newsletter";
-import OurSpec from "@/components/features/marketing/OurSpec";
+import Hero from "@/shared/components/layout/Hero";
+import Newsletter from "@/shared/components/marketing/Newsletter";
+import OurSpec from "@/shared/components/marketing/OurSpec";
 import { LatestProducts } from "@/features/products/index.server";
 import prisma from "@/server/db/prisma";
 
