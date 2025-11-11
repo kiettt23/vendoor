@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { requireSellerWithStore } from "@/features/auth/server";
+import { requireSellerWithStore } from "@/features/auth/index.server";
 import EditProductForm from "./_components/EditProductForm";
 
 export default async function EditProductPage({

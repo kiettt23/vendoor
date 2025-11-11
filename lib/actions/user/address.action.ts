@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { getCurrentUser } from "@/features/auth/server";
+import { getCurrentUser } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
 import type { AddressActionResponse, SerializedAddress } from "@/types";
 import type { AddressFormData } from "@/lib/validations";

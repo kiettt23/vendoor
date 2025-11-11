@@ -1,5 +1,8 @@
 import prisma from "@/lib/prisma";
-import { ProductDescription, ProductDetails } from "@/features/products/index.client";
+import {
+  ProductDescription,
+  ProductDetails,
+} from "@/features/products/index.client";
 import { vi } from "@/lib/i18n";
 import { notFound } from "next/navigation";
 

@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { getCurrentUser } from "@/features/auth/server";
+import { getCurrentUser } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
 import type { Rating, RatingActionResponse, SerializedRating } from "@/types";
 import { ratingSchema, type RatingFormData } from "@/lib/validations";

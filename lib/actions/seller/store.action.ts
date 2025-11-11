@@ -1,6 +1,6 @@
 "use server";
 
-import { requireSeller } from "@/features/auth/server";
+import { requireSeller } from "@/features/auth/index.server";
 import prisma from "@/lib/prisma";
 import { uploadToImageKit } from "@/configs/image-kit";
 import { revalidatePath } from "next/cache";

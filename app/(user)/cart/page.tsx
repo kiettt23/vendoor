@@ -1,4 +1,4 @@
-import { getSession } from "@/features/auth/server";
+import { getSession } from "@/features/auth/index.server";
 import prisma from "@/lib/prisma";
 import CartClient from "./_components/CartClient";
 

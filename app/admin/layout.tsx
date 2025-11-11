@@ -1,5 +1,5 @@
 import AdminLayout from "./_components/AdminLayout";
-import { requireAdmin } from "@/features/auth/server";
+import { requireAdmin } from "@/features/auth/index.server";
 
 export const metadata = {
   title: "Vendoor | Admin",

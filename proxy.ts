@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "@/features/auth";
+import { auth } from "@/features/auth/index.server";
 
 /**
  * Better Auth Proxy (Next.js 16+)

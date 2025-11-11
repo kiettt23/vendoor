@@ -1,6 +1,6 @@
 import StoreLayout from "./_components/StoreLayout";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { requireSellerWithStore } from "@/features/auth/server";
+import { requireSellerWithStore } from "@/features/auth/index.server";
 
 export const metadata = {
   title: "Vendoor | Store Dashboard",
