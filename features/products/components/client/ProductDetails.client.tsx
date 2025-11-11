@@ -1,6 +1,7 @@
 "use client";
 
-import { addToCart } from "@/lib/features/cart/cart-slice";
+import { useCart } from "@/features/cart/index.client";
+import { CartCounter, AddToCartButton } from "@/features/cart/index.client";
 import {
   StarIcon,
   TagIcon,
@@ -8,12 +9,8 @@ import {
   CreditCardIcon,
   UserIcon,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
-import Counter from "@/components/ui/Counter";
-import { useAppDispatch, useAppSelector } from "@/lib/store";
-import type { RootState } from "@/lib/store";
 import { vi } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/format/currency";
 import type { ProductWithRating } from "@/types";
@@ -24,17 +21,8 @@ interface ProductDetailsProps {
 
 export function ProductDetails({ product }: ProductDetailsProps) {
   const productId = product.id;
-
-  const cart = useAppSelector((state: RootState) => state.cart.cartItems);
-  const dispatch = useAppDispatch();
-
-  const router = useRouter();
-
+  const { items } = useCart();
   const [mainImage, setMainImage] = useState(product.images[0]);
-
-  const addToCartHandler = () => {
-    dispatch(addToCart({ productId }));
-  };
 
   const averageRating =
     product.rating.reduce((acc, item) => acc + item.rating, 0) /
@@ -98,22 +86,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </p>
         </div>
         <div className="flex items-end gap-5 mt-10">
-          {cart[productId] && (
+          {items[productId] && (
             <div className="flex flex-col gap-3">
               <p className="text-lg text-slate-800 font-semibold">
                 {vi.product.quantity}
               </p>
-              <Counter productId={productId} />
+              <CartCounter productId={productId} />
             </div>
           )}
-          <button
-            onClick={() =>
-              !cart[productId] ? addToCartHandler() : router.push("/cart")
-            }
-            className="bg-slate-800 text-white px-10 py-3 text-sm font-medium rounded hover:bg-slate-900 active:scale-95 transition"
-          >
-            {!cart[productId] ? vi.product.addToCart : "Xem giỏ hàng"}
-          </button>
+          <AddToCartButton productId={productId} />
         </div>
         <hr className="border-gray-300 my-5" />
         <div className="flex flex-col gap-4 text-slate-500">
