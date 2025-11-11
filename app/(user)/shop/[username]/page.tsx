@@ -1,4 +1,4 @@
-import ProductCard from "@/components/features/product/ProductCard";
+import { ProductCard } from "@/features/products/index.client";
 import { MailIcon, MapPinIcon } from "lucide-react";
 import Image from "next/image";
 import { vi } from "@/lib/i18n";

@@ -1,13 +1,6 @@
-/**
- * Products Feature - Client Components & Hooks
- * Import from: @/features/products/index.client
- */
-
-// Client Components
-// export { ProductCard } from "./components/client/ProductCard.client";
-// export { ProductFilters } from "./components/client/ProductFilters.client";
-// export { AddToCart } from "./components/client/AddToCart.client";
-
-// Client Hooks
-// export { useProductFilters } from "./hooks/useProductFilters";
-// export { useAIImageAnalysis } from "./hooks/useAIImageAnalysis";
+export { ProductCard } from "./components/client/ProductCard.client";
+export { ProductDescription } from "./components/client/ProductDescription.client";
+export { ProductDetails } from "./components/client/ProductDetails.client";
+export { useAIImageAnalysis } from "@/lib/hooks/useAIImageAnalysis";
+export * from "./schemas/product.schema";
+export * from "./types/product.types";

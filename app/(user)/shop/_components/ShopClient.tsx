@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import ProductCard from "@/components/features/product/ProductCard";
+import { ProductCard } from "@/features/products/index.client";
 import { MoveLeftIcon, SlidersHorizontalIcon, XIcon } from "lucide-react";
 import { vi } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
