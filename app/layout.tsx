@@ -1,15 +1,18 @@
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
-import StoreProvider from "@/app/StoreProvider";
+import { Toaster } from "@/shared/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
-import { AuthRedirectToast } from "@/features/auth";
+import { AuthRedirectToast } from "@/features/auth/index.client";
 
 export const metadata = {
   title: "Vendoor",
   description: "Multi-Vendor E-Commerce Platform",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
@@ -19,11 +22,9 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          <StoreProvider>
-            <AuthRedirectToast />
-            {children}
-            <Toaster position="top-center" />
-          </StoreProvider>
+          <AuthRedirectToast />
+          {children}
+          <Toaster position="top-center" />
         </ThemeProvider>
       </body>
     </html>

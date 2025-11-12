@@ -4,31 +4,29 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { XIcon } from "lucide-react";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "@/lib/store";
-import type { RootState } from "@/lib/store";
 import {
-  addAddress as addAddressToStore,
-  setAddresses,
-} from "@/lib/features/address/address-slice";
-import { vi } from "@/lib/i18n";
-import { addAddress, updateAddress } from "@/lib/actions/user/address.action";
-import { addressSchema, type AddressFormData } from "@/lib/validations";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+  addAddress,
+  updateAddress,
+} from "@/features/address/actions/address.action";
+import {
+  addressSchema,
+  type AddressFormData,
+} from "../../schemas/address.schema";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field";
+} from "@/shared/components/ui/field";
 import type { AddressModalProps } from "@/types";
 
 export function AddressModal({
   setShowAddressModal,
   editingAddress = null,
-}: AddressModalProps) {
-  const dispatch = useAppDispatch();
-  const addressList = useAppSelector((state: RootState) => state.address.list);
+  onSuccess,
+}: AddressModalProps & { onSuccess: () => void }) {
   const isEditing = !!editingAddress;
 
   const form = useForm<AddressFormData>({
@@ -64,20 +62,16 @@ export function AddressModal({
       if (!result.success) {
         throw new Error(result.error);
       }
-      const updatedList = addressList.map((addr) =>
-        addr.id === editingAddress.id ? result.address : addr
-      );
-      dispatch(setAddresses(updatedList));
     } else {
       result = await addAddress(data);
       if (!result.success) {
         throw new Error(result.error);
       }
-      dispatch(addAddressToStore(result.newAddress));
     }
 
     toast.success(result.message);
     setShowAddressModal(false);
+    onSuccess(); // Notify parent to refetch
   };
 
   return (
@@ -91,15 +85,15 @@ export function AddressModal({
         className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto"
       >
         <h2 className="text-2xl font-semibold text-slate-700 mb-4">
-          {isEditing ? "Chỉnh sửa địa chỉ" : vi.address.addAddress}
+          {isEditing ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ mới"}
         </h2>
 
         <FieldGroup className="space-y-4">
           <Field data-invalid={!!form.formState.errors.name}>
-            <FieldLabel htmlFor="name">{vi.address.name}</FieldLabel>
+            <FieldLabel htmlFor="name">Họ và tên</FieldLabel>
             <Input
               id="name"
-              placeholder={vi.address.name}
+              placeholder="Nhập họ và tên"
               aria-invalid={!!form.formState.errors.name}
               {...form.register("name")}
             />
@@ -108,11 +102,11 @@ export function AddressModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field data-invalid={!!form.formState.errors.email}>
-              <FieldLabel htmlFor="email">{vi.address.email}</FieldLabel>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 id="email"
                 type="email"
-                placeholder={vi.address.email}
+                placeholder="Nhập email"
                 aria-invalid={!!form.formState.errors.email}
                 {...form.register("email")}
               />
@@ -120,10 +114,10 @@ export function AddressModal({
             </Field>
 
             <Field data-invalid={!!form.formState.errors.phone}>
-              <FieldLabel htmlFor="phone">{vi.address.phone}</FieldLabel>
+              <FieldLabel htmlFor="phone">Số điện thoại</FieldLabel>
               <Input
                 id="phone"
-                placeholder={vi.address.phone}
+                placeholder="Nhập số điện thoại"
                 aria-invalid={!!form.formState.errors.phone}
                 {...form.register("phone")}
               />
@@ -132,10 +126,10 @@ export function AddressModal({
           </div>
 
           <Field data-invalid={!!form.formState.errors.street}>
-            <FieldLabel htmlFor="street">{vi.address.street}</FieldLabel>
+            <FieldLabel htmlFor="street">Địa chỉ</FieldLabel>
             <Input
               id="street"
-              placeholder={vi.address.street}
+              placeholder="Nhập địa chỉ cụ thể"
               aria-invalid={!!form.formState.errors.street}
               {...form.register("street")}
             />
@@ -144,10 +138,10 @@ export function AddressModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field data-invalid={!!form.formState.errors.city}>
-              <FieldLabel htmlFor="city">{vi.address.city}</FieldLabel>
+              <FieldLabel htmlFor="city">Thành phố</FieldLabel>
               <Input
                 id="city"
-                placeholder={vi.address.city}
+                placeholder="Nhập thành phố"
                 aria-invalid={!!form.formState.errors.city}
                 {...form.register("city")}
               />
@@ -155,10 +149,10 @@ export function AddressModal({
             </Field>
 
             <Field data-invalid={!!form.formState.errors.state}>
-              <FieldLabel htmlFor="state">{vi.address.state}</FieldLabel>
+              <FieldLabel htmlFor="state">Tỉnh/Thành</FieldLabel>
               <Input
                 id="state"
-                placeholder={vi.address.state}
+                placeholder="Nhập tỉnh/thành"
                 aria-invalid={!!form.formState.errors.state}
                 {...form.register("state")}
               />
@@ -175,7 +169,7 @@ export function AddressModal({
               ? "Đang xử lý..."
               : isEditing
               ? "CẬP NHẬT"
-              : vi.common.save.toUpperCase()}
+              : "LƯU"}
           </Button>
         </FieldGroup>
       </form>

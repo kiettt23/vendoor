@@ -1,6 +1,5 @@
 "use client";
 
-import { addToCart } from "@/lib/features/cart/cart-slice";
 import {
   StarIcon,
   TagIcon,
@@ -11,29 +10,26 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
-import Counter from "@/components/ui/Counter";
-import { useAppDispatch, useAppSelector } from "@/lib/store";
-import type { RootState } from "@/lib/store";
-import { vi } from "@/lib/i18n";
-import { formatPrice } from "@/lib/utils/format/currency";
+import Counter from "@/shared/components/ui/Counter";
+import { useCart } from "@/features/cart/hooks/useCart";
+import { formatPrice } from "@/shared/lib/format/currency";
 import type { ProductWithRating } from "@/types";
 
 interface ProductDetailsProps {
   product: ProductWithRating;
 }
 
-const ProductDetails = ({ product }: ProductDetailsProps) => {
+export const ProductDetails = ({ product }: ProductDetailsProps) => {
   const productId = product.id;
 
-  const cart = useAppSelector((state: RootState) => state.cart.cartItems);
-  const dispatch = useAppDispatch();
+  const { items, addToCart } = useCart();
 
   const router = useRouter();
 
   const [mainImage, setMainImage] = useState(product.images[0]);
 
   const addToCartHandler = () => {
-    dispatch(addToCart({ productId }));
+    addToCart(productId);
   };
 
   const averageRating =
@@ -80,7 +76,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
               />
             ))}
           <p className="text-sm ml-3 text-slate-500">
-            {product.rating.length} {vi.product.reviews}
+            {product.rating.length} đánh giá
           </p>
         </div>
         <div className="flex items-start my-6 gap-3 text-2xl font-semibold text-slate-800">
@@ -98,21 +94,19 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
           </p>
         </div>
         <div className="flex items-end gap-5 mt-10">
-          {cart[productId] && (
+          {items[productId] && (
             <div className="flex flex-col gap-3">
-              <p className="text-lg text-slate-800 font-semibold">
-                {vi.product.quantity}
-              </p>
+              <p className="text-lg text-slate-800 font-semibold">Số lượng</p>
               <Counter productId={productId} />
             </div>
           )}
           <button
             onClick={() =>
-              !cart[productId] ? addToCartHandler() : router.push("/cart")
+              !items[productId] ? addToCartHandler() : router.push("/cart")
             }
             className="bg-slate-800 text-white px-10 py-3 text-sm font-medium rounded hover:bg-slate-900 active:scale-95 transition"
           >
-            {!cart[productId] ? vi.product.addToCart : "Xem giỏ hàng"}
+            {!items[productId] ? "Thêm vào giỏ hàng" : "Xem giỏ hàng"}
           </button>
         </div>
         <hr className="border-gray-300 my-5" />
@@ -136,5 +130,3 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
     </div>
   );
 };
-
-export default ProductDetails;

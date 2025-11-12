@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
 import imagekit from "@/configs/image-kit";
 
-export async function createStore(formData) {
+export async function createStore(formData: FormData) {
   try {
     // 1. Check authentication
     const user = await getCurrentUser();
@@ -23,13 +23,13 @@ export async function createStore(formData) {
     }
 
     // 3. Extract form data
-    const name = formData.get("name");
-    const username = formData.get("username");
-    const description = formData.get("description");
-    const email = formData.get("email");
-    const contact = formData.get("contact");
-    const address = formData.get("address");
-    const imageFile = formData.get("image");
+    const name = formData.get("name") as string;
+    const username = formData.get("username") as string;
+    const description = formData.get("description") as string;
+    const email = formData.get("email") as string;
+    const contact = formData.get("contact") as string;
+    const address = formData.get("address") as string;
+    const imageFile = formData.get("image") as File | null;
 
     // 4. Validate required fields
     if (!name || !username || !description || !email || !contact || !address) {

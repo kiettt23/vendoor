@@ -4,7 +4,7 @@ import prisma from "@/server/db/prisma";
 import { getCurrentUser } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
 import type { AddressActionResponse, SerializedAddress } from "@/types";
-import type { AddressFormData } from "@/lib/validations";
+import type { AddressFormData } from "../schemas/address.schema";
 
 export async function getUserAddresses(): Promise<{
   addresses: SerializedAddress[];

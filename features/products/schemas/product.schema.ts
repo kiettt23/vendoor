@@ -1,8 +1,7 @@
 import { z } from "zod";
 
 /**
- * Validation schema cho Product
- * Dùng chung cho: add-product, edit-product, admin review
+ * Product Validation Schema
  */
 export const productSchema = z.object({
   name: z.string().min(3, "Tên sản phẩm phải có ít nhất 3 ký tự"),
@@ -12,4 +11,7 @@ export const productSchema = z.object({
   mrp: z.number().positive("Giá gốc phải lớn hơn 0"),
 });
 
+/**
+ * Inferred Types
+ */
 export type ProductFormData = z.infer<typeof productSchema>;

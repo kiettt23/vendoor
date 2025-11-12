@@ -8,48 +8,36 @@ import {
   type UpdateQuantityInput,
 } from "../schemas/cart.schema";
 import type { ActionResponse } from "@/types/action-response";
+import { cartService } from "../lib/cart.service";
 
 export async function updateQuantity(
   input: UpdateQuantityInput
 ): Promise<ActionResponse<{ total: number }>> {
   try {
-    const { user } = await getSession();
+    const session = await getSession();
+    const userId = session?.user?.id;
 
-    if (!user) {
+    if (!userId) {
       return {
         success: false,
-        error: "Vui lòng đăng nhập",
+        error: "Unauthorized",
       };
     }
 
     const validatedData = updateQuantitySchema.parse(input);
     const { productId, quantity } = validatedData;
 
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { cart: true },
-    });
-
-    const currentCart = (dbUser?.cart as Record<string, number>) || {};
-
-    if (quantity === 0) {
-      delete currentCart[productId];
-    } else {
-      currentCart[productId] = quantity;
-    }
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { cart: currentCart },
-    });
-
-    const total = Object.values(currentCart).reduce((sum, qty) => sum + qty, 0);
+    const result = await cartService.updateQuantity(
+      userId,
+      productId,
+      quantity
+    );
 
     revalidatePath("/cart");
 
     return {
       success: true,
-      data: { total },
+      data: { total: result.total },
     };
   } catch (error) {
     console.error("Update quantity error:", error);

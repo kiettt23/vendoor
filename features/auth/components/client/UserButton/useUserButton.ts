@@ -25,6 +25,8 @@ export function useUserButton(
 
   useEffect(() => {
     const loadSessions = async () => {
+      if (!session) return;
+
       try {
         const sessions = await authClient.multiSession.listDeviceSessions();
         if (sessions.data) {
@@ -38,9 +40,11 @@ export function useUserButton(
     if (session?.user) {
       loadSessions();
     }
-  }, [session?.user]);
+  }, [session]);
 
   const handleSignOut = async () => {
+    if (!session) return;
+
     const otherSessions = allSessions.filter(
       (s) => s.session.token !== session?.session.token
     );

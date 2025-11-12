@@ -1,5 +1,9 @@
+// Components
 export { RatingModal } from "./components/client/RatingModal.client";
 
-export type { Rating } from "./types/rating.types";
+// Schemas
+export { ratingSchema } from "./schemas/rating.schema";
 
-export { ratingSchema, type RatingFormData } from "./schemas/rating.schema";
+// Types
+export type * from "./types/rating.types";
+export type { RatingFormData } from "./schemas/rating.schema";

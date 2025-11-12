@@ -1,27 +1,32 @@
+// Service
+export { orderService, OrderService } from "./lib/order.service";
+
+// User Actions
 export {
   getOrders,
   getUserOrders,
   applyCoupon,
-  placeOrder,
+  createOrder,
+  cancelOrder,
 } from "./actions/user-order.action";
 
+// Seller Actions
 export {
   getOrders as getSellerOrders,
   updateOrderStatus,
 } from "./actions/seller-order.action";
 
-export type {
-  Order,
-  OrderItem,
-  OrderWithDetails,
-  CouponActionResponse,
-} from "./types/order.types";
-
+// Schemas
 export {
   orderSchema,
   orderItemSchema,
   couponCodeSchema,
-  type OrderFormData,
-  type OrderItemFormData,
-  type CouponCodeFormData,
+} from "./schemas/order.schema";
+
+// Types
+export type * from "./types/order.types";
+export type {
+  OrderFormData,
+  OrderItemFormData,
+  CouponCodeFormData,
 } from "./schemas/order.schema";

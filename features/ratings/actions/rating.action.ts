@@ -4,7 +4,7 @@ import prisma from "@/server/db/prisma";
 import { getCurrentUser } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
 import type { Rating, RatingActionResponse, SerializedRating } from "@/types";
-import { ratingSchema, type RatingFormData } from "@/lib/validations";
+import { ratingSchema, type RatingFormData } from "../schemas/rating.schema";
 
 export async function getUserRatings(): Promise<{
   ratings: SerializedRating[];

@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 /**
- * Validation schema cho Store
- * Dùng chung cho: create-store, edit-store, admin approval
+ * Store Validation Schemas
  */
+
 export const storeSchema = z.object({
   name: z.string().min(3, "Tên cửa hàng phải có ít nhất 3 ký tự"),
   username: z
@@ -20,11 +20,6 @@ export const storeSchema = z.object({
   image: z.instanceof(File).optional(),
 });
 
-export type StoreFormData = z.infer<typeof storeSchema>;
-
-/**
- * Validation schema cho Update Store (không bao gồm username)
- */
 export const storeUpdateSchema = z.object({
   name: z.string().min(3, "Tên cửa hàng phải có ít nhất 3 ký tự"),
   description: z.string().min(1, "Vui lòng nhập mô tả"),
@@ -33,4 +28,8 @@ export const storeUpdateSchema = z.object({
   address: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
 });
 
+/**
+ * Inferred Types
+ */
+export type StoreFormData = z.infer<typeof storeSchema>;
 export type StoreUpdateFormData = z.infer<typeof storeUpdateSchema>;

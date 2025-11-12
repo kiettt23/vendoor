@@ -8,7 +8,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/components/ui/dropdown-menu";
 import { User, Store, Settings, LogOut, Shield, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { UserAvatar } from "./UserAvatar.client";
@@ -18,7 +18,7 @@ import { useUserButton } from "./useUserButton";
 export function UserButton() {
   const { data: session, isPending } = useSession();
   const { allSessions, handleSignOut, handleSwitchSession, handleAddAccount } =
-    useUserButton(session);
+    useUserButton(session as any);
 
   if (isPending) {
     return <div className="size-8 rounded-full bg-gray-200 animate-pulse" />;
@@ -62,7 +62,7 @@ export function UserButton() {
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/store" className="cursor-pointer">
+          <Link href="/vendor" className="cursor-pointer">
             <Store className="mr-2 h-4 w-4" />
             Cửa hàng của tôi
           </Link>

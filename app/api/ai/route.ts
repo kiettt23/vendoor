@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     const { getCurrentUser } = await import("@/features/auth/index.server");
     const user = await getCurrentUser();
 
-    if (!isSeller(user)) {
+    if (!user || !isSeller(user)) {
       return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }
 

@@ -1,9 +1,9 @@
 export const AUTH_ROUTES = {
-  SIGN_IN: "/sign-in",
-  SIGN_UP: "/sign-up",
+  SIGN_IN: "/login",
+  SIGN_UP: "/register",
   HOME: "/",
   ADMIN: "/admin",
-  STORE: "/store",
+  VENDOR: "/vendor",
   CREATE_STORE: "/create-store",
   ORDERS: "/orders",
   SETTINGS: "/settings",

@@ -3,7 +3,7 @@
 import { useCart, type CartProduct } from "@/features/cart/index.client";
 import { CartCounter } from "./CartCounter.client";
 import { OrderSummary } from "@/features/orders/index.client";
-import PageTitle from "@/components/ui/PageTitle";
+import PageTitle from "@/shared/components/ui/PageTitle";
 import { Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -29,7 +29,7 @@ export function CartClient({ products }: CartClientProps) {
             ...product,
             quantity,
           });
-          setTotalPrice((prev) => prev + product.price * quantity);
+          setTotalPrice((prev) => prev + Number(product.price) * quantity);
         }
       }
 

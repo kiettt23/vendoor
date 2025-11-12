@@ -7,9 +7,18 @@ export async function getSession() {
   return await auth.api.getSession({ headers: await headers() });
 }
 
-export async function getCurrentUser(): Promise<AuthUser> {
+export async function getCurrentUser(): Promise<AuthUser | null> {
   const session = await getSession();
-  return session?.user ?? null;
+  if (!session?.user) return null;
+
+  return {
+    id: session.user.id,
+    email: session.user.email ?? undefined,
+    username: session.user.username ?? undefined,
+    role: session.user.role ?? undefined,
+    name: session.user.name ?? undefined,
+    image: session.user.image ?? undefined,
+  };
 }
 
 export async function getSellerStore(): Promise<SellerStoreResult> {

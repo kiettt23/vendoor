@@ -3,13 +3,14 @@
 import prisma from "@/server/db/prisma";
 import { getCurrentUser } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
-import type { Coupon, CouponActionResponse } from "@/types";
+import type { Coupon } from "@/types";
+import type { CouponActionResponse } from "../types/order.types";
 import {
   orderSchema,
   couponCodeSchema,
   type OrderFormData,
   type CouponCodeFormData,
-} from "@/lib/validations";
+} from "../schemas/order.schema";
 import { APP_CONFIG } from "@/configs/app";
 
 interface OrderResponse {
@@ -61,11 +62,9 @@ export async function getOrders() {
     },
   });
 
-  // Parse coupon JSON for each order
   const ordersWithParsedCoupon = orders.map((order) => {
     let parsedCoupon = order.coupon;
 
-    // Handle both string (old orders) and object (Prisma default)
     if (typeof order.coupon === "string") {
       try {
         parsedCoupon = JSON.parse(order.coupon);
@@ -93,10 +92,8 @@ export async function getOrders() {
   return ordersWithParsedCoupon;
 }
 
-// Alias for backward compatibility
 export { getOrders as getUserOrders };
 
-// Apply a coupon code
 export async function applyCoupon(code: string): Promise<CouponActionResponse> {
   try {
     const user = await getCurrentUser();
@@ -104,7 +101,6 @@ export async function applyCoupon(code: string): Promise<CouponActionResponse> {
       return { success: false, error: "Vui lòng đăng nhập" };
     }
 
-    // ✅ Validate using Zod schema (Single Source of Truth)
     const validation = couponCodeSchema.safeParse({ code });
     if (!validation.success) {
       return {
@@ -128,19 +124,14 @@ export async function applyCoupon(code: string): Promise<CouponActionResponse> {
       return { success: false, error: "Mã giảm giá đã hết hạn" };
     }
 
-    // Check if user has any orders (for forNewUser check)
     const userOrderCount = await prisma.order.count({
       where: { userId: user.id },
     });
 
     const isNewUser = userOrderCount === 0;
 
-    // TODO: Implement Plus membership feature
-    // Option 1: Add `isPlusMember` field to User model
-    // Option 2: Create separate Membership table
-    const isPlusMember = false; // Temporary: Always false until membership is implemented
+    const isPlusMember = false;
 
-    // Check forNewUser restriction
     if (coupon.forNewUser && !isNewUser) {
       return {
         success: false,
@@ -184,7 +175,6 @@ export async function applyCoupon(code: string): Promise<CouponActionResponse> {
   }
 }
 
-// Create a new order
 export async function createOrder(
   orderData: OrderFormData
 ): Promise<OrderResponse> {
@@ -194,7 +184,6 @@ export async function createOrder(
       return { success: false, message: "Vui lòng đăng nhập" };
     }
 
-    // ✅ Validate using Zod schema (Single Source of Truth)
     const validation = orderSchema.safeParse(orderData);
     if (!validation.success) {
       return {
@@ -279,7 +268,7 @@ export async function createOrder(
         paymentMethod,
         isPaid: paymentMethod === "STRIPE",
         isCouponUsed: !!coupon,
-        coupon: coupon || null,
+        coupon: coupon as any,
         orderItems: {
           create: allItems,
         },
@@ -299,20 +288,17 @@ export async function createOrder(
 
       // Calculate total amount with coupon and shipping
       // TODO: Implement Plus membership feature
-      const isPlusMember = false; // Temporary: Always false until membership is implemented
+      const isPlusMember = false;
 
       let subtotal = 0;
       for (const item of items) {
         subtotal += item.price * item.quantity;
       }
 
-      // Apply discount
       const discountAmount = coupon ? (coupon.discount / 100) * subtotal : 0;
 
-      // Add shipping fee (free for Plus members)
       const shippingFee = isPlusMember ? 0 : APP_CONFIG.SHIPPING_FEE;
 
-      // Calculate final total
       const finalTotal = subtotal + shippingFee - discountAmount;
 
       const session = await stripe.checkout.sessions.create({

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ERROR_MESSAGE_MAP } from "../lib/constants";
+import { ERROR_MESSAGE_MAP } from "../../lib/constants";
 
 export function AuthRedirectToast() {
   const searchParams = useSearchParams();

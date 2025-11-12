@@ -1,10 +1,9 @@
 "use client";
 
 import { useCart } from "@/features/cart/index.client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/features/auth/index.client";
-import vi from "@/lib/i18n";
 
 interface AddToCartButtonProps {
   productId: string;
@@ -36,7 +35,7 @@ export function AddToCartButton({ productId }: AddToCartButtonProps) {
       className="bg-primary text-white"
       disabled={isPending}
     >
-      {!isInCart ? vi.product.addToCart : "Xem giỏ hàng"}
+      {!isInCart ? "Thêm vào giỏ hàng" : "Xem giỏ hàng"}
     </Button>
   );
 }

@@ -3,15 +3,14 @@ import { ArrowRight, StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { vi } from "@/lib/i18n";
-import { formatDate } from "@/lib/utils/format/date";
+import { formatDate } from "@/shared/lib/format/date";
 import type { ProductWithRating } from "@/types";
 
 interface ProductDescriptionProps {
   product: ProductWithRating;
 }
 
-const ProductDescription = ({ product }: ProductDescriptionProps) => {
+export const ProductDescription = ({ product }: ProductDescriptionProps) => {
   const [selectedTab, setSelectedTab] = useState("Description");
 
   const tabs = {
@@ -47,13 +46,13 @@ const ProductDescription = ({ product }: ProductDescriptionProps) => {
       {selectedTab === "Reviews" && (
         <div className="flex flex-col gap-3 mt-14">
           {product.rating.length === 0 ? (
-            <p className="text-slate-400">{vi.product.noReviews}</p>
+            <p className="text-slate-400">Chưa có đánh giá nào</p>
           ) : (
             product.rating.map((item, index) => (
               <div key={index} className="flex gap-5 mb-10">
                 <Image
-                  src={item.user.image}
-                  alt={item.user.name}
+                  src={item.user?.image || "/images/default-avatar.jpg"}
+                  alt={item.user?.name || "User"}
                   className="size-10 rounded-full"
                   width={100}
                   height={100}
@@ -74,7 +73,9 @@ const ProductDescription = ({ product }: ProductDescriptionProps) => {
                       ))}
                   </div>
                   <p className="text-sm max-w-lg my-4">{item.review}</p>
-                  <p className="font-medium text-slate-800">{item.user.name}</p>
+                  <p className="font-medium text-slate-800">
+                    {item.user?.name || "Anonymous"}
+                  </p>
                   <p className="mt-3 font-light">
                     {formatDate(item.createdAt)}
                   </p>
@@ -86,29 +87,28 @@ const ProductDescription = ({ product }: ProductDescriptionProps) => {
       )}
 
       {/* Store Page */}
-      <div className="flex gap-3 mt-14">
-        <Image
-          src={product.store.logo || "/images/gs_logo.jpg"}
-          alt={product.store.name}
-          className="size-11 rounded-full ring ring-slate-400 object-cover"
-          width={100}
-          height={100}
-        />
-        <div>
-          <p className="font-medium text-slate-600">
-            Sản phẩm từ {product.store.name}
-          </p>
-          <Link
-            href={`/shop/${product.store.username}`}
-            className="flex items-center gap-1.5 text-purple-500"
-          >
-            {" "}
-            Xem cửa hàng <ArrowRight size={14} />
-          </Link>
+      {product.store && (
+        <div className="flex gap-3 mt-14">
+          <Image
+            src={product.store.logo || "/images/gs_logo.jpg"}
+            alt={product.store.name}
+            className="size-11 rounded-full ring ring-slate-400 object-cover"
+            width={100}
+            height={100}
+          />
+          <div>
+            <p className="font-medium text-slate-600">
+              Sản phẩm từ {product.store.name}
+            </p>
+            <Link
+              href={`/shop/${product.store.username}`}
+              className="flex items-center gap-1.5 text-purple-500"
+            >
+              Xem cửa hàng <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
-
-export default ProductDescription;

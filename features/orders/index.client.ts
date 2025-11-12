@@ -1,19 +1,22 @@
+// Components
 export { OrderItem } from "./components/client/OrderItem.client";
 export { OrderSummary } from "./components/client/OrderSummary.client";
 export { default as OrdersAreaChart } from "./components/client/OrdersAreaChart.client";
 
-export type {
-  Order,
-  OrderItem as OrderItemType,
-  OrderWithDetails,
-  CouponActionResponse,
-} from "./types/order.types";
+// Hooks
+export { useOrderManagement } from "./hooks/useOrderManagement";
 
+// Schemas
 export {
   orderSchema,
   orderItemSchema,
   couponCodeSchema,
-  type OrderFormData,
-  type OrderItemFormData,
-  type CouponCodeFormData,
+} from "./schemas/order.schema";
+
+// Types
+export type * from "./types/order.types";
+export type {
+  OrderFormData,
+  OrderItemFormData,
+  CouponCodeFormData,
 } from "./schemas/order.schema";

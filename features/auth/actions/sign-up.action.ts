@@ -66,7 +66,7 @@ export async function signUpAction(input: SignUpInput) {
 export async function signUpWithRedirect(input: SignUpInput) {
   const result = await signUpAction(input);
 
-  if (result.success) {
+  if (result.success && input.callbackURL) {
     redirect(input.callbackURL);
   }
 

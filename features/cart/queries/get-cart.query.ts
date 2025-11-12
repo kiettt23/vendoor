@@ -1,22 +1,17 @@
 "use server";
 
+import { cache } from "react";
 import prisma from "@/server/db/prisma";
 import { getSession } from "@/features/auth/index.server";
+import { cartService } from "../lib/cart.service";
 
-export async function getCart() {
-  const { user } = await getSession();
+export const getCart = cache(async () => {
+  const session = await getSession();
+  const user = session?.user;
 
   if (!user) {
-    return { items: {}, total: 0 };
+    return {};
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { cart: true },
-  });
-
-  const items = (dbUser?.cart as Record<string, number>) || {};
-  const total = Object.values(items).reduce((sum, qty) => sum + qty, 0);
-
-  return { items, total };
-}
+  return cartService.getCart(user.id);
+});

@@ -1,15 +1,14 @@
 "use server";
 
-import prisma from "@/server/db/prisma";
 import { getSession } from "@/features/auth/index.server";
 import { syncCartSchema, type SyncCartInput } from "../schemas/cart.schema";
 import type { ActionResponse } from "@/types/action-response";
+import { cartService } from "../lib/cart.service";
 
-export async function syncCart(
-  input: SyncCartInput
-): Promise<ActionResponse<{ total: number }>> {
+export async function syncCart(input: SyncCartInput): Promise<ActionResponse> {
   try {
-    const { user } = await getSession();
+    const session = await getSession();
+    const user = session?.user;
 
     if (!user) {
       return {
@@ -21,16 +20,11 @@ export async function syncCart(
     const validatedData = syncCartSchema.parse(input);
     const { items } = validatedData;
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { cart: items },
-    });
-
-    const total = Object.values(items).reduce((sum, qty) => sum + qty, 0);
+    const result = await cartService.syncCart(user.id, items);
 
     return {
       success: true,
-      data: { total },
+      data: { total: result.total },
     };
   } catch (error) {
     console.error("Sync cart error:", error);

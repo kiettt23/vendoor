@@ -1,16 +1,17 @@
 "use server";
 
-import prisma from "@/server/db/prisma";
 import { getSession } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
 import { addToCartSchema, type AddToCartInput } from "../schemas/cart.schema";
 import type { ActionResponse } from "@/types/action-response";
+import { cartService } from "../lib/cart.service";
 
 export async function addToCart(
   input: AddToCartInput
 ): Promise<ActionResponse<{ total: number }>> {
   try {
-    const { user } = await getSession();
+    const session = await getSession();
+    const user = session?.user;
 
     if (!user) {
       return {
@@ -20,43 +21,16 @@ export async function addToCart(
     }
 
     const validatedData = addToCartSchema.parse(input);
-    const { productId } = validatedData;
+    const { productId, quantity = 1 } = validatedData;
 
-    const product = await prisma.product.findUnique({
-      where: { id: productId },
-    });
-
-    if (!product) {
-      return {
-        success: false,
-        error: "Sản phẩm không tồn tại",
-      };
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { cart: true },
-    });
-
-    const currentCart = (dbUser?.cart as Record<string, number>) || {};
-    const newCart = {
-      ...currentCart,
-      [productId]: (currentCart[productId] || 0) + 1,
-    };
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { cart: newCart },
-    });
-
-    const total = Object.values(newCart).reduce((sum, qty) => sum + qty, 0);
+    const result = await cartService.addToCart(user.id, productId, quantity);
 
     revalidatePath("/cart");
     revalidatePath("/product/[productId]", "page");
 
     return {
       success: true,
-      data: { total },
+      data: { total: result.total },
     };
   } catch (error) {
     console.error("Add to cart error:", error);

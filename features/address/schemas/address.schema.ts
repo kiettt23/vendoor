@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 /**
- * Validation schema cho Address
- * Dùng chung cho: address modal, checkout, profile
+ * Address Validation Schema
  */
+
 export const addressSchema = z.object({
   name: z.string().min(2, "Tên phải có ít nhất 2 ký tự"),
   email: z.string().email("Email không hợp lệ"),
@@ -13,4 +13,7 @@ export const addressSchema = z.object({
   state: z.string().min(1, "Vui lòng nhập quận/huyện"),
 });
 
+/**
+ * Inferred Types
+ */
 export type AddressFormData = z.infer<typeof addressSchema>;

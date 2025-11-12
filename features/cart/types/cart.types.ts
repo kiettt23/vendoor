@@ -1,3 +1,7 @@
+/**
+ * Cart Types
+ */
+
 export interface CartItem {
   productId: string;
   quantity: number;
@@ -25,4 +29,13 @@ export interface CartState {
   items: Record<string, number>;
   total: number;
   isLoading: boolean;
+}
+
+export interface CartSummary {
+  items: CartProduct[];
+  totalItems: number;
+  subtotal: number;
+  shippingFee: number;
+  discount: number;
+  total: number;
 }

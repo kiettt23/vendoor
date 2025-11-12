@@ -4,20 +4,20 @@ import { Star } from "lucide-react";
 import React, { useState } from "react";
 import { XIcon } from "lucide-react";
 import { toast } from "sonner";
-import { useAppDispatch } from "@/lib/store";
-import { addRating } from "@/lib/features/rating/rating-slice";
-import { vi } from "@/lib/i18n";
-import { submitRating } from "@/lib/actions/user/rating.action";
+import { submitRating } from "@/features/ratings/actions/rating.action";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ratingSchema, type RatingFormData } from "@/lib/validations";
-import { Field } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { ratingSchema, type RatingFormData } from "../../schemas/rating.schema";
+import { Field } from "@/shared/components/ui/field";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { Button } from "@/shared/components/ui/button";
 import type { RatingModalProps } from "@/types";
 
-export function RatingModal({ ratingModal, setRatingModal }: RatingModalProps) {
-  const dispatch = useAppDispatch();
+export function RatingModal({
+  ratingModal,
+  setRatingModal,
+  onSuccess,
+}: RatingModalProps & { onSuccess: () => void }) {
   const [rating, setRating] = useState(0);
 
   const form = useForm<RatingFormData>({
@@ -37,9 +37,9 @@ export function RatingModal({ ratingModal, setRatingModal }: RatingModalProps) {
       return toast.error(result.error);
     }
 
-    dispatch(addRating(result.rating));
     toast.success(result.message);
     setRatingModal(null);
+    onSuccess(); // Notify parent to refetch
   };
 
   return (
@@ -52,7 +52,7 @@ export function RatingModal({ ratingModal, setRatingModal }: RatingModalProps) {
           <XIcon size={20} />
         </button>
         <h2 className="text-xl font-medium text-slate-600 mb-4">
-          {vi.rating.writeReview}
+          Viết đánh giá
         </h2>
 
         <form
@@ -86,7 +86,7 @@ export function RatingModal({ ratingModal, setRatingModal }: RatingModalProps) {
           {/* Review Field */}
           <Textarea
             {...form.register("review")}
-            placeholder={vi.rating.yourReview}
+            placeholder="Nhập đánh giá của bạn..."
             rows={4}
             className="w-full p-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-purple-400"
           />
@@ -100,7 +100,7 @@ export function RatingModal({ ratingModal, setRatingModal }: RatingModalProps) {
             type="submit"
             className="w-full bg-purple-500 text-white py-2 rounded-md hover:bg-purple-600 transition"
           >
-            {vi.rating.submitReview}
+            Gửi đánh giá
           </Button>
         </form>
       </div>

@@ -1,14 +1,13 @@
 import { XIcon } from "lucide-react";
-import AddressManager from "../address/AddressManager";
+import { AddressManager } from "@/features/address/index.client";
 import { toast } from "sonner";
-import { useSession } from "@/features/auth";
-import { vi } from "@/lib/i18n";
-import { formatPrice } from "@/lib/utils/format/currency";
+import { useSession } from "@/features/auth/index.client";
+import { formatPrice } from "@/shared/lib/format/currency";
 import { APP_CONFIG } from "@/configs/app";
 import { useOrderManagement } from "@/lib/hooks/useOrderManagement";
 import type { OrderSummaryProps } from "@/types";
 
-const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
+export const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
   const { data: session } = useSession();
   const user = session?.user;
 
@@ -44,10 +43,8 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
 
   return (
     <div className="w-full max-w-lg lg:max-w-[340px] bg-slate-50/30 border border-slate-200 text-slate-500 text-sm rounded-xl p-7">
-      <h2 className="text-xl font-medium text-slate-600">
-        {vi.order.orderSummary}
-      </h2>
-      <p className="text-slate-400 text-xs my-4">{vi.payment.paymentMethod}</p>
+      <h2 className="text-xl font-medium text-slate-600">Tóm tắt đơn hàng</h2>
+      <p className="text-slate-400 text-xs my-4">Phương thức thanh toán</p>
       <div className="flex gap-2 items-center">
         <input
           type="radio"
@@ -57,7 +54,7 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
           className="accent-gray-500"
         />
         <label htmlFor="COD" className="cursor-pointer">
-          {vi.payment.cod}
+          Thanh toán khi nhận hàng (COD)
         </label>
       </div>
       <div className="flex gap-2 items-center mt-1">
@@ -70,7 +67,7 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
           className="accent-gray-500"
         />
         <label htmlFor="STRIPE" className="cursor-pointer">
-          {vi.payment.stripe}
+          Thanh toán trực tuyến (Stripe)
         </label>
       </div>
 
@@ -82,16 +79,14 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
       <div className="pb-4 border-b border-slate-200">
         <div className="flex justify-between">
           <div className="flex flex-col gap-1 text-slate-400">
-            <p>{vi.cart.subtotal}:</p>
-            <p>{vi.cart.shipping}:</p>
-            {coupon && <p>{vi.coupon.discount}:</p>}
+            <p>Tạm tính:</p>
+            <p>Phí vận chuyển:</p>
+            {coupon && <p>Giảm giá:</p>}
           </div>
           <div className="flex flex-col gap-1 font-medium text-right">
             <p>{formatPrice(totalPrice)}</p>
             <p>
-              {hasPlusPlan
-                ? vi.cart.freeShipping
-                : formatPrice(APP_CONFIG.SHIPPING_FEE)}
+              {hasPlusPlan ? "Miễn phí" : formatPrice(APP_CONFIG.SHIPPING_FEE)}
             </p>
             {coupon && (
               <p className="text-green-600">-{formatPrice(discountAmount)}</p>
@@ -111,17 +106,17 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
               onChange={(e) => setCouponCodeInput(e.target.value)}
               value={couponCodeInput}
               type="text"
-              placeholder={vi.cart.couponCode}
+              placeholder="Nhập mã giảm giá"
               className="border border-slate-400 p-1.5 rounded w-full outline-none"
             />
             <button className="bg-slate-600 text-white px-3 rounded hover:bg-slate-800 active:scale-95 transition-all">
-              {vi.coupon.apply}
+              Áp dụng
             </button>
           </form>
         ) : (
           <div className="w-full flex items-center justify-center gap-2 text-xs mt-2">
             <p>
-              {vi.coupon.code}:{" "}
+              Mã:{" "}
               <span className="font-semibold ml-1">
                 {coupon.code.toUpperCase()}
               </span>
@@ -136,7 +131,7 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
         )}
       </div>
       <div className="flex justify-between py-4">
-        <p>{vi.cart.total}:</p>
+        <p>Tổng cộng:</p>
         <p className="font-medium text-right">
           {hasPlusPlan
             ? formatPrice(totalWithoutShipping)
@@ -151,10 +146,8 @@ const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
         }
         className="w-full bg-slate-700 text-white py-2.5 rounded hover:bg-slate-900 active:scale-95 transition-all"
       >
-        {vi.order.orderPlaced.replace("Đã đặt hàng", "Đặt hàng")}
+        Đặt hàng
       </button>
     </div>
   );
 };
-
-export default OrderSummary;

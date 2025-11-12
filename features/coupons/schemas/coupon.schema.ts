@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 /**
- * Validation schema cho Coupon
- * Dùng chung cho: admin create coupon, edit coupon
+ * Coupon Validation Schema
  */
+
 export const couponSchema = z.object({
   code: z
     .string()
@@ -24,4 +24,7 @@ export const couponSchema = z.object({
     .optional(),
 });
 
+/**
+ * Inferred Types
+ */
 export type CouponFormData = z.infer<typeof couponSchema>;

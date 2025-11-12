@@ -1,16 +1,17 @@
 "use server";
 
-import prisma from "@/server/db/prisma";
 import { getSession } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
 import { removeItemSchema, type RemoveItemInput } from "../schemas/cart.schema";
 import type { ActionResponse } from "@/types/action-response";
+import { cartService } from "../lib/cart.service";
 
 export async function removeItem(
   input: RemoveItemInput
-): Promise<ActionResponse<{ total: number }>> {
+): Promise<ActionResponse> {
   try {
-    const { user } = await getSession();
+    const session = await getSession();
+    const user = session?.user;
 
     if (!user) {
       return {
@@ -22,26 +23,13 @@ export async function removeItem(
     const validatedData = removeItemSchema.parse(input);
     const { productId } = validatedData;
 
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { cart: true },
-    });
-
-    const currentCart = (dbUser?.cart as Record<string, number>) || {};
-    delete currentCart[productId];
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { cart: currentCart },
-    });
-
-    const total = Object.values(currentCart).reduce((sum, qty) => sum + qty, 0);
+    const result = await cartService.removeItem(user.id, productId);
 
     revalidatePath("/cart");
 
     return {
       success: true,
-      data: { total },
+      data: { total: result.total },
     };
   } catch (error) {
     console.error("Remove item error:", error);

@@ -7,7 +7,7 @@ import { removeItem as removeItemAction } from "../actions/remove-item.action";
 import { syncCart as syncCartAction } from "../actions/sync-cart.action";
 import { getCart } from "../queries/get-cart.query";
 import { toast } from "sonner";
-import type { CartState } from "../types/cart.types";
+import type { CartState } from "@/types";
 
 const CART_STORAGE_KEY = "vendoor_cart";
 
@@ -23,6 +23,8 @@ export function useCart() {
     const loadCart = async () => {
       try {
         const serverCart = await getCart();
+        const serverItems = serverCart?.items || {};
+        const serverTotal = serverCart?.total || 0;
 
         const localCart = localStorage.getItem(CART_STORAGE_KEY);
         if (localCart) {
@@ -33,7 +35,7 @@ export function useCart() {
 
           if (
             Object.keys(parsedLocalCart).length > 0 &&
-            Object.keys(serverCart.items).length === 0
+            Object.keys(serverItems).length === 0
           ) {
             await syncCartAction({ items: parsedLocalCart });
             setCart({
@@ -45,24 +47,18 @@ export function useCart() {
               isLoading: false,
             });
           } else {
-            localStorage.setItem(
-              CART_STORAGE_KEY,
-              JSON.stringify(serverCart.items)
-            );
+            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(serverItems));
             setCart({
-              items: serverCart.items,
-              total: serverCart.total,
+              items: serverItems,
+              total: serverTotal,
               isLoading: false,
             });
           }
         } else {
-          localStorage.setItem(
-            CART_STORAGE_KEY,
-            JSON.stringify(serverCart.items)
-          );
+          localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(serverItems));
           setCart({
-            items: serverCart.items,
-            total: serverCart.total,
+            items: serverItems,
+            total: serverTotal,
             isLoading: false,
           });
         }
@@ -106,7 +102,7 @@ export function useCart() {
       updateLocalCart(optimisticItems);
 
       startTransition(async () => {
-        const result = await addToCartAction({ productId });
+        const result = await addToCartAction({ productId, quantity: 1 });
         if (result.success) {
           toast.success("Đã thêm vào giỏ hàng");
         } else {

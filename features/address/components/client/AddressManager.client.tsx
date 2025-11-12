@@ -1,34 +1,43 @@
 "use client";
-import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/lib/store";
-import type { RootState } from "@/lib/store";
+import { useState, useEffect } from "react";
 import { Trash2Icon, EditIcon, PlusIcon } from "lucide-react";
 import { toast } from "sonner";
-import { vi } from "@/lib/i18n";
-import { setAddresses } from "@/lib/features/address/address-slice";
 import {
   deleteAddress,
-  updateAddress,
-  addAddress,
-} from "@/lib/actions/user/address.action";
+  getUserAddresses,
+} from "@/features/address/actions/address.action";
 import { AddressModal } from "./AddressModal.client";
 import type { SerializedAddress } from "@/types";
 
 interface AddressManagerProps {
   selectedAddress: SerializedAddress | null;
   setSelectedAddress: (address: SerializedAddress | null) => void;
+  initialAddresses?: SerializedAddress[];
 }
 
 export function AddressManager({
   selectedAddress,
   setSelectedAddress,
+  initialAddresses = [],
 }: AddressManagerProps) {
-  const dispatch = useAppDispatch();
-  const addressList = useAppSelector((state: RootState) => state.address.list);
+  const [addressList, setAddressList] =
+    useState<SerializedAddress[]>(initialAddresses);
   const [showAddressModal, setShowAddressModal] = useState(false);
-  const [editingAddress, setEditingAddress] = useState(null);
+  const [editingAddress, setEditingAddress] =
+    useState<SerializedAddress | null>(null);
 
-  const handleDelete = async (addressId) => {
+  const fetchAddresses = async () => {
+    const result = await getUserAddresses();
+    setAddressList(result.addresses);
+  };
+
+  useEffect(() => {
+    if (initialAddresses.length === 0) {
+      fetchAddresses();
+    }
+  }, [initialAddresses]);
+
+  const handleDelete = async (addressId: string) => {
     if (!confirm("Bạn có chắc muốn xóa địa chỉ này?")) return;
 
     try {
@@ -38,9 +47,9 @@ export function AddressManager({
         return toast.error(result.error);
       }
 
-      // Update Redux
+      // Update local state
       const updatedList = addressList.filter((addr) => addr.id !== addressId);
-      dispatch(setAddresses(updatedList));
+      setAddressList(updatedList);
 
       // Clear selection if deleted
       if (selectedAddress?.id === addressId) {
@@ -49,13 +58,15 @@ export function AddressManager({
 
       toast.success(result.message);
     } catch (error) {
-      toast.error(error.message || "Không thể xóa địa chỉ");
+      toast.error(
+        error instanceof Error ? error.message : "Không thể xóa địa chỉ"
+      );
     }
   };
 
   return (
     <div className="my-4 py-4 border-y border-slate-200 text-slate-400">
-      <p className="font-medium mb-2">{vi.address.title}</p>
+      <p className="font-medium mb-2">Địa chỉ giao hàng</p>
 
       {selectedAddress ? (
         <div className="flex gap-2 items-center justify-between bg-purple-50 p-3 rounded">
@@ -125,9 +136,7 @@ export function AddressManager({
             }}
           >
             <PlusIcon size={18} />
-            {addressList.length > 0
-              ? "Thêm địa chỉ mới"
-              : vi.address.addAddress}
+            {addressList.length > 0 ? "Thêm địa chỉ mới" : "Thêm địa chỉ"}
           </button>
         </div>
       )}
@@ -136,6 +145,7 @@ export function AddressManager({
         <AddressModal
           setShowAddressModal={setShowAddressModal}
           editingAddress={editingAddress}
+          onSuccess={fetchAddresses}
         />
       )}
     </div>

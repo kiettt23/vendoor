@@ -34,6 +34,10 @@ export async function requireSeller(): Promise<AuthUser> {
 export async function requireSellerWithStore(): Promise<SellerWithStore> {
   const user = await requireSeller();
 
+  if (!user) {
+    redirect(`${AUTH_ROUTES.SIGN_IN}?error=${AUTH_ERROR_PARAMS.AUTH_REQUIRED}`);
+  }
+
   const store = await prisma.store.findUnique({
     where: { userId: user.id },
     select: {

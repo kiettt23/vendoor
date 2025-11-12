@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
 import { OctagonXIcon, RefreshCwIcon, HomeIcon } from "lucide-react";
 import Link from "next/link";
-import { vi } from "@/lib/i18n";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -62,12 +61,12 @@ export default function Error({ error, reset }: ErrorProps) {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button onClick={reset} size="lg" className="gap-2">
               <RefreshCwIcon size={18} />
-              {vi.common.yes}, thử lại
+              Thử lại
             </Button>
             <Button asChild variant="outline" size="lg" className="gap-2">
               <Link href="/">
                 <HomeIcon size={18} />
-                {vi.common.goHome}
+                Về trang chủ
               </Link>
             </Button>
           </div>

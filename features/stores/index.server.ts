@@ -1,19 +1,21 @@
-export { createStore, getSellerStatus } from "./actions/create-store.action";
-export {
-  getStoreInfo,
-  updateStoreLogo,
-  updateStoreInfo,
-} from "./actions/seller-store.action";
+// Services
+export { storeService } from "./lib/store.service";
 
-// Admin actions
-export {
-  getStores,
-  getPendingStores,
-  approveStore,
-  rejectStore,
-  toggleStoreActive,
-} from "./actions/admin-store.action";
+// Actions
+export * from "./actions/create-store.action";
+export * from "./actions/seller-store.action";
+export * from "./actions/admin-store.action";
+export { getStoreInfo } from "./actions/get-store-info.action";
 
-export type { Store } from "./types/store.types";
+// Hooks (server-side compatible)
+export { useSellerStatus } from "./hooks/useSellerStatus";
 
-export { storeSchema, type StoreFormData } from "./schemas/store.schema";
+// Schemas
+export { storeSchema, storeUpdateSchema } from "./schemas/store.schema";
+
+// Types
+export type * from "./types/store.types";
+export type {
+  StoreFormData,
+  StoreUpdateFormData,
+} from "./schemas/store.schema";

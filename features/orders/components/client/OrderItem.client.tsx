@@ -1,26 +1,41 @@
 "use client";
 import Image from "next/image";
 import { DotIcon } from "lucide-react";
-import { useAppSelector } from "@/lib/store";
-import type { RootState } from "@/lib/store";
-import Rating from "@/components/ui/Rating";
-import { useState } from "react";
+import Rating from "@/shared/components/ui/Rating";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import RatingModal from "../rating/RatingModal";
-import { vi } from "@/lib/i18n";
-import { formatPrice } from "@/lib/utils/format/currency";
-import { formatDate } from "@/lib/utils/format/date";
-import { getOrderStatusText } from "@/lib/utils/helpers/order";
-import type { OrderWithDetails } from "@/types";
+import { RatingModal } from "@/features/ratings/components/client/RatingModal.client";
+import { getUserRatings } from "@/features/ratings/actions/rating.action";
+import { formatPrice } from "@/shared/lib/format/currency";
+import { formatDate } from "@/shared/lib/format/date";
+import { getOrderStatusText } from "@/shared/lib/helpers/order";
+import type { OrderWithDetails, SerializedRating } from "@/types";
 
 interface OrderItemProps {
   order: OrderWithDetails;
+  initialRatings?: SerializedRating[];
 }
 
-const OrderItem = ({ order }: OrderItemProps) => {
-  const [ratingModal, setRatingModal] = useState(null);
+interface RatingModalState {
+  orderId: string;
+  productId: string;
+  productName: string;
+}
 
-  const { ratings } = useAppSelector((state: RootState) => state.rating);
+export const OrderItem = ({ order, initialRatings = [] }: OrderItemProps) => {
+  const [ratingModal, setRatingModal] = useState<RatingModalState | null>(null);
+  const [ratings, setRatings] = useState<SerializedRating[]>(initialRatings);
+
+  const fetchRatings = async () => {
+    const result = await getUserRatings();
+    setRatings(result.ratings);
+  };
+
+  useEffect(() => {
+    if (initialRatings.length === 0) {
+      fetchRatings();
+    }
+  }, [initialRatings]);
 
   return (
     <>
@@ -58,7 +73,7 @@ const OrderItem = ({ order }: OrderItemProps) => {
                             (rating) =>
                               order.id === rating.orderId &&
                               item.product.id === rating.productId
-                          ).rating
+                          )?.rating ?? 0
                         }
                       />
                     ) : (
@@ -70,20 +85,22 @@ const OrderItem = ({ order }: OrderItemProps) => {
                           setRatingModal({
                             orderId: order.id,
                             productId: item.product.id,
+                            productName: item.product.name,
                           });
                         }}
                         className={`text-purple-500 hover:bg-purple-50 transition ${
                           order.status !== "DELIVERED" && "hidden"
                         }`}
                       >
-                        {vi.rating.writeReview}
+                        Viết đánh giá
                       </button>
                     )}
                   </div>
                   {ratingModal && (
                     <RatingModal
                       ratingModal={ratingModal}
-                      setRatingModal={setRatingModal}
+                      setRatingModal={setRatingModal as any}
+                      onSuccess={fetchRatings}
                     />
                   )}
                 </div>
@@ -156,5 +173,3 @@ const OrderItem = ({ order }: OrderItemProps) => {
     </>
   );
 };
-
-export default OrderItem;

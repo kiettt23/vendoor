@@ -1,6 +1,10 @@
+// Components
 export { AddressModal } from "./components/client/AddressModal.client";
 export { AddressManager } from "./components/client/AddressManager.client";
 
-export type { Address } from "./types/address.types";
+// Schemas
+export { addressSchema } from "./schemas/address.schema";
 
-export { addressSchema, type AddressFormData } from "./schemas/address.schema";
+// Types
+export type * from "./types/address.types";
+export type { AddressFormData } from "./schemas/address.schema";

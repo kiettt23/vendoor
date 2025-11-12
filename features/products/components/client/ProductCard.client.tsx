@@ -2,12 +2,12 @@
 import { StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { formatPrice } from "@/lib/utils/format/currency";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { formatPrice } from "@/shared/lib/format/currency";
+import { Card } from "@/shared/components/ui/card";
+import { Badge } from "@/shared/components/ui/badge";
 import type { ProductCardProps } from "@/types";
 
-const ProductCard = ({ product }: ProductCardProps) => {
+export const ProductCard = ({ product }: ProductCardProps) => {
   // Calculate the average rating of the product
   const rating = Math.round(
     product.rating.reduce((acc, curr) => acc + curr.rating, 0) /
@@ -83,5 +83,3 @@ const ProductCard = ({ product }: ProductCardProps) => {
     </Link>
   );
 };
-
-export default ProductCard;

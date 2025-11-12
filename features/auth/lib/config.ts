@@ -47,7 +47,7 @@ export const auth = betterAuth({
       defaultRole: "USER",
       adminRoles: ["ADMIN"],
       impersonationSessionDuration: 60 * 60,
-      async isAdmin(user) {
+      async isAdmin(user: { email?: string | null }) {
         if (!user.email) return false;
         const adminEmails =
           process.env.ADMIN_EMAILS?.split(",").map((e) => e.trim()) || [];

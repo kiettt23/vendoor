@@ -1,3 +1,4 @@
+// Actions
 export {
   getUserAddresses,
   addAddress,
@@ -5,6 +6,9 @@ export {
   deleteAddress,
 } from "./actions/address.action";
 
-export type { Address } from "./types/address.types";
+// Schemas
+export { addressSchema } from "./schemas/address.schema";
 
-export { addressSchema, type AddressFormData } from "./schemas/address.schema";
+// Types
+export type * from "./types/address.types";
+export type { AddressFormData } from "./schemas/address.schema";
