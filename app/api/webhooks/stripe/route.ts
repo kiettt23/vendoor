@@ -1,4 +1,4 @@
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import next from "next";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";

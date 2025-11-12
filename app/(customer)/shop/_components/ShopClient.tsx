@@ -8,12 +8,13 @@ import { Button } from "@/shared/components/ui/button";
 import {
   getAllCategoryNamesEn,
   getAllCategoryNamesVi,
-} from "@/configs/categories";
+} from "@/shared/configs/categories";
+import type { ProductCardData } from "@/features/products/types/product.types";
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "popular";
 
 interface ShopClientProps {
-  products: any[];
+  products: ProductCardData[];
   initialSearch: string;
 }
 

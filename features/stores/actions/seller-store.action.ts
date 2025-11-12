@@ -1,10 +1,10 @@
 "use server";
 
 import { requireSeller } from "@/features/auth/index.server";
-import prisma from "@/server/db/prisma";
-import { uploadToImageKit } from "@/configs/image-kit";
+import prisma from "@/shared/configs/prisma";
+import { uploadToImageKit } from "@/shared/configs/image-kit";
 import { revalidatePath } from "next/cache";
-import type { ActionResponse } from "@/types";
+import type { ActionResponse } from "@/shared/types";
 
 /**
  * Get store information

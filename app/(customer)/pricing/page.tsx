@@ -1,4 +1,3 @@
-// TODO: Replace Clerk PricingTable with custom pricing UI or Stripe/Lemonsqueezy integration
 import {
   SparklesIcon,
   ShieldCheckIcon,
@@ -31,7 +30,6 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {/* TODO: Add custom pricing table here */}
         <div className="max-w-[700px] mx-auto mb-20 bg-white rounded-lg shadow-lg p-8">
           <p className="text-center text-slate-600">
             Pricing table coming soon...

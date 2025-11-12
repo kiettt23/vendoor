@@ -1,5 +1,5 @@
 import { formatPrice } from "@/shared/lib/format/currency";
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import { requireAuth } from "@/features/auth/index.server";
 import { redirect } from "next/navigation";
 import StoreDashboardClient from "./_components/StoreDashboardClient";
@@ -58,7 +58,7 @@ export default async function Dashboard() {
     }),
   ]);
 
-  const totalEarnings = orders.reduce((sum, order) => sum + order.total, 0);
+  const totalEarnings = orders.reduce((sum: number, order) => sum + order.total, 0);
 
   // ✅ Pass only serializable data (no React components)
   const stats = {

@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/features/auth/index.server";
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import StoresClient from "./_components/StoresClient";
 
 // ✅ Server Component - Fetch approved stores

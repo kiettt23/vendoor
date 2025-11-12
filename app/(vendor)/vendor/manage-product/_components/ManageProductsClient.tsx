@@ -24,7 +24,7 @@ import {
   TableRow,
 } from "@/shared/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { getCategoryNameVi } from "@/configs/categories";
+import { getCategoryNameVi } from "@/shared/configs/categories";
 
 const currency = "đ";
 

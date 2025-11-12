@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 
 /**
  * Get latest public coupon for banner

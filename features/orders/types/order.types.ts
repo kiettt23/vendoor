@@ -78,5 +78,5 @@ export interface CreateOrderData {
 export interface CouponActionResponse {
   success: boolean;
   error?: string;
-  coupon?: any;
+  coupon?: OrderCoupon;
 }

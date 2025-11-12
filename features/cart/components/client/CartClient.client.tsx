@@ -79,7 +79,9 @@ export function CartClient({ products }: CartClientProps) {
                   <td className="flex gap-3 my-4">
                     <div className="flex gap-3 items-center justify-center bg-slate-100 size-18 rounded-md">
                       <Image
-                        src={item.images[0]}
+                        src={
+                          item.images?.[0] || "/images/avatar_placeholder.png"
+                        }
                         className="h-14 w-auto"
                         alt={item.name}
                         width={45}

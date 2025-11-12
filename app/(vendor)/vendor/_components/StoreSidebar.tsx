@@ -9,9 +9,10 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { StoreInfo } from "@/features/stores/types/store.types";
 
 interface StoreSidebarProps {
-  storeInfo: any;
+  storeInfo: StoreInfo;
 }
 
 export default function StoreSidebar({ storeInfo }: StoreSidebarProps) {

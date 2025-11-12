@@ -1,13 +1,13 @@
 "use server";
 
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import { getSession } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
 import {
   updateQuantitySchema,
   type UpdateQuantityInput,
 } from "../schemas/cart.schema";
-import type { ActionResponse } from "@/types/action-response";
+import type { ActionResponse } from "@/shared/types/action-response";
 import { cartService } from "../lib/cart.service";
 
 export async function updateQuantity(

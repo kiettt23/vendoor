@@ -1,9 +1,9 @@
 "use server";
 
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import { requireSeller } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
-import imagekit from "@/configs/image-kit";
+import imagekit from "@/shared/configs/image-kit";
 
 interface ActionResponse {
   success: boolean;
@@ -379,7 +379,7 @@ export async function analyzeProductImage(
     }
 
     // Call OpenAI Vision API
-    const { openai } = await import("@/configs/openai");
+    const { openai } = await import("@/shared/configs/openai");
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",

@@ -7,7 +7,9 @@ const StoreNavbar = () => {
   const user = session?.user;
 
   const firstName =
-    user?.name?.split(" ")[0] || user?.email?.split("@")[0] || "User";
+    user?.name?.split(" ").filter((n) => n)[0] ||
+    user?.email?.split("@")[0] ||
+    "User";
 
   return (
     <div className="flex items-center justify-between px-12 py-3 border-b border-slate-200 transition-all">

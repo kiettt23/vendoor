@@ -3,7 +3,7 @@ import Hero from "@/shared/layouts/Hero";
 import Newsletter from "@/shared/layouts/marketing/Newsletter";
 import OurSpec from "@/shared/layouts/marketing/OurSpec";
 import { LatestProducts } from "@/features/products/index.server";
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 
 // ✅ Server Component - Fetch products for homepage
 export default async function Home() {

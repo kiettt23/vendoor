@@ -1,5 +1,5 @@
-import prisma from "@/server/db/prisma";
-import imagekit from "@/configs/image-kit";
+import prisma from "@/shared/configs/prisma";
+import imagekit from "@/shared/configs/image-kit";
 import type { Prisma } from "@prisma/client";
 
 interface CreateStoreInput {

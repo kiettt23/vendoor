@@ -1,6 +1,10 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
 
 interface UserAvatarProps {
   image?: string | null;
@@ -18,12 +22,15 @@ export function UserAvatar({
   size = "md",
 }: UserAvatarProps) {
   const initials =
-    name
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) ||
+    (name
+      ? name
+          .split(" ")
+          .filter((n) => n.length > 0)
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2)
+      : "") ||
     username?.slice(0, 2).toUpperCase() ||
     email?.slice(0, 2).toUpperCase() ||
     "??";

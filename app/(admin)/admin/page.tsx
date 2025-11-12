@@ -6,7 +6,7 @@ import {
   TagsIcon,
 } from "lucide-react";
 import { formatPrice } from "@/shared/lib/format/currency";
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import { requireAdmin } from "@/features/auth/index.server";
 
 // ✅ Server Component - Fetch dashboard data directly from DB
@@ -26,7 +26,10 @@ export default async function AdminDashboard() {
   ]);
 
   // ✅ Calculate revenue from order.total (not totalAmount)
-  const revenue = orders.reduce((total, order) => total + order.total, 0);
+  const revenue = orders.reduce(
+    (total: number, order) => total + order.total,
+    0
+  );
 
   const dashboardData = {
     products,

@@ -1,5 +1,5 @@
 import { isSeller } from "@/features/auth/index.server";
-import { openai } from "@/configs/openai";
+import { openai } from "@/shared/configs/openai";
 import { NextRequest, NextResponse } from "next/server";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
@@ -86,10 +86,15 @@ export async function POST(request: NextRequest) {
     const result = await main(base64Image, mimeType);
 
     return NextResponse.json({ ...result });
-  } catch (error: any) {
+  } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: error.code || error.message },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Đã có lỗi xảy ra khi phân tích ảnh",
+      },
       { status: 400 }
     );
   }

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import Loading from "@/shared/components/ui/Loading";
 import { useSession } from "@/features/auth/index.client";
 import { createStore } from "@/features/stores/index.server";
-import { useSellerStatus } from "@/lib/hooks/useSellerStatus";
+import { useSellerStatus } from "@/features/stores/hooks/useSellerStatus";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";

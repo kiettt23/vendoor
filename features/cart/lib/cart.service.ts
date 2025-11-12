@@ -1,4 +1,4 @@
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 
 export class CartService {
   async getCart(userId: string) {
@@ -64,7 +64,7 @@ export class CartService {
       data: { cart: newCart },
     });
 
-    const total = Object.values(newCart).reduce((sum, qty) => sum + qty, 0);
+    const total = Object.values(newCart).reduce((sum: number, qty) => sum + qty, 0);
     return { cart: newCart, total };
   }
 
@@ -86,7 +86,7 @@ export class CartService {
       data: { cart: currentCart },
     });
 
-    const total = Object.values(currentCart).reduce((sum, qty) => sum + qty, 0);
+    const total = Object.values(currentCart).reduce((sum: number, qty) => sum + qty, 0);
     return { cart: currentCart, total };
   }
 
@@ -99,7 +99,7 @@ export class CartService {
       data: { cart: currentCart },
     });
 
-    const total = Object.values(currentCart).reduce((sum, qty) => sum + qty, 0);
+    const total = Object.values(currentCart).reduce((sum: number, qty) => sum + qty, 0);
     return { cart: currentCart, total };
   }
 
@@ -125,7 +125,7 @@ export class CartService {
       data: { cart: mergedCart },
     });
 
-    const total = Object.values(mergedCart).reduce((sum, qty) => sum + qty, 0);
+    const total = Object.values(mergedCart).reduce((sum: number, qty) => sum + qty, 0);
     return { cart: mergedCart, total };
   }
 }

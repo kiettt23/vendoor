@@ -13,7 +13,7 @@ import Image from "next/image";
 import Counter from "@/shared/components/ui/Counter";
 import { useCart } from "@/features/cart/hooks/useCart";
 import { formatPrice } from "@/shared/lib/format/currency";
-import type { ProductWithRating } from "@/types";
+import type { ProductWithRating } from "@/features/products/types/product.types";
 
 interface ProductDetailsProps {
   product: ProductWithRating;
@@ -26,15 +26,19 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
   const router = useRouter();
 
-  const [mainImage, setMainImage] = useState(product.images[0]);
+  const [mainImage, setMainImage] = useState(
+    product.images?.[0] || "/images/avatar_placeholder.png"
+  );
 
   const addToCartHandler = () => {
     addToCart(productId);
   };
 
   const averageRating =
-    product.rating.reduce((acc, item) => acc + item.rating, 0) /
-    product.rating.length;
+    product.rating.length > 0
+      ? product.rating.reduce((acc: number, item) => acc + item.rating, 0) /
+        product.rating.length
+      : 0;
 
   return (
     <div className="flex max-lg:flex-col gap-12">

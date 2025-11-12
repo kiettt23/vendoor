@@ -4,49 +4,12 @@ import { toast } from "sonner";
 import { updateOrderStatus } from "@/features/orders/index.server";
 import OrderModal from "./OrderModal";
 import { formatPrice } from "@/shared/lib/format/currency";
+import type { OrderWithDetails } from "@/features/orders/types/order.types";
 
 type OrderStatus = "ORDER_PLACED" | "PROCESSING" | "SHIPPED" | "DELIVERED";
 
-interface OrderItem {
-  productId: string;
-  orderId: string;
-  quantity: number;
-  price: number;
-  product?: {
-    name: string;
-    price: number;
-    images: string[];
-  };
-}
-
-interface Order {
-  id: string;
-  total: number;
-  paymentMethod: string;
-  status: string;
-  createdAt: string;
-  isCouponUsed: boolean;
-  coupon: any;
-  user?: {
-    name: string | null;
-    email: string | null;
-  };
-  address: {
-    userId: string;
-    name: string;
-    id: string;
-    email: string;
-    createdAt: string;
-    street: string;
-    city: string;
-    state: string;
-    phone: string;
-  };
-  orderItems: OrderItem[];
-}
-
 interface StoreOrdersClientProps {
-  orders: Order[];
+  orders: OrderWithDetails[];
 }
 
 export default function StoreOrdersClient({

@@ -4,13 +4,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { toast } from "sonner";
-import { CATEGORIES } from "@/configs/categories";
+import { CATEGORIES } from "@/shared/configs/categories";
 import { createProduct } from "@/features/products/index.server";
 import {
   productSchema,
   type ProductFormData,
 } from "@/features/products/index.client";
-import { useAIImageAnalysis } from "@/lib/hooks/useAIImageAnalysis";
+import { useAIImageAnalysis } from "@/features/products/hooks/useAIImageAnalysis";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";

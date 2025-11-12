@@ -2,7 +2,7 @@
 
 import { getSession } from "@/features/auth/index.server";
 import { syncCartSchema, type SyncCartInput } from "../schemas/cart.schema";
-import type { ActionResponse } from "@/types/action-response";
+import type { ActionResponse } from "@/shared/types/action-response";
 import { cartService } from "../lib/cart.service";
 
 export async function syncCart(input: SyncCartInput): Promise<ActionResponse> {

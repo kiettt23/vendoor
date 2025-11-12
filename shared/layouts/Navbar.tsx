@@ -32,7 +32,6 @@ const Navbar = () => {
             className="relative text-4xl font-semibold text-slate-700"
           >
             <span className="text-purple-600">Ven</span>door
-            {/* TODO: Implement Plus membership feature */}
           </Link>
 
           {/* Desktop Menu */}

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { formatDate } from "@/shared/lib/format/date";
-import type { ProductWithRating } from "@/types";
+import type { ProductWithRating } from "@/features/products/types/product.types";
 
 interface ProductDescriptionProps {
   product: ProductWithRating;

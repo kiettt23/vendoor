@@ -19,7 +19,7 @@ import type { Coupon } from "@/features/coupons/types/coupon.types";
  * const res1: ActionResponse<Address> = { success: true, data: address };
  * const res2: ActionResponse<Product[]> = { success: true, data: products };
  */
-export interface ActionResponse<T = any> {
+export interface ActionResponse<T = unknown> {
   success: boolean;
   error?: string;
   message?: string;
@@ -51,7 +51,10 @@ export interface RatingActionResponse extends ActionResponse {
 export interface OrderActionResponse extends ActionResponse {
   order?: Order;
   orders?: Order[];
-  session?: any; // Stripe session
+  session?: {
+    id: string;
+    url: string;
+  };
 }
 
 /**
@@ -65,13 +68,13 @@ export interface CouponActionResponse extends ActionResponse {
  * Product Action Response
  */
 export interface ProductActionResponse extends ActionResponse {
-  product?: any;
-  products?: any[];
+  product?: import("@/features/products/types/product.types").Product;
+  products?: import("@/features/products/types/product.types").Product[];
 }
 
 /**
  * Store Action Response
  */
 export interface StoreActionResponse extends ActionResponse {
-  store?: any;
+  store?: import("@/features/stores/types/store.types").Store;
 }

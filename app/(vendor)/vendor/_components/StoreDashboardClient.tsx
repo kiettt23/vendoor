@@ -8,10 +8,18 @@ import {
   StarIcon,
   TagsIcon,
 } from "lucide-react";
+import type { Rating } from "@/features/ratings/types/rating.types";
+
+interface StoreStats {
+  totalProducts: number;
+  totalOrders: number;
+  totalRevenue: number;
+  averageRating: number;
+}
 
 interface StoreDashboardClientProps {
-  stats: any;
-  ratings: any[];
+  stats: StoreStats;
+  ratings: Rating[];
 }
 
 export default function StoreDashboardClient({
@@ -29,7 +37,7 @@ export default function StoreDashboardClient({
     },
     {
       title: "Tổng doanh thu",
-      value: stats.totalEarnings,
+      value: stats.totalRevenue,
       icon: CircleDollarSignIcon,
     },
     {
@@ -39,7 +47,7 @@ export default function StoreDashboardClient({
     },
     {
       title: "Tổng đánh giá",
-      value: stats.totalRatings,
+      value: stats.averageRating,
       icon: StarIcon,
     },
   ];
@@ -79,14 +87,14 @@ export default function StoreDashboardClient({
             <div>
               <div className="flex gap-3">
                 <Image
-                  src={review.user.image}
+                  src={review.user?.image || "/images/avatar_placeholder.png"}
                   alt=""
                   className="w-10 aspect-square rounded-full"
                   width={100}
                   height={100}
                 />
                 <div>
-                  <p className="font-medium">{review.user.name}</p>
+                  <p className="font-medium">{review.user?.name}</p>
                   <p className="font-light text-slate-500">
                     {formatDate(review.createdAt)}
                   </p>
@@ -116,7 +124,10 @@ export default function StoreDashboardClient({
                 </div>
               </div>
               <button
-                onClick={() => router.push(`/product/${review.product.id}`)}
+                onClick={() =>
+                  review.product?.id &&
+                  router.push(`/product/${review.product.id}`)
+                }
                 className="bg-slate-100 px-5 py-2 hover:bg-slate-200 rounded transition-all"
               >
                 Xem chi tiết

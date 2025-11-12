@@ -36,10 +36,11 @@ export interface AddressModalProps {
  */
 export interface OrderSummaryProps {
   totalPrice: number;
-  items: Array<{
-    id: string;
-    quantity: number;
-    price: number;
-    [key: string]: any; // Allow extra fields
-  }>;
+  items: Array<
+    {
+      id: string;
+      quantity: number;
+      price: number;
+    } & Record<string, unknown>
+  >;
 }

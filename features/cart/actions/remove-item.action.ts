@@ -3,7 +3,7 @@
 import { getSession } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
 import { removeItemSchema, type RemoveItemInput } from "../schemas/cart.schema";
-import type { ActionResponse } from "@/types/action-response";
+import type { ActionResponse } from "@/shared/types/action-response";
 import { cartService } from "../lib/cart.service";
 
 export async function removeItem(

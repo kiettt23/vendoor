@@ -8,16 +8,18 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import type { Order } from "@/features/orders/types/order.types";
 
-export default function OrdersAreaChart({ allOrders }: { allOrders: any[] }) {
-  // Group orders by date
-  const ordersPerDay = allOrders.reduce((acc: any, order: any) => {
-    const date = new Date(order.createdAt).toISOString().split("T")[0]; // format: YYYY-MM-DD
-    acc[date] = (acc[date] || 0) + 1;
-    return acc;
-  }, {});
+export default function OrdersAreaChart({ allOrders }: { allOrders: Order[] }) {
+  const ordersPerDay = allOrders.reduce(
+    (acc: Record<string, number>, order) => {
+      const date = new Date(order.createdAt).toISOString().split("T")[0];
+      acc[date] = (acc[date] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
 
-  // Convert to array for Recharts
   const chartData = Object.entries(ordersPerDay).map(([date, count]) => ({
     date,
     orders: count,

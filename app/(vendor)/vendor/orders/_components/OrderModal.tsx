@@ -1,8 +1,9 @@
 import Image from "next/image";
 import { formatPrice } from "@/shared/lib/format/currency";
+import type { OrderWithDetails } from "@/features/orders/types/order.types";
 
 interface OrderModalProps {
-  order: any;
+  order: OrderWithDetails;
   onClose: () => void;
 }
 
@@ -50,7 +51,11 @@ export default function OrderModal({ order, onClose }: OrderModalProps) {
                 className="flex items-center gap-4 border border-slate-100 shadow rounded p-2"
               >
                 <Image
-                  src={item.product.images?.[0].src || item.product.images?.[0]}
+                  src={
+                    item.product.images?.[0]?.src ||
+                    item.product.images?.[0] ||
+                    "/images/avatar_placeholder.png"
+                  }
                   alt={item.product?.name || "Product"}
                   width={64}
                   height={64}

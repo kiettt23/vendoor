@@ -1,7 +1,7 @@
 import { ProductCard } from "@/features/products/index.client";
 import { MailIcon, MapPinIcon } from "lucide-react";
 import Image from "next/image";
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import { notFound } from "next/navigation";
 
 // ✅ Server Component - Fetch store data directly from DB

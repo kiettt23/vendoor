@@ -2,7 +2,7 @@
 
 import { requireAuth } from "@/features/auth/index.server";
 import { storeService } from "../lib/store.service";
-import type { ActionResponse } from "@/types/action-response";
+import type { ActionResponse } from "@/shared/types/action-response";
 
 export async function getStoreInfo(): Promise<
   ActionResponse<{

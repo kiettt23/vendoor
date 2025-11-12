@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/features/auth/index.server";
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import ApproveClient from "./_components/ApproveClient";
 
 // ✅ Server Component - Fetch pending stores

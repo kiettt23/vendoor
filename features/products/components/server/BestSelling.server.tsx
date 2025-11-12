@@ -1,12 +1,13 @@
 import ViewMore from "@/shared/components/ui/ViewMore";
 import { ProductCard } from "../client/ProductCard.client";
+import type { ProductCardData } from "@/features/products/types/product.types";
 
-export const BestSelling = ({ products }: { products: any[] }) => {
+export const BestSelling = ({ products }: { products: ProductCardData[] }) => {
   const displayQuantity = 8;
 
   const bestSellingProducts = products
     .slice()
-    .sort((a: any, b: any) => b.rating.length - a.rating.length)
+    .sort((a, b) => b.rating.length - a.rating.length)
     .slice(0, displayQuantity);
 
   return (
@@ -19,7 +20,7 @@ export const BestSelling = ({ products }: { products: any[] }) => {
         href="/shop"
       />
       <div className="mt-12  grid grid-cols-2 sm:flex flex-wrap gap-6 xl:gap-12">
-        {bestSellingProducts.map((product: any, index: number) => (
+        {bestSellingProducts.map((product, index) => (
           <ProductCard key={index} product={product} />
         ))}
       </div>

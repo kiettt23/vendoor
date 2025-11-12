@@ -2,7 +2,7 @@
 
 import { getSession } from "@/features/auth/index.server";
 import { cartService } from "../lib/cart.service";
-import type { CartProduct } from "@/types";
+import type { CartProduct } from "@/features/cart/types/cart.types";
 
 export async function getCartProducts(): Promise<CartProduct[]> {
   const session = await getSession();

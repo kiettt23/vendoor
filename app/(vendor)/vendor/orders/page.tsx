@@ -1,4 +1,4 @@
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import { requireAuth } from "@/features/auth/index.server";
 import { redirect } from "next/navigation";
 import StoreOrdersClient from "./_components/StoreOrdersClient";

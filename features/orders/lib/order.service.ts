@@ -1,4 +1,4 @@
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import { cartService } from "@/features/cart/lib/cart.service";
 
 interface CreateOrderInput {
@@ -219,7 +219,7 @@ export class OrderService {
 
     const stats = {
       totalOrders: orders.length,
-      totalRevenue: orders.reduce((sum, order) => sum + order.total, 0),
+      totalRevenue: orders.reduce((sum: number, order) => sum + order.total, 0),
       pendingOrders: orders.filter((o) => o.status === "ORDER_PLACED").length,
       completedOrders: orders.filter((o) => o.status === "DELIVERED").length,
     };

@@ -9,7 +9,7 @@ import { getUserRatings } from "@/features/ratings/actions/rating.action";
 import { formatPrice } from "@/shared/lib/format/currency";
 import { formatDate } from "@/shared/lib/format/date";
 import { getOrderStatusText } from "@/shared/lib/helpers/order";
-import type { OrderWithDetails, SerializedRating } from "@/types";
+import type { OrderWithDetails, SerializedRating } from "@/shared/types";
 
 interface OrderItemProps {
   order: OrderWithDetails;
@@ -47,7 +47,10 @@ export const OrderItem = ({ order, initialRatings = [] }: OrderItemProps) => {
                 <div className="w-20 aspect-square bg-slate-100 flex items-center justify-center rounded-md">
                   <Image
                     className="h-14 w-auto"
-                    src={item.product.images[0]}
+                    src={
+                      item.product.images?.[0] ||
+                      "/images/avatar_placeholder.png"
+                    }
                     alt="product_img"
                     width={50}
                     height={50}

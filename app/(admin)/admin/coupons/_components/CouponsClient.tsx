@@ -18,9 +18,10 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/shared/components/ui/field";
+import type { Coupon } from "@/features/coupons/types/coupon.types";
 
 interface CouponsClientProps {
-  coupons: any[];
+  coupons: Coupon[];
 }
 
 export default function CouponsClient({

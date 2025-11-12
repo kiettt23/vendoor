@@ -11,7 +11,7 @@ import { ratingSchema, type RatingFormData } from "../../schemas/rating.schema";
 import { Field } from "@/shared/components/ui/field";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Button } from "@/shared/components/ui/button";
-import type { RatingModalProps } from "@/types";
+import type { RatingModalProps } from "@/features/ratings/types/rating.types";
 
 export function RatingModal({
   ratingModal,

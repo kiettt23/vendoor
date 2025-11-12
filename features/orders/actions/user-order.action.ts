@@ -1,23 +1,26 @@
 "use server";
 
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import { getCurrentUser } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
-import type { Coupon } from "@/types";
-import type { CouponActionResponse } from "../types/order.types";
+import type { Coupon } from "@/features/coupons/types/coupon.types";
+import type { CouponActionResponse, Order } from "../types/order.types";
 import {
   orderSchema,
   couponCodeSchema,
   type OrderFormData,
   type CouponCodeFormData,
 } from "../schemas/order.schema";
-import { APP_CONFIG } from "@/configs/app";
+import { APP_CONFIG } from "@/shared/configs/app";
 
 interface OrderResponse {
   success: boolean;
   message: string;
-  session?: any;
-  order?: any;
+  session?: {
+    id: string;
+    url: string;
+  };
+  order?: Order;
 }
 
 // Get all orders for the current user
@@ -62,32 +65,34 @@ export async function getOrders() {
     },
   });
 
-  const ordersWithParsedCoupon = orders.map((order) => {
-    let parsedCoupon = order.coupon;
+  const ordersWithParsedCoupon = orders.map(
+    (order: { coupon: string | object | null; [key: string]: unknown }) => {
+      let parsedCoupon = order.coupon;
 
-    if (typeof order.coupon === "string") {
-      try {
-        parsedCoupon = JSON.parse(order.coupon);
-      } catch (e) {
-        console.error("Failed to parse coupon:", e);
+      if (typeof order.coupon === "string") {
+        try {
+          parsedCoupon = JSON.parse(order.coupon);
+        } catch (e) {
+          console.error("Failed to parse coupon:", e);
+          parsedCoupon = null;
+        }
+      }
+
+      // If coupon is empty object {}, set to null for cleaner UI
+      if (
+        parsedCoupon &&
+        typeof parsedCoupon === "object" &&
+        Object.keys(parsedCoupon).length === 0
+      ) {
         parsedCoupon = null;
       }
-    }
 
-    // If coupon is empty object {}, set to null for cleaner UI
-    if (
-      parsedCoupon &&
-      typeof parsedCoupon === "object" &&
-      Object.keys(parsedCoupon).length === 0
-    ) {
-      parsedCoupon = null;
+      return {
+        ...order,
+        coupon: parsedCoupon,
+      };
     }
-
-    return {
-      ...order,
-      coupon: parsedCoupon,
-    };
-  });
+  );
 
   return ordersWithParsedCoupon;
 }
@@ -254,7 +259,7 @@ export async function createOrder(
 
     // Apply coupon discount
     let finalTotal = totalPrice;
-    if (coupon) {
+    if (coupon && coupon.discount) {
       finalTotal = finalTotal - (finalTotal * coupon.discount) / 100;
     }
 
@@ -286,8 +291,6 @@ export async function createOrder(
       const successUrl = `${baseUrl}/orders?success=true`;
       const cancelUrl = `${baseUrl}/cart?canceled=true`;
 
-      // Calculate total amount with coupon and shipping
-      // TODO: Implement Plus membership feature
       const isPlusMember = false;
 
       let subtotal = 0;
@@ -295,7 +298,8 @@ export async function createOrder(
         subtotal += item.price * item.quantity;
       }
 
-      const discountAmount = coupon ? (coupon.discount / 100) * subtotal : 0;
+      const discountAmount =
+        coupon && coupon.discount ? (coupon.discount / 100) * subtotal : 0;
 
       const shippingFee = isPlusMember ? 0 : APP_CONFIG.SHIPPING_FEE;
 

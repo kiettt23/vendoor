@@ -1,9 +1,10 @@
 "use server";
 
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import { requireAdmin } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
-import type { CouponFormData, ActionResponse } from "@/types";
+import type { ActionResponse } from "@/shared/types/action-response";
+import type { CouponFormData } from "@/features/coupons/types/coupon.types";
 
 // Get all coupons for admin
 export async function getCoupons() {

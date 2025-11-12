@@ -3,17 +3,15 @@ import { AddressManager } from "@/features/address/index.client";
 import { toast } from "sonner";
 import { useSession } from "@/features/auth/index.client";
 import { formatPrice } from "@/shared/lib/format/currency";
-import { APP_CONFIG } from "@/configs/app";
-import { useOrderManagement } from "@/lib/hooks/useOrderManagement";
-import type { OrderSummaryProps } from "@/types";
+import { APP_CONFIG } from "@/shared/configs/app";
+import { useOrderManagement } from "@/features/orders/hooks/useOrderManagement";
+import type { OrderSummaryProps } from "@/shared/types";
 
 export const OrderSummary = ({ totalPrice, items }: OrderSummaryProps) => {
   const { data: session } = useSession();
   const user = session?.user;
 
-  // TODO: Add subscription/plan field to user schema
-  // For now, assume all users have free shipping (plan === "plus")
-  const hasPlusPlan = true; // user?.plan === "plus"
+  const hasPlusPlan = true;
 
   const {
     paymentMethod,

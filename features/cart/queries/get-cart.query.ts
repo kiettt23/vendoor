@@ -1,7 +1,7 @@
 "use server";
 
 import { cache } from "react";
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import { getSession } from "@/features/auth/index.server";
 import { cartService } from "../lib/cart.service";
 

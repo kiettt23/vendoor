@@ -2,9 +2,10 @@
 import StoreInfo from "../../_components/StoreInfo";
 import { toast } from "sonner";
 import { toggleStoreActive } from "@/features/stores/index.server";
+import type { Store } from "@/features/stores/types/store.types";
 
 interface StoresClientProps {
-  stores: any[];
+  stores: Store[];
 }
 
 export default function StoresClient({

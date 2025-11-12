@@ -7,7 +7,7 @@ import {
   getUserAddresses,
 } from "@/features/address/actions/address.action";
 import { AddressModal } from "./AddressModal.client";
-import type { SerializedAddress } from "@/types";
+import type { SerializedAddress } from "@/features/address/types/address.types";
 
 interface AddressManagerProps {
   selectedAddress: SerializedAddress | null;

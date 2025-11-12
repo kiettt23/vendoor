@@ -1,4 +1,4 @@
-import { getAllCategoryNamesEn } from "@/configs/categories";
+import { getAllCategoryNamesEn } from "@/shared/configs/categories";
 import Link from "next/link";
 
 const CategoriesMarquee = () => {

@@ -5,12 +5,12 @@ import Link from "next/link";
 import { formatPrice } from "@/shared/lib/format/currency";
 import { Card } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
-import type { ProductCardProps } from "@/types";
+import type { ProductCardProps } from "@/shared/types";
 
 export const ProductCard = ({ product }: ProductCardProps) => {
   // Calculate the average rating of the product
   const rating = Math.round(
-    product.rating.reduce((acc, curr) => acc + curr.rating, 0) /
+    product.rating.reduce((acc: number, curr) => acc + curr.rating, 0) /
       product.rating.length
   );
 
@@ -31,7 +31,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             width={500}
             height={500}
             className="max-h-[75%] w-auto group-hover:scale-110 transition-transform duration-500 ease-out object-contain"
-            src={product.images[0]}
+            src={product.images?.[0] || "/images/avatar_placeholder.png"}
             alt={product.name}
           />
           {hasDiscount && (

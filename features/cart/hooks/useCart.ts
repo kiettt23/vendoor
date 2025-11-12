@@ -7,7 +7,7 @@ import { removeItem as removeItemAction } from "../actions/remove-item.action";
 import { syncCart as syncCartAction } from "../actions/sync-cart.action";
 import { getCart } from "../queries/get-cart.query";
 import { toast } from "sonner";
-import type { CartState } from "@/types";
+import type { CartState } from "@/features/cart/types/cart.types";
 
 const CART_STORAGE_KEY = "vendoor_cart";
 
@@ -88,7 +88,7 @@ export function useCart() {
   }, []);
 
   const updateLocalCart = useCallback((items: Record<string, number>) => {
-    const total = Object.values(items).reduce((sum, qty) => sum + qty, 0);
+    const total = Object.values(items).reduce((sum: number, qty) => sum + qty, 0);
     setCart({ items, total, isLoading: false });
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   }, []);

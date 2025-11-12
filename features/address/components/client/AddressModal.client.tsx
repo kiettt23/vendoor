@@ -20,7 +20,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/shared/components/ui/field";
-import type { AddressModalProps } from "@/types";
+import type { AddressModalProps } from "@/features/address/types/address.types";
 
 export function AddressModal({
   setShowAddressModal,

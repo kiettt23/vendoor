@@ -1,9 +1,9 @@
 "use server";
 
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import { getCurrentUser } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
-import imagekit from "@/configs/image-kit";
+import imagekit from "@/shared/configs/image-kit";
 
 export async function createStore(formData: FormData) {
   try {

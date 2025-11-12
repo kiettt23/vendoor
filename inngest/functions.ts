@@ -1,5 +1,5 @@
-import { inngest } from "./client";
-import prisma from "@/server/db/prisma";
+import { inngest } from "@/shared/configs/client";
+import prisma from "@/shared/configs/prisma";
 
 // Inngest Function to save user data to a database
 export const syncUserCreation = inngest.createFunction(
@@ -7,11 +7,17 @@ export const syncUserCreation = inngest.createFunction(
   { event: "clerk/user.created" },
   async ({ event }) => {
     const { data } = event;
+    const primaryEmail = data.email_addresses?.[0]?.email_address;
+
+    if (!primaryEmail) {
+      throw new Error("No email address found for user");
+    }
+
     await prisma.user.create({
       data: {
         id: data.id,
-        email: data.email_addresses[0].email_address,
-        name: `${data.first_name} ${data.last_name}`,
+        email: primaryEmail,
+        name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
         image: data.image_url,
       },
     });
@@ -24,11 +30,17 @@ export const syncUserUpdate = inngest.createFunction(
   { event: "clerk/user.updated" },
   async ({ event }) => {
     const { data } = event;
+    const primaryEmail = data.email_addresses?.[0]?.email_address;
+
+    if (!primaryEmail) {
+      throw new Error("No email address found for user");
+    }
+
     await prisma.user.update({
       where: { id: data.id },
       data: {
-        email: data.email_addresses[0].email_address,
-        name: `${data.first_name} ${data.last_name}`,
+        email: primaryEmail,
+        name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
         image: data.image_url,
       },
     });
@@ -39,7 +51,7 @@ export const syncUserUpdate = inngest.createFunction(
 export const syncUserDeletion = inngest.createFunction(
   { id: "sync-user-delete" },
   { event: "clerk/user.deleted" },
-  async ({ event }) => {
+  async ({ event }: { event: { data: { id: string } } }) => {
     const { data } = event;
     await prisma.user.delete({
       where: { id: data.id },
@@ -51,7 +63,16 @@ export const syncUserDeletion = inngest.createFunction(
 export const deleteCouponOnExpiry = inngest.createFunction(
   { id: "delete-coupon-on-expiry" },
   { event: "app/coupon.expired" },
-  async ({ event, step }) => {
+  async ({
+    event,
+    step,
+  }: {
+    event: { data: { expires_at: string; code: string } };
+    step: {
+      sleepUntil: (id: string, date: Date) => Promise<void>;
+      run: <T>(id: string, fn: () => Promise<T>) => Promise<T>;
+    };
+  }) => {
     const { data } = event;
     const expiryDate = new Date(data.expires_at);
     await step.sleepUntil("wait-for-expiry", expiryDate);

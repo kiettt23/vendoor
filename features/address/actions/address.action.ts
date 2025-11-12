@@ -1,9 +1,10 @@
 "use server";
 
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import { getCurrentUser } from "@/features/auth/index.server";
 import { revalidatePath } from "next/cache";
-import type { AddressActionResponse, SerializedAddress } from "@/types";
+import type { ActionResponse } from "@/shared/types/action-response";
+import type { SerializedAddress } from "@/features/address/types/address.types";
 import type { AddressFormData } from "../schemas/address.schema";
 
 export async function getUserAddresses(): Promise<{

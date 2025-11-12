@@ -1,7 +1,7 @@
 "use server";
 
-import prisma from "@/server/db/prisma";
-import type { ActionResponse } from "@/types/action-response";
+import prisma from "@/shared/configs/prisma";
+import type { ActionResponse } from "@/shared/types/action-response";
 
 interface LatestCoupon {
   code: string;

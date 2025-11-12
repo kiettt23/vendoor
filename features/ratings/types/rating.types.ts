@@ -8,6 +8,13 @@ export interface RatingUser {
   image?: string | null;
 }
 
+export interface RatingProduct {
+  id: string;
+  name: string;
+  images: string[];
+  category?: string;
+}
+
 export interface Rating {
   id: string;
   rating: number;
@@ -18,6 +25,7 @@ export interface Rating {
   createdAt: Date | string;
   updatedAt: Date | string;
   user?: RatingUser;
+  product?: RatingProduct;
 }
 
 export type SerializedRating = Omit<Rating, "createdAt" | "updatedAt"> & {

@@ -1,5 +1,5 @@
-export type { ActionResponse } from "@/types/action-response";
+export type { ActionResponse } from "@/shared/types/action-response";
 export type {
   OrderSummaryProps,
   ProductCardProps,
-} from "@/types/component-props";
+} from "@/shared/types/component-props";

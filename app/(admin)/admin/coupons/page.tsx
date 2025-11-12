@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/features/auth/index.server";
-import prisma from "@/server/db/prisma";
+import prisma from "@/shared/configs/prisma";
 import CouponsClient from "./_components/CouponsClient";
 
 // ✅ Server Component - Fetch coupons
@@ -15,11 +15,22 @@ export default async function AdminCoupons() {
   });
 
   // Serialize dates for client
-  const serializedCoupons = coupons.map((coupon) => ({
-    ...coupon,
-    expiresAt: coupon.expiresAt.toISOString(),
-    createdAt: coupon.createdAt.toISOString(),
-  }));
+  const serializedCoupons = coupons.map(
+    (coupon: {
+      code: string;
+      description: string;
+      discount: number;
+      expiresAt: Date;
+      createdAt: Date;
+      isPublic: boolean;
+      forNewUser: boolean;
+      forMember: boolean;
+    }) => ({
+      ...coupon,
+      expiresAt: coupon.expiresAt.toISOString(),
+      createdAt: coupon.createdAt.toISOString(),
+    })
+  );
 
   return <CouponsClient coupons={serializedCoupons} />;
 }
