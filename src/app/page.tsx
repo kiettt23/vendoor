@@ -1,9 +1,51 @@
+"use client";
+
 import Image from "next/image";
+import { authClient } from "@/shared/lib/auth-client";
+import { Button } from "@/shared/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
+
+  const handleLogout = async () => {
+    await authClient.signOut();
+    router.refresh();
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+        {/* Session Info */}
+        <div className="w-full mb-8">
+          {isPending ? (
+            <p>Loading...</p>
+          ) : session?.user ? (
+            <div className="flex items-center justify-between p-4 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
+              <div>
+                <p className="font-semibold">{session.user.name}</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  {session.user.email}
+                </p>
+              </div>
+              <Button onClick={handleLogout} variant="outline">
+                Logout
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Button onClick={() => router.push("/login")}>Login</Button>
+              <Button
+                onClick={() => router.push("/register")}
+                variant="outline"
+              >
+                Register
+              </Button>
+            </div>
+          )}
+        </div>
+
         <Image
           className="dark:invert"
           src="/next.svg"
@@ -51,7 +93,7 @@ export default function Home() {
             Deploy Now
           </a>
           <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
+            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/8 px-5 transition-colors hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
             href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
             target="_blank"
             rel="noopener noreferrer"
