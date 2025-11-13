@@ -3,259 +3,338 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
+// ============================================
+// ENUMS
+// ============================================
+
 enum Role {
-  USER
-  SELLER
+  CUSTOMER
+  VENDOR
   ADMIN
 }
 
-model User {
-  id              String    @id @default(cuid())
-  name            String?
-  email           String?   @unique
-  emailVerified   Boolean   @default(false)
-  image           String?
-  role            Role      @default(USER)
-  username        String?   @unique
-  displayUsername String?
-  banned          Boolean   @default(false)
-  cart            Json      @default("{}")
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  // Better Auth Relations
-  accounts Account[]
-  sessions Session[]
-
-  // Relations
-  ratings     Rating[]
-  Address     Address[]
-  store       Store?
-  buyerOrders Order[]   @relation("BuyerRelation")
-
-  @@index([email])
-  @@index([role])
-  @@index([username])
-}
-
-model Product {
-  id          String   @id @default(cuid())
-  name        String
-  description String
-  mrp         Float
-  price       Float
-  images      String[]
-  category    String
-  inStock     Boolean  @default(true)
-  storeId     String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  store      Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  orderItems OrderItem[]
-  rating     Rating[]
-
-  @@index([storeId])
-  @@index([category])
-  @@index([createdAt])
-  @@index([storeId, category])
+enum VendorStatus {
+  PENDING   // Chờ admin duyệt
+  APPROVED  // Đã được duyệt, có thể bán hàng
+  REJECTED  // Bị từ chối
+  SUSPENDED // Bị đình chỉ
 }
 
 enum OrderStatus {
-  ORDER_PLACED
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
+  PENDING_PAYMENT  // Chờ thanh toán
+  PENDING          // Đã thanh toán, chờ vendor xử lý
+  PROCESSING       // Vendor đang chuẩn bị hàng
+  SHIPPED          // Đã giao cho đơn vị vận chuyển
+  DELIVERED        // Đã giao thành công
+  CANCELLED        // Đã hủy
+  REFUNDED         // Đã hoàn tiền
+}
+
+enum PaymentStatus {
+  PENDING   // Chờ thanh toán
+  COMPLETED // Đã thanh toán thành công
+  FAILED    // Thanh toán thất bại
+  REFUNDED  // Đã hoàn tiền
 }
 
 enum PaymentMethod {
-  COD
-  STRIPE
+  VNPAY
+  MOMO      // Làm sau
+  ZALOPAY   // Làm sau
+  COD       // Làm sau
 }
 
-model Order {
-  id            String        @id @default(cuid())
-  total         Float
-  status        OrderStatus   @default(ORDER_PLACED)
-  userId        String
-  storeId       String
-  addressId     String
-  isPaid        Boolean       @default(false)
-  paymentMethod PaymentMethod
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  isCouponUsed  Boolean       @default(false)
-  coupon        Json          @default("{}")
-  orderItems    OrderItem[]
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
 
-  // Relations
-  user    User    @relation("BuyerRelation", fields: [userId], references: [id])
-  store   Store   @relation(fields: [storeId], references: [id])
-  address Address @relation(fields: [addressId], references: [id])
-
-  @@index([userId])
-  @@index([storeId])
-  @@index([status])
-  @@index([createdAt])
-  @@index([userId, status])
-  @@index([storeId, status])
-}
-
-model OrderItem {
-  orderId   String
-  productId String
-  quantity  Int
-  price     Float
-
-  // Relations
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
-
-  @@id([orderId, productId])
-}
-
-model Rating {
+model User {
   id        String   @id @default(cuid())
-  rating    Int
-  review    String
-  userId    String
-  productId String
-  orderId   String
+  email     String   @unique
+  password  String   // Hashed by Better Auth
+  name      String?
+  phone     String?
+  avatar    String?
+
+  roles     Role[]   @default([CUSTOMER]) // Array: có thể vừa CUSTOMER vừa VENDOR
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  vendorProfile VendorProfile?  // Nếu user là vendor
 
-  @@unique([userId, productId, orderId])
-  @@index([productId])
-  @@index([userId])
-  @@index([orderId])
+  ordersAsCustomer Order[] @relation("CustomerOrders")
+  ordersAsVendor   Order[] @relation("VendorOrders")
+
+  products Product[] // Products user tạo (khi là vendor)
+
+  @@index([email])
+  @@map("users")
 }
 
-model Address {
-  id        String   @id @default(cuid())
-  userId    String
-  name      String
-  email     String
-  street    String
-  city      String
-  state     String
-  phone     String
-  createdAt DateTime @default(now())
+// ============================================
+// VENDOR
+// ============================================
+
+model VendorProfile {
+  id          String        @id @default(cuid())
+  userId      String        @unique
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  shopName    String        // Tên shop
+  slug        String        @unique // URL-friendly: /shop/abc-store
+  description String?       @db.Text
+  logo        String?       // Cloudinary URL
+  banner      String?       // Cloudinary URL
+
+  // Business info (optional cho MVP)
+  businessAddress String?
+  businessPhone   String?
+  businessEmail   String?
+
+  // Commission settings (default 10%)
+  commissionRate Float @default(0.1) // 0.1 = 10%
+
+  status      VendorStatus  @default(PENDING)
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([slug])
+  @@index([status])
+  @@map("vendor_profiles")
+}
+
+// ============================================
+// PRODUCT & CATEGORY
+// ============================================
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique // URL-friendly
+  description String?   @db.Text
+  image       String?   // Cloudinary URL
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   // Relations
-  Order Order[]
-  user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products    Product[]
 
-  @@index([userId])
+  @@index([slug])
+  @@map("categories")
 }
 
-model Coupon {
-  code        String   @id
-  description String
-  discount    Float
-  forNewUser  Boolean
-  forMember   Boolean  @default(false)
-  isPublic    Boolean
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
+model Product {
+  id          String    @id @default(cuid())
 
-  @@index([isPublic])
-  @@index([expiresAt])
-  @@index([forNewUser])
-}
+  vendorId    String
+  vendor      User      @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 
-model Store {
-  id          String   @id @default(cuid())
-  userId      String   @unique
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+
   name        String
-  description String
-  username    String   @unique
-  address     String
-  status      String   @default("pending")
-  isActive    Boolean  @default(false)
-  logo        String
-  email       String
-  contact     String
+  slug        String    @unique // URL-friendly
+  description String?   @db.Text
+
+  // Status
+  isActive    Boolean   @default(true) // false = soft delete
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  variants    ProductVariant[]
+  images      ProductImage[]
+
+  @@index([vendorId])
+  @@index([categoryId])
+  @@index([slug])
+  @@index([isActive])
+  @@map("products")
+}
+
+model ProductVariant {
+  id          String  @id @default(cuid())
+
+  productId   String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Variant info (nullable nếu product không có variant)
+  name        String? // VD: "Đỏ - Size M", hoặc null nếu default variant
+  sku         String? @unique // Stock Keeping Unit
+
+  // Variant attributes (nullable)
+  color       String?
+  size        String?
+
+  // Pricing
+  price       Float   // Giá bán (VND)
+  compareAtPrice Float? // Giá gốc (để hiển thị % giảm giá)
+
+  // Inventory
+  stock       Int     @default(0)
+
+  // Default variant (cho products không có variant)
+  isDefault   Boolean @default(false)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  Product Product[]
-  Order   Order[]
-  user    User      @relation(fields: [userId], references: [id])
+  // Relations
+  orderItems  OrderItem[]
 
-  @@index([username])
-  @@index([status])
-  @@index([isActive])
-  @@index([status, isActive])
+  @@index([productId])
+  @@index([sku])
+  @@map("product_variants")
 }
 
-// ============================================
-// Better Auth Tables
-// ============================================
-
-// Account: OAuth connections (Google, Facebook, etc.)
-// Mỗi user có thể có nhiều accounts (Google + Facebook)
-// Better Auth Account Schema (Official Docs)
-model Account {
-  id                       String    @id @default(cuid())
-  userId                   String
-  accountId                String // Email for credential, provider ID for OAuth
-  providerId               String // "credential", "google", "github"
-  accessToken              String?   @db.Text // OAuth access token or hashed password
-  refreshToken             String?   @db.Text // OAuth refresh token
-  accessTokenExpiresAt     DateTime? // When access token expires
-  refreshTokenExpiresAt    DateTime? // When refresh token expires
-  scope                    String? // OAuth scopes
-  idToken                  String?   @db.Text // OAuth ID token
-  password                 String?   @db.Text // Hashed password for email/password auth
-  createdAt                DateTime  @default(now())
-  updatedAt                DateTime  @updatedAt
-
-  // Link to User
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Unique constraint: 1 user per provider
-  @@unique([providerId, accountId])
-  @@index([userId])
-}
-
-// Better Auth Session Schema (Official Docs)
-model Session {
+model ProductImage {
   id        String   @id @default(cuid())
-  userId    String
-  token     String   @unique @db.Text // Session token stored in cookie
-  expiresAt DateTime // When session expires
-  ipAddress String? // IP address of device
-  userAgent String? // User agent of device
+
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  url       String   // Cloudinary URL
+  altText   String?
+  order     Int      @default(0) // Thứ tự hiển thị (0 = ảnh chính)
+
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  // Link to User
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([expiresAt]) // For cleaning expired sessions
+  @@index([productId])
+  @@index([order])
+  @@map("product_images")
 }
 
-// Better Auth Verification Schema (Official Docs)
-model Verification {
-  id         String   @id @default(cuid())
-  identifier String // Email or phone number
-  value      String // OTP code or verification token
-  expiresAt  DateTime // When verification expires
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+// ============================================
+// ORDER & PAYMENT
+// ============================================
 
-  @@unique([identifier, value])
-  @@index([expiresAt]) // For cleaning expired verifications
+model Order {
+  id          String      @id @default(cuid())
+
+  // Customer
+  customerId  String
+  customer    User        @relation("CustomerOrders", fields: [customerId], references: [id])
+
+  // Vendor (1 order = 1 vendor)
+  vendorId    String
+  vendor      User        @relation("VendorOrders", fields: [vendorId], references: [id])
+
+  // Order info
+  orderNumber String      @unique // VD: "ORD-20250113-001"
+  status      OrderStatus @default(PENDING_PAYMENT)
+
+  // Pricing
+  subtotal    Float       // Tổng tiền sản phẩm
+  shippingFee Float       @default(0) // Phí ship (tính sau, MVP = 0)
+  tax         Float       @default(0) // Thuế (tính sau, MVP = 0)
+
+  // Commission (CORE - phải có từ đầu)
+  platformFee     Float  // Phí platform (= subtotal * platformFeeRate)
+  vendorEarnings  Float  // Tiền vendor nhận (= subtotal - platformFee)
+  platformFeeRate Float  // % commission (lưu lại để audit, VD: 0.1 = 10%)
+
+  total       Float       // Tổng tiền = subtotal + shippingFee + tax
+
+  // Shipping info
+  shippingName    String
+  shippingPhone   String
+  shippingAddress String
+  shippingCity    String?
+  shippingDistrict String?
+  shippingWard    String?
+
+  trackingNumber  String? // Mã vận đơn (khi status = SHIPPED)
+
+  // Notes
+  customerNote    String? @db.Text // Ghi chú từ khách hàng
+  vendorNote      String? @db.Text // Ghi chú nội bộ vendor
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  items       OrderItem[]
+  payment     Payment?    @relation(fields: [paymentId], references: [id])
+  paymentId   String?
+
+  @@index([customerId])
+  @@index([vendorId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
 }
+
+model OrderItem {
+  id        String  @id @default(cuid())
+
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  // Snapshot data (lưu lại thông tin tại thời điểm đặt hàng)
+  productName   String
+  variantName   String?
+  price         Float  // Giá tại thời điểm mua
+  quantity      Int
+  subtotal      Float  // = price * quantity
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([variantId])
+  @@map("order_items")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+
+  // Payment info
+  paymentNumber   String        @unique // VD: "PAY-20250113-001"
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+
+  // Amount
+  amount          Float
+
+  // VNPay specific (nullable cho methods khác)
+  vnpayTransactionId String?   @unique
+  vnpayBankCode      String?
+  vnpayCardType      String?
+
+  // Timestamps
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  orders          Order[]
+
+  @@index([paymentNumber])
+  @@index([status])
+  @@map("payments")
+}
+
+// ============================================
+// FUTURE MODELS (Làm sau MVP)
+// ============================================
+
+// model Voucher {}      // Discount system
+// model Review {}       // Product reviews
+// model Notification {} // Push notifications
+// model Conversation {} // Chat vendor-customer
+// model Payout {}       // Vendor payout management
+// model RefundRequest {} // Refund handling
