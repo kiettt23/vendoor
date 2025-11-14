@@ -7,6 +7,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { formatPrice } from "@/features/product/lib/utils";
 
 // ============================================
 // TYPES
@@ -61,7 +62,7 @@ export function CartItemComponent({
             </Badge>
           )}
           <p className="text-sm text-muted-foreground mt-1">
-            {item.price.toLocaleString("vi-VN")} ₫
+            {formatPrice(item.price)}
           </p>
         </div>
 

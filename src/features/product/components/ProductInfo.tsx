@@ -7,6 +7,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Minus, Plus, ShoppingCart, Store } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { formatPrice, calculateDiscount } from "../lib/utils";
 
 // ============================================
 // TYPES
@@ -51,21 +52,6 @@ interface ProductInfoProps {
 }
 
 // ============================================
-// HELPERS
-// ============================================
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(price);
-}
-
-function calculateDiscount(price: number, compareAtPrice: number): number {
-  return Math.round(((compareAtPrice - price) / compareAtPrice) * 100);
-}
-
-// ============================================
 // PRODUCT INFO COMPONENT
 // ============================================
 
@@ -74,13 +60,10 @@ export function ProductInfo({ product, defaultVariant }: ProductInfoProps) {
     useState<ProductVariant>(defaultVariant);
   const [quantity, setQuantity] = useState(1);
 
-  const hasDiscount =
-    selectedVariant.compareAtPrice &&
-    selectedVariant.compareAtPrice > selectedVariant.price;
-  const discountPercent =
-    hasDiscount && selectedVariant.compareAtPrice
-      ? calculateDiscount(selectedVariant.price, selectedVariant.compareAtPrice)
-      : 0;
+  const discountPercent = calculateDiscount(
+    selectedVariant.price,
+    selectedVariant.compareAtPrice
+  );
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;
@@ -131,7 +114,7 @@ export function ProductInfo({ product, defaultVariant }: ProductInfoProps) {
         <span className="text-3xl font-bold text-primary">
           {formatPrice(selectedVariant.price)}
         </span>
-        {hasDiscount && selectedVariant.compareAtPrice && (
+        {discountPercent !== null && selectedVariant.compareAtPrice && (
           <>
             <span className="text-xl text-muted-foreground line-through">
               {formatPrice(selectedVariant.compareAtPrice)}

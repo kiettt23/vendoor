@@ -3,6 +3,7 @@
 import { Card } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
+import { formatPrice } from "@/features/product/lib/utils";
 
 // ============================================
 // TYPES
@@ -44,26 +45,24 @@ export function CartSummary({
           <span className="text-muted-foreground">
             Tạm tính ({itemCount} sản phẩm)
           </span>
-          <span>{subtotal.toLocaleString("vi-VN")} ₫</span>
+          <span>{formatPrice(subtotal)}</span>
         </div>
 
         <div className="flex justify-between">
           <span className="text-muted-foreground">Phí vận chuyển</span>
-          <span>{shippingFee.toLocaleString("vi-VN")} ₫</span>
+          <span>{formatPrice(shippingFee)}</span>
         </div>
 
         <div className="flex justify-between">
           <span className="text-muted-foreground">Phí dịch vụ</span>
-          <span>{platformFee.toLocaleString("vi-VN")} ₫</span>
+          <span>{formatPrice(platformFee)}</span>
         </div>
 
         <Separator className="my-4" />
 
         <div className="flex justify-between font-semibold text-base">
           <span>Tổng cộng</span>
-          <span className="text-primary">
-            {total.toLocaleString("vi-VN")} ₫
-          </span>
+          <span className="text-primary">{formatPrice(total)}</span>
         </div>
       </div>
 

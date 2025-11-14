@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/shared/components/ui/badge";
 import { Card, CardContent } from "@/shared/components/ui/card";
+import { formatPrice, calculateDiscount } from "../lib/utils";
 
 // ============================================
 // TYPES
@@ -23,26 +24,10 @@ interface ProductCardProps {
 }
 
 // ============================================
-// HELPERS
-// ============================================
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(price);
-}
-
-function calculateDiscount(price: number, compareAtPrice: number): number {
-  return Math.round(((compareAtPrice - price) / compareAtPrice) * 100);
-}
-
-// ============================================
 // PRODUCT CARD COMPONENT
 // ============================================
 
 export function ProductCard({
-  id,
   name,
   slug,
   price,
@@ -51,10 +36,7 @@ export function ProductCard({
   vendor,
   category,
 }: ProductCardProps) {
-  const hasDiscount = compareAtPrice && compareAtPrice > price;
-  const discountPercent = hasDiscount
-    ? calculateDiscount(price, compareAtPrice)
-    : 0;
+  const discountPercent = calculateDiscount(price, compareAtPrice);
 
   return (
     <Link href={`/products/${slug}`}>
@@ -69,22 +51,16 @@ export function ProductCard({
               className="object-cover transition-transform group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
-            
+
             {/* Discount badge */}
-            {hasDiscount && (
-              <Badge
-                variant="destructive"
-                className="absolute right-2 top-2"
-              >
+            {discountPercent !== null && (
+              <Badge variant="destructive" className="absolute right-2 top-2">
                 -{discountPercent}%
               </Badge>
             )}
 
             {/* Category badge */}
-            <Badge
-              variant="secondary"
-              className="absolute bottom-2 left-2"
-            >
+            <Badge variant="secondary" className="absolute bottom-2 left-2">
               {category.name}
             </Badge>
           </div>
@@ -92,9 +68,7 @@ export function ProductCard({
           {/* Content */}
           <div className="p-4">
             {/* Vendor */}
-            <p className="text-xs text-muted-foreground mb-1">
-              {vendor.name}
-            </p>
+            <p className="text-xs text-muted-foreground mb-1">{vendor.name}</p>
 
             {/* Product name */}
             <h3 className="font-semibold line-clamp-2 mb-2 group-hover:text-primary transition-colors">
@@ -106,7 +80,7 @@ export function ProductCard({
               <span className="text-lg font-bold text-primary">
                 {formatPrice(price)}
               </span>
-              {hasDiscount && (
+              {discountPercent !== null && compareAtPrice && (
                 <span className="text-sm text-muted-foreground line-through">
                   {formatPrice(compareAtPrice)}
                 </span>
