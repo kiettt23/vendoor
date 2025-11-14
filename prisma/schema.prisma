@@ -12,6 +12,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================
+// ENUMS
+// ============================================
+
+enum Role {
+  CUSTOMER
+  VENDOR
+  ADMIN
+}
+
+enum VendorStatus {
+  PENDING   // Chờ admin duyệt
+  APPROVED  // Đã được duyệt, có thể bán hàng
+  REJECTED  // Bị từ chối
+  SUSPENDED // Bị đình chỉ
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT  // Chờ thanh toán
+  PENDING          // Đã thanh toán, chờ vendor xử lý
+  PROCESSING       // Vendor đang chuẩn bị hàng
+  SHIPPED          // Đã giao cho đơn vị vận chuyển
+  DELIVERED        // Đã giao thành công
+  CANCELLED        // Đã hủy
+  REFUNDED         // Đã hoàn tiền
+}
+
+enum PaymentStatus {
+  PENDING   // Chờ thanh toán
+  COMPLETED // Đã thanh toán thành công
+  FAILED    // Thanh toán thất bại
+  REFUNDED  // Đã hoàn tiền
+}
+
+enum PaymentMethod {
+  VNPAY
+  MOMO      // Làm sau
+  ZALOPAY   // Làm sau
+  COD       // Làm sau
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
 model User {
   id               String         @id @default(cuid())
   email            String         @unique
@@ -21,7 +66,9 @@ model User {
   updatedAt        DateTime       @updatedAt
   emailVerified    Boolean        @default(false)
   image            String?
-  roles            String[]       @default(["CUSTOMER"])
+
+  roles            String[]       @default(["CUSTOMER"]) // Array: có thể vừa CUSTOMER vừa VENDOR
+  
   accounts         Account[]
   ordersAsCustomer Order[]        @relation("CustomerOrders")
   ordersAsVendor   Order[]        @relation("VendorOrders")
@@ -79,22 +126,33 @@ model Verification {
   @@map("verifications")
 }
 
+// ============================================
+// VENDOR
+// ============================================
+
 model VendorProfile {
-  id              String       @id @default(cuid())
-  userId          String       @unique
-  shopName        String
-  slug            String       @unique
-  description     String?
-  logo            String?
-  banner          String?
+  id          String        @id @default(cuid())
+  userId      String        @unique
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  shopName    String        // Tên shop
+  slug        String        @unique // URL-friendly: /shop/abc-store
+  description String?       @db.Text
+  logo        String?       // Cloudinary URL
+  banner      String?       // Cloudinary URL
+
+  // Business info (optional cho MVP)
   businessAddress String?
   businessPhone   String?
   businessEmail   String?
-  commissionRate  Float        @default(0.1)
-  status          VendorStatus @default(PENDING)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Commission settings (default 10%)
+  commissionRate Float @default(0.1) // 0.1 = 10%
+
+  status      VendorStatus  @default(PENDING)
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@index([userId])
   @@index([slug])
@@ -102,14 +160,21 @@ model VendorProfile {
   @@map("vendor_profiles")
 }
 
+// ============================================
+// PRODUCT & CATEGORY
+// ============================================
+
 model Category {
   id          String    @id @default(cuid())
   name        String    @unique
-  slug        String    @unique
-  description String?
-  image       String?
+  slug        String    @unique // URL-friendly
+  description String?   @db.Text
+  image       String?   // Cloudinary URL
+
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  // Relations
   products    Product[]
 
   @@index([slug])
@@ -117,19 +182,27 @@ model Category {
 }
 
 model Product {
-  id          String           @id @default(cuid())
+  id          String    @id @default(cuid())
+
   vendorId    String
+  vendor      User      @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
   categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+
   name        String
-  slug        String           @unique
-  description String?
-  isActive    Boolean          @default(true)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  images      ProductImage[]
+  slug        String    @unique // URL-friendly
+  description String?   @db.Text
+
+  // Status
+  isActive    Boolean   @default(true) // false = soft delete
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
   variants    ProductVariant[]
-  category    Category         @relation(fields: [categoryId], references: [id])
-  vendor      User             @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  images      ProductImage[]
 
   @@index([vendorId])
   @@index([categoryId])
@@ -139,21 +212,36 @@ model Product {
 }
 
 model ProductVariant {
-  id             String      @id @default(cuid())
-  productId      String
-  name           String?
-  sku            String?     @unique
-  color          String?
-  size           String?
-  price          Float
-  compareAtPrice Float?
-  stock          Int         @default(0)
-  isDefault      Boolean     @default(false)
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  orderItems     OrderItem[]
-  product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id          String  @id @default(cuid())
 
+  productId   String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Variant info (nullable nếu product không có variant)
+  name        String? // VD: "Đỏ - Size M", hoặc null nếu default variant
+  sku         String? @unique // Stock Keeping Unit
+
+  // Variant attributes (nullable)
+  color       String?
+  size        String?
+
+  // Pricing
+  price       Float   // Giá bán (VND)
+  compareAtPrice Float? // Giá gốc (để hiển thị % giảm giá)
+
+  // Inventory
+  stock       Int     @default(0)
+
+  // Default variant (cho products không có variant)
+  isDefault   Boolean @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  orderItems  OrderItem[]
+
+  @@index([productId, isDefault])
   @@index([productId])
   @@index([sku])
   @@map("product_variants")
@@ -161,47 +249,74 @@ model ProductVariant {
 
 model ProductImage {
   id        String   @id @default(cuid())
+
   productId String
-  url       String
-  altText   String?
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  url       String   // Cloudinary URL
+  altText   String?
+  order     Int      @default(0) // Thứ tự hiển thị (0 = ảnh chính)
+
+  createdAt DateTime @default(now())
 
   @@index([productId])
   @@index([order])
   @@map("product_images")
 }
 
+// ============================================
+// ORDER & PAYMENT
+// ============================================
+
 model Order {
-  id               String      @id @default(cuid())
-  customerId       String
-  vendorId         String
-  orderNumber      String      @unique
-  status           OrderStatus @default(PENDING_PAYMENT)
-  subtotal         Float
-  shippingFee      Float       @default(0)
-  tax              Float       @default(0)
-  platformFee      Float
-  vendorEarnings   Float
-  platformFeeRate  Float
-  total            Float
-  shippingName     String
-  shippingPhone    String
-  shippingAddress  String
-  shippingCity     String?
+  id          String      @id @default(cuid())
+
+  // Customer
+  customerId  String
+  customer    User        @relation("CustomerOrders", fields: [customerId], references: [id])
+
+  // Vendor (1 order = 1 vendor)
+  vendorId    String
+  vendor      User        @relation("VendorOrders", fields: [vendorId], references: [id])
+
+  // Order info
+  orderNumber String      @unique // VD: "ORD-20250113-001"
+  status      OrderStatus @default(PENDING_PAYMENT)
+
+  // Pricing
+  subtotal    Float       // Tổng tiền sản phẩm
+  shippingFee Float       @default(0) // Phí ship (tính sau, MVP = 0)
+  tax         Float       @default(0) // Thuế (tính sau, MVP = 0)
+
+  // Commission (CORE - phải có từ đầu)
+  platformFee     Float  // Phí platform (= subtotal * platformFeeRate)
+  vendorEarnings  Float  // Tiền vendor nhận (= subtotal - platformFee)
+  platformFeeRate Float  // % commission (lưu lại để audit, VD: 0.1 = 10%)
+
+  total       Float       // Tổng tiền = subtotal + shippingFee + tax
+
+  // Shipping info
+  shippingName    String
+  shippingPhone   String
+  shippingAddress String
+  shippingCity    String?
   shippingDistrict String?
-  shippingWard     String?
-  trackingNumber   String?
-  customerNote     String?
-  vendorNote       String?
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-  paymentId        String?
-  items            OrderItem[]
-  customer         User        @relation("CustomerOrders", fields: [customerId], references: [id])
-  payment          Payment?    @relation(fields: [paymentId], references: [id])
-  vendor           User        @relation("VendorOrders", fields: [vendorId], references: [id])
+  shippingWard    String?
+
+  trackingNumber  String? // Mã vận đơn (khi status = SHIPPED)
+
+  // Notes
+  customerNote    String? @db.Text // Ghi chú từ khách hàng
+  vendorNote      String? @db.Text // Ghi chú nội bộ vendor
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  items       OrderItem[]
+  payment     Payment?    @relation(fields: [paymentId], references: [id])
+  paymentId   String?
 
   @@index([customerId])
   @@index([vendorId])
@@ -212,17 +327,22 @@ model Order {
 }
 
 model OrderItem {
-  id          String         @id @default(cuid())
-  orderId     String
-  variantId   String
-  productName String
-  variantName String?
-  price       Float
-  quantity    Int
-  subtotal    Float
-  createdAt   DateTime       @default(now())
-  order       Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  variant     ProductVariant @relation(fields: [variantId], references: [id])
+  id        String  @id @default(cuid())
+
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  // Snapshot data (lưu lại thông tin tại thời điểm đặt hàng)
+  productName   String
+  variantName   String?
+  price         Float  // Giá tại thời điểm mua
+  quantity      Int
+  subtotal      Float  // = price * quantity
+
+  createdAt DateTime @default(now())
 
   @@index([orderId])
   @@index([variantId])
@@ -230,57 +350,41 @@ model OrderItem {
 }
 
 model Payment {
-  id                 String        @id @default(cuid())
-  paymentNumber      String        @unique
-  method             PaymentMethod
-  status             PaymentStatus @default(PENDING)
-  amount             Float
-  vnpayTransactionId String?       @unique
+  id              String        @id @default(cuid())
+
+  // Payment info
+  paymentNumber   String        @unique // VD: "PAY-20250113-001"
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+
+  // Amount
+  amount          Float
+
+  // VNPay specific (nullable cho methods khác)
+  vnpayTransactionId String?   @unique
   vnpayBankCode      String?
   vnpayCardType      String?
-  paidAt             DateTime?
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  orders             Order[]
+
+  // Timestamps
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  orders          Order[]
 
   @@index([paymentNumber])
   @@index([status])
   @@map("payments")
 }
 
-enum Role {
-  CUSTOMER
-  VENDOR
-  ADMIN
-}
+// ============================================
+// FUTURE MODELS (Làm sau MVP)
+// ============================================
 
-enum VendorStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  SUSPENDED
-}
-
-enum OrderStatus {
-  PENDING_PAYMENT
-  PENDING
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  REFUNDED
-}
-
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-}
-
-enum PaymentMethod {
-  VNPAY
-  MOMO
-  ZALOPAY
-  COD
-}
+// model Voucher {}      // Discount system
+// model Review {}       // Product reviews
+// model Notification {} // Push notifications
+// model Conversation {} // Chat vendor-customer
+// model Payout {}       // Vendor payout management
+// model RefundRequest {} // Refund handling
