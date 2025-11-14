@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { uploadImage } from "@/shared/lib/cloudinary";
-import { z } from "zod";
+import { auth } from "@/shared/lib/auth";
 
 // ============================================
 // VALIDATION SCHEMA
@@ -15,6 +15,18 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export async function POST(request: NextRequest) {
   try {
+    // 0. Check authentication
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized. Please login to upload images." },
+        { status: 401 }
+      );
+    }
+
     // 1. Parse FormData
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
