@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useCart } from "@/features/cart/hooks/useCart";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Minus, Plus, ShoppingCart, Store } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 // ============================================
 // TYPES
@@ -25,13 +27,22 @@ interface ProductVariant {
 interface Product {
   id: string;
   name: string;
+  slug: string;
+  description: string | null;
   vendor: {
     id: string;
     name: string;
     shopName: string;
     slug: string;
   };
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  };
   variants: ProductVariant[];
+  images: { id: string; url: string; altText: string | null; order: number }[];
+  createdAt: Date;
 }
 
 interface ProductInfoProps {
@@ -59,14 +70,17 @@ function calculateDiscount(price: number, compareAtPrice: number): number {
 // ============================================
 
 export function ProductInfo({ product, defaultVariant }: ProductInfoProps) {
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(defaultVariant);
+  const [selectedVariant, setSelectedVariant] =
+    useState<ProductVariant>(defaultVariant);
   const [quantity, setQuantity] = useState(1);
 
   const hasDiscount =
-    selectedVariant.compareAtPrice && selectedVariant.compareAtPrice > selectedVariant.price;
-  const discountPercent = hasDiscount && selectedVariant.compareAtPrice
-    ? calculateDiscount(selectedVariant.price, selectedVariant.compareAtPrice)
-    : 0;
+    selectedVariant.compareAtPrice &&
+    selectedVariant.compareAtPrice > selectedVariant.price;
+  const discountPercent =
+    hasDiscount && selectedVariant.compareAtPrice
+      ? calculateDiscount(selectedVariant.price, selectedVariant.compareAtPrice)
+      : 0;
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;
@@ -75,9 +89,25 @@ export function ProductInfo({ product, defaultVariant }: ProductInfoProps) {
     }
   };
 
+  const addItem = useCart((state) => state.addItem);
+
   const handleAddToCart = () => {
-    // TODO: Implement add to cart
-    alert(`Added ${quantity}x ${product.name} (${selectedVariant.name}) to cart`);
+    addItem({
+      productId: product.id,
+      productName: product.name,
+      productSlug: product.slug,
+      variantId: selectedVariant.id,
+      variantName: selectedVariant.name,
+      price: selectedVariant.price,
+      quantity,
+      image: product.images[0]?.url,
+      stock: selectedVariant.stock,
+      vendorId: product.vendor.id,
+      vendorName: product.vendor.shopName,
+    });
+    toast.success(
+      `Đã thêm ${quantity}x ${product.name} (${selectedVariant.name}) vào giỏ hàng!`
+    );
   };
 
   return (
@@ -85,7 +115,7 @@ export function ProductInfo({ product, defaultVariant }: ProductInfoProps) {
       {/* Product Name */}
       <div>
         <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-        
+
         {/* Vendor */}
         <Link
           href={`/vendors/${product.vendor.slug}`}
@@ -119,7 +149,9 @@ export function ProductInfo({ product, defaultVariant }: ProductInfoProps) {
             {product.variants.map((variant) => (
               <Button
                 key={variant.id}
-                variant={selectedVariant.id === variant.id ? "default" : "outline"}
+                variant={
+                  selectedVariant.id === variant.id ? "default" : "outline"
+                }
                 onClick={() => {
                   setSelectedVariant(variant);
                   setQuantity(1); // Reset quantity khi đổi variant
@@ -142,7 +174,11 @@ export function ProductInfo({ product, defaultVariant }: ProductInfoProps) {
       {/* Stock */}
       <div>
         <span className="text-sm text-muted-foreground">
-          Còn lại: <span className="font-semibold text-foreground">{selectedVariant.stock}</span> sản phẩm
+          Còn lại:{" "}
+          <span className="font-semibold text-foreground">
+            {selectedVariant.stock}
+          </span>{" "}
+          sản phẩm
         </span>
       </div>
 
@@ -158,7 +194,9 @@ export function ProductInfo({ product, defaultVariant }: ProductInfoProps) {
           >
             <Minus className="h-4 w-4" />
           </Button>
-          <span className="text-xl font-semibold w-12 text-center">{quantity}</span>
+          <span className="text-xl font-semibold w-12 text-center">
+            {quantity}
+          </span>
           <Button
             variant="outline"
             size="icon"
@@ -190,7 +228,9 @@ export function ProductInfo({ product, defaultVariant }: ProductInfoProps) {
       <div className="pt-6 border-t space-y-2 text-sm text-muted-foreground">
         <div className="flex justify-between">
           <span>SKU:</span>
-          <span className="font-medium text-foreground">{selectedVariant.sku || "N/A"}</span>
+          <span className="font-medium text-foreground">
+            {selectedVariant.sku || "N/A"}
+          </span>
         </div>
         <div className="flex justify-between">
           <span>Tình trạng:</span>
