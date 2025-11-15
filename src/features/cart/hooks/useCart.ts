@@ -145,10 +145,10 @@ export const useCart = create<CartStore>()(
       /**
        * Clear entire cart
        * - Called after successful checkout
+       * - No toast to avoid blocking redirect
        */
       clearCart: () => {
         set({ items: [] });
-        toast.info("Giỏ hàng đã được xóa");
       },
     }),
     {
