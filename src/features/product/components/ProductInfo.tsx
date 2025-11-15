@@ -6,7 +6,6 @@ import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Minus, Plus, ShoppingCart, Store } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
 import { formatPrice, calculateDiscount } from "../lib/utils";
 
 // ============================================
@@ -88,9 +87,6 @@ export function ProductInfo({ product, defaultVariant }: ProductInfoProps) {
       vendorId: product.vendor.id,
       vendorName: product.vendor.shopName,
     });
-    toast.success(
-      `Đã thêm ${quantity}x ${product.name} (${selectedVariant.name}) vào giỏ hàng!`
-    );
   };
 
   return (
@@ -203,7 +199,7 @@ export function ProductInfo({ product, defaultVariant }: ProductInfoProps) {
           Thêm Vào Giỏ
         </Button>
         <Button size="lg" variant="outline" className="flex-1">
-          Mua Ngay
+          <Link href={"/cart"}>Mua Ngay</Link>
         </Button>
       </div>
 

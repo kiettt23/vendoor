@@ -4,11 +4,11 @@
 
 /**
  * Cart item representation
- * - Mỗi item là 1 variant cụ thể của product
- * - Grouped by vendor cho checkout flow
+ * - Stored in localStorage via Zustand persist
+ * - stock field is CACHED (may be outdated)
  */
 export interface CartItem {
-  id: string; // Unique cart item ID (variantId + timestamp)
+  id: string; // variantId (unique identifier)
   productId: string;
   productName: string;
   productSlug: string;
@@ -17,37 +17,46 @@ export interface CartItem {
   price: number;
   quantity: number;
   image: string;
-  stock: number; // For validation
+  stock: number; // ⚠️ CACHED - may not match DB
   vendorId: string;
   vendorName: string;
 }
 
 /**
- * Cart store state interface
- */
-export interface CartStore {
-  // State
-  items: CartItem[];
-
-  // Computed values (getters)
-  itemCount: () => number;
-  subtotal: () => number;
-  getItemsByVendor: () => Record<string, CartItem[]>;
-
-  // Actions
-  addItem: (item: Omit<CartItem, "id">) => void;
-  removeItem: (itemId: string) => void;
-  updateQuantity: (itemId: string, quantity: number) => void;
-  clearCart: () => void;
-}
-
-/**
- * Vendor group for checkout
- * - 1 Order = 1 Vendor rule
+ * Vendor group for display
+ * - Used for grouping items by vendor (1 Order = 1 Vendor rule)
  */
 export interface VendorGroup {
   vendorId: string;
   vendorName: string;
   items: CartItem[];
   subtotal: number;
+}
+
+/**
+ * Zustand cart store interface
+ */
+export interface CartStore {
+  items: CartItem[];
+  addItem: (item: Omit<CartItem, "id"> & { id?: string }) => void;
+  updateQuantity: (variantId: string, quantity: number) => void;
+  removeItem: (variantId: string) => void;
+  clearCart: () => void;
+}
+
+/**
+ * Stock validation result (from server)
+ */
+export interface StockValidationItem {
+  variantId: string;
+  requestedQuantity: number;
+  availableStock: number;
+  isAvailable: boolean;
+  message?: string;
+}
+
+export interface StockValidationResult {
+  isValid: boolean;
+  items: StockValidationItem[];
+  hasWarnings: boolean;
 }

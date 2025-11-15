@@ -2,143 +2,158 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { toast } from "sonner";
 import type { CartStore } from "../types";
-import {
-  calculateItemCount,
-  calculateSubtotal,
-  findItemByVariant,
-  generateCartItemId,
-  groupItemsByVendor,
-  validateQuantity,
-} from "../lib/utils";
+import { validateQuantityClient } from "../lib/utils";
 
 // ============================================
-// ZUSTAND CART STORE
+// ZUSTAND CART STORE (Client State)
 // ============================================
 
 /**
- * Global cart state management with Zustand
+ * Global cart state with localStorage persistence
  *
  * Features:
- * - localStorage persistence
- * - Optimized re-renders (only subscribers affected)
- * - No Provider needed
- * - Redux DevTools support
+ * - Add/Update/Remove items
+ * - Client-side validation (cached stock)
+ * - Toast notifications
+ * - Auto persist to localStorage
+ * - Clear on checkout (manual call)
  *
- * Usage:
- * ```tsx
- * // Subscribe to specific state slice
- * const itemCount = useCart((state) => state.itemCount());
- * const addItem = useCart((state) => state.addItem);
- * ```
+ * Architecture Decision:
+ * - Zustand handles CLIENT state (what's in cart)
+ * - React Query handles SERVER state (stock validation)
+ * - Separation of concerns
  */
 export const useCart = create<CartStore>()(
   persist(
     (set, get) => ({
-      // ============================================
-      // STATE
-      // ============================================
       items: [],
-
-      // ============================================
-      // COMPUTED VALUES (Getters)
-      // ============================================
-
-      itemCount: () => {
-        return calculateItemCount(get().items);
-      },
-
-      subtotal: () => {
-        return calculateSubtotal(get().items);
-      },
-
-      getItemsByVendor: () => {
-        return groupItemsByVendor(get().items);
-      },
-
-      // ============================================
-      // ACTIONS
-      // ============================================
 
       /**
        * Add item to cart
-       * - If item exists (same variant), increase quantity
-       * - Respects stock limit
+       * - If exists: increase quantity
+       * - Client validation against cached stock
+       * - Toast success/error
        */
       addItem: (newItem) => {
-        set((state) => {
-          const existingItem = findItemByVariant(
-            state.items,
-            newItem.variantId
+        const items = get().items;
+        const itemId = newItem.id || newItem.variantId;
+        const existingItem = items.find((item) => item.id === itemId);
+
+        if (existingItem) {
+          // Item exists → update quantity
+          const newQuantity = existingItem.quantity + (newItem.quantity || 1);
+
+          // Client validation (cached stock)
+          const validation = validateQuantityClient(
+            newQuantity,
+            existingItem.stock
           );
 
-          if (existingItem) {
-            // Update quantity (max = stock)
-            return {
-              items: state.items.map((item) =>
-                item.id === existingItem.id
-                  ? {
-                      ...item,
-                      quantity: validateQuantity(
-                        item.quantity + newItem.quantity,
-                        item.stock
-                      ),
-                    }
-                  : item
-              ),
-            };
+          if (!validation.isValid) {
+            toast.error("Không thể thêm vào giỏ hàng", {
+              description: validation.message,
+            });
+            return;
           }
 
-          // Add new item
-          return {
+          set({
+            items: items.map((item) =>
+              item.id === itemId ? { ...item, quantity: newQuantity } : item
+            ),
+          });
+
+          toast.success("Đã cập nhật giỏ hàng");
+        } else {
+          // New item → add
+          const quantity = newItem.quantity || 1;
+
+          // Client validation
+          const validation = validateQuantityClient(quantity, newItem.stock);
+
+          if (!validation.isValid) {
+            toast.error("Không thể thêm vào giỏ hàng", {
+              description: validation.message,
+            });
+            return;
+          }
+
+          set({
             items: [
-              ...state.items,
+              ...items,
               {
                 ...newItem,
-                id: generateCartItemId(newItem.variantId),
+                id: itemId,
+                quantity,
               },
             ],
-          };
+          });
+
+          toast.success("Đã thêm vào giỏ hàng", {
+            description: newItem.productName,
+          });
+        }
+      },
+
+      /**
+       * Update item quantity
+       * - Client validation against cached stock
+       * - Show warning if exceeds
+       */
+      updateQuantity: (variantId, quantity) => {
+        const items = get().items;
+        const item = items.find((i) => i.id === variantId);
+
+        if (!item) return;
+
+        // Client validation
+        const validation = validateQuantityClient(quantity, item.stock);
+
+        if (!validation.isValid) {
+          toast.warning("Số lượng không hợp lệ", {
+            description: validation.message,
+          });
+          return;
+        }
+
+        set({
+          items: items.map((i) =>
+            i.id === variantId ? { ...i, quantity } : i
+          ),
         });
       },
 
       /**
        * Remove item from cart
        */
-      removeItem: (itemId) => {
-        set((state) => ({
-          items: state.items.filter((item) => item.id !== itemId),
-        }));
-      },
+      removeItem: (variantId) => {
+        const items = get().items;
+        const item = items.find((i) => i.id === variantId);
 
-      /**
-       * Update item quantity
-       * - Validates: 1 <= quantity <= stock
-       */
-      updateQuantity: (itemId, quantity) => {
-        set((state) => ({
-          items: state.items.map((item) => {
-            if (item.id === itemId) {
-              return {
-                ...item,
-                quantity: validateQuantity(quantity, item.stock),
-              };
-            }
-            return item;
-          }),
-        }));
+        set({
+          items: items.filter((i) => i.id !== variantId),
+        });
+
+        if (item) {
+          toast.success("Đã xóa khỏi giỏ hàng", {
+            description: item.productName,
+          });
+        }
       },
 
       /**
        * Clear entire cart
+       * - Called after successful checkout
        */
       clearCart: () => {
         set({ items: [] });
+        toast.info("Giỏ hàng đã được xóa");
       },
     }),
     {
       name: "cart-storage", // localStorage key
-      skipHydration: false, // Auto hydrate from localStorage
+      // No expiration - clear on checkout only (per architecture decision)
     }
   )
 );
