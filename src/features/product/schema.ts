@@ -105,8 +105,50 @@ export type CreateProductInput = z.infer<typeof createProductSchema>;
 // UPDATE PRODUCT SCHEMA
 // ============================================
 
-export const updateProductSchema = createProductSchema.extend({
-  id: z.string().cuid("Product ID không hợp lệ"),
-});
+export const updateProductSchema = z
+  .object({
+    id: z.string().cuid("Product ID không hợp lệ"),
+    name: z
+      .string()
+      .min(3, "Tên sản phẩm phải có ít nhất 3 ký tự")
+      .max(200, "Tên sản phẩm tối đa 200 ký tự"),
+    description: z
+      .string()
+      .max(5000, "Mô tả tối đa 5000 ký tự")
+      .optional()
+      .or(z.literal("")),
+    categoryId: z.string().cuid("Category ID không hợp lệ"),
+    variants: z
+      .array(productVariantSchema)
+      .min(1, "Phải có ít nhất 1 biến thể"),
+    images: z
+      .array(productImageSchema)
+      .min(1, "Phải có ít nhất 1 ảnh")
+      .max(10, "Tối đa 10 ảnh"),
+  })
+  .refine(
+    (data) => {
+      // Validate: Chỉ có 1 variant được đánh dấu isDefault
+      const defaultVariants = data.variants.filter((v) => v.isDefault);
+      return defaultVariants.length === 1;
+    },
+    {
+      message: "Phải có đúng 1 biến thể mặc định",
+      path: ["variants"],
+    }
+  )
+  .refine(
+    (data) => {
+      // Validate: Nếu variant có compareAtPrice, phải > price
+      return data.variants.every((v) => {
+        if (!v.compareAtPrice || v.compareAtPrice === 0) return true;
+        return v.compareAtPrice > v.price;
+      });
+    },
+    {
+      message: "Giá gốc phải lớn hơn giá bán",
+      path: ["variants"],
+    }
+  );
 
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
