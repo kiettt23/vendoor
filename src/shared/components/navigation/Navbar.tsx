@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ShoppingCart,
   User,
@@ -20,8 +20,10 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { Badge } from "@/shared/components/ui/badge";
 import { useCart } from "@/features/cart/hooks/useCart";
+import { signOut } from "@/shared/lib/auth-client";
 import { useState } from "react";
 import { cn } from "@/shared/lib/utils";
+import { toast } from "sonner";
 
 // ============================================
 // NAVBAR COMPONENT
@@ -48,6 +50,7 @@ interface NavbarProps {
 
 export function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const cart = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -59,6 +62,19 @@ export function Navbar({ user }: NavbarProps) {
   // Check user roles
   const isVendor = user?.roles.includes("VENDOR");
   const isAdmin = user?.roles.includes("ADMIN");
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success("Đăng xuất thành công");
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Có lỗi xảy ra khi đăng xuất");
+    }
+  };
 
   // Navigation links
   const publicLinks = [{ href: "/products", label: "Sản phẩm", icon: Package }];
@@ -201,16 +217,8 @@ export function Navbar({ user }: NavbarProps) {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <form
-                      action="/api/auth/sign-out"
-                      method="POST"
-                      className="w-full"
-                    >
-                      <button type="submit" className="w-full text-left">
-                        Đăng xuất
-                      </button>
-                    </form>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    Đăng xuất
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -313,17 +321,17 @@ export function Navbar({ user }: NavbarProps) {
                       {user.email}
                     </p>
                   </div>
-                  <form action="/api/auth/sign-out" method="POST">
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Đăng xuất
-                    </Button>
-                  </form>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                  >
+                    Đăng xuất
+                  </Button>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">

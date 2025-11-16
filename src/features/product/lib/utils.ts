@@ -95,3 +95,38 @@ export function formatStockStatus(stock: number): string {
   if (stock <= 10) return `Còn ${stock} sản phẩm`;
   return "Còn hàng";
 }
+
+/**
+ * Generate unique slug with collision handling
+ * - First try: base slug (e.g., "ao-thun-nam")
+ * - If exists: append random string (e.g., "ao-thun-nam-a3f2x1")
+ *
+ * @param baseText - Base text to slugify
+ * @param checkExists - Async function to check if slug exists
+ * @returns Promise<string> - Unique slug
+ *
+ * @example
+ * const slug = await generateUniqueSlug(
+ *   "Áo Thun Nam",
+ *   async (slug) => {
+ *     const exists = await prisma.product.findUnique({ where: { slug } });
+ *     return !!exists;
+ *   }
+ * );
+ */
+export async function generateUniqueSlug(
+  baseText: string,
+  checkExists: (slug: string) => Promise<boolean>
+): Promise<string> {
+  const baseSlug = slugify(baseText);
+
+  // Try base slug first
+  const exists = await checkExists(baseSlug);
+  if (!exists) {
+    return baseSlug;
+  }
+
+  // Generate random suffix (6 characters)
+  const randomSuffix = Math.random().toString(36).substring(2, 8);
+  return `${baseSlug}-${randomSuffix}`;
+}
