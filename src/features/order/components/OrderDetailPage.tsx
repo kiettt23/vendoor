@@ -359,13 +359,22 @@ function OrderStatusBadge({ status }: { status: string }) {
     string,
     {
       label: string;
-      variant: "default" | "secondary" | "destructive" | "outline";
+      variant:
+        | "default"
+        | "secondary"
+        | "destructive"
+        | "outline"
+        | "warning"
+        | "success"
+        | "info"
+        | "purple";
     }
   > = {
-    PENDING: { label: "Chờ xác nhận", variant: "secondary" },
-    PROCESSING: { label: "Đang xử lý", variant: "default" },
-    SHIPPED: { label: "Đang giao", variant: "default" },
-    DELIVERED: { label: "Đã giao", variant: "outline" },
+    PENDING_PAYMENT: { label: "Chờ thanh toán", variant: "secondary" },
+    PENDING: { label: "Chờ xác nhận", variant: "warning" },
+    PROCESSING: { label: "Đang xử lý", variant: "info" },
+    SHIPPED: { label: "Đang giao", variant: "purple" },
+    DELIVERED: { label: "Đã giao", variant: "success" },
     CANCELLED: { label: "Đã hủy", variant: "destructive" },
   };
 
@@ -382,11 +391,19 @@ function PaymentStatusBadge({ status }: { status: string }) {
     string,
     {
       label: string;
-      variant: "default" | "secondary" | "destructive" | "outline";
+      variant:
+        | "default"
+        | "secondary"
+        | "destructive"
+        | "outline"
+        | "warning"
+        | "success"
+        | "info"
+        | "purple";
     }
   > = {
-    PENDING: { label: "Chờ thanh toán", variant: "secondary" },
-    PAID: { label: "Đã thanh toán", variant: "outline" },
+    PENDING: { label: "Chờ thanh toán", variant: "warning" },
+    COMPLETED: { label: "Đã thanh toán", variant: "success" },
     FAILED: { label: "Thất bại", variant: "destructive" },
   };
 

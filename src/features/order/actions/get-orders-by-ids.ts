@@ -21,12 +21,8 @@ export async function getOrdersByIds(orderIds: string[]) {
       include: {
         vendor: {
           select: {
-            vendorProfile: {
-              select: {
-                shopName: true,
-                slug: true,
-              },
-            },
+            shopName: true,
+            slug: true,
           },
         },
         items: {
@@ -66,8 +62,8 @@ export async function getOrdersByIds(orderIds: string[]) {
         platformFee: order.platformFee,
         createdAt: order.createdAt,
         vendor: {
-          shopName: order.vendor.vendorProfile?.shopName ?? "Unknown",
-          slug: order.vendor.vendorProfile?.slug ?? "",
+          shopName: order.vendor.shopName,
+          slug: order.vendor.slug,
         },
         items: order.items.map((item) => ({
           id: item.id,

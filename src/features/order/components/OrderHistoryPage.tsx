@@ -233,14 +233,22 @@ function OrderStatusBadge({ status }: { status: string }) {
     string,
     {
       label: string;
-      variant: "default" | "secondary" | "destructive" | "outline";
+      variant:
+        | "default"
+        | "secondary"
+        | "destructive"
+        | "outline"
+        | "warning"
+        | "success"
+        | "info"
+        | "purple";
     }
   > = {
-    PENDING: { label: "Chờ xác nhận", variant: "secondary" },
     PENDING_PAYMENT: { label: "Chờ thanh toán", variant: "secondary" },
-    PROCESSING: { label: "Đang xử lý", variant: "default" },
-    SHIPPED: { label: "Đang giao", variant: "default" },
-    DELIVERED: { label: "Đã giao", variant: "outline" },
+    PENDING: { label: "Chờ xác nhận", variant: "warning" },
+    PROCESSING: { label: "Đang xử lý", variant: "info" },
+    SHIPPED: { label: "Đang giao", variant: "purple" },
+    DELIVERED: { label: "Đã giao", variant: "success" },
     CANCELLED: { label: "Đã hủy", variant: "destructive" },
   };
 

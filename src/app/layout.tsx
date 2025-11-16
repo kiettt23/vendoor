@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/shared/components/ui/sonner";
 import { ReactQueryProvider } from "@/shared/components/providers/ReactQueryProvider";
+import { Navbar } from "@/shared/components/navigation/Navbar";
+import { auth } from "@/shared/lib/auth";
+import { headers } from "next/headers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,17 +22,31 @@ export const metadata: Metadata = {
   description: "Platform thương mại điện tử đa nhà cung cấp",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Get user session for navbar
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const user = session?.user
+    ? {
+        name: session.user.name,
+        email: session.user.email,
+        roles: session.user.roles || [],
+      }
+    : null;
+
   return (
     <html lang="vi">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReactQueryProvider>
+          <Navbar user={user} />
           {children}
           <Toaster position="top-right" richColors />
         </ReactQueryProvider>

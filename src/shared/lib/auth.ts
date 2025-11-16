@@ -7,9 +7,21 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
 
-  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL,
-
-  trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL!],
+  // Better Auth Additional Fields - Include custom fields in session
+  user: {
+    additionalFields: {
+      roles: {
+        type: "string[]", // Array matching Prisma schema
+        required: false,
+        defaultValue: ["CUSTOMER"],
+        input: false, // ⚠️ Security: User can't set roles on signup
+      },
+      phone: {
+        type: "string",
+        required: false,
+      },
+    },
+  },
 
   emailAndPassword: {
     enabled: true,

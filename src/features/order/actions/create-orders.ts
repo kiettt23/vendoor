@@ -196,11 +196,7 @@ export async function createOrders(
           include: {
             vendor: {
               select: {
-                vendorProfile: {
-                  select: {
-                    shopName: true,
-                  },
-                },
+                shopName: true,
               },
             },
           },
@@ -210,7 +206,7 @@ export async function createOrders(
           id: order.id,
           orderNumber: order.orderNumber,
           vendorId: order.vendorId,
-          vendorName: order.vendor.vendorProfile?.shopName ?? "Unknown",
+          vendorName: order.vendor.shopName,
           total: order.total,
           status: order.status,
         });

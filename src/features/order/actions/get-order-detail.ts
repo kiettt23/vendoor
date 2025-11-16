@@ -79,14 +79,11 @@ export async function getOrderDetail(
       where: { id: orderId },
       include: {
         vendor: {
-          include: {
-            vendorProfile: {
-              select: {
-                shopName: true,
-                slug: true,
-                businessPhone: true,
-              },
-            },
+          select: {
+            id: true,
+            shopName: true,
+            slug: true,
+            businessPhone: true,
           },
         },
         items: {
@@ -134,9 +131,9 @@ export async function getOrderDetail(
       updatedAt: order.updatedAt,
       vendor: {
         id: order.vendor.id,
-        shopName: order.vendor.vendorProfile?.shopName || "Unknown Shop",
-        slug: order.vendor.vendorProfile?.slug || "",
-        phone: order.vendor.vendorProfile?.businessPhone || null,
+        shopName: order.vendor.shopName,
+        slug: order.vendor.slug,
+        phone: order.vendor.businessPhone,
       },
       items: order.items.map((item) => ({
         id: item.id,

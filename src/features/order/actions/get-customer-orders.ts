@@ -82,13 +82,9 @@ export async function getCustomerOrders(
         where: whereClause,
         include: {
           vendor: {
-            include: {
-              vendorProfile: {
-                select: {
-                  shopName: true,
-                  slug: true,
-                },
-              },
+            select: {
+              shopName: true,
+              slug: true,
             },
           },
           _count: {
@@ -115,8 +111,8 @@ export async function getCustomerOrders(
       itemCount: order._count.items,
       createdAt: order.createdAt,
       vendor: {
-        shopName: order.vendor.vendorProfile?.shopName || "Unknown Shop",
-        slug: order.vendor.vendorProfile?.slug || "",
+        shopName: order.vendor.shopName,
+        slug: order.vendor.slug,
       },
     }));
 

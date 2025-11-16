@@ -71,7 +71,6 @@ model User {
   
   accounts         Account[]
   ordersAsCustomer Order[]        @relation("CustomerOrders")
-  ordersAsVendor   Order[]        @relation("VendorOrders")
   products         Product[]
   sessions         Session[]
   vendorProfile    VendorProfile?
@@ -153,6 +152,9 @@ model VendorProfile {
 
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  // Relations
+  orders      Order[]
 
   @@index([userId])
   @@index([slug])
@@ -275,9 +277,9 @@ model Order {
   customerId  String
   customer    User        @relation("CustomerOrders", fields: [customerId], references: [id])
 
-  // Vendor (1 order = 1 vendor)
+  // Vendor (1 order = 1 vendor) - Link to VendorProfile, not User
   vendorId    String
-  vendor      User        @relation("VendorOrders", fields: [vendorId], references: [id])
+  vendor      VendorProfile @relation(fields: [vendorId], references: [id])
 
   // Order info
   orderNumber String      @unique // VD: "ORD-20250113-001"

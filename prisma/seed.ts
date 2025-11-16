@@ -354,7 +354,7 @@ async function seedProducts(vendors: any[], categories: any[]) {
 // ============================================
 
 async function seedOrders(customers: any[], vendors: any[]) {
-  console.log("🛒 Seeding orders...");
+  console.log("🛒 Seeding orders với nhiều test case...");
 
   // Get all product variants with product info
   const allVariants = await prisma.productVariant.findMany({
@@ -372,20 +372,20 @@ async function seedOrders(customers: any[], vendors: any[]) {
 
   const orders = [];
 
-  // ============================================
-  // Tạo 5 orders
-  // ============================================
-
-  for (let i = 0; i < 5; i++) {
-    const customer = customers[i % customers.length];
-    const vendor = vendors[i % vendors.length];
-
-    // Random 2-3 variants từ cùng 1 vendor
+  // Helper: Create order với status cụ thể
+  const createOrder = async (
+    customer: any,
+    vendor: any,
+    status: OrderStatus,
+    trackingNumber?: string,
+    vendorNote?: string
+  ) => {
+    // Random 2-3 variants từ vendor
     const vendorVariants = allVariants.filter(
       (v) => v.product.vendorId === vendor.id
     );
 
-    if (vendorVariants.length === 0) continue;
+    if (vendorVariants.length === 0) return null;
 
     const selectedVariants = vendorVariants
       .sort(() => Math.random() - 0.5)
@@ -394,15 +394,11 @@ async function seedOrders(customers: any[], vendors: any[]) {
         Math.min(vendorVariants.length, Math.floor(Math.random() * 2) + 2)
       );
 
-    // ============================================
-    // Create proper OrderItem data
-    // ============================================
-
     const itemsData = selectedVariants.map((variant) => {
       const quantity = Math.floor(Math.random() * 2) + 1;
       return {
         variantId: variant.id,
-        productName: variant.product.name, // ← Đúng field name từ schema
+        productName: variant.product.name,
         variantName: variant.name,
         quantity,
         price: variant.price,
@@ -418,17 +414,25 @@ async function seedOrders(customers: any[], vendors: any[]) {
     const total = subtotal + shippingFee;
 
     // Generate unique order number
-    const orderNumber = `ORD-${Date.now()}-${i}`;
-    const paymentNumber = `PAY-${Date.now()}-${i}`;
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 10000);
+    const orderNumber = `ORD-${timestamp}-${random}`;
+    const paymentNumber = `PAY-${timestamp}-${random}`;
+
+    // Payment status based on order status
+    const paymentStatus =
+      status === OrderStatus.PENDING_PAYMENT
+        ? PaymentStatus.PENDING
+        : PaymentStatus.COMPLETED;
 
     // Create payment first
     const payment = await prisma.payment.create({
       data: {
         paymentNumber,
         method: PaymentMethod.VNPAY,
-        status: PaymentStatus.COMPLETED,
+        status: paymentStatus,
         amount: total,
-        paidAt: new Date(),
+        paidAt: paymentStatus === PaymentStatus.COMPLETED ? new Date() : null,
       },
     });
 
@@ -437,15 +441,17 @@ async function seedOrders(customers: any[], vendors: any[]) {
       data: {
         orderNumber,
         customerId: customer.id,
-        vendorId: vendor.id,
+        vendorId: vendor.vendorProfile!.id,
         paymentId: payment.id,
-        status: OrderStatus.PENDING,
+        status,
         subtotal,
         shippingFee,
         platformFee,
         platformFeeRate,
         vendorEarnings,
         total,
+        trackingNumber,
+        vendorNote,
         // Shipping info (mock data)
         shippingName: customer.name || "Khách hàng",
         shippingPhone: "0909123456",
@@ -462,10 +468,206 @@ async function seedOrders(customers: any[], vendors: any[]) {
       },
     });
 
-    orders.push(order);
+    return order;
+  };
+
+  // ============================================
+  // VENDOR 1: 10 orders - ĐẦY ĐỦ TEST CASES
+  // ============================================
+  console.log("  → Vendor 1: 10 orders (full test cases)");
+  const vendor1 = vendors[0];
+
+  // PENDING: 3 orders cần vendor xử lý
+  let order = await createOrder(customers[0]!, vendor1, OrderStatus.PENDING);
+  if (order) orders.push(order);
+
+  order = await createOrder(customers[1]!, vendor1, OrderStatus.PENDING);
+  if (order) orders.push(order);
+
+  order = await createOrder(customers[2]!, vendor1, OrderStatus.PENDING);
+  if (order) orders.push(order);
+
+  // PROCESSING: 2 orders đang chuẩn bị
+  order = await createOrder(
+    customers[0]!,
+    vendor1,
+    OrderStatus.PROCESSING,
+    undefined,
+    "Đang đóng gói hàng"
+  );
+  if (order) orders.push(order);
+
+  order = await createOrder(
+    customers[1]!,
+    vendor1,
+    OrderStatus.PROCESSING,
+    undefined,
+    "Chờ lấy hàng"
+  );
+  if (order) orders.push(order);
+
+  // SHIPPED: 2 orders đã gửi
+  order = await createOrder(
+    customers[2]!,
+    vendor1,
+    OrderStatus.SHIPPED,
+    "VN123456789",
+    "Đã gửi qua GHTK"
+  );
+  if (order) orders.push(order);
+
+  order = await createOrder(
+    customers[0]!,
+    vendor1,
+    OrderStatus.SHIPPED,
+    "VN987654321",
+    "Đã gửi qua GHN"
+  );
+  if (order) orders.push(order);
+
+  // DELIVERED: 2 orders đã hoàn thành (tính revenue)
+  order = await createOrder(customers[1]!, vendor1, OrderStatus.DELIVERED);
+  if (order) orders.push(order);
+
+  order = await createOrder(customers[2]!, vendor1, OrderStatus.DELIVERED);
+  if (order) orders.push(order);
+
+  // CANCELLED: 1 order bị hủy
+  order = await createOrder(
+    customers[0]!,
+    vendor1,
+    OrderStatus.CANCELLED,
+    undefined,
+    "Khách yêu cầu hủy"
+  );
+  if (order) orders.push(order);
+
+  // ============================================
+  // VENDOR 2: 8 orders - NHIỀU DELIVERED ĐỂ TEST REVENUE
+  // ============================================
+  console.log("  → Vendor 2: 8 orders (high revenue test)");
+  const vendor2 = vendors[1];
+
+  // DELIVERED: 5 orders (để test revenue cao)
+  for (let i = 0; i < 5; i++) {
+    order = await createOrder(
+      customers[i % 3]!,
+      vendor2,
+      OrderStatus.DELIVERED
+    );
+    if (order) orders.push(order);
   }
 
-  console.log(`✅ Created ${orders.length} orders`);
+  // PENDING: 1 order
+  order = await createOrder(customers[0]!, vendor2, OrderStatus.PENDING);
+  if (order) orders.push(order);
+
+  // CANCELLED: 1 order (không tính revenue)
+  order = await createOrder(
+    customers[1]!,
+    vendor2,
+    OrderStatus.CANCELLED,
+    undefined,
+    "Khách hủy đơn"
+  );
+  if (order) orders.push(order);
+
+  // SHIPPED: 1 order
+  order = await createOrder(
+    customers[2]!,
+    vendor2,
+    OrderStatus.SHIPPED,
+    "VN555666777",
+    "Đang vận chuyển"
+  );
+  if (order) orders.push(order);
+
+  // ============================================
+  // VENDOR 3: 5 orders - CÂN BẰNG CÁC STATUS
+  // ============================================
+  console.log("  → Vendor 3: 5 orders (balanced status)");
+  const vendor3 = vendors[2];
+
+  // PENDING: 1 order
+  order = await createOrder(customers[0]!, vendor3, OrderStatus.PENDING);
+  if (order) orders.push(order);
+
+  // PROCESSING: 1 order
+  order = await createOrder(
+    customers[1]!,
+    vendor3,
+    OrderStatus.PROCESSING,
+    undefined,
+    "Đang xử lý"
+  );
+  if (order) orders.push(order);
+
+  // SHIPPED: 1 order
+  order = await createOrder(
+    customers[2]!,
+    vendor3,
+    OrderStatus.SHIPPED,
+    "VN111222333",
+    "Đã gửi"
+  );
+  if (order) orders.push(order);
+
+  // DELIVERED: 2 orders
+  order = await createOrder(customers[0]!, vendor3, OrderStatus.DELIVERED);
+  if (order) orders.push(order);
+
+  order = await createOrder(customers[1]!, vendor3, OrderStatus.DELIVERED);
+  if (order) orders.push(order);
+
+  // ============================================
+  // PENDING_PAYMENT: 2 orders chưa thanh toán
+  // ============================================
+  console.log("  → Creating pending payment orders");
+  order = await createOrder(
+    customers[0]!,
+    vendor1,
+    OrderStatus.PENDING_PAYMENT
+  );
+  if (order) orders.push(order);
+
+  order = await createOrder(
+    customers[1]!,
+    vendor2,
+    OrderStatus.PENDING_PAYMENT
+  );
+  if (order) orders.push(order);
+
+  console.log(`\n✅ Created ${orders.length} orders với nhiều status:`);
+  console.log(
+    `  - PENDING: ${
+      orders.filter((o) => o.status === "PENDING").length
+    } (cần vendor xử lý)`
+  );
+  console.log(
+    `  - PROCESSING: ${
+      orders.filter((o) => o.status === "PROCESSING").length
+    } (đang chuẩn bị)`
+  );
+  console.log(
+    `  - SHIPPED: ${
+      orders.filter((o) => o.status === "SHIPPED").length
+    } (đã gửi)`
+  );
+  console.log(
+    `  - DELIVERED: ${
+      orders.filter((o) => o.status === "DELIVERED").length
+    } (tính revenue)`
+  );
+  console.log(
+    `  - CANCELLED: ${
+      orders.filter((o) => o.status === "CANCELLED").length
+    } (không tính revenue)`
+  );
+  console.log(
+    `  - PENDING_PAYMENT: ${
+      orders.filter((o) => o.status === "PENDING_PAYMENT").length
+    } (chưa thanh toán)`
+  );
 
   return orders;
 }
