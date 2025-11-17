@@ -5,7 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getOrders } from "../actions/get-orders";
 import { getVendors } from "../actions/get-vendors";
 import { OrdersTable } from "./OrdersTable";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import {
@@ -69,6 +74,7 @@ export function OrdersPage() {
   useEffect(() => {
     const page = parseInt(searchParams.get("page") || "1");
     loadOrders(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const loadVendors = async () => {
@@ -169,7 +175,9 @@ export function OrdersPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">Tất cả</SelectItem>
-                  <SelectItem value="PENDING_PAYMENT">Chờ thanh toán</SelectItem>
+                  <SelectItem value="PENDING_PAYMENT">
+                    Chờ thanh toán
+                  </SelectItem>
                   <SelectItem value="PENDING">Chờ xử lý</SelectItem>
                   <SelectItem value="PROCESSING">Đang chuẩn bị</SelectItem>
                   <SelectItem value="SHIPPED">Đang giao</SelectItem>
@@ -205,7 +213,9 @@ export function OrdersPage() {
               <Input
                 type="date"
                 value={filters.startDate}
-                onChange={(e) => handleFilterChange("startDate", e.target.value)}
+                onChange={(e) =>
+                  handleFilterChange("startDate", e.target.value)
+                }
               />
             </div>
 

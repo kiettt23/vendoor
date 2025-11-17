@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { getOrderDetail } from "../actions/get-order-detail";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { OrderStatusBadge } from "./OrderStatusBadge";
