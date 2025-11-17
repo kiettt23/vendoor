@@ -24,7 +24,13 @@ export function VendorStatusFilter({
   const handleStatusChange = (value: string) => {
     const params = new URLSearchParams();
     params.set("page", "1"); // Reset to page 1 when filter changes
-    params.set("status", value);
+
+    // Only add status if not "ALL"
+    if (value !== "ALL") {
+      params.set("status", value);
+    }
+
+    // Preserve search filter
     if (currentSearch) {
       params.set("search", currentSearch);
     }

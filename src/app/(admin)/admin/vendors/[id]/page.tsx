@@ -1,5 +1,10 @@
 import { VendorDetailPage } from "@/features/admin/components/VendorDetailPage";
 
-export default function Page({ params }: { params: { id: string } }) {
-  return <VendorDetailPage vendorId={params.id} />;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  return <VendorDetailPage vendorId={id} />;
 }

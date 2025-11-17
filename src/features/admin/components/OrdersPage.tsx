@@ -198,7 +198,7 @@ export function OrdersPage() {
                   <SelectValue placeholder="Tất cả vendors" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tất cả vendors</SelectItem>
+                  <SelectItem value="ALL">Tất cả vendors</SelectItem>
                   {vendors.map((vendor) => (
                     <SelectItem key={vendor.id} value={vendor.id}>
                       {vendor.shopName}

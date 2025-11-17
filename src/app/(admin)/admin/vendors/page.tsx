@@ -1,9 +1,10 @@
 import { VendorsPage } from "@/features/admin/components/VendorsPage";
 
-export default function Page({
+export default async function Page({
   searchParams,
 }: {
-  searchParams: { page?: string; status?: string; search?: string };
+  searchParams: Promise<{ page?: string; status?: string; search?: string }>;
 }) {
-  return <VendorsPage searchParams={searchParams} />;
+  const resolvedSearchParams = await searchParams;
+  return <VendorsPage searchParams={resolvedSearchParams} />;
 }
