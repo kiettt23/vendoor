@@ -1,8 +1,10 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { multiSession } from "better-auth/plugins";
 import { prisma } from "@/shared/lib/prisma";
 
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -32,6 +34,12 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day
   },
+
+  plugins: [
+    multiSession({
+      maximumSessions: 5, // Max 5 sessions per device
+    }),
+  ],
 });
 
 export type Session = typeof auth.$Infer.Session;

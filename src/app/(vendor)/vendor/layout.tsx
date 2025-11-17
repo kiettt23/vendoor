@@ -7,7 +7,6 @@ import {
   Package,
   ShoppingCart,
   DollarSign,
-  Store,
 } from "lucide-react";
 import { prisma } from "@/shared/lib/prisma";
 
@@ -73,21 +72,6 @@ export default async function VendorLayout({
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Store className="h-6 w-6" />
-            <span className="font-bold text-lg">{vendorProfile.shopName}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
-              {session.user.name || session.user.email}
-            </span>
-          </div>
-        </div>
-      </header>
-
       <div className="container mx-auto px-4">
         <div className="flex gap-6 py-6">
           {/* Sidebar */}

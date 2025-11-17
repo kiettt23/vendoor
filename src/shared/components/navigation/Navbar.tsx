@@ -24,6 +24,7 @@ import { signOut } from "@/shared/lib/auth-client";
 import { useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
+import { AccountSwitcher } from "@/features/auth/components/AccountSwitcher";
 
 // ============================================
 // NAVBAR COMPONENT
@@ -186,42 +187,45 @@ export function Navbar({ user }: NavbarProps) {
           {/* User Menu */}
           <div className="hidden md:flex items-center gap-4">
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <User className="h-4 w-4" />
-                    <span className="max-w-[150px] truncate">
-                      {user.name || user.email}
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="flex flex-col space-y-1 p-2">
-                    <p className="text-sm font-medium">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {user.email}
-                    </p>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/orders">Đơn hàng của tôi</Link>
-                  </DropdownMenuItem>
-                  {isVendor && (
+              <>
+                <AccountSwitcher />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <User className="h-4 w-4" />
+                      <span className="max-w-[150px] truncate">
+                        {user.name || user.email}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="flex flex-col space-y-1 p-2">
+                      <p className="text-sm font-medium">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/vendor">Quản lý Shop</Link>
+                      <Link href="/orders">Đơn hàng của tôi</Link>
                     </DropdownMenuItem>
-                  )}
-                  {isAdmin && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin">Admin Panel</Link>
+                    {isVendor && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/vendor">Quản lý Shop</Link>
+                      </DropdownMenuItem>
+                    )}
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin">Admin Panel</Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                      Đăng xuất
                     </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    Đăng xuất
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <div className="flex items-center gap-2">
                 <Button variant="ghost" size="sm" asChild>

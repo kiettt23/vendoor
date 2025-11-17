@@ -1,5 +1,8 @@
 import { createAuthClient } from "better-auth/react";
-import { inferAdditionalFields } from "better-auth/client/plugins";
+import {
+  inferAdditionalFields,
+  multiSessionClient,
+} from "better-auth/client/plugins";
 import type { auth } from "./auth";
 
 export const authClient = createAuthClient({
@@ -7,6 +10,8 @@ export const authClient = createAuthClient({
   plugins: [
     // Infer additional fields from server auth config
     inferAdditionalFields<typeof auth>(),
+    // Multi-session support for switching accounts
+    multiSessionClient(),
   ],
 });
 
