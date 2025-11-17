@@ -47,7 +47,7 @@ export function VendorActions({
       } else {
         toast.error(result.error);
       }
-    } catch (error) {
+    } catch {
       toast.error("Có lỗi xảy ra");
     } finally {
       setIsApproving(false);
@@ -63,7 +63,7 @@ export function VendorActions({
       } else {
         toast.error(result.error);
       }
-    } catch (error) {
+    } catch {
       toast.error("Có lỗi xảy ra");
     } finally {
       setIsRejecting(false);

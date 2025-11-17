@@ -26,7 +26,16 @@ export async function getVendors(params: GetVendorsParams = {}) {
     const skip = (page - 1) * pageSize;
 
     // Build where clause
-    const where: any = {};
+    const where: {
+      status?: VendorStatus;
+      OR?: Array<{
+        shopName?: { contains: string; mode: "insensitive" };
+        user?: {
+          name?: { contains: string; mode: "insensitive" };
+          email?: { contains: string; mode: "insensitive" };
+        };
+      }>;
+    } = {};
 
     // Filter by status
     if (status !== "ALL") {
