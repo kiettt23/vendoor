@@ -4,15 +4,9 @@ import { VendorStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { VendorStatusFilter } from "./VendorStatusFilter";
 
 interface VendorsPageProps {
   searchParams: {
@@ -78,22 +72,7 @@ export async function VendorsPage({ searchParams }: VendorsPageProps) {
         </form>
 
         {/* Status Filter */}
-        <Select
-          value={status}
-          onValueChange={(value) => {
-            window.location.href = buildUrl({ status: value, page: 1 });
-          }}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Lọc trạng thái" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Tất cả</SelectItem>
-            <SelectItem value="PENDING">Chờ duyệt</SelectItem>
-            <SelectItem value="APPROVED">Đã duyệt</SelectItem>
-            <SelectItem value="REJECTED">Đã từ chối</SelectItem>
-          </SelectContent>
-        </Select>
+        <VendorStatusFilter currentStatus={status} currentSearch={search} />
       </div>
 
       {/* Stats */}
