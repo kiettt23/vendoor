@@ -3,6 +3,10 @@
  * Không dùng Better Auth plugin - tự quản lý bằng localStorage
  */
 
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("MultiAccountStorage");
+
 export interface StoredAccount {
   userId: string;
   email: string;
@@ -56,7 +60,7 @@ export function saveAccount(account: Omit<StoredAccount, "addedAt">): void {
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
   } catch (error) {
-    console.error("Failed to save account:", error);
+    logger.error("Failed to save account", error);
   }
 }
 
@@ -71,7 +75,7 @@ export function removeAccount(userId: string): void {
     accounts = accounts.filter((a) => a.userId !== userId);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
   } catch (error) {
-    console.error("Failed to remove account:", error);
+    logger.error("Failed to remove account", error);
   }
 }
 
@@ -88,7 +92,7 @@ export function switchToAccount(sessionToken: string): void {
     // Reload page để refresh session
     window.location.reload();
   } catch (error) {
-    console.error("Failed to switch account:", error);
+    logger.error("Failed to switch account", error);
   }
 }
 

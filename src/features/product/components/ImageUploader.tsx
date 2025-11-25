@@ -7,6 +7,7 @@ import { Card } from "@/shared/components/ui/card";
 import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { getCloudinarySignature } from "@/features/product/actions/get-cloudinary-signature";
+import { createLogger } from "@/shared/lib/logger";
 
 // ============================================
 // TYPES
@@ -123,7 +124,8 @@ export function ImageUploader({
         onChange([...images, ...newImages]);
         toast.success(`Đã upload ${validFiles.length} ảnh`);
       } catch (error) {
-        console.error("Upload error:", error);
+        const logger = createLogger("ImageUploader");
+        logger.error("Upload failed", error);
         toast.error(
           error instanceof Error ? error.message : "Có lỗi khi upload ảnh"
         );

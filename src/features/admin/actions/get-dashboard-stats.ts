@@ -3,6 +3,9 @@
 import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AdminActions");
 
 export async function getAdminDashboardStats() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -92,7 +95,7 @@ export async function getAdminDashboardStats() {
       },
     };
   } catch (error) {
-    console.error("Error fetching admin dashboard stats:", error);
+    logger.error("Failed to fetch dashboard stats", error);
     return {
       success: false,
       error: "Không thể tải thống kê dashboard",

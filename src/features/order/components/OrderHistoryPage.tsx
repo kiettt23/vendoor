@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Package, Store, Calendar, ChevronRight } from "lucide-react";
+import { createLogger } from "@/shared/lib/logger";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
@@ -18,6 +19,8 @@ import {
   type OrderListItem,
 } from "../actions/get-customer-orders";
 import { formatPrice } from "../lib/utils";
+
+const logger = createLogger("OrderHistory");
 
 /**
  * Order History List Component
@@ -55,7 +58,7 @@ export function OrderHistoryPage() {
         setTotal(result.total);
         setHasMore(result.hasMore);
       } catch (error) {
-        console.error("Error loading orders:", error);
+        logger.error("Failed to load orders", error);
       } finally {
         setIsLoading(false);
       }

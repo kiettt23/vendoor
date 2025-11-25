@@ -4,6 +4,9 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("CartError");
 
 /**
  * Error boundary for cart page
@@ -16,7 +19,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Cart error:", error);
+    logger.error("Cart error caught by error boundary", error);
   }, [error]);
 
   return (

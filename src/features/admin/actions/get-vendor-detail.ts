@@ -3,6 +3,9 @@
 import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AdminActions");
 
 export async function getVendorDetail(vendorId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -91,7 +94,7 @@ export async function getVendorDetail(vendorId: string) {
       },
     };
   } catch (error) {
-    console.error("Error fetching vendor detail:", error);
+    logger.error("Failed to fetch vendor detail", error);
     return {
       success: false,
       error: "Không thể tải thông tin vendor",

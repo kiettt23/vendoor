@@ -5,6 +5,9 @@ import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
 import { OrderStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("OrderActions");
 
 // ============================================
 // UPDATE ORDER STATUS (VENDOR)
@@ -144,7 +147,7 @@ export async function updateOrderStatus(
       message: `Đã cập nhật trạng thái đơn hàng ${order.orderNumber}`,
     };
   } catch (error) {
-    console.error("Failed to update order status:", error);
+    logger.error("Action failed", error);
     return {
       success: false,
       error: "Không thể cập nhật trạng thái đơn hàng",

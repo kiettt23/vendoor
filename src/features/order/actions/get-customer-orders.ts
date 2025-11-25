@@ -4,6 +4,9 @@ import { auth } from "@/shared/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/shared/lib/prisma";
 import type { OrderStatus } from "@prisma/client";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("OrderActions");
 
 /**
  * Get customer orders with pagination
@@ -124,7 +127,7 @@ export async function getCustomerOrders(
       hasMore: skip + orders.length < total,
     };
   } catch (error) {
-    console.error("Error fetching customer orders:", error);
+    logger.error("Action failed", error);
     return {
       orders: [],
       total: 0,

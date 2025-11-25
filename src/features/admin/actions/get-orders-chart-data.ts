@@ -3,6 +3,9 @@
 import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AdminActions");
 
 export async function getOrdersChartData(months: number = 12) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -66,7 +69,7 @@ export async function getOrdersChartData(months: number = 12) {
       data: chartData,
     };
   } catch (error) {
-    console.error("Error fetching orders chart data:", error);
+    logger.error("Failed to fetch orders chart data", error);
     return {
       success: false,
       error: "Không thể tải dữ liệu biểu đồ đơn hàng",

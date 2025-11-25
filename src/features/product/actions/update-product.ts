@@ -6,6 +6,9 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { updateProductSchema, type UpdateProductInput } from "../schema";
 import { generateUniqueSlug } from "../lib/utils";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("ProductActions");
 
 // ============================================
 // UPDATE PRODUCT
@@ -155,7 +158,7 @@ export async function updateProduct(
       productId: product.id,
     };
   } catch (error) {
-    console.error("[updateProduct] Error:", error);
+    logger.error("Failed to update product", error);
     return {
       success: false,
       error: "Failed to update product",

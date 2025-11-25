@@ -4,6 +4,9 @@ import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AdminActions");
 
 export async function deleteCategory(categoryId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -48,7 +51,7 @@ export async function deleteCategory(categoryId: string) {
       message: "Xóa danh mục thành công",
     };
   } catch (error) {
-    console.error("Error deleting category:", error);
+    logger.error("Failed to delete category", error);
     return { success: false, error: "Không thể xóa danh mục" };
   }
 }

@@ -6,6 +6,9 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createProductSchema, type CreateProductInput } from "../schema";
 import { generateUniqueSlug } from "../lib/utils";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("ProductActions");
 
 // ============================================
 // CREATE PRODUCT
@@ -114,7 +117,7 @@ export async function createProduct(
       productId: product.id,
     };
   } catch (error) {
-    console.error("[createProduct] Error:", error);
+    logger.error("Failed to create product", error);
     return {
       success: false,
       error: "Failed to create product",

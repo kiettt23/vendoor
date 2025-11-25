@@ -3,6 +3,9 @@
 import { auth } from "@/shared/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/shared/lib/prisma";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("OrderActions");
 
 /**
  * Get order detail by ID
@@ -164,7 +167,7 @@ export async function getOrderDetail(
         : null,
     };
   } catch (error) {
-    console.error("Error fetching order detail:", error);
+    logger.error("Action failed", error);
     return null;
   }
 }

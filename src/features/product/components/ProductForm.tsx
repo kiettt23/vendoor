@@ -27,6 +27,7 @@ import { createProductSchema, type CreateProductInput } from "../schema";
 import { createProduct } from "../actions/create-product";
 import { ImageUploader } from "./ImageUploader";
 import { VariantManager } from "./VariantManager";
+import { createLogger } from "@/shared/lib/logger";
 
 // ============================================
 // TYPES
@@ -117,7 +118,8 @@ export function ProductForm({
 
   // Handle form submit
   const onSubmit = async (data: CreateProductInput) => {
-    console.log("Form submit triggered", { isEditMode, data });
+    const logger = createLogger("ProductForm");
+    logger.debug("Form submit triggered", { isEditMode, data });
 
     // Validate: Must have at least 1 image
     if (data.images.length === 0) {
@@ -138,18 +140,18 @@ export function ProductForm({
 
       if (isEditMode) {
         // Update existing product
-        console.log("Updating product with ID:", initialData.id);
+        logger.debug("Updating product", { id: initialData.id });
         const { updateProduct } = await import("../actions/update-product");
         result = await updateProduct({
           id: initialData.id,
           ...data,
         });
-        console.log("Update result:", result);
+        logger.debug("Update result", result);
       } else {
         // Create new product
-        console.log("Creating new product");
+        logger.debug("Creating new product");
         result = await createProduct(data);
-        console.log("Create result:", result);
+        logger.debug("Create result", result);
       }
 
       if (result.success) {
@@ -181,7 +183,7 @@ export function ProductForm({
         }
       }
     } catch (error) {
-      console.error("Form submit error:", error);
+      logger.error("Form submit failed", error);
       toast.error(
         isEditMode
           ? "Có lỗi xảy ra khi cập nhật sản phẩm"

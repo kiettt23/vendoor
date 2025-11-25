@@ -9,7 +9,10 @@ import {
   syncCurrentAccount,
   type StoredAccount,
 } from "@/features/auth/lib/multi-account-storage";
+import { createLogger } from "@/shared/lib/logger";
 import { Button } from "@/shared/components/ui/button";
+
+const logger = createLogger("AccountSwitcher");
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,7 +63,7 @@ export function AccountSwitcher() {
       switchToAccount(account.sessionToken);
       // Page will reload automatically
     } catch (error) {
-      console.error("Failed to switch account:", error);
+      logger.error("Failed to switch account", error);
       toast.error("Không thể chuyển tài khoản");
       setIsLoading(false);
     }

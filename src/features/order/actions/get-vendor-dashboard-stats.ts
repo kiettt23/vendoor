@@ -4,6 +4,9 @@ import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
 import { OrderStatus } from "@prisma/client";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("OrderActions");
 
 // ============================================
 // GET VENDOR DASHBOARD STATS
@@ -183,7 +186,7 @@ export async function getVendorDashboardStats(): Promise<
       data: stats,
     };
   } catch (error) {
-    console.error("Failed to get vendor dashboard stats:", error);
+    logger.error("Action failed", error);
     return {
       success: false,
       error: "Không thể tải thông tin dashboard",

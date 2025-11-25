@@ -8,6 +8,9 @@ import { prepareOrderData, generateOrderNumber } from "../lib/utils";
 import type { CartItem } from "@/features/cart/types";
 import type { CreateOrdersResult } from "../types";
 import type { CheckoutFormData } from "../types";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("OrderActions");
 
 // ============================================
 // SERVER ACTION: Create Orders
@@ -260,7 +263,7 @@ export async function createOrders(
       totalAmount,
     };
   } catch (error) {
-    console.error("Create orders error:", error);
+    logger.error("Action failed", error);
 
     // Handle specific errors
     if (error instanceof Error) {

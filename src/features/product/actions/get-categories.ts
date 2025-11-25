@@ -1,6 +1,9 @@
 "use server";
 
 import { prisma } from "@/shared/lib/prisma";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("ProductActions");
 
 // ============================================
 // GET CATEGORIES
@@ -36,7 +39,7 @@ export async function getCategories(): Promise<GetCategoriesResult> {
       categories,
     };
   } catch (error) {
-    console.error("[getCategories] Error:", error);
+    logger.error("Failed to get categories", error);
     return {
       success: false,
       error: "Failed to get categories",

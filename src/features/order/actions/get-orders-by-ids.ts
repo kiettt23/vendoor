@@ -1,6 +1,9 @@
 "use server";
 
 import { prisma } from "@/shared/lib/prisma";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("OrderActions");
 
 /**
  * Get multiple orders by IDs (for order success page)
@@ -85,7 +88,7 @@ export async function getOrdersByIds(orderIds: string[]) {
       })),
     };
   } catch (error) {
-    console.error("[GET_ORDERS_BY_IDS_ERROR]", error);
+    logger.error("Action failed", error);
     return {
       success: false,
       orders: [],

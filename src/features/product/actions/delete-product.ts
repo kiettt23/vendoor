@@ -4,6 +4,9 @@ import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("ProductActions");
 
 // ============================================
 // DELETE PRODUCT (Soft Delete)
@@ -70,7 +73,7 @@ export async function deleteProduct(
       success: true,
     };
   } catch (error) {
-    console.error("[deleteProduct] Error:", error);
+    logger.error("Failed to delete product", error);
     return {
       success: false,
       error: "Failed to delete product",

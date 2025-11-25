@@ -3,6 +3,9 @@
 import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("ProductActions");
 
 // ============================================
 // TYPES
@@ -197,7 +200,7 @@ export async function getVendorProducts(
       },
     };
   } catch (error) {
-    console.error("[getVendorProducts] Error:", error);
+    logger.error("Failed to get vendor products", error);
     return {
       success: false,
       error: "Failed to get products",

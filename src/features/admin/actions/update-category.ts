@@ -5,6 +5,9 @@ import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
 import { updateCategorySchema } from "../schema/category.schema";
 import { revalidatePath } from "next/cache";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AdminActions");
 
 export async function updateCategory(data: unknown) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -65,7 +68,7 @@ export async function updateCategory(data: unknown) {
       data: category,
     };
   } catch (error) {
-    console.error("Error updating category:", error);
+    logger.error("Failed to update category", error);
     if (error instanceof Error) {
       return { success: false, error: error.message };
     }

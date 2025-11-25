@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import { createLogger } from "./logger";
 
 // ============================================
 // CONFIG
@@ -88,7 +89,8 @@ export async function uploadImage(
       uploadStream.end(buffer);
     });
   } catch (error) {
-    console.error("Upload error:", error);
+    const logger = createLogger("Cloudinary");
+    logger.error("Upload failed", error);
     throw new Error("Failed to upload image");
   }
 }
@@ -132,10 +134,6 @@ export async function deleteImage(publicId: string): Promise<void> {
  * const url = getPlaceholderImageUrl("product-1", 800, 600);
  * // → "https://picsum.photos/seed/product-1/800/600"
  */
-export function getPlaceholderImageUrl(
-  seed: string,
-  width: number = 800,
-  height: number = 600
-): string {
+export function getPlaceholderImageUrl(seed: string): string {
   return `https://picsum.photos/seed/${seed}/800/600`;
 }

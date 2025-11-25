@@ -240,7 +240,7 @@ export function OrderDetailPage({ orderId }: OrderDetailPageProps) {
           <div className="space-y-4">
             {order.items.map((item) => (
               <div key={item.id} className="flex gap-4">
-                <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border">
                   {item.variant.product.images[0]?.url ? (
                     <Image
                       src={item.variant.product.images[0].url}

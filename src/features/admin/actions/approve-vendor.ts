@@ -4,6 +4,9 @@ import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AdminActions");
 
 export async function approveVendor(vendorId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -45,7 +48,7 @@ export async function approveVendor(vendorId: string) {
       message: "Vendor đã được duyệt thành công",
     };
   } catch (error) {
-    console.error("Error approving vendor:", error);
+    logger.error("Failed to approve vendor", error);
     return {
       success: false,
       error: "Không thể duyệt vendor",

@@ -5,6 +5,9 @@ import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
 import { createCategorySchema } from "../schema/category.schema";
 import { revalidatePath } from "next/cache";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AdminActions");
 
 export async function createCategory(data: unknown) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -51,7 +54,7 @@ export async function createCategory(data: unknown) {
       data: category,
     };
   } catch (error) {
-    console.error("Error creating category:", error);
+    logger.error("Failed to create category", error);
     if (error instanceof Error) {
       return { success: false, error: error.message };
     }

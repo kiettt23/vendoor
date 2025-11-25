@@ -4,6 +4,9 @@ import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
 import { OrderStatus } from "@prisma/client";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AdminActions");
 
 interface GetOrdersParams {
   page?: number;
@@ -103,7 +106,7 @@ export async function getOrders(params: GetOrdersParams = {}) {
       },
     };
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    logger.error("Failed to fetch orders", error);
     return {
       success: false,
       error: "Không thể tải danh sách đơn hàng",

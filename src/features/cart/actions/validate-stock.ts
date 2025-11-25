@@ -1,7 +1,10 @@
 "use server";
 
 import { prisma } from "@/shared/lib/prisma";
+import { createLogger } from "@/shared/lib/logger";
 import type { StockValidationResult } from "../types";
+
+const logger = createLogger("CartActions");
 
 // ============================================
 // SERVER ACTION: Validate Cart Stock
@@ -62,7 +65,7 @@ export async function validateCartStock(
       hasWarnings,
     };
   } catch (error) {
-    console.error("Stock validation error:", error);
+    logger.error("Stock validation failed", error);
 
     // Return pessimistic result on error
     return {

@@ -10,6 +10,9 @@ import type { CartItem } from "@/features/cart/types";
 import { useCart } from "@/features/cart/hooks/useCart";
 import { createOrders } from "../actions/create-orders";
 import { validateCheckout } from "../actions/validate-checkout";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("Checkout");
 
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -138,7 +141,7 @@ export function CheckoutForm({ items, onCheckoutStart }: CheckoutFormProps) {
       // Navigate to success page (use replace to prevent back to checkout)
       router.replace(`/orders?orders=${orderIds}`);
     } catch (error) {
-      console.error("Checkout error:", error);
+      logger.error("Checkout failed", error);
 
       // Better error messages
       if (error instanceof Error) {

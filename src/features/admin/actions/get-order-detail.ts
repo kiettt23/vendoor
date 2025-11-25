@@ -3,6 +3,9 @@
 import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AdminActions");
 
 export async function getOrderDetail(orderId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -63,7 +66,7 @@ export async function getOrderDetail(orderId: string) {
       data: order,
     };
   } catch (error) {
-    console.error("Error fetching order detail:", error);
+    logger.error("Failed to fetch order detail", error);
     return {
       success: false,
       error: "Không thể tải thông tin đơn hàng",

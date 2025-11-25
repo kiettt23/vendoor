@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle2, Package, Store, MapPin, Clock } from "lucide-react";
+import { createLogger } from "@/shared/lib/logger";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -15,6 +16,8 @@ import {
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
 import { getOrdersByIds } from "../actions/get-orders-by-ids";
+
+const logger = createLogger("OrderSuccess");
 
 /**
  * Order Success Page Component
@@ -86,7 +89,7 @@ export function OrderSuccessPage() {
           router.push("/");
         }
       } catch (error) {
-        console.error("Failed to load orders:", error);
+        logger.error("Failed to load orders", error);
         router.push("/");
       } finally {
         setLoading(false);

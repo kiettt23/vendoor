@@ -6,6 +6,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterInput } from "@/features/auth/schema";
 import { authClient } from "@/shared/lib/auth-client";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AuthPages");
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -48,7 +51,7 @@ export default function RegisterPage() {
       router.push("/");
       router.refresh();
     } catch (error) {
-      console.error(error);
+      logger.error("Registration failed", error);
       setError("root", { message: "Có lỗi xảy ra. Vui lòng thử lại." });
     } finally {
       setIsLoading(false);

@@ -8,6 +8,9 @@ import Link from "next/link";
 
 import { loginSchema, type LoginInput } from "@/features/auth/schema";
 import { authClient } from "@/shared/lib/auth-client";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AuthPages");
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -56,7 +59,7 @@ export default function LoginPage() {
       router.push("/");
       router.refresh();
     } catch (error) {
-      console.error("Login error:", error);
+      logger.error("Login failed", error);
       setErrorMessage("Có lỗi xảy ra. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);

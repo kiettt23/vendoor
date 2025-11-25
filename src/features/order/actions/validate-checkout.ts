@@ -3,6 +3,9 @@
 import { prisma } from "@/shared/lib/prisma";
 import { groupItemsByVendor } from "@/features/cart/lib/utils";
 import type { CartItem } from "@/features/cart/types";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("OrderActions");
 
 // ============================================
 // VALIDATION RESULT TYPES
@@ -174,7 +177,7 @@ export async function validateCheckout(
       invalidItems: [],
     };
   } catch (error) {
-    console.error("Validate checkout error:", error);
+    logger.error("Action failed", error);
 
     return {
       isValid: false,

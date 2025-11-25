@@ -3,6 +3,9 @@
 import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AdminActions");
 
 export async function getRevenueChartData(months: number = 12) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -71,7 +74,7 @@ export async function getRevenueChartData(months: number = 12) {
       data: chartData,
     };
   } catch (error) {
-    console.error("Error fetching revenue chart data:", error);
+    logger.error("Failed to fetch revenue chart data", error);
     return {
       success: false,
       error: "Không thể tải dữ liệu biểu đồ doanh thu",

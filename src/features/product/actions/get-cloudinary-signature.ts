@@ -3,6 +3,9 @@
 import { v2 as cloudinary } from "cloudinary";
 import { auth } from "@/shared/lib/auth";
 import { headers } from "next/headers";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("CloudinarySignature");
 
 // ============================================
 // CONFIG
@@ -77,7 +80,7 @@ export async function getCloudinarySignature(): Promise<GetCloudinarySignatureRe
       },
     };
   } catch (error) {
-    console.error("[getCloudinarySignature] Error:", error);
+    logger.error("Failed to generate Cloudinary signature", error);
     return {
       success: false,
       error: "Failed to generate signature",

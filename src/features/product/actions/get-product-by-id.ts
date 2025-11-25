@@ -3,6 +3,9 @@
 import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("ProductActions");
 
 // ============================================
 // GET PRODUCT BY ID
@@ -135,7 +138,7 @@ export async function getProductById(
       },
     };
   } catch (error) {
-    console.error("[getProductById] Error:", error);
+    logger.error("Failed to get product by ID", error);
     return {
       success: false,
       error: "Failed to get product",

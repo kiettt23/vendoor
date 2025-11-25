@@ -66,7 +66,7 @@ export function SuccessBanner({
   return (
     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
       <div className="flex items-start gap-3">
-        <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+        <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
         <div className="flex-1">
           {title && (
             <p className="font-semibold text-green-900 mb-1">{title}</p>
@@ -76,7 +76,7 @@ export function SuccessBanner({
         {onDismiss && (
           <button
             onClick={onDismiss}
-            className="text-green-600 hover:text-green-800 flex-shrink-0"
+            className="text-green-600 hover:text-green-800 shrink-0"
             aria-label="Đóng"
           >
             <svg

@@ -4,6 +4,9 @@ import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
 import { VendorStatus } from "@prisma/client";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AdminActions");
 
 interface GetVendorsParams {
   page?: number;
@@ -110,7 +113,7 @@ export async function getVendors(params: GetVendorsParams = {}) {
       },
     };
   } catch (error) {
-    console.error("Error fetching vendors:", error);
+    logger.error("Failed to fetch vendors", error);
     return {
       success: false,
       error: "Không thể tải danh sách vendors",

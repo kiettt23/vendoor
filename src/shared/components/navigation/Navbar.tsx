@@ -25,6 +25,7 @@ import { useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
 import { AccountSwitcher } from "@/features/auth/components/AccountSwitcher";
+import { createLogger } from "@/shared/lib/logger";
 
 // ============================================
 // NAVBAR COMPONENT
@@ -72,7 +73,8 @@ export function Navbar({ user }: NavbarProps) {
       router.push("/");
       router.refresh();
     } catch (error) {
-      console.error("Logout error:", error);
+      const logger = createLogger("Auth");
+      logger.error("Logout failed", error);
       toast.error("Có lỗi xảy ra khi đăng xuất");
     }
   };

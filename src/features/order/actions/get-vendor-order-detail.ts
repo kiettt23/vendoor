@@ -3,6 +3,9 @@
 import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("OrderActions");
 
 // ============================================
 // GET VENDOR ORDER DETAIL
@@ -237,7 +240,7 @@ export async function getVendorOrderDetail(
       data: result,
     };
   } catch (error) {
-    console.error("Failed to get vendor order detail:", error);
+    logger.error("Action failed", error);
     return {
       success: false,
       error: "Không thể tải thông tin đơn hàng",

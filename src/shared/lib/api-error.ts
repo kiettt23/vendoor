@@ -4,6 +4,7 @@
  */
 
 import { toast } from "sonner";
+import { createLogger } from "./logger";
 
 /**
  * Standard API error response
@@ -137,14 +138,13 @@ export function handleApiError(error: ApiError, fallbackMessage?: string) {
         : undefined,
   });
 
-  // Log to console in development
-  if (process.env.NODE_ENV === "development") {
-    console.error("[API Error]", {
-      code: error.code,
-      message: error.error,
-      details: error.details,
-    });
-  }
+  // Log error
+  const logger = createLogger("API");
+  logger.error("API Error", {
+    code: error.code,
+    message: error.error,
+    details: error.details,
+  });
 }
 
 /**

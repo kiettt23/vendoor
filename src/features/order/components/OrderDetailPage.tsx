@@ -14,7 +14,10 @@ import {
   Truck,
   XCircle,
 } from "lucide-react";
+import { createLogger } from "@/shared/lib/logger";
 import { Button } from "@/shared/components/ui/button";
+
+const logger = createLogger("OrderDetail");
 import {
   Card,
   CardContent,
@@ -60,7 +63,7 @@ export function OrderDetailPage({ orderId }: OrderDetailPageProps) {
 
         setOrder(data);
       } catch (err) {
-        console.error("Error loading order:", err);
+        logger.error("Failed to load order", err);
         setError("Có lỗi xảy ra khi tải đơn hàng");
       } finally {
         setIsLoading(false);

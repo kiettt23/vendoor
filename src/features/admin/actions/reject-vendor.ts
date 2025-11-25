@@ -4,6 +4,9 @@ import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("AdminActions");
 
 export async function rejectVendor(vendorId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -45,7 +48,7 @@ export async function rejectVendor(vendorId: string) {
       message: "Vendor đã bị từ chối",
     };
   } catch (error) {
-    console.error("Error rejecting vendor:", error);
+    logger.error("Failed to reject vendor", error);
     return {
       success: false,
       error: "Không thể từ chối vendor",

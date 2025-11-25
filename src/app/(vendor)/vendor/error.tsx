@@ -4,6 +4,9 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("VendorError");
 
 /**
  * Error boundary for vendor dashboard
@@ -16,7 +19,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Vendor dashboard error:", error);
+    logger.error("Vendor dashboard error caught by error boundary", error);
   }, [error]);
 
   return (

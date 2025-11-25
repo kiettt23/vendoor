@@ -4,6 +4,9 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { ServerCrash } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("GlobalError");
 
 /**
  * Global error boundary
@@ -18,7 +21,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log error to error reporting service (e.g., Sentry)
-    console.error("Global error:", error);
+    logger.error("Unhandled error caught by error boundary", error);
   }, [error]);
 
   return (

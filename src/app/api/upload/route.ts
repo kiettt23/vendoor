@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { uploadImage } from "@/shared/lib/cloudinary";
 import { auth } from "@/shared/lib/auth";
+import { createLogger } from "@/shared/lib/logger";
 
 // ============================================
 // VALIDATION SCHEMA
@@ -70,7 +71,8 @@ export async function POST(request: NextRequest) {
       publicId: result.publicId,
     });
   } catch (error) {
-    console.error("Upload error:", error);
+    const logger = createLogger("UploadAPI");
+    logger.error("Upload failed", error);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }

@@ -4,6 +4,9 @@ import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { createLogger } from "@/shared/lib/logger";
+
+const logger = createLogger("ProductActions");
 
 // ============================================
 // TOGGLE PRODUCT STATUS
@@ -70,7 +73,7 @@ export async function toggleProductStatus(
       success: true,
     };
   } catch (error) {
-    console.error("[toggleProductStatus] Error:", error);
+    logger.error("Failed to toggle product status", error);
     return {
       success: false,
       error: "Failed to toggle product status",
