@@ -1,6 +1,8 @@
 import { v2 as cloudinary } from "cloudinary";
 import { createLogger } from "./logger";
 
+const logger = createLogger("Cloudinary");
+
 // ============================================
 // CONFIG
 // ============================================
@@ -112,7 +114,7 @@ export async function deleteImage(publicId: string): Promise<void> {
   try {
     await cloudinary.uploader.destroy(publicId);
   } catch (error) {
-    console.error("Delete error:", error);
+    logger.error("Delete failed", error);
     throw new Error("Failed to delete image");
   }
 }

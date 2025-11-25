@@ -6,6 +6,8 @@
 import { toast } from "sonner";
 import { createLogger } from "./logger";
 
+const logger = createLogger("ServerAction");
+
 /**
  * Standard API error response
  */
@@ -173,7 +175,7 @@ export function withErrorHandling<
     try {
       return await action(...args);
     } catch (error) {
-      console.error("[Server Action Error]", error);
+      logger.error("Server action failed", error);
 
       // Handle Zod validation errors
       if (error instanceof Error && error.name === "ZodError") {
