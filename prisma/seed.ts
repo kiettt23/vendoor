@@ -1,708 +1,562 @@
-import {
-  PrismaClient,
-  VendorStatus,
-  OrderStatus,
-  PaymentStatus,
-  PaymentMethod,
-} from "@prisma/client";
-import { getPlaceholderImageUrl } from "../src/shared/lib/cloudinary";
-import { auth } from "../src/shared/lib/auth";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// ============================================
-// 1. CLEAR DATABASE
-// ============================================
-
-async function clearDatabase() {
-  console.log("🗑️  Clearing database...");
-
-  await prisma.orderItem.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.payment.deleteMany();
-  await prisma.productImage.deleteMany();
-  await prisma.productVariant.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.category.deleteMany();
-  await prisma.vendorProfile.deleteMany();
-  await prisma.account.deleteMany();
-  await prisma.session.deleteMany();
-  await prisma.verification.deleteMany();
-  await prisma.user.deleteMany();
-
-  console.log("✅ Database cleared");
-}
-
-// ============================================
-// 2. SEED USERS
-// ============================================
-
-async function seedUsers() {
-  console.log("👤 Seeding users...");
-
-  // ============================================
-  // 2.1 ADMIN - Dùng Better Auth API
-  // ============================================
-
-  const adminResult = await auth.api.signUpEmail({
-    body: {
-      email: "admin@vendoor.com",
-      password: "Password123!",
-      name: "Admin",
-    },
-  });
-
-  if (!adminResult) {
-    throw new Error("Failed to create admin user");
-  }
-
-  // Update roles (Better Auth tạo với roles: ["CUSTOMER"] mặc định)
-  const admin = await prisma.user.update({
-    where: { email: "admin@vendoor.com" },
-    data: {
-      roles: ["ADMIN"],
-      emailVerified: true,
-    },
-  });
-
-  // ============================================
-  // 2.2 CUSTOMERS - Dùng Better Auth API
-  // ============================================
-
-  const customers = [];
-
-  for (let i = 1; i <= 3; i++) {
-    await auth.api.signUpEmail({
-      body: {
-        email: `customer${i}@example.com`,
-        password: "Password123!",
-        name: `Khách Hàng ${i}`,
-      },
-    });
-
-    const customer = await prisma.user.update({
-      where: { email: `customer${i}@example.com` },
-      data: {
-        emailVerified: true,
-      },
-    });
-
-    customers.push(customer);
-  }
-
-  // ============================================
-  // 2.3 VENDORS
-  // ============================================
-
-  const vendorData = [
-    {
-      email: "vendor1@example.com",
-      name: "Shop Thời Trang XYZ",
-      shopName: "Shop Thời Trang XYZ",
-      slug: "shop-thoi-trang-xyz",
-      description: "Chuyên cung cấp quần áo thời trang nam nữ",
-    },
-    {
-      email: "vendor2@example.com",
-      name: "Điện Tử ABC",
-      shopName: "Điện Tử ABC",
-      slug: "dien-tu-abc",
-      description: "Phụ kiện điện tử, công nghệ",
-    },
-    {
-      email: "vendor3@example.com",
-      name: "Mỹ Phẩm DEF",
-      shopName: "Mỹ Phẩm DEF",
-      slug: "my-pham-def",
-      description: "Mỹ phẩm chính hãng",
-    },
-  ];
-
-  const vendors = [];
-
-  for (const data of vendorData) {
-    // Tạo user qua Better Auth
-    await auth.api.signUpEmail({
-      body: {
-        email: data.email,
-        password: "Password123!",
-        name: data.name,
-      },
-    });
-
-    // Update roles + tạo vendorProfile
-    const vendor = await prisma.user.update({
-      where: { email: data.email },
-      data: {
-        roles: ["VENDOR"],
-        emailVerified: true,
-        vendorProfile: {
-          create: {
-            shopName: data.shopName,
-            slug: data.slug,
-            description: data.description,
-            status: VendorStatus.APPROVED,
-          },
-        },
-      },
-      include: {
-        vendorProfile: true,
-      },
-    });
-
-    vendors.push(vendor);
-  }
-
-  console.log(
-    `✅ Created ${customers.length} customers, ${vendors.length} vendors, 1 admin`
-  );
-
-  return { admin, customers, vendors };
-}
-
-// ============================================
-// 3. SEED CATEGORIES
-// ============================================
-
-async function seedCategories() {
-  console.log("📁 Seeding categories...");
-
-  const categoriesData = [
-    {
-      name: "Thời Trang",
-      slug: "thoi-trang",
-      description: "Quần áo, giày dép, phụ kiện thời trang",
-    },
-    {
-      name: "Điện Tử",
-      slug: "dien-tu",
-      description: "Điện thoại, laptop, phụ kiện công nghệ",
-    },
-    {
-      name: "Mỹ Phẩm",
-      slug: "my-pham",
-      description: "Son, kem dưỡng da, nước hoa",
-    },
-    {
-      name: "Thực Phẩm",
-      slug: "thuc-pham",
-      description: "Đồ ăn, đồ uống, thực phẩm chức năng",
-    },
-    {
-      name: "Nội Thất",
-      slug: "noi-that",
-      description: "Bàn ghế, tủ kệ, đồ trang trí",
-    },
-  ];
-
-  await prisma.category.createMany({
-    data: categoriesData,
-  });
-
-  const allCategories = await prisma.category.findMany();
-
-  console.log(`✅ Created ${allCategories.length} categories`);
-
-  return allCategories;
-}
-
-// ============================================
-// 4. SEED PRODUCTS
-// ============================================
-
-async function seedProducts(vendors: any[], categories: any[]) {
-  console.log("📦 Seeding products...");
-
-  const products = [];
-
-  // ============================================
-  // 4.1 VENDOR 1: 8 PRODUCTS (Thời trang)
-  // ============================================
-
-  const fashionCategory = categories.find((c) => c.slug === "thoi-trang")!;
-
-  for (let i = 1; i <= 8; i++) {
-    const product = await prisma.product.create({
-      data: {
-        name: `Áo Thun Nam Cao Cấp ${i}`,
-        slug: `ao-thun-nam-${i}`,
-        description: `Áo thun nam chất liệu cotton 100%, form regular fit, thoáng mát`,
-        vendorId: vendors[0].id,
-        categoryId: fashionCategory.id,
-        variants: {
-          create: [
-            {
-              name: "Size M - Trắng",
-              sku: `ATN-${i}-M-WHITE`,
-              price: 199000,
-              stock: 50,
-              isDefault: true,
-            },
-            {
-              name: "Size L - Đen",
-              sku: `ATN-${i}-L-BLACK`,
-              price: 199000,
-              stock: 30,
-              isDefault: false,
-            },
-          ],
-        },
-        images: {
-          create: [
-            { url: getPlaceholderImageUrl(`product-${i}-1`), order: 0 },
-            { url: getPlaceholderImageUrl(`product-${i}-2`), order: 1 },
-            { url: getPlaceholderImageUrl(`product-${i}-3`), order: 2 },
-          ],
-        },
-      },
-    });
-    products.push(product);
-  }
-
-  // ============================================
-  // 4.2 VENDOR 2: 7 PRODUCTS (Điện tử)
-  // ============================================
-
-  const electronicsCategory = categories.find((c) => c.slug === "dien-tu")!;
-
-  for (let i = 1; i <= 7; i++) {
-    const product = await prisma.product.create({
-      data: {
-        name: `Tai Nghe Bluetooth ${i}`,
-        slug: `tai-nghe-bluetooth-${i}`,
-        description: `Tai nghe không dây, chống ồn chủ động, pin 24h`,
-        vendorId: vendors[1].id,
-        categoryId: electronicsCategory.id,
-        variants: {
-          create: [
-            {
-              name: "Default",
-              sku: `TNB-${i}-DEFAULT`,
-              price: 599000,
-              stock: 100,
-              isDefault: true,
-            },
-          ],
-        },
-        images: {
-          create: [
-            {
-              url: getPlaceholderImageUrl(`earphone-${i}-1`),
-              order: 0,
-            },
-            {
-              url: getPlaceholderImageUrl(`earphone-${i}-2`),
-              order: 1,
-            },
-          ],
-        },
-      },
-    });
-    products.push(product);
-  }
-
-  // ============================================
-  // 4.3 VENDOR 3: 5 PRODUCTS (Mỹ phẩm)
-  // ============================================
-
-  const cosmeticsCategory = categories.find((c) => c.slug === "my-pham")!;
-
-  for (let i = 1; i <= 5; i++) {
-    const product = await prisma.product.create({
-      data: {
-        name: `Son Môi Lì ${i}`,
-        slug: `son-moi-li-${i}`,
-        description: `Son lì lâu trôi, không khô môi, nhiều màu sắc`,
-        vendorId: vendors[2].id,
-        categoryId: cosmeticsCategory.id,
-        variants: {
-          create: [
-            {
-              name: "Màu Đỏ",
-              sku: `SML-${i}-RED`,
-              price: 149000,
-              stock: 200,
-              isDefault: true,
-            },
-            {
-              name: "Màu Hồng",
-              sku: `SML-${i}-PINK`,
-              price: 149000,
-              stock: 150,
-              isDefault: false,
-            },
-          ],
-        },
-        images: {
-          create: [
-            { url: getPlaceholderImageUrl(`lipstick-${i}-1`), order: 0 },
-            { url: getPlaceholderImageUrl(`lipstick-${i}-2`), order: 1 },
-          ],
-        },
-      },
-    });
-    products.push(product);
-  }
-
-  console.log(`✅ Created ${products.length} products`);
-
-  return products;
-}
-
-// ============================================
-// 5. SEED ORDERS
-// ============================================
-
-async function seedOrders(customers: any[], vendors: any[]) {
-  console.log("🛒 Seeding orders với nhiều test case...");
-
-  // Get all product variants with product info
-  const allVariants = await prisma.productVariant.findMany({
-    include: {
-      product: {
-        include: {
-          images: {
-            where: { order: 0 },
-            take: 1,
-          },
-        },
-      },
-    },
-  });
-
-  const orders = [];
-
-  // Helper: Create order với status cụ thể
-  const createOrder = async (
-    customer: any,
-    vendor: any,
-    status: OrderStatus,
-    trackingNumber?: string,
-    vendorNote?: string
-  ) => {
-    // Random 2-3 variants từ vendor
-    const vendorVariants = allVariants.filter(
-      (v) => v.product.vendorId === vendor.id
-    );
-
-    if (vendorVariants.length === 0) return null;
-
-    const selectedVariants = vendorVariants
-      .sort(() => Math.random() - 0.5)
-      .slice(
-        0,
-        Math.min(vendorVariants.length, Math.floor(Math.random() * 2) + 2)
-      );
-
-    const itemsData = selectedVariants.map((variant) => {
-      const quantity = Math.floor(Math.random() * 2) + 1;
-      return {
-        variantId: variant.id,
-        productName: variant.product.name,
-        variantName: variant.name,
-        quantity,
-        price: variant.price,
-        subtotal: variant.price * quantity,
-      };
-    });
-
-    const subtotal = itemsData.reduce((sum, item) => sum + item.subtotal, 0);
-    const shippingFee = 30000;
-    const platformFeeRate = 0.1;
-    const platformFee = Math.round(subtotal * platformFeeRate);
-    const vendorEarnings = subtotal - platformFee;
-    const total = subtotal + shippingFee;
-
-    // Generate unique order number
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 10000);
-    const orderNumber = `ORD-${timestamp}-${random}`;
-    const paymentNumber = `PAY-${timestamp}-${random}`;
-
-    // Payment status based on order status
-    const paymentStatus =
-      status === OrderStatus.PENDING_PAYMENT
-        ? PaymentStatus.PENDING
-        : PaymentStatus.COMPLETED;
-
-    // Create payment first
-    const payment = await prisma.payment.create({
-      data: {
-        paymentNumber,
-        method: PaymentMethod.VNPAY,
-        status: paymentStatus,
-        amount: total,
-        paidAt: paymentStatus === PaymentStatus.COMPLETED ? new Date() : null,
-      },
-    });
-
-    // Create order WITH items
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        customerId: customer.id,
-        vendorId: vendor.vendorProfile!.id,
-        paymentId: payment.id,
-        status,
-        subtotal,
-        shippingFee,
-        platformFee,
-        platformFeeRate,
-        vendorEarnings,
-        total,
-        trackingNumber,
-        vendorNote,
-        // Shipping info (mock data)
-        shippingName: customer.name || "Khách hàng",
-        shippingPhone: "0909123456",
-        shippingAddress: "123 Đường ABC, Phường XYZ",
-        shippingCity: "Hồ Chí Minh",
-        shippingDistrict: "Quận 1",
-        shippingWard: "Phường Bến Nghé",
-        items: {
-          create: itemsData,
-        },
-      },
-      include: {
-        items: true,
-      },
-    });
-
-    return order;
-  };
-
-  // ============================================
-  // VENDOR 1: 10 orders - ĐẦY ĐỦ TEST CASES
-  // ============================================
-  console.log("  → Vendor 1: 10 orders (full test cases)");
-  const vendor1 = vendors[0];
-
-  // PENDING: 3 orders cần vendor xử lý
-  let order = await createOrder(customers[0]!, vendor1, OrderStatus.PENDING);
-  if (order) orders.push(order);
-
-  order = await createOrder(customers[1]!, vendor1, OrderStatus.PENDING);
-  if (order) orders.push(order);
-
-  order = await createOrder(customers[2]!, vendor1, OrderStatus.PENDING);
-  if (order) orders.push(order);
-
-  // PROCESSING: 2 orders đang chuẩn bị
-  order = await createOrder(
-    customers[0]!,
-    vendor1,
-    OrderStatus.PROCESSING,
-    undefined,
-    "Đang đóng gói hàng"
-  );
-  if (order) orders.push(order);
-
-  order = await createOrder(
-    customers[1]!,
-    vendor1,
-    OrderStatus.PROCESSING,
-    undefined,
-    "Chờ lấy hàng"
-  );
-  if (order) orders.push(order);
-
-  // SHIPPED: 2 orders đã gửi
-  order = await createOrder(
-    customers[2]!,
-    vendor1,
-    OrderStatus.SHIPPED,
-    "VN123456789",
-    "Đã gửi qua GHTK"
-  );
-  if (order) orders.push(order);
-
-  order = await createOrder(
-    customers[0]!,
-    vendor1,
-    OrderStatus.SHIPPED,
-    "VN987654321",
-    "Đã gửi qua GHN"
-  );
-  if (order) orders.push(order);
-
-  // DELIVERED: 2 orders đã hoàn thành (tính revenue)
-  order = await createOrder(customers[1]!, vendor1, OrderStatus.DELIVERED);
-  if (order) orders.push(order);
-
-  order = await createOrder(customers[2]!, vendor1, OrderStatus.DELIVERED);
-  if (order) orders.push(order);
-
-  // CANCELLED: 1 order bị hủy
-  order = await createOrder(
-    customers[0]!,
-    vendor1,
-    OrderStatus.CANCELLED,
-    undefined,
-    "Khách yêu cầu hủy"
-  );
-  if (order) orders.push(order);
-
-  // ============================================
-  // VENDOR 2: 8 orders - NHIỀU DELIVERED ĐỂ TEST REVENUE
-  // ============================================
-  console.log("  → Vendor 2: 8 orders (high revenue test)");
-  const vendor2 = vendors[1];
-
-  // DELIVERED: 5 orders (để test revenue cao)
-  for (let i = 0; i < 5; i++) {
-    order = await createOrder(
-      customers[i % 3]!,
-      vendor2,
-      OrderStatus.DELIVERED
-    );
-    if (order) orders.push(order);
-  }
-
-  // PENDING: 1 order
-  order = await createOrder(customers[0]!, vendor2, OrderStatus.PENDING);
-  if (order) orders.push(order);
-
-  // CANCELLED: 1 order (không tính revenue)
-  order = await createOrder(
-    customers[1]!,
-    vendor2,
-    OrderStatus.CANCELLED,
-    undefined,
-    "Khách hủy đơn"
-  );
-  if (order) orders.push(order);
-
-  // SHIPPED: 1 order
-  order = await createOrder(
-    customers[2]!,
-    vendor2,
-    OrderStatus.SHIPPED,
-    "VN555666777",
-    "Đang vận chuyển"
-  );
-  if (order) orders.push(order);
-
-  // ============================================
-  // VENDOR 3: 5 orders - CÂN BẰNG CÁC STATUS
-  // ============================================
-  console.log("  → Vendor 3: 5 orders (balanced status)");
-  const vendor3 = vendors[2];
-
-  // PENDING: 1 order
-  order = await createOrder(customers[0]!, vendor3, OrderStatus.PENDING);
-  if (order) orders.push(order);
-
-  // PROCESSING: 1 order
-  order = await createOrder(
-    customers[1]!,
-    vendor3,
-    OrderStatus.PROCESSING,
-    undefined,
-    "Đang xử lý"
-  );
-  if (order) orders.push(order);
-
-  // SHIPPED: 1 order
-  order = await createOrder(
-    customers[2]!,
-    vendor3,
-    OrderStatus.SHIPPED,
-    "VN111222333",
-    "Đã gửi"
-  );
-  if (order) orders.push(order);
-
-  // DELIVERED: 2 orders
-  order = await createOrder(customers[0]!, vendor3, OrderStatus.DELIVERED);
-  if (order) orders.push(order);
-
-  order = await createOrder(customers[1]!, vendor3, OrderStatus.DELIVERED);
-  if (order) orders.push(order);
-
-  // ============================================
-  // PENDING_PAYMENT: 2 orders chưa thanh toán
-  // ============================================
-  console.log("  → Creating pending payment orders");
-  order = await createOrder(
-    customers[0]!,
-    vendor1,
-    OrderStatus.PENDING_PAYMENT
-  );
-  if (order) orders.push(order);
-
-  order = await createOrder(
-    customers[1]!,
-    vendor2,
-    OrderStatus.PENDING_PAYMENT
-  );
-  if (order) orders.push(order);
-
-  console.log(`\n✅ Created ${orders.length} orders với nhiều status:`);
-  console.log(
-    `  - PENDING: ${
-      orders.filter((o) => o.status === "PENDING").length
-    } (cần vendor xử lý)`
-  );
-  console.log(
-    `  - PROCESSING: ${
-      orders.filter((o) => o.status === "PROCESSING").length
-    } (đang chuẩn bị)`
-  );
-  console.log(
-    `  - SHIPPED: ${
-      orders.filter((o) => o.status === "SHIPPED").length
-    } (đã gửi)`
-  );
-  console.log(
-    `  - DELIVERED: ${
-      orders.filter((o) => o.status === "DELIVERED").length
-    } (tính revenue)`
-  );
-  console.log(
-    `  - CANCELLED: ${
-      orders.filter((o) => o.status === "CANCELLED").length
-    } (không tính revenue)`
-  );
-  console.log(
-    `  - PENDING_PAYMENT: ${
-      orders.filter((o) => o.status === "PENDING_PAYMENT").length
-    } (chưa thanh toán)`
-  );
-
-  return orders;
-}
-
-// ============================================
-// MAIN FUNCTION
-// ============================================
-
 async function main() {
-  console.log("🌱 Starting seed...\n");
+  console.log("🌱 Starting v0 seed...");
 
-  await clearDatabase();
+  // ============================================
+  // 1. CREATE CATEGORIES
+  // ============================================
+  console.log("📁 Creating categories...");
 
-  const { admin, customers, vendors } = await seedUsers();
-  const categories = await seedCategories();
-  const products = await seedProducts(vendors, categories);
-  const orders = await seedOrders(customers, vendors);
+  const categories = await Promise.all([
+    prisma.category.upsert({
+      where: { slug: "dien-thoai" },
+      update: {},
+      create: {
+        name: "Điện thoại",
+        slug: "dien-thoai",
+        description: "Điện thoại thông minh từ các thương hiệu hàng đầu",
+        image: "/placeholder.jpg", // Sẽ update sau
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: "laptop" },
+      update: {},
+      create: {
+        name: "Laptop",
+        slug: "laptop",
+        description: "Laptop cho công việc và giải trí",
+        image: "/placeholder.jpg",
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: "tablet" },
+      update: {},
+      create: {
+        name: "Tablet",
+        slug: "tablet",
+        description: "Máy tính bảng cao cấp",
+        image: "/placeholder.jpg",
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: "tai-nghe" },
+      update: {},
+      create: {
+        name: "Tai nghe",
+        slug: "tai-nghe",
+        description: "Tai nghe chính hãng chất lượng cao",
+        image: "/placeholder.jpg",
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: "phu-kien" },
+      update: {},
+      create: {
+        name: "Phụ kiện",
+        slug: "phu-kien",
+        description: "Phụ kiện công nghệ đa dạng",
+        image: "/placeholder.jpg",
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: "gaming" },
+      update: {},
+      create: {
+        name: "Gaming",
+        slug: "gaming",
+        description: "Thiết bị gaming chuyên nghiệp",
+        image: "/placeholder.jpg",
+      },
+    }),
+  ]);
 
-  console.log("\n✅ Seed completed!");
-  console.log("📊 Summary:");
-  console.log(`  - Users: ${customers.length + vendors.length + 1}`);
-  console.log(`  - Categories: ${categories.length}`);
-  console.log(`  - Products: ${products.length}`);
-  console.log(`  - Orders: ${orders.length}`);
-  console.log("\n🔗 Login credentials:");
-  console.log(
-    "  Email: admin@vendoor.com / customer1@example.com / vendor1@example.com"
-  );
-  console.log("  Password: Password123!");
-  console.log("\n💡 Run: npm run dev → http://localhost:3000/login");
+  console.log(`✅ Created ${categories.length} categories`);
+
+  // ============================================
+  // 2. CREATE VENDORS
+  // ============================================
+  console.log("🏪 Creating vendors...");
+
+  // Create vendor users first
+  const appleStoreUser = await prisma.user.upsert({
+    where: { email: "apple@vendoor.com" },
+    update: {},
+    create: {
+      email: "apple@vendoor.com",
+      name: "Apple Store VN",
+      phone: "1900000001",
+      emailVerified: true,
+      roles: ["VENDOR"],
+    },
+  });
+
+  const samsungUser = await prisma.user.upsert({
+    where: { email: "samsung@vendoor.com" },
+    update: {},
+    create: {
+      email: "samsung@vendoor.com",
+      name: "Samsung Official",
+      phone: "1900000002",
+      emailVerified: true,
+      roles: ["VENDOR"],
+    },
+  });
+
+  const sonyUser = await prisma.user.upsert({
+    where: { email: "sony@vendoor.com" },
+    update: {},
+    create: {
+      email: "sony@vendoor.com",
+      name: "Sony Center",
+      phone: "1900000003",
+      emailVerified: true,
+      roles: ["VENDOR"],
+    },
+  });
+
+  const techzoneUser = await prisma.user.upsert({
+    where: { email: "techzone@vendoor.com" },
+    update: {},
+    create: {
+      email: "techzone@vendoor.com",
+      name: "TechZone",
+      phone: "1900000004",
+      emailVerified: true,
+      roles: ["VENDOR"],
+    },
+  });
+
+  const logitechUser = await prisma.user.upsert({
+    where: { email: "logitech@vendoor.com" },
+    update: {},
+    create: {
+      email: "logitech@vendoor.com",
+      name: "Logitech Store",
+      phone: "1900000005",
+      emailVerified: true,
+      roles: ["VENDOR"],
+    },
+  });
+
+  const asusUser = await prisma.user.upsert({
+    where: { email: "asus@vendoor.com" },
+    update: {},
+    create: {
+      email: "asus@vendoor.com",
+      name: "ASUS Gaming VN",
+      phone: "1900000006",
+      emailVerified: true,
+      roles: ["VENDOR"],
+    },
+  });
+
+  // Create vendor profiles
+  const appleStore = await prisma.vendorProfile.upsert({
+    where: { userId: appleStoreUser.id },
+    update: {},
+    create: {
+      userId: appleStoreUser.id,
+      shopName: "Apple Store VN",
+      slug: "apple-store-vn",
+      description: "Nhà phân phối chính thức sản phẩm Apple tại Việt Nam",
+      logo: "/apple-logo-minimal.jpg",
+      banner: "/apple-store-modern-interior.jpg",
+      status: "APPROVED",
+      commissionRate: 0.1,
+    },
+  });
+
+  const samsungStore = await prisma.vendorProfile.upsert({
+    where: { userId: samsungUser.id },
+    update: {},
+    create: {
+      userId: samsungUser.id,
+      shopName: "Samsung Official",
+      slug: "samsung-official",
+      description: "Cửa hàng chính hãng Samsung",
+      logo: "/samsung-logo-blue.jpg",
+      banner: "/samsung-store-display.jpg",
+      status: "APPROVED",
+      commissionRate: 0.1,
+    },
+  });
+
+  const sonyStore = await prisma.vendorProfile.upsert({
+    where: { userId: sonyUser.id },
+    update: {},
+    create: {
+      userId: sonyUser.id,
+      shopName: "Sony Center",
+      slug: "sony-center",
+      description: "Trung tâm Sony chính hãng",
+      logo: "/placeholder-logo.png",
+      status: "APPROVED",
+      commissionRate: 0.1,
+    },
+  });
+
+  const techzoneStore = await prisma.vendorProfile.upsert({
+    where: { userId: techzoneUser.id },
+    update: {},
+    create: {
+      userId: techzoneUser.id,
+      shopName: "TechZone",
+      slug: "techzone",
+      description: "Đa dạng sản phẩm công nghệ",
+      logo: "/placeholder-logo.png",
+      status: "APPROVED",
+      commissionRate: 0.1,
+    },
+  });
+
+  const logitechStore = await prisma.vendorProfile.upsert({
+    where: { userId: logitechUser.id },
+    update: {},
+    create: {
+      userId: logitechUser.id,
+      shopName: "Logitech Store",
+      slug: "logitech-store",
+      description: "Cửa hàng Logitech chính hãng",
+      logo: "/placeholder-logo.png",
+      status: "APPROVED",
+      commissionRate: 0.1,
+    },
+  });
+
+  const asusStore = await prisma.vendorProfile.upsert({
+    where: { userId: asusUser.id },
+    update: {},
+    create: {
+      userId: asusUser.id,
+      shopName: "ASUS Gaming VN",
+      slug: "asus-gaming-vn",
+      description: "Chuyên gaming gear ASUS ROG",
+      logo: "/placeholder-logo.png",
+      status: "APPROVED",
+      commissionRate: 0.1,
+    },
+  });
+
+  console.log("✅ Created 6 vendors");
+
+  // ============================================
+  // 3. CREATE PRODUCTS (From v0 data)
+  // ============================================
+  console.log("📦 Creating products...");
+
+  const laptopCategory = categories.find((c) => c.slug === "laptop")!;
+  const phoneCategory = categories.find((c) => c.slug === "dien-thoai")!;
+  const tabletCategory = categories.find((c) => c.slug === "tablet")!;
+  const headphoneCategory = categories.find((c) => c.slug === "tai-nghe")!;
+  const accessoryCategory = categories.find((c) => c.slug === "phu-kien")!;
+  const gamingCategory = categories.find((c) => c.slug === "gaming")!;
+
+  // Helper function to create product with variant and images
+  async function createProduct(data: {
+    vendorId: string;
+    categoryId: string;
+    name: string;
+    slug: string;
+    description: string;
+    price: number;
+    compareAtPrice?: number;
+    stock: number;
+    images: string[];
+    sales?: number; // For sorting featured products
+    rating?: number;
+    reviews?: number;
+  }) {
+    const product = await prisma.product.create({
+      data: {
+        vendorId: data.vendorId,
+        categoryId: data.categoryId,
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        isActive: true,
+      },
+    });
+
+    // Create default variant
+    await prisma.productVariant.create({
+      data: {
+        productId: product.id,
+        name: "Mặc định",
+        price: data.price,
+        compareAtPrice: data.compareAtPrice,
+        stock: data.stock,
+        isDefault: true,
+      },
+    });
+
+    // Create images
+    await Promise.all(
+      data.images.map((url, index) =>
+        prisma.productImage.create({
+          data: {
+            productId: product.id,
+            url,
+            altText: data.name,
+            order: index,
+          },
+        })
+      )
+    );
+
+    return product;
+  }
+
+  // FEATURED PRODUCTS (High sales/rating for sorting)
+  await createProduct({
+    vendorId: appleStoreUser.id,
+    categoryId: laptopCategory.id,
+    name: "MacBook Pro 14 M3 Pro",
+    slug: "macbook-pro-14-m3-pro",
+    description:
+      "Hiệu năng vượt trội với chip M3 Pro, màn hình Liquid Retina XDR",
+    price: 49990000,
+    compareAtPrice: 54990000,
+    stock: 50,
+    images: ["/macbook-pro-14-m3-laptop-space-gray.jpg"],
+    sales: 256, // High sales for featured
+    rating: 4.9,
+    reviews: 256,
+  });
+
+  await createProduct({
+    vendorId: sonyUser.id,
+    categoryId: headphoneCategory.id,
+    name: "Sony WH-1000XM5",
+    slug: "sony-wh-1000xm5",
+    description: "Tai nghe chống ồn hàng đầu với AI noise cancelling",
+    price: 7490000,
+    compareAtPrice: 8990000,
+    stock: 100,
+    images: ["/sony-wh-1000xm5-headphones-black.jpg"],
+    sales: 189,
+    rating: 4.8,
+    reviews: 189,
+  });
+
+  await createProduct({
+    vendorId: samsungUser.id,
+    categoryId: tabletCategory.id,
+    name: "Samsung Galaxy Tab S9",
+    slug: "samsung-galaxy-tab-s9",
+    description: "Máy tính bảng cao cấp với S Pen đi kèm",
+    price: 18990000,
+    compareAtPrice: 21990000,
+    stock: 30,
+    images: ["/samsung-galaxy-tab-s9-tablet.jpg"],
+    sales: 134,
+    rating: 4.7,
+    reviews: 134,
+  });
+
+  await createProduct({
+    vendorId: logitechUser.id,
+    categoryId: accessoryCategory.id,
+    name: "Logitech MX Master 3S",
+    slug: "logitech-mx-master-3s",
+    description: "Chuột không dây cao cấp cho năng suất làm việc",
+    price: 2490000,
+    stock: 200,
+    images: ["/logitech-mx-master-3s-mouse.jpg"],
+    sales: 412, // Highest sales
+    rating: 5.0,
+    reviews: 412,
+  });
+
+  await createProduct({
+    vendorId: asusUser.id,
+    categoryId: gamingCategory.id,
+    name: "ASUS ROG Strix G16",
+    slug: "asus-rog-strix-g16",
+    description: "Gaming laptop mạnh mẽ với RTX 4070",
+    price: 42990000,
+    compareAtPrice: 47990000,
+    stock: 20,
+    images: ["/asus-rog-strix-gaming-laptop.jpg"],
+    sales: 89,
+    rating: 4.8,
+    reviews: 89,
+  });
+
+  await createProduct({
+    vendorId: appleStoreUser.id,
+    categoryId: accessoryCategory.id,
+    name: "Apple Watch Ultra 2",
+    slug: "apple-watch-ultra-2",
+    description: "Đồng hồ thông minh cao cấp cho thể thao và phiêu lưu",
+    price: 21990000,
+    compareAtPrice: 23990000,
+    stock: 40,
+    images: ["/apple-watch-ultra-2-smartwatch.jpg"],
+    sales: 178,
+    rating: 4.9,
+    reviews: 178,
+  });
+
+  await createProduct({
+    vendorId: techzoneUser.id,
+    categoryId: accessoryCategory.id,
+    name: "DJI Mini 4 Pro",
+    slug: "dji-mini-4-pro",
+    description: "Drone nhỏ gọn với camera 4K chống rung tiên tiến",
+    price: 23990000,
+    stock: 15,
+    images: ["/dji-mini-4-pro-drone.jpg"],
+    sales: 67,
+    rating: 4.7,
+    reviews: 67,
+  });
+
+  await createProduct({
+    vendorId: samsungUser.id,
+    categoryId: accessoryCategory.id,
+    name: "Samsung 990 Pro 2TB",
+    slug: "samsung-990-pro-2tb",
+    description: "Ổ cứng SSD NVMe tốc độ cao cho gaming và workstation",
+    price: 4990000,
+    compareAtPrice: 5990000,
+    stock: 150,
+    images: ["/samsung-990-pro-ssd.jpg"],
+    sales: 234,
+    rating: 4.9,
+    reviews: 234,
+  });
+
+  // FLASH DEALS (For flash sale section)
+  await createProduct({
+    vendorId: appleStoreUser.id,
+    categoryId: phoneCategory.id,
+    name: "iPhone 15 Pro Max 256GB",
+    slug: "iphone-15-pro-max-256gb",
+    description: "iPhone cao cấp nhất với chip A17 Pro và camera 48MP",
+    price: 28990000,
+    compareAtPrice: 34990000,
+    stock: 100,
+    images: ["/iphone-15-pro-max.png"],
+    sales: 350, // Very high for flash deal
+    rating: 4.9,
+    reviews: 420,
+  });
+
+  await createProduct({
+    vendorId: appleStoreUser.id,
+    categoryId: laptopCategory.id,
+    name: "MacBook Air M3 13 inch",
+    slug: "macbook-air-m3-13",
+    description: "Mỏng nhẹ, pin trâu với chip M3 tiết kiệm điện",
+    price: 24990000,
+    compareAtPrice: 28990000,
+    stock: 80,
+    images: ["/macbook-air-m3-laptop-silver.jpg"],
+    sales: 280,
+    rating: 4.8,
+    reviews: 310,
+  });
+
+  await createProduct({
+    vendorId: appleStoreUser.id,
+    categoryId: headphoneCategory.id,
+    name: "AirPods Pro 2",
+    slug: "airpods-pro-2",
+    description: "Tai nghe true wireless với ANC chủ động thế hệ mới",
+    price: 4990000,
+    compareAtPrice: 6990000,
+    stock: 150,
+    images: ["/airpods-pro-2-earbuds-white.jpg"],
+    sales: 480, // Highest sales for flash
+    rating: 4.9,
+    reviews: 550,
+  });
+
+  await createProduct({
+    vendorId: samsungUser.id,
+    categoryId: phoneCategory.id,
+    name: "Samsung Galaxy S24 Ultra",
+    slug: "samsung-galaxy-s24-ultra",
+    description: "Flagship Android với S Pen và camera zoom 100x",
+    price: 26990000,
+    compareAtPrice: 33990000,
+    stock: 60,
+    images: ["/samsung-galaxy-s24-ultra.png"],
+    sales: 210,
+    rating: 4.8,
+    reviews: 280,
+  });
+
+  await createProduct({
+    vendorId: appleStoreUser.id,
+    categoryId: tabletCategory.id,
+    name: "iPad Pro M4 11 inch",
+    slug: "ipad-pro-m4-11",
+    description: "Tablet cao cấp với chip M4 và màn hình OLED",
+    price: 22990000,
+    compareAtPrice: 27990000,
+    stock: 50,
+    images: ["/ipad-pro-m4-tablet.jpg"],
+    sales: 145,
+    rating: 4.9,
+    reviews: 180,
+  });
+
+  // NEW ARRIVALS (Recent createdAt)
+  // These will be created last, so they have newest createdAt
+  await createProduct({
+    vendorId: techzoneUser.id,
+    categoryId: accessoryCategory.id,
+    name: "Bàn phím cơ gaming RGB",
+    slug: "ban-phim-co-gaming-rgb",
+    description: "Bàn phím cơ switches blue, đèn RGB đầy đủ",
+    price: 1290000,
+    stock: 100,
+    images: ["/placeholder.jpg"],
+    sales: 45,
+    rating: 4.6,
+    reviews: 67,
+  });
+
+  await createProduct({
+    vendorId: techzoneUser.id,
+    categoryId: accessoryCategory.id,
+    name: "Webcam 4K streaming",
+    slug: "webcam-4k-streaming",
+    description: "Webcam chất lượng cao cho streaming và meeting",
+    price: 2490000,
+    stock: 80,
+    images: ["/placeholder.jpg"],
+    sales: 23,
+    rating: 4.5,
+    reviews: 34,
+  });
+
+  await createProduct({
+    vendorId: techzoneUser.id,
+    categoryId: accessoryCategory.id,
+    name: "Hub USB-C 7 in 1",
+    slug: "hub-usbc-7-in-1",
+    description: "Hub đa năng với HDMI, USB 3.0, SD card reader",
+    price: 890000,
+    stock: 150,
+    images: ["/placeholder.jpg"],
+    sales: 78,
+    rating: 4.7,
+    reviews: 92,
+  });
+
+  console.log("✅ Created 18 products");
+
+  console.log("🎉 V0 seed completed!");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Seed failed:", e);
+    console.error("❌ Seed error:", e);
     process.exit(1);
   })
   .finally(async () => {
