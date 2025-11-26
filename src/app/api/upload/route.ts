@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { uploadImage } from "@/shared/lib/cloudinary";
-import { auth } from "@/shared/lib/auth";
-import { createLogger } from "@/shared/lib/logger";
-
-// ============================================
-// VALIDATION SCHEMA
-// ============================================
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+import { uploadImage } from "@/shared/lib/upload/cloudinary";
+import { validateImageFile } from "@/shared/lib/upload";
+import { auth } from "@/shared/lib/auth/config";
+import { createLogger } from "@/shared/lib/utils/logger";
 
 // ============================================
 // POST /api/upload
@@ -36,19 +30,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // 2. Validate file
-    // Check file size
-    if (file.size > MAX_FILE_SIZE) {
+    // 2. Validate file using shared validation
+    const validationResult = validateImageFile(file);
+    if (!validationResult.valid) {
       return NextResponse.json(
-        { error: "File size must be less than 5MB" },
-        { status: 400 }
-      );
-    }
-
-    // Check file type
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { error: "Only JPG, PNG, WEBP allowed" },
+        { error: validationResult.error },
         { status: 400 }
       );
     }

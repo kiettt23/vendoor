@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/shared/lib/auth";
+import { auth } from "@/shared/lib/auth/config";
 import { headers } from "next/headers";
 import Link from "next/link";
 import {
@@ -8,7 +8,7 @@ import {
   ShoppingCart,
   DollarSign,
 } from "lucide-react";
-import { prisma } from "@/shared/lib/prisma";
+import { prisma } from "@/shared/lib/db/prisma";
 
 // ============================================
 // VENDOR LAYOUT

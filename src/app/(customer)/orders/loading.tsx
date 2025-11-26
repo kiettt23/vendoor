@@ -1,15 +1,10 @@
-import { ListLoadingSkeleton } from "@/shared/components/feedback/Loading";
-import { Skeleton } from "@/shared/components/ui/skeleton";
+import { ListLoadingSkeleton } from "@/shared/ui/loading";
+import { Skeleton } from "@/shared/ui/skeleton";
 
-/**
- * Loading state for orders page
- */
 export default function Loading() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Skeleton className="h-10 w-48 mb-8" />
-
-      {/* Orders list skeleton */}
+    <div className="container mx-auto py-8 px-4 max-w-4xl">
+      <Skeleton className="h-10 w-56 mb-8" />
       <ListLoadingSkeleton items={5} />
     </div>
   );

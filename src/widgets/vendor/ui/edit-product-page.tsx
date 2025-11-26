@@ -1,0 +1,205 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowLeft, Save, Loader2, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Textarea } from "@/shared/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { Switch } from "@/shared/ui/switch";
+
+interface Category {
+  id: string;
+  name: string;
+}
+
+interface ProductData {
+  id: string;
+  name: string;
+  description: string | null;
+  categoryId: string;
+  isActive: boolean;
+  images: { id: string; url: string }[];
+  variants: { id: string; name: string | null; price: number; compareAtPrice: number | null; sku: string | null; stock: number; isDefault: boolean }[];
+}
+
+interface EditProductPageProps {
+  product: ProductData;
+  categories: Category[];
+  onUpdate: (data: ProductFormData) => Promise<{ success: boolean; error?: string }>;
+  onDelete: () => Promise<{ success: boolean; error?: string }>;
+}
+
+interface ProductFormData {
+  name: string;
+  description: string;
+  categoryId: string;
+  price: number;
+  compareAtPrice?: number;
+  sku: string;
+  stock: number;
+  isActive: boolean;
+}
+
+export function EditProductPage({ product, categories, onUpdate, onDelete }: EditProductPageProps) {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const defaultVariant = product.variants.find((v) => v.isDefault) || product.variants[0];
+
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ProductFormData>({
+    defaultValues: {
+      name: product.name,
+      description: product.description || "",
+      categoryId: product.categoryId,
+      isActive: product.isActive,
+      price: defaultVariant?.price || 0,
+      compareAtPrice: defaultVariant?.compareAtPrice || undefined,
+      sku: defaultVariant?.sku ?? "",
+      stock: defaultVariant?.stock || 0,
+    },
+  });
+
+  const onSubmit = async (data: ProductFormData) => {
+    setIsSubmitting(true);
+    try {
+      const result = await onUpdate(data);
+      if (result.success) {
+        toast.success("Đã cập nhật sản phẩm");
+        router.refresh();
+      } else {
+        toast.error(result.error || "Lỗi");
+      }
+    } catch {
+      toast.error("Có lỗi xảy ra");
+    }
+    setIsSubmitting(false);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Xác nhận xóa sản phẩm này?")) return;
+    setIsDeleting(true);
+    try {
+      const result = await onDelete();
+      if (result.success) {
+        toast.success("Đã xóa sản phẩm");
+        router.push("/vendor/products");
+      } else {
+        toast.error(result.error || "Lỗi");
+      }
+    } catch {
+      toast.error("Có lỗi xảy ra");
+    }
+    setIsDeleting(false);
+  };
+
+  return (
+    <div className="container mx-auto py-8 px-4 max-w-3xl">
+      <Button variant="ghost" size="sm" asChild className="mb-6">
+        <Link href="/vendor/products"><ArrowLeft className="mr-2 h-4 w-4" />Danh sách sản phẩm</Link>
+      </Button>
+
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold">Chỉnh Sửa Sản Phẩm</h1>
+        <Button variant="destructive" size="sm" onClick={handleDelete} disabled={isDeleting}>
+          {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+        </Button>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {product.images.length > 0 && (
+          <Card>
+            <CardHeader><CardTitle>Hình Ảnh</CardTitle></CardHeader>
+            <CardContent>
+              <div className="flex gap-4 flex-wrap">
+                {product.images.map((img) => (
+                  <div key={img.id} className="relative h-24 w-24 rounded overflow-hidden bg-muted">
+                    <Image src={img.url} alt="" fill className="object-cover" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card>
+          <CardHeader><CardTitle>Thông Tin Cơ Bản</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Tên sản phẩm *</Label>
+              <Input {...register("name", { required: "Bắt buộc" })} />
+              {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
+            </div>
+            <div>
+              <Label>Mô tả</Label>
+              <Textarea {...register("description")} rows={4} />
+            </div>
+            <div>
+              <Label>Danh mục *</Label>
+              <Select onValueChange={(v) => setValue("categoryId", v)} defaultValue={watch("categoryId")}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Giá & Kho</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Giá bán *</Label>
+                <Input {...register("price", { required: "Bắt buộc", valueAsNumber: true })} type="number" min={0} />
+              </div>
+              <div>
+                <Label>Giá so sánh</Label>
+                <Input {...register("compareAtPrice", { valueAsNumber: true })} type="number" min={0} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>SKU *</Label>
+                <Input {...register("sku", { required: "Bắt buộc" })} />
+              </div>
+              <div>
+                <Label>Số lượng tồn kho *</Label>
+                <Input {...register("stock", { required: "Bắt buộc", valueAsNumber: true })} type="number" min={0} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Trạng Thái</CardTitle></CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Hiển thị sản phẩm</p>
+                <p className="text-sm text-muted-foreground">Sản phẩm sẽ xuất hiện trên cửa hàng</p>
+              </div>
+              <Switch checked={watch("isActive")} onCheckedChange={(v) => setValue("isActive", v)} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Đang lưu...</> : <><Save className="mr-2 h-4 w-4" />Lưu Thay Đổi</>}
+        </Button>
+      </form>
+    </div>
+  );
+}
+

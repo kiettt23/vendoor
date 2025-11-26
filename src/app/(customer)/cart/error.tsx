@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
-import { createLogger } from "@/shared/lib/logger";
+import { Button } from "@/shared/ui/button";
+import { createLogger } from "@/shared/lib/utils/logger";
 
 const logger = createLogger("CartError");
 

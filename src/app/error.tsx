@@ -2,9 +2,10 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { ServerCrash } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
-import { createLogger } from "@/shared/lib/logger";
+import { ServerCrash, RefreshCw, Home } from "lucide-react";
+import { Button } from "@/shared/ui/button";
+import { Badge } from "@/shared/ui/badge";
+import { createLogger } from "@/shared/lib/utils/logger";
 
 const logger = createLogger("GlobalError");
 
@@ -25,38 +26,85 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="text-center max-w-md">
-        <div className="mb-6 flex justify-center">
-          <div className="rounded-full bg-destructive/10 p-6">
-            <ServerCrash className="h-12 w-12 text-destructive" />
+    <div className="flex min-h-screen items-center justify-center px-(--spacing-component) relative overflow-hidden">
+      {/* Decorative Background */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-error/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-warning/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="text-center max-w-lg space-y-(--spacing-content)">
+        {/* Icon */}
+        <div className="flex justify-center mb-(--spacing-component)">
+          <div className="rounded-full bg-error/10 p-(--spacing-content) animate-pulse">
+            <ServerCrash className="size-16 text-error" />
           </div>
         </div>
 
-        <h1 className="text-3xl font-bold mb-3">Đã xảy ra lỗi</h1>
+        {/* Error Badge */}
+        <div className="flex justify-center">
+          <Badge variant="error-soft">Lỗi hệ thống</Badge>
+        </div>
 
-        <p className="text-muted-foreground mb-2">
-          Rất tiếc, đã có lỗi xảy ra. Vui lòng thử lại.
+        {/* Title */}
+        <h1 className="text-heading-xl font-bold">Đã xảy ra lỗi</h1>
+
+        {/* Description */}
+        <p className="text-body-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
+          Rất tiếc, đã có lỗi không mong muốn xảy ra. 
+          Chúng tôi đã ghi nhận và sẽ khắc phục sớm nhất.
         </p>
 
+        {/* Dev Error Details */}
         {process.env.NODE_ENV === "development" && (
-          <details className="mt-4 p-4 bg-muted rounded-lg text-left text-sm">
-            <summary className="cursor-pointer font-semibold mb-2">
-              Chi tiết lỗi (chỉ hiện trong dev mode)
+          <details className="p-(--spacing-component) bg-error-bg border-2 border-error/20 rounded-lg text-left">
+            <summary className="cursor-pointer font-semibold text-body mb-(--spacing-tight) text-error">
+              Chi tiết lỗi (dev mode only)
             </summary>
-            <pre className="whitespace-pre-wrap text-xs overflow-auto">
-              {error.message}
-              {error.stack && `\n\n${error.stack}`}
-            </pre>
+            <div className="space-y-(--spacing-tight) text-caption">
+              <div>
+                <p className="font-semibold text-muted-foreground">Message:</p>
+                <pre className="whitespace-pre-wrap text-error">{error.message}</pre>
+              </div>
+              {error.digest && (
+                <div>
+                  <p className="font-semibold text-muted-foreground">Digest:</p>
+                  <code className="text-error">{error.digest}</code>
+                </div>
+              )}
+              {error.stack && (
+                <div>
+                  <p className="font-semibold text-muted-foreground">Stack:</p>
+                  <pre className="whitespace-pre-wrap text-xs text-muted-foreground overflow-auto max-h-40">
+                    {error.stack}
+                  </pre>
+                </div>
+              )}
+            </div>
           </details>
         )}
 
-        <div className="mt-6 flex gap-3 justify-center">
-          <Button onClick={reset}>Thử lại</Button>
-          <Button variant="outline" asChild>
-            <Link href="/">Về trang chủ</Link>
+        {/* Actions */}
+        <div className="flex gap-(--spacing-component) justify-center pt-(--spacing-component)">
+          <Button size="lg" onClick={reset}>
+            <RefreshCw className="size-4" />
+            Thử lại
+          </Button>
+          <Button size="lg" variant="outline" asChild>
+            <Link href="/">
+              <Home className="size-4" />
+              Về trang chủ
+            </Link>
           </Button>
         </div>
+
+        {/* Help Text */}
+        <p className="text-body-sm text-muted-foreground pt-(--spacing-component)">
+          Nếu lỗi vẫn tiếp diễn, vui lòng{" "}
+          <a href="mailto:support@vendoor.com" className="text-brand-primary hover:underline">
+            liên hệ hỗ trợ
+          </a>
+        </p>
 
         {error.digest && (
           <p className="mt-4 text-xs text-muted-foreground">

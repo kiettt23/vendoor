@@ -1,22 +1,12 @@
-import {
-  StatsCardsLoading,
-  TableLoadingSkeleton,
-} from "@/shared/components/feedback/Loading";
-import { Skeleton } from "@/shared/components/ui/skeleton";
+import { StatsCardsLoading, TableLoadingSkeleton } from "@/shared/ui/loading";
+import { Skeleton } from "@/shared/ui/skeleton";
 
-/**
- * Loading state for admin orders page
- */
 export default function Loading() {
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto py-8 px-4 space-y-6">
       <Skeleton className="h-10 w-48" />
-
-      {/* Stats cards */}
       <StatsCardsLoading count={4} />
-
-      {/* Orders table skeleton */}
-      <TableLoadingSkeleton rows={10} columns={4} />
+      <TableLoadingSkeleton rows={10} cols={5} />
     </div>
   );
 }

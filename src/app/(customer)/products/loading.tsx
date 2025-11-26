@@ -1,5 +1,4 @@
-import { GridLoadingSkeleton } from "@/shared/components/feedback/Loading";
-import { Skeleton } from "@/shared/components/ui/skeleton";
+import { ProductCardSkeleton } from "@/shared/ui/skeleton";
 
 /**
  * Loading state for products page
@@ -7,22 +6,29 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
  */
 export default function Loading() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-(--spacing-component) py-(--spacing-section)">
       {/* Header skeleton */}
-      <div className="mb-8">
-        <Skeleton className="h-10 w-64 mb-4" />
-        <Skeleton className="h-6 w-96" />
+      <div className="mb-(--spacing-section) space-y-(--spacing-component)">
+        <div className="h-12 w-64 bg-muted animate-pulse rounded-md" />
+        <div className="h-6 w-96 bg-muted animate-pulse rounded-md" />
       </div>
 
       {/* Filters skeleton */}
-      <div className="flex gap-4 mb-6">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-10 w-48" />
+      <div className="flex gap-(--spacing-component) mb-(--spacing-content) flex-wrap">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="h-10 w-48 bg-muted animate-pulse rounded-md"
+          />
+        ))}
       </div>
 
       {/* Products grid skeleton */}
-      <GridLoadingSkeleton items={8} columns={4} />
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-(--spacing-content)">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <ProductCardSkeleton key={i} />
+        ))}
+      </div>
     </div>
   );
 }

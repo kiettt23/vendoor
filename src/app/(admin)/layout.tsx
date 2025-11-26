@@ -1,4 +1,4 @@
-import { auth } from "@/shared/lib/auth";
+import { auth } from "@/shared/lib/auth/config";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -9,7 +9,7 @@ import {
   Package,
   LogOut,
 } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
+import { Button } from "@/shared/ui/button";
 
 export default async function AdminLayout({
   children,

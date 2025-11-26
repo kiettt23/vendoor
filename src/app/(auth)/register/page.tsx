@@ -4,128 +4,84 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema, type RegisterInput } from "@/features/auth/schema";
-import { authClient } from "@/shared/lib/auth-client";
-import { createLogger } from "@/shared/lib/logger";
-
-const logger = createLogger("AuthPages");
-
-import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
+import Link from "next/link";
+import { registerSchema, type RegisterFormData } from "@/features/auth";
+import { authClient } from "@/shared/lib/auth/client";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shared/ui/card";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setError,
-  } = useForm<RegisterInput>({
+  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = async (data: RegisterInput) => {
+  const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
-
+    setError(null);
     try {
-      const { error } = await authClient.signUp.email({
+      const result = await authClient.signUp.email({
+        name: data.name,
         email: data.email,
         password: data.password,
-        name: data.name,
       });
-
-      if (error) {
-        setError("root", { message: error.message || "Đăng ký thất bại" });
+      if (result.error) {
+        setError(result.error.message || "Đăng ký thất bại");
         return;
       }
-
-      router.push("/");
-      router.refresh();
-    } catch (error) {
-      logger.error("Registration failed", error);
-      setError("root", { message: "Có lỗi xảy ra. Vui lòng thử lại." });
+      router.push("/login");
+    } catch {
+      setError("Có lỗi xảy ra. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Đăng ký</CardTitle>
+          <CardTitle className="text-2xl">Đăng ký</CardTitle>
+          <CardDescription>Tạo tài khoản mới</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="name">Họ tên</Label>
-              <Input id="name" {...register("name")} disabled={isLoading} />
-              {errors.name && (
-                <p className="text-sm text-red-500">{errors.name.message}</p>
-              )}
+              <Input id="name" placeholder="Nguyễn Văn A" disabled={isLoading} {...register("name")} />
+              {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
             </div>
-
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                {...register("email")}
-                disabled={isLoading}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
-              )}
+              <Input id="email" type="email" placeholder="name@example.com" disabled={isLoading} {...register("email")} />
+              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
-
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="password">Mật khẩu</Label>
-              <Input
-                id="password"
-                type="password"
-                {...register("password")}
-                disabled={isLoading}
-              />
-              {errors.password && (
-                <p className="text-sm text-red-500">
-                  {errors.password.message}
-                </p>
-              )}
+              <Input id="password" type="password" disabled={isLoading} {...register("password")} />
+              {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
-
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                {...register("confirmPassword")}
-                disabled={isLoading}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-500">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
+              <Input id="confirmPassword" type="password" disabled={isLoading} {...register("confirmPassword")} />
+              {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>}
             </div>
-
-            {errors.root && (
-              <p className="text-sm text-red-500">{errors.root.message}</p>
-            )}
-
+            {error && <div className="rounded-md bg-destructive/10 p-3"><p className="text-sm text-destructive">{error}</p></div>}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Đang đăng ký..." : "Đăng ký"}
             </Button>
           </form>
         </CardContent>
+        <CardFooter>
+          <p className="text-sm text-muted-foreground">
+            Đã có tài khoản? <Link href="/login" className="text-primary hover:underline">Đăng nhập</Link>
+          </p>
+        </CardFooter>
       </Card>
     </div>
   );

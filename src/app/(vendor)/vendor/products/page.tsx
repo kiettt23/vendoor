@@ -1,11 +1,23 @@
-import { VendorProductsPage } from "@/features/product/components/VendorProductsPage";
+import { redirect } from "next/navigation";
+import { auth } from "@/shared/lib/auth/config";
+import { headers } from "next/headers";
+import { prisma } from "@/shared/lib/db/prisma";
+import { VendorProductsPage } from "@/widgets/vendor";
 
-export default async function Page(props: {
-  searchParams?: Promise<{
-    search?: string;
-    status?: "all" | "active" | "inactive";
-    page?: string;
-  }>;
-}) {
-  return <VendorProductsPage searchParams={props.searchParams} />;
+export default async function Page() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) redirect("/login");
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { roles: true },
+  });
+
+  if (!user?.roles.includes("VENDOR")) redirect("/");
+
+  return (
+    <div className="container mx-auto py-8 px-4">
+      <VendorProductsPage />
+    </div>
+  );
 }

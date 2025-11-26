@@ -1,26 +1,14 @@
-import {
-  StatsCardsLoading,
-  TableLoadingSkeleton,
-} from "@/shared/components/feedback/Loading";
-import { Skeleton } from "@/shared/components/ui/skeleton";
+import { ListLoadingSkeleton } from "@/shared/ui/loading";
+import { Skeleton } from "@/shared/ui/skeleton";
 
-/**
- * Loading state for vendor products page
- */
 export default function Loading() {
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="container mx-auto py-8 px-4 space-y-6">
       <div className="flex justify-between items-center">
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-10 w-40" />
       </div>
-
-      {/* Stats cards */}
-      <StatsCardsLoading count={3} />
-
-      {/* Products table skeleton */}
-      <TableLoadingSkeleton rows={5} columns={5} />
+      <ListLoadingSkeleton items={8} />
     </div>
   );
 }
