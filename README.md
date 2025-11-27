@@ -2,66 +2,125 @@
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Prisma](https://img.shields.io/badge/Prisma-6-2D3748)
 ![FSD](https://img.shields.io/badge/Architecture-FSD-purple)
 
-Nền tảng thương mại điện tử đa người bán.
+Sàn thương mại điện tử đa người bán (Multi-Vendor Marketplace) - tương tự Shopee, Lazada.
 
-## Quick Start
+> 🆕 **Người mới?** Đọc [Hướng dẫn cho người mới](docs/GETTING_STARTED.md) để bắt đầu.
+
+---
+
+## ⚡ Quick Start
 
 ```bash
-npm install
+# 1. Clone & cài dependencies
+git clone <repo-url>
+cd vendoor
+pnpm install
+
+# 2. Setup môi trường
 cp .env.example .env
+# Điền DATABASE_URL, BETTER_AUTH_SECRET, CLOUDINARY_* vào .env
+
+# 3. Khởi tạo database
 npx prisma migrate dev
-npm run db:seed
-npm run dev
+pnpm db:seed
+
+# 4. Chạy dự án
+pnpm dev
 ```
 
-## Project Structure
+Mở http://localhost:3000 🎉
+
+---
+
+## 🏗️ Cấu trúc dự án (FSD)
 
 ```
 src/
-├── app/          # Next.js routing
-├── widgets/      # Header, Footer, ProductGrid
-├── features/     # AddToCart, Checkout, Auth
-├── entities/     # Product, Order, Cart, User, Vendor
-└── shared/       # UI, lib, hooks, providers
+├── app/          # Routing (Next.js App Router)
+├── widgets/      # Các section lớn (Header, Footer, ProductGrid)
+├── features/     # Tính năng tương tác (AddToCart, Checkout)
+├── entities/     # Đối tượng nghiệp vụ (Product, Order, Cart)
+└── shared/       # Code dùng chung (UI, utils, hooks)
 ```
 
-## Tech Stack
+**Quy tắc:** Layer cao import từ layer thấp, không ngược lại.
 
-- **Framework:** Next.js 16 (App Router)
-- **Database:** PostgreSQL + Prisma
-- **Auth:** Better Auth
-- **UI:** Shadcn/UI + Tailwind CSS 4
-- **State:** Zustand
+---
 
-## Import Examples
+## 🛠️ Tech Stack
+
+| Công nghệ    | Phiên bản | Vai trò               |
+| ------------ | --------- | --------------------- |
+| Next.js      | 16        | Framework, App Router |
+| React        | 19        | UI Library            |
+| TypeScript   | 5         | Type Safety           |
+| Prisma       | 6         | Database ORM          |
+| PostgreSQL   | -         | Database              |
+| Better Auth  | 1.3       | Authentication        |
+| Zustand      | 5         | Client State          |
+| Tailwind CSS | 4         | Styling               |
+| Shadcn/UI    | -         | UI Components         |
+| Vitest       | 4         | Unit Testing          |
+| Playwright   | 1.57      | E2E Testing           |
+
+---
+
+## 📜 Scripts
+
+| Lệnh             | Mô tả               |
+| ---------------- | ------------------- |
+| `pnpm dev`       | Chạy dev server     |
+| `pnpm build`     | Build production    |
+| `pnpm test`      | Chạy unit tests     |
+| `pnpm test:e2e`  | Chạy E2E tests      |
+| `pnpm db:studio` | Mở GUI xem database |
+| `pnpm db:seed`   | Seed data mẫu       |
+| `pnpm db:reset`  | Reset database      |
+
+---
+
+## 👤 Tài khoản test
+
+| Vai trò  | Email                  | Password    |
+| -------- | ---------------------- | ----------- |
+| Admin    | `admin@vendoor.com`    | `Kiet1461!` |
+| Vendor   | `vendor@vendoor.com`   | `Kiet1461!` |
+| Customer | `customer@vendoor.com` | `Kiet1461!` |
+
+---
+
+## 📚 Documentation
+
+| Tài liệu                                      | Mô tả                                      |
+| --------------------------------------------- | ------------------------------------------ |
+| [🚀 Getting Started](docs/GETTING_STARTED.md) | **Đọc đầu tiên** - Hướng dẫn cho người mới |
+| [📐 Architecture](docs/ARCHITECTURE.md)       | Chi tiết cấu trúc thư mục                  |
+| [✨ Features](docs/FEATURES.md)               | Danh sách tính năng                        |
+| [🛠️ Commands](docs/COMMANDS.md)               | Tất cả commands hay dùng                   |
+| [🧪 Testing](docs/TESTING.md)                 | Hướng dẫn viết tests                       |
+| [🗺️ Roadmap](docs/ROADMAP.md)                 | Kế hoạch phát triển                        |
+
+---
+
+## 📦 Import Examples
 
 ```typescript
+// Entities - đối tượng nghiệp vụ
 import { ProductCard } from "@/entities/product";
-import { useCart } from "@/entities/cart";
+import { useCartStore } from "@/entities/cart";
+
+// Features - tính năng tương tác
 import { AddToCartButton } from "@/features/cart";
+import { LoginForm } from "@/features/auth";
+
+// Widgets - section lớn
 import { Header } from "@/widgets/header";
-import { Button } from "@/shared/ui";
+import { ProductGrid } from "@/widgets/product-grid";
+
+// Shared - code dùng chung
+import { Button, Card } from "@/shared/ui";
+import { formatCurrency } from "@/shared/lib/utils";
 ```
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Development server |
-| `npm run build` | Production build |
-| `npm run db:seed` | Seed database |
-| `npm run db:studio` | Prisma Studio |
-
-## Documentation
-
-- [FSD Architecture](docs/FSD.md)
-
-## Demo Accounts
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@vendoor.vn | Admin123 |
-| Vendor | vendor@vendoor.vn | Vendor123 |
-| Customer | customer@vendoor.vn | Customer123 |
