@@ -51,7 +51,7 @@ export default async function RootLayout({
           <Header user={user} />
           <main>{children}</main>
           <Footer />
-          <Toaster position="top-right" richColors />
+          <Toaster position="top-center" richColors />
         </ReactQueryProvider>
       </body>
     </html>

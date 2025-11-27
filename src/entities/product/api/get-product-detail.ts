@@ -3,7 +3,9 @@
 import { prisma } from "@/shared/lib";
 import type { ProductDetail, ProductListItem } from "../model/types";
 
-export async function getProductBySlug(slug: string): Promise<ProductDetail | null> {
+export async function getProductBySlug(
+  slug: string
+): Promise<ProductDetail | null> {
   const product = await prisma.product.findUnique({
     where: { slug, isActive: true },
     include: {
@@ -11,7 +13,7 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
         select: {
           id: true,
           name: true,
-          vendorProfile: { select: { shopName: true, slug: true } },
+          vendorProfile: { select: { id: true, shopName: true, slug: true } },
         },
       },
       category: { select: { id: true, name: true, slug: true } },
@@ -20,7 +22,7 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
     },
   });
 
-  if (!product) return null;
+  if (!product || !product.vendor.vendorProfile) return null;
 
   return {
     id: product.id,
@@ -30,11 +32,16 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
     isActive: product.isActive,
     vendor: {
       id: product.vendor.id,
+      vendorProfileId: product.vendor.vendorProfile.id, // VendorProfile.id for orders
       name: product.vendor.name || "Unknown",
-      shopName: product.vendor.vendorProfile?.shopName || "Unknown Shop",
-      slug: product.vendor.vendorProfile?.slug || "",
+      shopName: product.vendor.vendorProfile.shopName,
+      slug: product.vendor.vendorProfile.slug,
     },
-    category: { id: product.category.id, name: product.category.name, slug: product.category.slug },
+    category: {
+      id: product.category.id,
+      name: product.category.name,
+      slug: product.category.slug,
+    },
     variants: product.variants,
     images: product.images,
   };
@@ -50,7 +57,10 @@ export async function getRelatedProducts(
     include: {
       vendor: { select: { id: true, name: true } },
       category: { select: { name: true, slug: true } },
-      variants: { where: { isDefault: true }, select: { price: true, compareAtPrice: true } },
+      variants: {
+        where: { isDefault: true },
+        select: { price: true, compareAtPrice: true },
+      },
       images: { where: { order: 0 }, take: 1, select: { url: true } },
     },
     take: limit,
@@ -68,4 +78,3 @@ export async function getRelatedProducts(
     category: { name: product.category.name, slug: product.category.slug },
   }));
 }
-

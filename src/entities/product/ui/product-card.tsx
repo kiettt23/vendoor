@@ -7,7 +7,7 @@ import { formatPrice } from "@/shared/lib";
 import { calculateDiscount } from "../lib/utils";
 import type { ProductListItem } from "../model/types";
 
-interface ProductCardProps extends ProductListItem {}
+type ProductCardProps = ProductListItem;
 
 export function ProductCard({
   name,

@@ -1,14 +1,14 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Store, ShoppingCart } from "lucide-react";
+import { Store } from "lucide-react";
 import {
   getProductBySlug,
   getRelatedProducts,
   ProductCard,
+  ProductActions,
   calculateDiscount,
 } from "@/entities/product";
-import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { Card, CardContent } from "@/shared/ui/card";
 import { formatPrice } from "@/shared/lib";
@@ -156,26 +156,19 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </Card>
           )}
 
-          <div className="flex items-center gap-2 text-sm">
-            <span
-              className={
-                defaultVariant.stock > 0 ? "text-green-600" : "text-red-600"
-              }
-            >
-              {defaultVariant.stock > 0
-                ? `Còn ${defaultVariant.stock} sản phẩm`
-                : "Hết hàng"}
-            </span>
-          </div>
-
-          <Button
-            size="lg"
-            className="w-full"
-            disabled={defaultVariant.stock === 0}
-          >
-            <ShoppingCart className="mr-2 h-5 w-5" />
-            {defaultVariant.stock === 0 ? "Hết hàng" : "Thêm vào giỏ"}
-          </Button>
+          <ProductActions
+            product={{
+              id: product.id,
+              name: product.name,
+              slug: product.slug,
+            }}
+            vendor={{
+              vendorProfileId: product.vendor.vendorProfileId,
+              shopName: product.vendor.shopName,
+            }}
+            variant={defaultVariant}
+            image={product.images[0]?.url || ""}
+          />
         </div>
       </div>
 

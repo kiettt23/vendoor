@@ -18,7 +18,10 @@ export function OrderSuccessPage() {
         </div>
         <h1 className="text-3xl font-bold mb-2">Đặt Hàng Thành Công!</h1>
         <p className="text-muted-foreground">
-          Cảm ơn bạn đã mua hàng. {orderIds.length > 1 ? `Đã tạo ${orderIds.length} đơn hàng.` : "Đơn hàng của bạn đang được xử lý."}
+          Cảm ơn bạn đã mua hàng.{" "}
+          {orderIds.length > 1
+            ? `Đã tạo ${orderIds.length} đơn hàng.`
+            : "Đơn hàng của bạn đang được xử lý."}
         </p>
       </div>
 
@@ -26,14 +29,18 @@ export function OrderSuccessPage() {
         <CardContent className="pt-6">
           <div className="flex items-center justify-center gap-3 text-muted-foreground">
             <Package className="h-5 w-5" />
-            <span>Theo dõi đơn hàng trong mục "Đơn hàng của tôi"</span>
+            <span>
+              Theo dõi đơn hàng trong mục &ldquo;Đơn hàng của tôi&rdquo;
+            </span>
           </div>
         </CardContent>
       </Card>
 
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Button asChild>
-          <Link href="/orders">Xem đơn hàng <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          <Link href="/orders">
+            Xem đơn hàng <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
         </Button>
         <Button variant="outline" asChild>
           <Link href="/products">Tiếp tục mua sắm</Link>
@@ -42,4 +49,3 @@ export function OrderSuccessPage() {
     </div>
   );
 }
-

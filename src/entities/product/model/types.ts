@@ -48,7 +48,13 @@ export interface ProductDetail {
   slug: string;
   description: string | null;
   isActive: boolean;
-  vendor: { id: string; name: string; shopName: string; slug: string };
+  vendor: {
+    id: string; // User.id (owner)
+    vendorProfileId: string; // VendorProfile.id (for orders)
+    name: string;
+    shopName: string;
+    slug: string;
+  };
   category: { id: string; name: string; slug: string };
   variants: ProductVariant[];
   images: ProductImage[];
@@ -77,4 +83,3 @@ export interface PaginatedProducts {
   products: ProductListItem[];
   pagination: PaginationMeta;
 }
-

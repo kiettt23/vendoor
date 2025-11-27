@@ -10,7 +10,22 @@ export type {
   PaginatedProducts,
 } from "./model";
 
-export { getProducts, getProductBySlug, getRelatedProducts, getCategories, getCategoriesWithCount } from "./api";
-export { ProductCard, ProductStatusBadge, ProductStockBadge } from "./ui";
-export { calculateDiscount, hasDiscount, validateSKU, generateUniqueSlug } from "./lib";
-
+export {
+  getProducts,
+  getProductBySlug,
+  getRelatedProducts,
+  getCategories,
+  getCategoriesWithCount,
+} from "./api";
+export {
+  ProductCard,
+  ProductStatusBadge,
+  ProductStockBadge,
+  ProductActions,
+} from "./ui";
+export {
+  calculateDiscount,
+  hasDiscount,
+  validateSKU,
+  generateUniqueSlug,
+} from "./lib";

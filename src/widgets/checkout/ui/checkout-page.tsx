@@ -6,7 +6,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, ShoppingBag, Loader2, AlertTriangle } from "lucide-react";
+import {
+  ArrowLeft,
+  ShoppingBag,
+  Loader2,
+  CreditCard,
+  Banknote,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -14,7 +20,7 @@ import { Label } from "@/shared/ui/label";
 import { Textarea } from "@/shared/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Separator } from "@/shared/ui/separator";
-import { Alert, AlertDescription } from "@/shared/ui/alert";
+import { RadioGroup, RadioGroupItem } from "@/shared/ui/radio-group";
 import {
   useCart,
   groupItemsByVendor,
@@ -23,6 +29,7 @@ import {
 import {
   checkoutSchema,
   type CheckoutFormData,
+  type PaymentMethod,
   createOrders,
   validateCheckout,
 } from "@/features/checkout";
@@ -40,9 +47,13 @@ export function CheckoutPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
+    defaultValues: {
+      paymentMethod: "COD",
+    },
   });
 
   if (items.length === 0) {
@@ -76,14 +87,43 @@ export function CheckoutPage() {
         return;
       }
 
+      const { paymentMethod, ...shippingInfo } = data;
+
       toast.info("Đang tạo đơn hàng...");
-      const result = await createOrders(items, data);
+      const result = await createOrders(items, shippingInfo, paymentMethod);
       if (!result.success) {
         toast.error(result.error || "Không thể tạo đơn hàng");
         setIsSubmitting(false);
         return;
       }
 
+      // Nếu là Stripe, redirect tới Stripe Checkout
+      if (paymentMethod === "STRIPE") {
+        toast.info("Đang chuyển đến trang thanh toán...");
+        const response = await fetch("/api/checkout/stripe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderIds: result.orders.map((o) => o.id),
+            amount: result.totalAmount,
+            customerEmail: data.email,
+          }),
+        });
+
+        const { url, error } = await response.json();
+        if (error) {
+          toast.error(error);
+          setIsSubmitting(false);
+          return;
+        }
+
+        // Redirect to Stripe Checkout URL
+        clearCart();
+        router.push(url);
+        return;
+      }
+
+      // COD: Xóa giỏ hàng và redirect
       clearCart();
       toast.success(`Đặt hàng thành công! ${result.orders.length} đơn hàng`);
       router.replace(
@@ -111,14 +151,6 @@ export function CheckoutPage() {
       <div className="grid lg:grid-cols-2 gap-8">
         <div>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                Demo: Payment chưa tích hợp. Đơn hàng sẽ ở trạng thái &quot;Chờ
-                thanh toán&quot;.
-              </AlertDescription>
-            </Alert>
-
             <Card>
               <CardHeader>
                 <CardTitle>Thông Tin Liên Hệ</CardTitle>
@@ -212,6 +244,59 @@ export function CheckoutPage() {
                     rows={3}
                   />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Phương Thức Thanh Toán</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RadioGroup
+                  defaultValue="COD"
+                  onValueChange={(value: PaymentMethod) =>
+                    setValue("paymentMethod", value)
+                  }
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-3 p-4 border rounded-lg hover:border-primary transition-colors cursor-pointer">
+                    <RadioGroupItem value="COD" id="cod" />
+                    <Label
+                      htmlFor="cod"
+                      className="flex items-center gap-3 cursor-pointer flex-1"
+                    >
+                      <Banknote className="h-5 w-5 text-green-600" />
+                      <div>
+                        <p className="font-medium">
+                          Thanh toán khi nhận hàng (COD)
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Trả tiền mặt khi nhận hàng
+                        </p>
+                      </div>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-3 p-4 border rounded-lg hover:border-primary transition-colors cursor-pointer">
+                    <RadioGroupItem value="STRIPE" id="stripe" />
+                    <Label
+                      htmlFor="stripe"
+                      className="flex items-center gap-3 cursor-pointer flex-1"
+                    >
+                      <CreditCard className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="font-medium">Thẻ tín dụng / Ghi nợ</p>
+                        <p className="text-sm text-muted-foreground">
+                          Visa, Mastercard, JCB... (Demo mode)
+                        </p>
+                      </div>
+                    </Label>
+                  </div>
+                </RadioGroup>
+                {errors.paymentMethod && (
+                  <p className="text-sm text-destructive mt-2">
+                    {errors.paymentMethod.message}
+                  </p>
+                )}
               </CardContent>
             </Card>
 

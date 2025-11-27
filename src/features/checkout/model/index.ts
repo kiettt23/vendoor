@@ -1,2 +1,6 @@
-export { checkoutSchema, type CheckoutFormData } from "./schema";
-
+export {
+  checkoutSchema,
+  paymentMethods,
+  type CheckoutFormData,
+  type PaymentMethod,
+} from "./schema";

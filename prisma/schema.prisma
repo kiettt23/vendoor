@@ -47,10 +47,11 @@ enum PaymentStatus {
 }
 
 enum PaymentMethod {
-  VNPAY
+  COD       // Thanh toán khi nhận hàng
+  STRIPE    // Thanh toán qua Stripe
+  VNPAY     // Làm sau
   MOMO      // Làm sau
   ZALOPAY   // Làm sau
-  COD       // Làm sau
 }
 
 // ============================================
@@ -361,6 +362,10 @@ model Payment {
 
   // Amount
   amount          Float
+
+  // Stripe specific (nullable cho methods khác)
+  stripeSessionId       String?   @unique
+  stripePaymentIntentId String?   @unique
 
   // VNPay specific (nullable cho methods khác)
   vnpayTransactionId String?   @unique
