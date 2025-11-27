@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -9,6 +9,7 @@ import { loginSchema, type LoginFormData } from "@/features/auth";
 import { authClient } from "@/shared/lib/auth/client";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { PasswordInput } from "@/shared/ui/password-input";
 import { Label } from "@/shared/ui/label";
 import {
   Card,
@@ -21,6 +22,8 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +47,7 @@ export default function LoginPage() {
         setError(result.error.message || "Email hoặc mật khẩu không đúng");
         return;
       }
-      router.push("/");
+      router.push(callbackUrl);
       router.refresh();
     } catch {
       setError("Có lỗi xảy ra. Vui lòng thử lại.");
@@ -90,9 +93,8 @@ export default function LoginPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Mật khẩu</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   disabled={isLoading}
                   {...register("password")}
                 />

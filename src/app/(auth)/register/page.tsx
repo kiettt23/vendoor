@@ -9,6 +9,7 @@ import { registerSchema, type RegisterFormData } from "@/features/auth";
 import { authClient } from "@/shared/lib/auth/client";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { PasswordInput } from "@/shared/ui/password-input";
 import { Label } from "@/shared/ui/label";
 import {
   Card,
@@ -45,7 +46,22 @@ export default function RegisterPage() {
         setError(result.error.message || "Đăng ký thất bại");
         return;
       }
-      router.push("/login");
+
+      // Auto-login sau khi đăng ký thành công
+      const loginResult = await authClient.signIn.email({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (loginResult.error) {
+        // Fallback: nếu auto-login fail, redirect về login page
+        router.push("/login");
+        return;
+      }
+
+      // Login thành công, redirect về home
+      router.push("/");
+      router.refresh();
     } catch {
       setError("Có lỗi xảy ra. Vui lòng thử lại.");
     } finally {
@@ -102,9 +118,8 @@ export default function RegisterPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Mật khẩu</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   disabled={isLoading}
                   {...register("password")}
                 />
@@ -116,9 +131,8 @@ export default function RegisterPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
-                <Input
+                <PasswordInput
                   id="confirmPassword"
-                  type="password"
                   disabled={isLoading}
                   {...register("confirmPassword")}
                 />

@@ -26,16 +26,16 @@ export function calculateCartTotals(items: CartItem[]) {
   const vendorGroups = groupItemsByVendor(items);
   const subtotal = vendorGroups.reduce((sum, g) => sum + g.subtotal, 0);
   const shippingFee = vendorGroups.length * SHIPPING_FEE_PER_VENDOR;
+  // platformFee là phí platform thu từ vendor, không tính vào total của customer
   const platformFee = Math.round(subtotal * PLATFORM_FEE_RATE);
-  const total = subtotal + shippingFee + platformFee;
+  const total = subtotal + shippingFee; // Customer trả: tiền hàng + phí ship
 
   return {
     subtotal,
     shippingFee,
-    platformFee,
+    platformFee, // Chỉ dùng để hiển thị cho admin/vendor
     total,
     vendorCount: vendorGroups.length,
     itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
   };
 }
-

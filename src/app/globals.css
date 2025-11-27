@@ -3,33 +3,58 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Updated color palette for tech marketplace - blue/cyan primary with electric accents */
+/* ============================================
+   DESIGN TOKENS - Vendoor E-commerce
+   ============================================ */
+
+/* Brand Colors - Tech Marketplace Theme */
 :root {
+  /* Background & Foreground */
   --background: oklch(0.98 0.005 250);
   --foreground: oklch(0.13 0.02 260);
+
+  /* Card & Popover */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.13 0.02 260);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.13 0.02 260);
+
+  /* Primary - Blue */
   --primary: oklch(0.55 0.2 255);
   --primary-foreground: oklch(0.98 0 0);
+
+  /* Secondary */
   --secondary: oklch(0.96 0.01 250);
   --secondary-foreground: oklch(0.2 0.02 260);
+
+  /* Muted */
   --muted: oklch(0.95 0.01 250);
   --muted-foreground: oklch(0.45 0.02 260);
+
+  /* Accent - Cyan */
   --accent: oklch(0.7 0.18 180);
   --accent-foreground: oklch(0.13 0.02 260);
+
+  /* Destructive */
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
+
+  /* Border & Input */
   --border: oklch(0.9 0.01 250);
   --input: oklch(0.92 0.01 250);
   --ring: oklch(0.55 0.2 255);
+
+  /* Charts */
   --chart-1: oklch(0.55 0.2 255);
   --chart-2: oklch(0.7 0.18 180);
   --chart-3: oklch(0.65 0.2 290);
   --chart-4: oklch(0.75 0.15 60);
   --chart-5: oklch(0.6 0.2 340);
+
+  /* Radius */
   --radius: 0.75rem;
+
+  /* Sidebar */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -38,6 +63,46 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* ============================================
+     BRAND TOKENS - Custom for Vendoor
+     ============================================ */
+
+  /* Brand Primary - Blue */
+  --brand-primary: oklch(0.55 0.2 255);
+  --brand-primary-hover: oklch(0.48 0.22 255);
+  --brand-primary-light: oklch(0.92 0.05 255);
+
+  /* Brand Secondary - Cyan/Teal */
+  --brand-secondary: oklch(0.7 0.18 180);
+  --brand-secondary-hover: oklch(0.62 0.2 180);
+
+  /* Semantic Colors */
+  --success: oklch(0.65 0.2 145);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.75 0.18 85);
+  --warning-foreground: oklch(0.2 0.05 85);
+  --error: oklch(0.577 0.245 27);
+  --error-foreground: oklch(1 0 0);
+  --info: oklch(0.6 0.18 240);
+  --info-foreground: oklch(1 0 0);
+
+  /* Spacing Tokens */
+  --spacing-xs: 0.25rem;
+  --spacing-tight: 0.5rem;
+  --spacing-component: 1rem;
+  --spacing-content: 1.5rem;
+  --spacing-section: 3rem;
+
+  /* Timing Tokens */
+  --timing-fast: 150ms;
+  --timing-base: 200ms;
+  --timing-slow: 300ms;
+
+  /* Typography */
+  --text-body: 1rem;
+  --text-body-sm: 0.875rem;
+  --text-body-lg: 1.125rem;
 }
 
 .dark {
@@ -73,6 +138,19 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+
+  /* Brand Colors - Dark Mode */
+  --brand-primary: oklch(0.65 0.2 255);
+  --brand-primary-hover: oklch(0.58 0.22 255);
+  --brand-primary-light: oklch(0.25 0.08 255);
+  --brand-secondary: oklch(0.7 0.18 180);
+  --brand-secondary-hover: oklch(0.62 0.2 180);
+
+  /* Semantic Colors - Dark Mode */
+  --success: oklch(0.7 0.2 145);
+  --warning: oklch(0.8 0.18 85);
+  --error: oklch(0.65 0.22 27);
+  --info: oklch(0.65 0.18 240);
 }
 
 @theme inline {
@@ -114,6 +192,40 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Brand Colors */
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-hover: var(--brand-primary-hover);
+  --color-brand-primary-light: var(--brand-primary-light);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-secondary-hover: var(--brand-secondary-hover);
+
+  /* Semantic Colors */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+
+  /* Spacing */
+  --spacing-xs: var(--spacing-xs);
+  --spacing-tight: var(--spacing-tight);
+  --spacing-component: var(--spacing-component);
+  --spacing-content: var(--spacing-content);
+  --spacing-section: var(--spacing-section);
+
+  /* Timing */
+  --timing-fast: var(--timing-fast);
+  --timing-base: var(--timing-base);
+  --timing-slow: var(--timing-slow);
+
+  /* Typography */
+  --text-body: var(--text-body);
+  --text-body-sm: var(--text-body-sm);
+  --text-body-lg: var(--text-body-lg);
 }
 
 @layer base {
