@@ -6,12 +6,10 @@ import {
   getProductBySlug,
   getRelatedProducts,
   ProductCard,
-  ProductActions,
+  ProductDetailClient,
   calculateDiscount,
 } from "@/entities/product";
 import { Badge } from "@/shared/ui/badge";
-import { Card, CardContent } from "@/shared/ui/card";
-import { formatPrice } from "@/shared/lib";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -126,37 +124,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <h1 className="text-3xl font-bold">{product.name}</h1>
           </div>
 
-          <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-bold text-primary">
-              {formatPrice(defaultVariant.price)}
-            </span>
-            {defaultVariant.compareAtPrice && (
-              <span className="text-xl text-muted-foreground line-through">
-                {formatPrice(defaultVariant.compareAtPrice)}
-              </span>
-            )}
-          </div>
-
-          {product.variants.length > 1 && (
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-3">Phân loại</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.variants.map((v) => (
-                    <Badge
-                      key={v.id}
-                      variant={v.isDefault ? "default" : "outline"}
-                      className="cursor-pointer"
-                    >
-                      {v.name || "Mặc định"} - {formatPrice(v.price)}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <ProductActions
+          <ProductDetailClient
             product={{
               id: product.id,
               name: product.name,
@@ -166,7 +134,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
               vendorProfileId: product.vendor.vendorProfileId,
               shopName: product.vendor.shopName,
             }}
-            variant={defaultVariant}
+            variants={product.variants}
+            defaultVariant={defaultVariant}
             image={product.images[0]?.url || ""}
           />
         </div>

@@ -46,7 +46,7 @@ const stats = [
 export function BecomeSellerSection() {
   return (
     <section className="py-16 lg:py-24 bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div className="space-y-6">

@@ -22,6 +22,7 @@ export {
   ProductStatusBadge,
   ProductStockBadge,
   ProductActions,
+  ProductDetailClient,
 } from "./ui";
 export {
   calculateDiscount,

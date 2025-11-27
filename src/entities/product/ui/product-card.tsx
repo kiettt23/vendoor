@@ -1,15 +1,21 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingCart, Check, Loader2, Eye } from "lucide-react";
 import { Badge } from "@/shared/ui/badge";
+import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { formatPrice } from "@/shared/lib";
+import { useCart } from "@/entities/cart";
 import { calculateDiscount } from "../lib/utils";
 import type { ProductListItem } from "../model/types";
 
 type ProductCardProps = ProductListItem;
 
 export function ProductCard({
+  id,
   name,
   slug,
   price,
@@ -19,6 +25,38 @@ export function ProductCard({
   category,
 }: ProductCardProps) {
   const discountPercent = calculateDiscount(price, compareAtPrice);
+  const [isAdding, setIsAdding] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
+  const addItem = useCart((state) => state.addItem);
+
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation
+    e.stopPropagation();
+
+    if (isAdding || isAdded) return;
+
+    setIsAdding(true);
+
+    addItem({
+      productId: id,
+      productName: name,
+      productSlug: slug,
+      variantId: `${id}-default`, // Default variant
+      variantName: "Mặc định",
+      price,
+      quantity: 1,
+      image: image || "/placeholder.jpg",
+      stock: 99, // Will be checked on checkout
+      vendorId: vendor.id,
+      vendorName: vendor.name,
+    });
+
+    setTimeout(() => {
+      setIsAdding(false);
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 2000);
+    }, 300);
+  };
 
   return (
     <Link href={`/products/${slug}`} className="group block h-full">
@@ -26,21 +64,52 @@ export function ProductCard({
         <CardContent className="p-0 flex flex-col h-full">
           <div className="relative aspect-square overflow-hidden bg-muted">
             <Image
-              src={image || "/placeholder-product.png"}
+              src={image || "/placeholder.jpg"}
               alt={name}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+            {/* Quick actions overlay */}
             <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform">
-              <div className="bg-primary/90 backdrop-blur px-4 py-2.5 text-center">
-                <div className="flex items-center justify-center gap-2 text-sm font-semibold text-white">
-                  <ShoppingBag className="h-4 w-4" />
-                  <span>Xem chi tiết</span>
-                </div>
+              <div className="flex gap-1 p-2 bg-black/60 backdrop-blur">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="flex-1 h-9"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  Chi tiết
+                </Button>
+                <Button
+                  size="sm"
+                  variant={isAdded ? "default" : "default"}
+                  className={`flex-1 h-9 ${
+                    isAdded ? "bg-green-600 hover:bg-green-600" : ""
+                  }`}
+                  onClick={handleQuickAdd}
+                  disabled={isAdding}
+                >
+                  {isAdding ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : isAdded ? (
+                    <>
+                      <Check className="h-4 w-4 mr-1" />
+                      Đã thêm
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-4 w-4 mr-1" />
+                      Thêm
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
+
             {discountPercent && (
               <Badge
                 variant="destructive"
@@ -51,7 +120,7 @@ export function ProductCard({
             )}
             <Badge
               variant="secondary"
-              className="absolute bottom-2 left-2 bg-white/95 text-xs"
+              className="absolute bottom-2 left-2 bg-white/95 text-xs group-hover:opacity-0 transition-opacity"
             >
               {category.name}
             </Badge>

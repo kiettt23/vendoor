@@ -5,7 +5,7 @@ import { ArrowRight, Smartphone, Laptop } from "lucide-react";
 export function PromoSection() {
   return (
     <section className="py-16 lg:py-24">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Promo Card 1 */}
           <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-8 lg:p-12">

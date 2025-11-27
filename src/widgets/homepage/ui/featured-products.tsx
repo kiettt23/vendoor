@@ -29,7 +29,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
 
   return (
     <section className="py-16 lg:py-24">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-10">
           <div>
             <h2 className="text-2xl lg:text-3xl font-bold">Sản phẩm nổi bật</h2>

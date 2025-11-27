@@ -1,17 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { Mail, LogIn, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { loginSchema, type LoginFormData } from "@/features/auth";
-import { authClient } from "@/shared/lib/auth/client";
+import { authClient, useSession } from "@/shared/lib/auth/client";
 import { translateAuthError } from "@/shared/lib/auth/error-messages";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { PasswordInput } from "@/shared/ui/password-input";
 import { Label } from "@/shared/ui/label";
+import { Logo } from "@/shared/ui/logo";
 import {
   Card,
   CardContent,
@@ -24,6 +27,7 @@ import {
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session, isPending } = useSession();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +39,20 @@ export default function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
+
+  // Redirect nếu đã đăng nhập
+  useEffect(() => {
+    if (!isPending && session?.user) {
+      router.replace("/");
+    }
+  }, [session, isPending, router]);
+
+  // Thông báo lý do redirect nếu có callbackUrl (bị bắt đăng nhập)
+  useEffect(() => {
+    if (searchParams.get("callbackUrl")) {
+      toast.info("Vui lòng đăng nhập để tiếp tục");
+    }
+  }, [searchParams]);
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
@@ -48,6 +66,7 @@ export default function LoginPage() {
         setError(translateAuthError(result.error.message));
         return;
       }
+      toast.success("Đăng nhập thành công");
       router.push(callbackUrl);
       router.refresh();
     } catch {
@@ -57,19 +76,28 @@ export default function LoginPage() {
     }
   };
 
+  // Loading trong khi check session
+  if (isPending) {
+    return (
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Đã đăng nhập thì không render
+  if (session?.user) {
+    return null;
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-12">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-muted/30 px-4 py-8">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <Link href="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">V</span>
-          </div>
-          <span className="text-2xl font-bold">Vendoor</span>
-        </Link>
+        <Logo size="lg" className="justify-center mb-8" />
 
         <Card className="w-full">
-          <CardHeader>
+          <CardHeader className="text-center">
             <CardTitle className="text-2xl">Đăng nhập</CardTitle>
             <CardDescription>
               Nhập email và mật khẩu để đăng nhập
@@ -79,13 +107,17 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  disabled={isLoading}
-                  {...register("email")}
-                />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    className="pl-10"
+                    disabled={isLoading}
+                    {...register("email")}
+                  />
+                </div>
                 {errors.email && (
                   <p className="text-sm text-destructive">
                     {errors.email.message}
@@ -111,7 +143,17 @@ export default function LoginPage() {
                 </div>
               )}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang đăng nhập...
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Đăng nhập
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>

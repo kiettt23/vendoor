@@ -5,34 +5,34 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/shared/lib/utils/cn";
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-full border px-(--spacing-tight) py-1 text-caption font-semibold w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-(--spacing-xs) [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,background-color,box-shadow] duration-(--timing-fast) overflow-hidden",
+  "inline-flex items-center justify-center rounded-full border px-2.5 py-0.5 text-xs font-semibold w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-colors",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-brand-primary text-white [a&]:hover:bg-brand-primary-hover",
+          "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
         secondary:
-          "border-transparent bg-brand-secondary/20 text-brand-secondary border-brand-secondary/30 [a&]:hover:bg-brand-secondary/30",
+          "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/80",
         destructive:
-          "border-transparent bg-error text-white [a&]:hover:bg-error/90 focus-visible:ring-error/20 dark:focus-visible:ring-error/40",
+          "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90",
         outline:
-          "bg-background text-foreground [a&]:hover:bg-brand-primary/5 [a&]:hover:border-brand-primary [a&]:hover:text-brand-primary",
-        // Semantic status variants (using design tokens)
+          "bg-background text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        // Semantic status variants
         success:
-          "border-transparent bg-success text-white [a&]:hover:opacity-90",
+          "border-transparent bg-green-500 text-white [a&]:hover:bg-green-600",
         warning:
-          "border-transparent bg-warning text-white [a&]:hover:opacity-90",
-        error: "border-transparent bg-error text-white [a&]:hover:opacity-90",
-        info: "border-transparent bg-info text-white [a&]:hover:opacity-90",
-        // Soft variants (for non-critical info)
+          "border-transparent bg-yellow-500 text-white [a&]:hover:bg-yellow-600",
+        error: "border-transparent bg-red-500 text-white [a&]:hover:bg-red-600",
+        info: "border-transparent bg-blue-500 text-white [a&]:hover:bg-blue-600",
+        // Soft variants
         "success-soft":
-          "border-success/30 bg-success-bg text-success [a&]:hover:bg-success-bg/80",
+          "border-green-200 bg-green-50 text-green-700 [a&]:hover:bg-green-100",
         "warning-soft":
-          "border-warning/30 bg-warning-bg text-warning [a&]:hover:bg-warning-bg/80",
+          "border-yellow-200 bg-yellow-50 text-yellow-700 [a&]:hover:bg-yellow-100",
         "error-soft":
-          "border-error/30 bg-error-bg text-error [a&]:hover:bg-error-bg/80",
+          "border-red-200 bg-red-50 text-red-700 [a&]:hover:bg-red-100",
         "info-soft":
-          "border-info/30 bg-info-bg text-info [a&]:hover:bg-info-bg/80",
+          "border-blue-200 bg-blue-50 text-blue-700 [a&]:hover:bg-blue-100",
       },
     },
     defaultVariants: {

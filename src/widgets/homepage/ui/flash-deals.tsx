@@ -109,7 +109,7 @@ export function FlashDeals({ products = mockFlashDeals }: FlashDealsProps) {
 
   return (
     <section className="py-16 lg:py-24 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">

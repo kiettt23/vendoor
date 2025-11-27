@@ -20,7 +20,7 @@ const stats = [
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-8 items-center py-16 lg:py-24">
           {/* Content */}
           <div className="space-y-6 text-center lg:text-left">
@@ -103,7 +103,7 @@ export function HeroSection() {
                 </div>
               </div>
 
-              <div className="absolute bottom-8 left-0 bg-card p-3 rounded-xl shadow-lg border border-border">
+              <div className="absolute bottom-8 left-4 bg-card p-3 rounded-xl shadow-lg border border-border">
                 <div className="flex items-center gap-2">
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                     <span className="text-xl">🔥</span>
@@ -125,12 +125,14 @@ export function HeroSection() {
           {features.map((feature) => (
             <div
               key={feature.label}
-              className="flex items-center justify-center gap-3 py-3"
+              className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 py-3 text-center sm:text-left"
             >
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <feature.icon className="h-5 w-5 text-primary" />
               </div>
-              <span className="font-medium text-sm">{feature.label}</span>
+              <span className="font-medium text-xs sm:text-sm">
+                {feature.label}
+              </span>
             </div>
           ))}
         </div>

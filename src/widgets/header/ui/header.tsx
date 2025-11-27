@@ -29,6 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
+import { Logo } from "@/shared/ui/logo";
 import { useCart } from "@/entities/cart";
 import { signOut } from "@/shared/lib/auth/client";
 import { toast } from "sonner";
@@ -59,8 +60,16 @@ type HeaderProps = {
 export function Header({ user }: HeaderProps) {
   const router = useRouter();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const items = useCart((state) => state.items);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -104,53 +113,34 @@ export function Header({ user }: HeaderProps) {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-80">
-              <div className="flex items-center gap-2 mb-8">
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-sm">
-                    V
-                  </span>
-                </div>
-                <span className="text-xl font-bold">Vendoor</span>
+            <SheetContent side="left" className="w-80 p-0">
+              <div className="flex items-center gap-2 p-6 border-b">
+                <Logo size="sm" asLink={false} />
               </div>
-              <nav className="flex flex-col gap-4">
-                {navigation.map((item) => (
+              <nav className="flex flex-col p-4">
+                {navigation.map((item, idx) => (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="text-lg font-medium hover:text-primary"
+                    className={`text-base font-medium hover:text-primary py-3 px-2 rounded-lg hover:bg-muted transition-colors ${
+                      idx < navigation.length - 1
+                        ? "border-b border-border"
+                        : ""
+                    }`}
                   >
                     {item.name}
-                  </Link>
-                ))}
-                <hr className="my-2" />
-                <p className="text-sm text-muted-foreground font-medium">
-                  Danh mục
-                </p>
-                {categories.map((cat) => (
-                  <Link
-                    key={cat}
-                    href={`/products?category=${cat.toLowerCase()}`}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    {cat}
                   </Link>
                 ))}
               </nav>
             </SheetContent>
           </Sheet>
 
-          <Link href="/" className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">V</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight hidden sm:inline">
-              Vendoor
-            </span>
-          </Link>
+          <Logo size="md" showText={true} className="hidden sm:flex" />
+          <Logo size="md" showText={false} className="flex sm:hidden" />
 
           <div className="flex-1 max-w-2xl hidden md:block">
-            <div
+            <form
+              onSubmit={handleSearch}
               className={`flex items-center rounded-xl border-2 transition-colors ${
                 isSearchFocused ? "border-primary" : "border-border"
               } bg-secondary/50`}
@@ -159,14 +149,23 @@ export function Header({ user }: HeaderProps) {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
+                    type="button"
                     className="rounded-l-xl rounded-r-none h-10 px-3"
                   >
                     Danh mục <ChevronDown className="h-4 w-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/products">Tất cả sản phẩm</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   {categories.map((cat) => (
-                    <DropdownMenuItem key={cat}>{cat}</DropdownMenuItem>
+                    <DropdownMenuItem key={cat} asChild>
+                      <Link href={`/products?category=${cat.toLowerCase()}`}>
+                        {cat}
+                      </Link>
+                    </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -174,17 +173,21 @@ export function Header({ user }: HeaderProps) {
               <Input
                 type="search"
                 placeholder="Tìm kiếm sản phẩm..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 border-0 bg-transparent focus-visible:ring-0 h-10"
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setIsSearchFocused(false)}
               />
               <Button
+                type="submit"
                 size="icon"
-                className="rounded-l-none rounded-r-xl h-10 w-12"
+                variant="ghost"
+                className="rounded-l-none rounded-r-lg h-10 w-12 hover:bg-primary hover:text-primary-foreground transition-colors"
               >
                 <Search className="h-4 w-4" />
               </Button>
-            </div>
+            </form>
           </div>
 
           <nav className="hidden xl:flex items-center gap-6">
@@ -274,7 +277,10 @@ export function Header({ user }: HeaderProps) {
               <Link href="/cart">
                 <ShoppingCart className="h-5 w-5" />
                 {totalItems > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                  <Badge
+                    variant="destructive"
+                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                  >
                     {totalItems > 99 ? "99+" : totalItems}
                   </Badge>
                 )}

@@ -35,6 +35,36 @@ import {
 } from "@/features/checkout";
 import { formatPrice } from "@/shared/lib";
 
+const CHECKOUT_INFO_KEY = "vendoor_checkout_info";
+
+interface SavedCheckoutInfo {
+  name: string;
+  phone: string;
+  address: string;
+  city: string;
+  district: string;
+  ward: string;
+}
+
+function getSavedCheckoutInfo(): SavedCheckoutInfo | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const saved = localStorage.getItem(CHECKOUT_INFO_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveCheckoutInfo(info: SavedCheckoutInfo) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(CHECKOUT_INFO_KEY, JSON.stringify(info));
+  } catch {
+    // Ignore localStorage errors
+  }
+}
+
 export function CheckoutPage() {
   const router = useRouter();
   const items = useCart((state) => state.items);
@@ -43,6 +73,9 @@ export function CheckoutPage() {
 
   const vendorGroups = groupItemsByVendor(items);
   const totals = calculateCartTotals(items);
+
+  // Load saved checkout info
+  const savedInfo = getSavedCheckoutInfo();
 
   const {
     register,
@@ -53,6 +86,12 @@ export function CheckoutPage() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       paymentMethod: "COD",
+      name: savedInfo?.name || "",
+      phone: savedInfo?.phone || "",
+      address: savedInfo?.address || "",
+      city: savedInfo?.city || "",
+      district: savedInfo?.district || "",
+      ward: savedInfo?.ward || "",
     },
   });
 
@@ -87,10 +126,17 @@ export function CheckoutPage() {
         return;
       }
 
-      const { paymentMethod, ...shippingInfo } = data;
+      const { paymentMethod, note, email, ...shippingInfo } = data;
+
+      // Lưu thông tin để dùng lại
+      saveCheckoutInfo(shippingInfo);
 
       toast.info("Đang tạo đơn hàng...");
-      const result = await createOrders(items, shippingInfo, paymentMethod);
+      const result = await createOrders(
+        items,
+        { ...shippingInfo, email, note },
+        paymentMethod
+      );
       if (!result.success) {
         toast.error(result.error || "Không thể tạo đơn hàng");
         setIsSubmitting(false);

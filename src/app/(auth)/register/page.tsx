@@ -1,17 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { Mail, User, UserPlus, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { registerSchema, type RegisterFormData } from "@/features/auth";
-import { authClient } from "@/shared/lib/auth/client";
+import { authClient, useSession } from "@/shared/lib/auth/client";
 import { translateAuthError } from "@/shared/lib/auth/error-messages";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { PasswordInput } from "@/shared/ui/password-input";
 import { Label } from "@/shared/ui/label";
+import { Logo } from "@/shared/ui/logo";
 import {
   Card,
   CardContent,
@@ -23,6 +26,7 @@ import {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { data: session, isPending } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +37,13 @@ export default function RegisterPage() {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
+
+  // Redirect nếu đã đăng nhập
+  useEffect(() => {
+    if (!isPending && session?.user) {
+      router.replace("/");
+    }
+  }, [session, isPending, router]);
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
@@ -61,6 +72,7 @@ export default function RegisterPage() {
       }
 
       // Login thành công, redirect về home
+      toast.success("Đăng ký thành công");
       router.push("/");
       router.refresh();
     } catch {
@@ -70,19 +82,28 @@ export default function RegisterPage() {
     }
   };
 
+  // Loading trong khi check session
+  if (isPending) {
+    return (
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Đã đăng nhập thì không render
+  if (session?.user) {
+    return null;
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-12">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-muted/30 px-4 py-8">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <Link href="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">V</span>
-          </div>
-          <span className="text-2xl font-bold">Vendoor</span>
-        </Link>
+        <Logo size="lg" className="justify-center mb-8" />
 
         <Card className="w-full">
-          <CardHeader>
+          <CardHeader className="text-center">
             <CardTitle className="text-2xl">Đăng ký</CardTitle>
             <CardDescription>Tạo tài khoản mới</CardDescription>
           </CardHeader>
@@ -90,12 +111,16 @@ export default function RegisterPage() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Họ tên</Label>
-                <Input
-                  id="name"
-                  placeholder="Nguyễn Văn A"
-                  disabled={isLoading}
-                  {...register("name")}
-                />
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="name"
+                    placeholder="Nguyễn Văn A"
+                    className="pl-10"
+                    disabled={isLoading}
+                    {...register("name")}
+                  />
+                </div>
                 {errors.name && (
                   <p className="text-sm text-destructive">
                     {errors.name.message}
@@ -104,13 +129,17 @@ export default function RegisterPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  disabled={isLoading}
-                  {...register("email")}
-                />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    className="pl-10"
+                    disabled={isLoading}
+                    {...register("email")}
+                  />
+                </div>
                 {errors.email && (
                   <p className="text-sm text-destructive">
                     {errors.email.message}
@@ -149,7 +178,17 @@ export default function RegisterPage() {
                 </div>
               )}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Đang đăng ký..." : "Đăng ký"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang đăng ký...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Đăng ký
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>
