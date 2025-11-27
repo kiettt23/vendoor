@@ -1,6 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Youtube, Twitter, Smartphone, CreditCard, Truck, ShieldCheck } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Youtube,
+  Twitter,
+  Smartphone,
+  CreditCard,
+  Truck,
+  ShieldCheck,
+} from "lucide-react";
 
 const footerLinks = {
   shop: {
@@ -60,10 +69,13 @@ export function Footer() {
   return (
     <footer className="bg-foreground text-background">
       <div className="border-b border-background/10">
-        <div className="container mx-auto px-4 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {features.map((feature) => (
-              <div key={feature.text} className="flex items-center justify-center gap-3">
+              <div
+                key={feature.text}
+                className="flex items-center justify-center gap-3"
+              >
                 <feature.icon className="h-5 w-5 text-primary" />
                 <span className="text-sm font-medium">{feature.text}</span>
               </div>
@@ -72,7 +84,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-10">
+      <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-flex items-center gap-2">
@@ -100,10 +112,13 @@ export function Footer() {
           {Object.values(footerLinks).map((section) => (
             <div key={section.title}>
               <h3 className="font-semibold mb-4 text-sm">{section.title}</h3>
-              <ul className="space-y-2.5">
+              <ul className="space-y-3">
                 {section.links.map((link) => (
                   <li key={link.name}>
-                    <Link href={link.href} className="text-sm text-background/70 hover:text-background">
+                    <Link
+                      href={link.href}
+                      className="text-sm text-background/70 hover:text-background"
+                    >
                       {link.name}
                     </Link>
                   </li>
@@ -114,12 +129,25 @@ export function Footer() {
         </div>
 
         <div className="border-t border-background/10 mt-10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-background/50">© 2025 Vendoor. Tất cả quyền được bảo lưu.</p>
+          <p className="text-sm text-background/50">
+            © 2025 Vendoor. Tất cả quyền được bảo lưu.
+          </p>
           <div className="flex items-center gap-3">
             <span className="text-xs text-background/50 mr-2">Thanh toán:</span>
-            {["visa-card-logo.png", "mastercard-logo.png", "generic-mobile-payment-logo.png", "zalopay-logo.png", "generic-payment-gateway-logo.png"].map((img) => (
+            {[
+              "visa-card-logo.png",
+              "mastercard-logo.png",
+              "generic-mobile-payment-logo.png",
+              "zalopay-logo.png",
+              "generic-payment-gateway-logo.png",
+            ].map((img) => (
               <div key={img} className="relative h-6 w-12">
-                <Image src={`/${img}`} alt="" fill className="object-contain opacity-70" />
+                <Image
+                  src={`/${img}`}
+                  alt=""
+                  fill
+                  className="object-contain opacity-70"
+                />
               </div>
             ))}
           </div>
@@ -128,4 +156,3 @@ export function Footer() {
     </footer>
   );
 }
-

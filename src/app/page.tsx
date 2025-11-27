@@ -1,5 +1,15 @@
 import { prisma } from "@/shared/lib/db/prisma";
-import { HeroSection, CategoriesSection, FeaturedProducts } from "@/widgets/homepage";
+import {
+  HeroSection,
+  CategoriesSection,
+  FeaturedProducts,
+  FlashDeals,
+  FeaturedStores,
+  PromoSection,
+  BecomeSellerSection,
+  TestimonialsSection,
+  NewsletterSection,
+} from "@/widgets/homepage";
 
 export default async function HomePage() {
   const categories = await prisma.category.findMany({
@@ -11,7 +21,10 @@ export default async function HomePage() {
     where: { isActive: true },
     include: {
       vendor: { select: { id: true, name: true } },
-      variants: { where: { isDefault: true }, select: { price: true, compareAtPrice: true } },
+      variants: {
+        where: { isDefault: true },
+        select: { price: true, compareAtPrice: true },
+      },
       images: { select: { url: true }, orderBy: { order: "asc" }, take: 1 },
     },
     orderBy: { createdAt: "desc" },
@@ -22,7 +35,13 @@ export default async function HomePage() {
     <>
       <HeroSection />
       <CategoriesSection categories={categories} />
+      <FlashDeals />
       <FeaturedProducts products={featuredProducts} />
+      <FeaturedStores />
+      <PromoSection />
+      <BecomeSellerSection />
+      <TestimonialsSection />
+      <NewsletterSection />
     </>
   );
 }

@@ -1,10 +1,3 @@
-/**
- * Auth Configuration - Better Auth Server Setup
- *
- * File này chứa cấu hình server-side auth.
- * Import: import { auth } from "@/lib/auth"
- */
-
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { multiSession } from "better-auth/plugins";
@@ -12,6 +5,8 @@ import { prisma } from "@/shared/lib/db";
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  secret: process.env.BETTER_AUTH_SECRET,
+  trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"],
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -40,6 +35,10 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 5, // 5 minutes
+    },
   },
 
   plugins: [

@@ -10,4 +10,11 @@ export { auth } from "./config";
 export type { Session } from "./config";
 
 // Client-side auth
-export { authClient, signIn, signUp, signOut, useSession } from "./client";
+export {
+  authClient,
+  signIn,
+  signUp,
+  signOut,
+  useSession,
+  getSession,
+} from "./client";

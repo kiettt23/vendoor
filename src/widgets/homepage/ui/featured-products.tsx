@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Button } from "@/shared/ui/button";
 import { ProductCard } from "@/entities/product";
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 interface Product {
   id: string;
@@ -29,18 +28,24 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
   }));
 
   return (
-    <section className="py-16">
+    <section className="py-16 lg:py-24">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-10">
           <div>
-            <h2 className="text-3xl font-bold mb-2">Sản Phẩm Nổi Bật</h2>
-            <p className="text-muted-foreground">Những sản phẩm được yêu thích nhất</p>
+            <h2 className="text-2xl lg:text-3xl font-bold">Sản phẩm nổi bật</h2>
+            <p className="text-muted-foreground mt-2">
+              Được khách hàng yêu thích nhất tuần này
+            </p>
           </div>
-          <Button variant="outline" asChild>
-            <Link href="/products">Xem tất cả <ArrowRight className="ml-2 h-4 w-4" /></Link>
-          </Button>
+          <Link
+            href="/products"
+            className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+          >
+            Xem tất cả
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
           {formatted.map((product) => (
             <ProductCard key={product.id} {...product} />
           ))}
@@ -49,4 +54,3 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
     </section>
   );
 }
-

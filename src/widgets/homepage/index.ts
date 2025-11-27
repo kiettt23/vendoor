@@ -1,4 +1,9 @@
 export { HeroSection } from "./ui/hero-section";
 export { CategoriesSection } from "./ui/categories-section";
 export { FeaturedProducts } from "./ui/featured-products";
-
+export { FlashDeals } from "./ui/flash-deals";
+export { FeaturedStores } from "./ui/featured-stores";
+export { PromoSection } from "./ui/promo-section";
+export { BecomeSellerSection } from "./ui/become-seller-section";
+export { TestimonialsSection } from "./ui/testimonials-section";
+export { NewsletterSection } from "./ui/newsletter-section";
