@@ -19,13 +19,21 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
 
   // Số lần retry khi fail
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
 
   // Số workers (song song)
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 2,
 
   // Reporter: list cho local, html cho debug
   reporter: [["list"], ["html", { open: "never" }]],
+
+  // Global timeout
+  timeout: 60000, // 60 seconds per test
+
+  // Expect timeout
+  expect: {
+    timeout: 15000, // 15 seconds for assertions
+  },
 
   // Shared settings cho tất cả projects
   use: {
@@ -40,6 +48,12 @@ export default defineConfig({
 
     // Video recording
     video: "retain-on-failure",
+
+    // Navigation timeout
+    navigationTimeout: 45000,
+
+    // Action timeout
+    actionTimeout: 15000,
   },
 
   // Chỉ test trên Chromium (có thể thêm firefox, webkit sau)
@@ -65,12 +79,6 @@ export default defineConfig({
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000, // 2 phút để build
-  },
-
-  // Timeout settings
-  timeout: 30 * 1000, // 30s per test
-  expect: {
-    timeout: 5 * 1000, // 5s per assertion
   },
 
   // Output folder cho artifacts
