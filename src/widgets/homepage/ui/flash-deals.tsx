@@ -165,7 +165,7 @@ export function FlashDeals({ products = mockFlashDeals }: FlashDealsProps) {
               </div>
               <div className="p-4 space-y-3">
                 <p className="text-xs text-muted-foreground">{deal.store}</p>
-                <h3 className="font-medium text-sm line-clamp-2 h-10">
+                <h3 className="font-semibold text-sm line-clamp-2 h-10">
                   {deal.name}
                 </h3>
                 <div>

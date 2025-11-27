@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, Store, ShoppingCart } from "lucide-react";
+import { Store, ShoppingCart } from "lucide-react";
 import {
   getProductBySlug,
   getRelatedProducts,
@@ -12,6 +12,14 @@ import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { Card, CardContent } from "@/shared/ui/card";
 import { formatPrice } from "@/shared/lib";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/shared/ui/breadcrumb";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -45,26 +53,35 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   return (
     <div className="container mx-auto py-12 lg:py-16 px-4">
-      <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-        <Link href="/" className="hover:text-foreground">
-          Trang chủ
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <Link href="/products" className="hover:text-foreground">
-          Sản phẩm
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <Link
-          href={`/products?category=${product.category.slug}`}
-          className="hover:text-foreground"
-        >
-          {product.category.name}
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <span className="text-foreground font-medium truncate">
-          {product.name}
-        </span>
-      </nav>
+      <Breadcrumb className="mb-8">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/">Trang chủ</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/products">Sản phẩm</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href={`/products?category=${product.category.slug}`}>
+                {product.category.name}
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="truncate max-w-[200px]">
+              {product.name}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="grid md:grid-cols-2 gap-10 mb-16">
         <div className="space-y-4">

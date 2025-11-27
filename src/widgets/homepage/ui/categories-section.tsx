@@ -80,7 +80,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
                   <IconComponent className="h-7 w-7" />
                 </div>
                 <div className="text-center">
-                  <h3 className="font-medium text-sm">{category.name}</h3>
+                  <h3 className="font-semibold text-sm">{category.name}</h3>
                   <p className="text-xs text-muted-foreground">
                     {category._count.products} SP
                   </p>
