@@ -22,7 +22,7 @@ export function ProductCard({
 
   return (
     <Link href={`/products/${slug}`} className="group block h-full">
-      <Card className="h-full overflow-hidden border border-border/50 bg-card transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:-translate-y-1">
+      <Card className="h-full overflow-hidden border border-border/50 bg-card transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:-translate-y-1 p-0">
         <CardContent className="p-0 flex flex-col h-full">
           <div className="relative aspect-square overflow-hidden bg-muted">
             <Image

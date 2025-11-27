@@ -18,3 +18,6 @@ export {
   useSession,
   getSession,
 } from "./client";
+
+// Error handling
+export { translateAuthError } from "./error-messages";

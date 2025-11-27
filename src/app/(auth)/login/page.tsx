@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { loginSchema, type LoginFormData } from "@/features/auth";
 import { authClient } from "@/shared/lib/auth/client";
+import { translateAuthError } from "@/shared/lib/auth/error-messages";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { PasswordInput } from "@/shared/ui/password-input";
@@ -44,7 +45,7 @@ export default function LoginPage() {
         password: data.password,
       });
       if (result.error) {
-        setError(result.error.message || "Email hoặc mật khẩu không đúng");
+        setError(translateAuthError(result.error.message));
         return;
       }
       router.push(callbackUrl);
