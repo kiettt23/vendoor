@@ -1,16 +1,46 @@
 import { PrismaClient } from "@prisma/client";
-import { scrypt, randomBytes } from "crypto";
+import { scrypt, randomBytes, ScryptOptions } from "crypto";
 import { promisify } from "util";
 
 const prisma = new PrismaClient();
 
-// Password hashing - match Better Auth's scrypt implementation
-const scryptAsync = promisify(scrypt);
+// Password hashing - MUST match Better Auth's exact implementation
+// From: packages/better-auth/src/crypto/password.ts
+// Better Auth uses @noble/hashes/scrypt with: N=16384, r=16, p=1, dkLen=64
+const scryptAsync = promisify<
+  string | Buffer,
+  string | Buffer,
+  number,
+  ScryptOptions,
+  Buffer
+>(scrypt);
+
+const config = {
+  N: 16384,
+  r: 16,
+  p: 1,
+  dkLen: 64,
+};
 
 async function hashPassword(password: string): Promise<string> {
+  // Generate 16 bytes salt and encode as hex (32 chars)
   const salt = randomBytes(16).toString("hex");
-  const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt}:${derivedKey.toString("hex")}`;
+
+  // Generate key with Better Auth's exact config
+  const key = await scryptAsync(
+    password.normalize("NFKC"),
+    salt,
+    config.dkLen,
+    {
+      N: config.N,
+      r: config.r,
+      p: config.p,
+      maxmem: 128 * config.N * config.r * 2,
+    }
+  );
+
+  // Format: salt:hexEncodedKey (exactly like Better Auth)
+  return `${salt}:${key.toString("hex")}`;
 }
 
 // Helper to create account for a user
@@ -364,6 +394,12 @@ async function main() {
     sales?: number; // For sorting featured products
     rating?: number;
     reviews?: number;
+    variants?: Array<{
+      name: string;
+      price: number;
+      compareAtPrice?: number;
+      stock: number;
+    }>;
   }) {
     const product = await prisma.product.create({
       data: {
@@ -376,17 +412,35 @@ async function main() {
       },
     });
 
-    // Create default variant
-    await prisma.productVariant.create({
-      data: {
-        productId: product.id,
-        name: "Mặc định",
-        price: data.price,
-        compareAtPrice: data.compareAtPrice,
-        stock: data.stock,
-        isDefault: true,
-      },
-    });
+    // Create variants (default or multiple)
+    if (data.variants && data.variants.length > 0) {
+      await Promise.all(
+        data.variants.map((variant, index) =>
+          prisma.productVariant.create({
+            data: {
+              productId: product.id,
+              name: variant.name,
+              price: variant.price,
+              compareAtPrice: variant.compareAtPrice,
+              stock: variant.stock,
+              isDefault: index === 0,
+            },
+          })
+        )
+      );
+    } else {
+      // Default single variant
+      await prisma.productVariant.create({
+        data: {
+          productId: product.id,
+          name: "Mặc định",
+          price: data.price,
+          compareAtPrice: data.compareAtPrice,
+          stock: data.stock,
+          isDefault: true,
+        },
+      });
+    }
 
     // Create images
     await Promise.all(
@@ -604,28 +658,29 @@ async function main() {
   // NEW ARRIVALS (Recent createdAt)
   // These will be created last, so they have newest createdAt
   await createProduct({
-    vendorId: techzoneUser.id,
-    categoryId: accessoryCategory.id,
+    vendorId: logitechUser.id,
+    categoryId: gamingCategory.id,
     name: "Bàn phím cơ gaming RGB",
     slug: "ban-phim-co-gaming-rgb",
-    description: "Bàn phím cơ switches blue, đèn RGB đầy đủ",
+    description:
+      "Bàn phím cơ switches blue, đèn RGB đầy đủ với phần mềm tùy chỉnh",
     price: 1290000,
     stock: 100,
-    images: ["/placeholder.jpg"],
+    images: ["/asus-rog-strix-gaming-laptop.jpg"], // Reuse gaming image
     sales: 45,
     rating: 4.6,
     reviews: 67,
   });
 
   await createProduct({
-    vendorId: techzoneUser.id,
+    vendorId: logitechUser.id,
     categoryId: accessoryCategory.id,
-    name: "Webcam 4K streaming",
-    slug: "webcam-4k-streaming",
-    description: "Webcam chất lượng cao cho streaming và meeting",
-    price: 2490000,
+    name: "Webcam HD Pro 1080p",
+    slug: "webcam-hd-pro-1080p",
+    description: "Webcam chất lượng cao cho meeting và streaming với mic kép",
+    price: 1490000,
     stock: 80,
-    images: ["/placeholder.jpg"],
+    images: ["/logitech-mx-master-3s-mouse.jpg"], // Logitech product
     sales: 23,
     rating: 4.5,
     reviews: 34,
@@ -636,16 +691,240 @@ async function main() {
     categoryId: accessoryCategory.id,
     name: "Hub USB-C 7 in 1",
     slug: "hub-usbc-7-in-1",
-    description: "Hub đa năng với HDMI, USB 3.0, SD card reader",
+    description:
+      "Hub đa năng với HDMI 4K, USB 3.0, SD card reader, sạc PD 100W",
     price: 890000,
     stock: 150,
-    images: ["/placeholder.jpg"],
+    images: ["/samsung-990-pro-ssd.jpg"], // Tech accessory
     sales: 78,
     rating: 4.7,
     reviews: 92,
   });
 
-  console.log("✅ Created 18 products");
+  // More products for diversity
+  await createProduct({
+    vendorId: asusUser.id,
+    categoryId: gamingCategory.id,
+    name: "Chuột gaming ROG",
+    slug: "chuot-gaming-rog",
+    description: "Chuột gaming không dây với sensor 25K DPI, pin 150 giờ",
+    price: 2190000,
+    compareAtPrice: 2590000,
+    stock: 75,
+    images: ["/logitech-mx-master-3s-mouse.jpg"],
+    sales: 156,
+    rating: 4.8,
+    reviews: 189,
+  });
+
+  await createProduct({
+    vendorId: samsungUser.id,
+    categoryId: accessoryCategory.id,
+    name: "Samsung DeX Station",
+    slug: "samsung-dex-station",
+    description: "Biến điện thoại thành máy tính với đế kết nối đa năng",
+    price: 1890000,
+    stock: 40,
+    images: ["/samsung-990-pro-ssd.jpg"],
+    sales: 34,
+    rating: 4.4,
+    reviews: 45,
+  });
+
+  await createProduct({
+    vendorId: appleStoreUser.id,
+    categoryId: accessoryCategory.id,
+    name: "Apple Magic Keyboard",
+    slug: "apple-magic-keyboard",
+    description: "Bàn phím không dây với Touch ID cho Mac",
+    price: 3990000,
+    stock: 60,
+    images: ["/macbook-air-m3-laptop-silver.jpg"],
+    sales: 89,
+    rating: 4.7,
+    reviews: 102,
+  });
+
+  await createProduct({
+    vendorId: sonyUser.id,
+    categoryId: headphoneCategory.id,
+    name: "Sony WF-1000XM5",
+    slug: "sony-wf-1000xm5",
+    description: "True wireless earbuds cao cấp với LDAC và DSEE Extreme",
+    price: 6290000,
+    compareAtPrice: 6990000,
+    stock: 90,
+    images: ["/airpods-pro-2-earbuds-white.jpg"],
+    sales: 234,
+    rating: 4.8,
+    reviews: 278,
+  });
+
+  await createProduct({
+    vendorId: asusUser.id,
+    categoryId: laptopCategory.id,
+    name: "ASUS ZenBook 14 OLED",
+    slug: "asus-zenbook-14-oled",
+    description: "Ultrabook mỏng nhẹ với màn OLED 2.8K và Intel Core Ultra",
+    price: 28990000,
+    compareAtPrice: 32990000,
+    stock: 35,
+    images: ["/macbook-air-m3-laptop-silver.jpg"],
+    sales: 67,
+    rating: 4.7,
+    reviews: 89,
+  });
+
+  await createProduct({
+    vendorId: techzoneUser.id,
+    categoryId: accessoryCategory.id,
+    name: "Sạc nhanh GaN 65W",
+    slug: "sac-nhanh-gan-65w",
+    description: "Sạc GaN siêu nhỏ gọn, 3 cổng, hỗ trợ PD 3.0",
+    price: 590000,
+    stock: 200,
+    images: ["/samsung-990-pro-ssd.jpg"],
+    sales: 456,
+    rating: 4.9,
+    reviews: 523,
+  });
+
+  await createProduct({
+    vendorId: logitechUser.id,
+    categoryId: accessoryCategory.id,
+    name: "Logitech StreamCam",
+    slug: "logitech-streamcam",
+    description: "Webcam Full HD 1080p 60fps cho streaming chuyên nghiệp",
+    price: 3490000,
+    stock: 45,
+    images: ["/logitech-mx-master-3s-mouse.jpg"],
+    sales: 78,
+    rating: 4.6,
+    reviews: 95,
+  });
+
+  // ============================================
+  // PRODUCTS WITH MULTIPLE VARIANTS
+  // ============================================
+  console.log("📦 Creating products with variants...");
+
+  // iPhone với nhiều màu/dung lượng
+  await createProduct({
+    vendorId: appleStoreUser.id,
+    categoryId: phoneCategory.id,
+    name: "iPhone 15",
+    slug: "iphone-15",
+    description: "iPhone 15 mới với Dynamic Island, camera 48MP",
+    price: 22990000,
+    stock: 0, // Will be overridden by variants
+    images: ["/iphone-15-pro-max.png"],
+    sales: 320,
+    rating: 4.8,
+    reviews: 420,
+    variants: [
+      { name: "128GB - Đen", price: 22990000, stock: 25 },
+      { name: "128GB - Xanh", price: 22990000, stock: 18 },
+      { name: "256GB - Đen", price: 25990000, stock: 12 },
+      { name: "256GB - Hồng", price: 25990000, stock: 8 },
+      { name: "512GB - Đen", price: 30990000, stock: 5 },
+    ],
+  });
+
+  // MacBook với nhiều cấu hình
+  await createProduct({
+    vendorId: appleStoreUser.id,
+    categoryId: laptopCategory.id,
+    name: "MacBook Air M2",
+    slug: "macbook-air-m2",
+    description: "MacBook Air với chip M2, mỏng nhẹ, pin cả ngày",
+    price: 27990000,
+    stock: 0,
+    images: ["/macbook-air-m3-laptop-silver.jpg"],
+    sales: 180,
+    rating: 4.9,
+    reviews: 210,
+    variants: [
+      { name: "8GB/256GB - Xám", price: 27990000, stock: 20 },
+      { name: "8GB/256GB - Vàng", price: 27990000, stock: 15 },
+      { name: "8GB/512GB - Xám", price: 32990000, stock: 10 },
+      { name: "16GB/512GB - Bạc", price: 39990000, stock: 5 },
+    ],
+  });
+
+  // Samsung với nhiều màu
+  await createProduct({
+    vendorId: samsungUser.id,
+    categoryId: phoneCategory.id,
+    name: "Galaxy Z Flip 5",
+    slug: "galaxy-z-flip-5",
+    description: "Điện thoại gập thời trang với Flex Window lớn hơn",
+    price: 25990000,
+    stock: 0,
+    images: ["/samsung-galaxy-s24-ultra.png"],
+    sales: 95,
+    rating: 4.6,
+    reviews: 130,
+    variants: [
+      { name: "256GB - Tím", price: 25990000, stock: 12 },
+      { name: "256GB - Kem", price: 25990000, stock: 8 },
+      { name: "512GB - Xám", price: 29990000, stock: 5 },
+    ],
+  });
+
+  console.log("✅ Created 3 products with variants");
+
+  // ============================================
+  // OUT OF STOCK PRODUCTS
+  // ============================================
+  console.log("📦 Creating out-of-stock products...");
+
+  await createProduct({
+    vendorId: appleStoreUser.id,
+    categoryId: phoneCategory.id,
+    name: "iPhone 15 Pro Max Limited",
+    slug: "iphone-15-pro-max-limited",
+    description: "Phiên bản giới hạn màu Titan Đen - ĐÃ HẾT HÀNG",
+    price: 46990000,
+    compareAtPrice: 49990000,
+    stock: 0,
+    images: ["/iphone-15-pro-max.png"],
+    sales: 500,
+    rating: 5.0,
+    reviews: 320,
+  });
+
+  await createProduct({
+    vendorId: sonyUser.id,
+    categoryId: headphoneCategory.id,
+    name: "Sony WH-1000XM5 Limited Edition",
+    slug: "sony-wh-1000xm5-limited",
+    description: "Phiên bản giới hạn màu Midnight Blue - ĐÃ HẾT HÀNG",
+    price: 9990000,
+    compareAtPrice: 10990000,
+    stock: 0,
+    images: ["/sony-wh-1000xm5-headphones-black.jpg"],
+    sales: 150,
+    rating: 4.9,
+    reviews: 89,
+  });
+
+  await createProduct({
+    vendorId: asusUser.id,
+    categoryId: gamingCategory.id,
+    name: "ROG Phone 8 Pro",
+    slug: "rog-phone-8-pro",
+    description: "Gaming phone cao cấp nhất - ĐÃ HẾT HÀNG",
+    price: 32990000,
+    stock: 0,
+    images: ["/asus-rog-strix-gaming-laptop.jpg"],
+    sales: 80,
+    rating: 4.8,
+    reviews: 65,
+  });
+
+  console.log("✅ Created 3 out-of-stock products");
+
+  console.log("✅ Created 24 products total");
 
   console.log("🎉 V0 seed completed!");
 }
