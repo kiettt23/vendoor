@@ -1,6 +1,37 @@
 import { PrismaClient } from "@prisma/client";
+import { scrypt, randomBytes } from "crypto";
+import { promisify } from "util";
 
 const prisma = new PrismaClient();
+
+// Password hashing - match Better Auth's scrypt implementation
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16).toString("hex");
+  const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${salt}:${derivedKey.toString("hex")}`;
+}
+
+// Helper to create account for a user
+async function createCredentialAccount(userId: string, password: string) {
+  const hashedPassword = await hashPassword(password);
+  return prisma.account.upsert({
+    where: {
+      providerId_accountId: {
+        providerId: "credential",
+        accountId: userId,
+      },
+    },
+    update: {},
+    create: {
+      userId,
+      accountId: userId,
+      providerId: "credential",
+      password: hashedPassword,
+    },
+  });
+}
 
 async function main() {
   console.log("🌱 Starting v0 seed...");
@@ -240,7 +271,72 @@ async function main() {
     },
   });
 
+  // Suppress unused variable warnings - we may use these later
+  void appleStore;
+  void samsungStore;
+  void sonyStore;
+  void techzoneStore;
+  void logitechStore;
+  void asusStore;
+
   console.log("✅ Created 6 vendors");
+
+  // ============================================
+  // 2b. CREATE CREDENTIAL ACCOUNTS FOR VENDORS
+  // ============================================
+  console.log("🔐 Creating credential accounts for vendors...");
+
+  // Use same password for all vendors: Kiet1461!
+  const vendorPassword = "Kiet1461!";
+
+  await Promise.all([
+    createCredentialAccount(appleStoreUser.id, vendorPassword),
+    createCredentialAccount(samsungUser.id, vendorPassword),
+    createCredentialAccount(sonyUser.id, vendorPassword),
+    createCredentialAccount(techzoneUser.id, vendorPassword),
+    createCredentialAccount(logitechUser.id, vendorPassword),
+    createCredentialAccount(asusUser.id, vendorPassword),
+  ]);
+
+  console.log("✅ Created 6 vendor accounts (password: Kiet1461!)");
+
+  // ============================================
+  // 2c. CREATE ADMIN USER
+  // ============================================
+  console.log("👑 Creating admin user...");
+
+  const adminUser = await prisma.user.upsert({
+    where: { email: "admin@vendoor.com" },
+    update: { roles: ["ADMIN"] },
+    create: {
+      email: "admin@vendoor.com",
+      name: "Admin Vendoor",
+      emailVerified: true,
+      roles: ["ADMIN"],
+    },
+  });
+
+  await createCredentialAccount(adminUser.id, vendorPassword);
+  console.log("✅ Created admin user (admin@vendoor.com / Kiet1461!)");
+
+  // ============================================
+  // 2d. CREATE TEST CUSTOMER USER
+  // ============================================
+  console.log("👤 Creating test customer user...");
+
+  const customerUser = await prisma.user.upsert({
+    where: { email: "customer@vendoor.com" },
+    update: {},
+    create: {
+      email: "customer@vendoor.com",
+      name: "Customer Test",
+      emailVerified: true,
+      roles: ["CUSTOMER"],
+    },
+  });
+
+  await createCredentialAccount(customerUser.id, vendorPassword);
+  console.log("✅ Created test customer (customer@vendoor.com / Kiet1461!)");
 
   // ============================================
   // 3. CREATE PRODUCTS (From v0 data)
