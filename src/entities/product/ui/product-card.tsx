@@ -21,6 +21,8 @@ export function ProductCard({
   price,
   compareAtPrice,
   image,
+  stock,
+  variantId,
   vendor,
   category,
 }: ProductCardProps) {
@@ -28,12 +30,13 @@ export function ProductCard({
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const addItem = useCart((state) => state.addItem);
+  const isOutOfStock = stock <= 0;
 
   const handleQuickAdd = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation
+    e.preventDefault();
     e.stopPropagation();
 
-    if (isAdding || isAdded) return;
+    if (isAdding || isAdded || isOutOfStock) return;
 
     setIsAdding(true);
 
@@ -41,12 +44,12 @@ export function ProductCard({
       productId: id,
       productName: name,
       productSlug: slug,
-      variantId: `${id}-default`, // Default variant
-      variantName: "Mặc định",
+      variantId: variantId,
+      variantName: null,
       price,
       quantity: 1,
       image: image || "/placeholder.jpg",
-      stock: 99, // Will be checked on checkout
+      stock,
       vendorId: vendor.id,
       vendorName: vendor.name,
     });
@@ -70,45 +73,59 @@ export function ProductCard({
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+            {/* Out of stock overlay */}
+            {isOutOfStock && (
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2">
+                <div className="bg-white/10 rounded-full p-3">
+                  <ShoppingCart className="h-6 w-6 text-white/80" />
+                </div>
+                <span className="text-white font-semibold text-sm tracking-wide uppercase">
+                  Hết hàng
+                </span>
+              </div>
+            )}
 
             {/* Quick actions overlay */}
-            <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform">
-              <div className="flex gap-1 p-2 bg-black/60 backdrop-blur">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="flex-1 h-9"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  Chi tiết
-                </Button>
-                <Button
-                  size="sm"
-                  variant={isAdded ? "default" : "default"}
-                  className={`flex-1 h-9 ${
-                    isAdded ? "bg-green-600 hover:bg-green-600" : ""
-                  }`}
-                  onClick={handleQuickAdd}
-                  disabled={isAdding}
-                >
-                  {isAdding ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : isAdded ? (
-                    <>
-                      <Check className="h-4 w-4 mr-1" />
-                      Đã thêm
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="h-4 w-4 mr-1" />
-                      Thêm
-                    </>
-                  )}
-                </Button>
+            {!isOutOfStock && (
+              <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform">
+                <div className="flex gap-1 p-2 bg-black/60 backdrop-blur">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="flex-1 h-9"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    Chi tiết
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={isAdded ? "default" : "default"}
+                    className={`flex-1 h-9 ${
+                      isAdded ? "bg-green-600 hover:bg-green-600" : ""
+                    }`}
+                    onClick={handleQuickAdd}
+                    disabled={isAdding}
+                  >
+                    {isAdding ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isAdded ? (
+                      <>
+                        <Check className="h-4 w-4 mr-1" />
+                        Đã thêm
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="h-4 w-4 mr-1" />
+                        Thêm
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
 
             {discountPercent && (
               <Badge

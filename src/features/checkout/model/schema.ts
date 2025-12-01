@@ -19,3 +19,20 @@ export const checkoutSchema = z.object({
 });
 
 export type CheckoutFormData = z.infer<typeof checkoutSchema>;
+
+// ============================================
+// Validation Types
+// ============================================
+
+export interface InvalidCartItem {
+  variantId: string;
+  productName: string;
+  variantName: string | null;
+  requestedQuantity: number;
+  availableStock: number;
+}
+
+export interface CheckoutValidationResult {
+  isValid: boolean;
+  invalidItems: InvalidCartItem[];
+}

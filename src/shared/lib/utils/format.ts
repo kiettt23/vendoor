@@ -5,7 +5,7 @@
  * Usage: import { formatPrice, formatDate } from "@/lib/utils"
  */
 
-import { CURRENCY } from "../constants";
+import { CURRENCY } from "../constants/currency";
 
 /**
  * Format price in Vietnamese Dong
@@ -225,30 +225,4 @@ export function formatStockStatus(stock: number): string {
   if (stock === 0) return "Hết hàng";
   if (stock < 10) return `Chỉ còn ${stock} sản phẩm`;
   return "Còn hàng";
-}
-
-/**
- * Format order status in Vietnamese
- */
-export function formatOrderStatus(status: string): string {
-  const statusMap: Record<string, string> = {
-    PENDING: "Chờ xác nhận",
-    PROCESSING: "Đang xử lý",
-    SHIPPED: "Đang giao",
-    DELIVERED: "Đã giao",
-    CANCELLED: "Đã hủy",
-  };
-  return statusMap[status] || status;
-}
-
-/**
- * Format vendor status in Vietnamese
- */
-export function formatVendorStatus(status: string): string {
-  const statusMap: Record<string, string> = {
-    PENDING: "Chờ duyệt",
-    APPROVED: "Đã duyệt",
-    REJECTED: "Từ chối",
-  };
-  return statusMap[status] || status;
 }

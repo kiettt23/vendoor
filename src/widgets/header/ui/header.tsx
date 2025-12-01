@@ -106,37 +106,48 @@ export function Header({ user }: HeaderProps) {
       </div>
 
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between gap-4">
-          <Sheet>
-            <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-80 p-0">
-              <div className="flex items-center gap-2 p-6 border-b">
-                <Logo size="sm" asLink={false} />
-              </div>
-              <nav className="flex flex-col p-4">
-                {navigation.map((item, idx) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`text-base font-medium hover:text-primary py-3 px-2 rounded-lg hover:bg-muted transition-colors ${
-                      idx < navigation.length - 1
-                        ? "border-b border-border"
-                        : ""
-                    }`}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
+        <div className="flex h-16 items-center gap-4 relative">
+          {/* Mobile: Menu button - only on small screens */}
+          <div className="md:hidden shrink-0">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80 p-0">
+                <div className="flex items-center gap-2 p-6 border-b">
+                  <Logo size="sm" asLink={false} />
+                </div>
+                <nav className="flex flex-col p-4">
+                  {navigation.map((item, idx) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`text-base font-medium hover:text-primary py-3 px-2 rounded-lg hover:bg-muted transition-colors ${
+                        idx < navigation.length - 1
+                          ? "border-b border-border"
+                          : ""
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
 
-          <Logo size="md" showText={true} className="hidden sm:flex" />
-          <Logo size="md" showText={false} className="flex sm:hidden" />
+          {/* Desktop: Logo with text (md and up) */}
+          <Logo size="lg" showText={true} className="hidden md:flex shrink-0" />
+
+          {/* Mobile: Logo centered - only on small screens */}
+          <div className="absolute left-1/2 -translate-x-1/2 md:hidden">
+            <Logo size="md" showText={false} />
+          </div>
+
+          {/* Spacer for mobile to push right icons to the end */}
+          <div className="flex-1 md:hidden" />
 
           <div className="flex-1 max-w-2xl hidden md:block">
             <form
@@ -150,18 +161,22 @@ export function Header({ user }: HeaderProps) {
                   <Button
                     variant="ghost"
                     type="button"
-                    className="rounded-l-xl rounded-r-none h-10 px-3"
+                    className="rounded-l-xl rounded-r-none h-10 px-3 cursor-pointer"
                   >
                     Danh mục <ChevronDown className="h-4 w-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild className="cursor-pointer">
                     <Link href="/products">Tất cả sản phẩm</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   {categories.map((cat) => (
-                    <DropdownMenuItem key={cat} asChild>
+                    <DropdownMenuItem
+                      key={cat}
+                      asChild
+                      className="cursor-pointer"
+                    >
                       <Link href={`/products?category=${cat.toLowerCase()}`}>
                         {cat}
                       </Link>

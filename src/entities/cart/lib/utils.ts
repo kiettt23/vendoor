@@ -1,8 +1,5 @@
 import type { CartItem, VendorGroup } from "../model/types";
-import { ORDER } from "@/shared/lib";
-
-export const SHIPPING_FEE_PER_VENDOR = ORDER.SHIPPING_FEE_PER_VENDOR;
-export const PLATFORM_FEE_RATE = ORDER.PLATFORM_FEE_RATE;
+import { ORDER } from "@/shared/lib/constants";
 
 export function groupItemsByVendor(items: CartItem[]): VendorGroup[] {
   return items.reduce((acc, item) => {
@@ -25,9 +22,9 @@ export function groupItemsByVendor(items: CartItem[]): VendorGroup[] {
 export function calculateCartTotals(items: CartItem[]) {
   const vendorGroups = groupItemsByVendor(items);
   const subtotal = vendorGroups.reduce((sum, g) => sum + g.subtotal, 0);
-  const shippingFee = vendorGroups.length * SHIPPING_FEE_PER_VENDOR;
+  const shippingFee = vendorGroups.length * ORDER.SHIPPING_FEE_PER_VENDOR;
   // platformFee là phí platform thu từ vendor, không tính vào total của customer
-  const platformFee = Math.round(subtotal * PLATFORM_FEE_RATE);
+  const platformFee = Math.round(subtotal * ORDER.PLATFORM_FEE_RATE);
   const total = subtotal + shippingFee; // Customer trả: tiền hàng + phí ship
 
   return {

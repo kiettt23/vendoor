@@ -11,7 +11,7 @@ export function OrderSuccessPage() {
   const orderIds = searchParams.get("orders")?.split(",") || [];
 
   return (
-    <div className="container mx-auto py-16 px-4 max-w-lg text-center">
+    <div className="container mx-auto py-16 px-4 max-w-lg text-center min-h-[60vh] flex flex-col justify-center">
       <div className="mb-8">
         <div className="h-20 w-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
           <CheckCircle className="h-10 w-10 text-green-600" />
@@ -25,13 +25,11 @@ export function OrderSuccessPage() {
         </p>
       </div>
 
-      <Card className="mb-8">
-        <CardContent className="pt-6">
+      <Card className="mb-6">
+        <CardContent className="">
           <div className="flex items-center justify-center gap-3 text-muted-foreground">
             <Package className="h-5 w-5" />
-            <span>
-              Theo dõi đơn hàng trong mục &ldquo;Đơn hàng của tôi&rdquo;
-            </span>
+            <span>Theo dõi đơn hàng trong mục Đơn hàng của tôi</span>
           </div>
         </CardContent>
       </Card>

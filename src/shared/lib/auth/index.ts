@@ -21,3 +21,14 @@ export {
 
 // Error handling
 export { translateAuthError } from "./error-messages";
+
+// Auth Guards (Server-side)
+export {
+  requireAuth,
+  requireRole,
+  requireVendor,
+  requireAdmin,
+  getAuthSession,
+  hasRole,
+} from "./guards";
+export type { UserRole, AuthResult } from "./guards";

@@ -2,14 +2,11 @@ import { auth } from "@/shared/lib/auth/config";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import {
-  LayoutDashboard,
-  Users,
-  ShoppingCart,
-  Package,
-  LogOut,
-} from "lucide-react";
+import { Package, LogOut } from "lucide-react";
+
 import { Button } from "@/shared/ui/button";
+import { logout } from "@/features/auth";
+import { ADMIN_NAV_ITEMS } from "@/shared/lib/constants";
 
 export default async function AdminLayout({
   children,
@@ -22,12 +19,6 @@ export default async function AdminLayout({
   if (!session || !session.user.roles?.includes("ADMIN")) {
     redirect("/login");
   }
-
-  const handleLogout = async () => {
-    "use server";
-    await auth.api.signOut({ headers: await headers() });
-    redirect("/login");
-  };
 
   return (
     <div className="flex min-h-screen">
@@ -47,34 +38,19 @@ export default async function AdminLayout({
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1 p-4">
-            <Link
-              href="/admin"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </Link>
-            <Link
-              href="/admin/vendors"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-            >
-              <Users className="h-4 w-4" />
-              Vendors
-            </Link>
-            <Link
-              href="/admin/orders"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-            >
-              <ShoppingCart className="h-4 w-4" />
-              Đơn hàng
-            </Link>
-            <Link
-              href="/admin/categories"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-            >
-              <Package className="h-4 w-4" />
-              Danh mục
-            </Link>
+            {ADMIN_NAV_ITEMS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* User Info & Logout */}
@@ -90,7 +66,7 @@ export default async function AdminLayout({
                 <p className="text-xs text-muted-foreground truncate">Admin</p>
               </div>
             </div>
-            <form action={handleLogout}>
+            <form action={logout}>
               <Button
                 type="submit"
                 variant="outline"

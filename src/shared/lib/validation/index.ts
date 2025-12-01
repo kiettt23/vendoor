@@ -13,7 +13,6 @@ export {
   validateOnBlur,
   clearFieldErrors,
   ValidationMessages,
-  ValidationPatterns,
   validatePhone,
   validateEmail,
   validatePassword,

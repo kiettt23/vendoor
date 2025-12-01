@@ -12,13 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
-import { prisma } from "@/shared/lib/db/prisma";
-import { auth } from "@/shared/lib/auth/config";
-import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
-import { formatPrice } from "@/shared/lib";
-import { formatShippingAddress } from "@/entities/order";
-import { OrderStatus } from "@prisma/client";
+import { formatPrice, formatDateTime } from "@/shared/lib";
+import { getCurrentVendorProfile } from "@/entities/vendor";
+import {
+  formatShippingAddress,
+  updateOrderStatusAction,
+  getVendorOrderDetail,
+} from "@/entities/order";
+import type { OrderStatus } from "@prisma/client";
 
 const statusMap: Record<
   OrderStatus,
@@ -36,14 +37,6 @@ const statusMap: Record<
   REFUNDED: { label: "Hoàn tiền", variant: "secondary" },
 };
 
-async function updateOrderStatus(formData: FormData) {
-  "use server";
-  const orderId = formData.get("orderId") as string;
-  const status = formData.get("status") as OrderStatus;
-  await prisma.order.update({ where: { id: orderId }, data: { status } });
-  revalidatePath(`/vendor/orders/${orderId}`);
-}
-
 interface VendorOrderDetailPageProps {
   orderId: string;
 }
@@ -51,32 +44,10 @@ interface VendorOrderDetailPageProps {
 export async function VendorOrderDetailPage({
   orderId,
 }: VendorOrderDetailPageProps) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return null;
+  const vendorProfile = await getCurrentVendorProfile();
+  if (!vendorProfile) return null;
 
-  const vendorProfile = await prisma.vendorProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { id: true },
-  });
-
-  const order = await prisma.order.findFirst({
-    where: { id: orderId, vendorId: vendorProfile?.id },
-    include: {
-      customer: { select: { name: true, email: true, phone: true } },
-      items: {
-        include: {
-          variant: {
-            include: {
-              product: {
-                include: { images: { take: 1, orderBy: { order: "asc" } } },
-              },
-            },
-          },
-        },
-      },
-      payment: true,
-    },
-  });
+  const order = await getVendorOrderDetail(orderId, vendorProfile.id);
 
   if (!order) {
     return (
@@ -108,7 +79,7 @@ export async function VendorOrderDetailPage({
         <div>
           <h1 className="text-2xl font-bold">{order.orderNumber}</h1>
           <p className="text-muted-foreground">
-            {new Date(order.createdAt).toLocaleString("vi-VN")}
+            {formatDateTime(order.createdAt)}
           </p>
         </div>
         <Badge variant={status.variant} className="text-base px-4 py-1">
@@ -155,7 +126,7 @@ export async function VendorOrderDetailPage({
           <CardTitle>Cập Nhật Trạng Thái</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={updateOrderStatus} className="flex gap-4">
+          <form action={updateOrderStatusAction} className="flex gap-4">
             <input type="hidden" name="orderId" value={order.id} />
             <Select name="status" defaultValue={order.status}>
               <SelectTrigger className="w-[200px]">

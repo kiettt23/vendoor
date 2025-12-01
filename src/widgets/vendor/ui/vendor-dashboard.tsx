@@ -9,75 +9,51 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { prisma } from "@/shared/lib/db/prisma";
-import { auth } from "@/shared/lib/auth/config";
-import { headers } from "next/headers";
-import { formatPrice } from "@/shared/lib";
+import { formatPrice, formatDate } from "@/shared/lib";
+import { getVendorDashboardData } from "@/entities/vendor";
 
-export async function VendorDashboardPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return null;
+interface RecentOrder {
+  id: string;
+  orderNumber: string;
+  status: string;
+  total: number;
+  createdAt: Date;
+}
 
-  const vendorProfile = await prisma.vendorProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { id: true, shopName: true },
-  });
-  if (!vendorProfile) return null;
+interface VendorDashboardPageProps {
+  userId: string;
+}
 
-  const [totalProducts, totalOrders, pendingOrders, orders] = await Promise.all(
-    [
-      prisma.product.count({
-        where: { vendorId: session.user.id, isActive: true },
-      }),
-      prisma.order.count({ where: { vendorId: vendorProfile.id } }),
-      prisma.order.count({
-        where: { vendorId: vendorProfile.id, status: "PENDING" },
-      }),
-      prisma.order.findMany({
-        where: { vendorId: vendorProfile.id },
-        select: {
-          id: true,
-          orderNumber: true,
-          status: true,
-          total: true,
-          createdAt: true,
-        },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      }),
-    ]
-  );
+export async function VendorDashboardPage({
+  userId,
+}: VendorDashboardPageProps) {
+  const data = await getVendorDashboardData(userId);
+  if (!data) return null;
 
-  const totalRevenue = await prisma.order.aggregate({
-    where: {
-      vendorId: vendorProfile.id,
-      status: { in: ["DELIVERED", "SHIPPED", "PROCESSING"] },
-    },
-    _sum: { vendorEarnings: true },
-  });
+  const { vendorProfile, stats, recentOrders } = data;
 
-  const stats = [
+  const statItems = [
     {
       label: "Sản phẩm",
-      value: totalProducts,
+      value: stats.totalProducts,
       icon: Package,
       color: "text-blue-600",
     },
     {
       label: "Đơn hàng",
-      value: totalOrders,
+      value: stats.totalOrders,
       icon: ShoppingCart,
       color: "text-green-600",
     },
     {
       label: "Chờ xử lý",
-      value: pendingOrders,
+      value: stats.pendingOrders,
       icon: Clock,
       color: "text-orange-600",
     },
     {
       label: "Doanh thu",
-      value: formatPrice(totalRevenue._sum.vendorEarnings || 0),
+      value: formatPrice(stats.totalRevenue),
       icon: DollarSign,
       color: "text-primary",
     },
@@ -91,7 +67,7 @@ export async function VendorDashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
+        {statItems.map((stat) => (
           <Card key={stat.label}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -116,13 +92,13 @@ export async function VendorDashboardPage() {
           </Button>
         </CardHeader>
         <CardContent>
-          {orders.length === 0 ? (
+          {recentOrders.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
               Chưa có đơn hàng
             </p>
           ) : (
             <div className="space-y-4">
-              {orders.map((order) => (
+              {recentOrders.map((order: RecentOrder) => (
                 <Link
                   key={order.id}
                   href={`/vendor/orders/${order.id}`}
@@ -131,7 +107,7 @@ export async function VendorDashboardPage() {
                   <div>
                     <p className="font-semibold">{order.orderNumber}</p>
                     <p className="text-sm text-muted-foreground">
-                      {new Date(order.createdAt).toLocaleDateString("vi-VN")}
+                      {formatDate(order.createdAt)}
                     </p>
                   </div>
                   <div className="text-right">

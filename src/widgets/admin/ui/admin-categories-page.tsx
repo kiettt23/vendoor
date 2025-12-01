@@ -2,11 +2,17 @@
 
 import { useState } from "react";
 import { Plus, Pencil, Trash2, FolderOpen } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shared/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/shared/ui/dialog";
 import { toast } from "sonner";
 
 interface Category {
@@ -19,11 +25,19 @@ interface Category {
 interface AdminCategoriesPageProps {
   categories: Category[];
   onCreate: (name: string) => Promise<{ success: boolean; error?: string }>;
-  onUpdate: (id: string, name: string) => Promise<{ success: boolean; error?: string }>;
+  onUpdate: (
+    id: string,
+    name: string
+  ) => Promise<{ success: boolean; error?: string }>;
   onDelete: (id: string) => Promise<{ success: boolean; error?: string }>;
 }
 
-export function AdminCategoriesPage({ categories, onCreate, onUpdate, onDelete }: AdminCategoriesPageProps) {
+export function AdminCategoriesPage({
+  categories,
+  onCreate,
+  onUpdate,
+  onDelete,
+}: AdminCategoriesPageProps) {
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -72,23 +86,39 @@ export function AdminCategoriesPage({ categories, onCreate, onUpdate, onDelete }
         <h1 className="text-3xl font-bold">Danh Mục</h1>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" />Thêm danh mục</Button>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Thêm danh mục
+            </Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>Thêm Danh Mục Mới</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>Thêm Danh Mục Mới</DialogTitle>
+            </DialogHeader>
             <div className="space-y-4">
-              <div><Label>Tên danh mục</Label><Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Điện thoại" /></div>
-              <Button onClick={handleCreate} className="w-full">Tạo</Button>
+              <div>
+                <Label>Tên danh mục</Label>
+                <Input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Điện thoại"
+                />
+              </div>
+              <Button onClick={handleCreate} className="w-full">
+                Tạo
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
       {categories.length === 0 ? (
-        <Card><CardContent className="py-16 text-center">
-          <FolderOpen className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold">Chưa có danh mục</h3>
-        </CardContent></Card>
+        <Card>
+          <CardContent className="py-16 text-center">
+            <FolderOpen className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Chưa có danh mục</h3>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid gap-4">
           {categories.map((cat) => (
@@ -97,21 +127,48 @@ export function AdminCategoriesPage({ categories, onCreate, onUpdate, onDelete }
                 <div className="flex items-center justify-between">
                   {editingId === cat.id ? (
                     <div className="flex-1 flex gap-2">
-                      <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
-                      <Button size="sm" onClick={() => handleUpdate(cat.id)}>Lưu</Button>
-                      <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Hủy</Button>
+                      <Input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                      />
+                      <Button size="sm" onClick={() => handleUpdate(cat.id)}>
+                        Lưu
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingId(null)}
+                      >
+                        Hủy
+                      </Button>
                     </div>
                   ) : (
                     <>
                       <div>
                         <p className="font-semibold">{cat.name}</p>
-                        <p className="text-sm text-muted-foreground">{cat._count.products} sản phẩm</p>
+                        <p className="text-sm text-muted-foreground">
+                          {cat._count.products} sản phẩm
+                        </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" onClick={() => { setEditingId(cat.id); setEditName(cat.name); }}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingId(cat.id);
+                            setEditName(cat.name);
+                          }}
+                        >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button size="sm" variant="destructive" onClick={() => handleDelete(cat.id, cat._count.products)} disabled={cat._count.products > 0}>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() =>
+                            handleDelete(cat.id, cat._count.products)
+                          }
+                          disabled={cat._count.products > 0}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -126,4 +183,3 @@ export function AdminCategoriesPage({ categories, onCreate, onUpdate, onDelete }
     </div>
   );
 }
-

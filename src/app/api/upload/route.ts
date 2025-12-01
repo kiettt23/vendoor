@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { uploadImage } from "@/shared/lib/upload/cloudinary";
 import { validateImageFile } from "@/shared/lib/upload";
 import { auth } from "@/shared/lib/auth/config";

@@ -7,7 +7,12 @@ interface Product {
   name: string;
   slug: string;
   vendor: { id: string; name: string | null };
-  variants: { price: number; compareAtPrice: number | null }[];
+  variants: {
+    id: string;
+    price: number;
+    compareAtPrice: number | null;
+    stock: number;
+  }[];
   images: { url: string }[];
 }
 
@@ -23,6 +28,8 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
     price: p.variants[0]?.price || 0,
     compareAtPrice: p.variants[0]?.compareAtPrice || null,
     image: p.images[0]?.url || "",
+    stock: p.variants[0]?.stock ?? 0,
+    variantId: p.variants[0]?.id || "",
     vendor: { id: p.vendor.id, name: p.vendor.name || "Unknown" },
     category: { name: "Sản phẩm", slug: "" },
   }));

@@ -3,10 +3,10 @@ import { Package, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
-import { prisma } from "@/shared/lib/db/prisma";
 import { auth } from "@/shared/lib/auth/config";
 import { headers } from "next/headers";
-import { formatPrice } from "@/shared/lib";
+import { formatPrice, formatDateTime } from "@/shared/lib";
+import { getCustomerOrders } from "@/entities/order";
 
 const statusMap: Record<
   string,
@@ -28,23 +28,15 @@ export async function OrderHistoryPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return null;
 
-  const orders = await prisma.order.findMany({
-    where: { customerId: session.user.id },
-    include: {
-      vendor: { select: { shopName: true } },
-      items: { select: { productName: true, quantity: true }, take: 2 },
-      _count: { select: { items: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const orders = await getCustomerOrders();
 
   if (orders.length === 0) {
     return (
-      <div className="container mx-auto py-16 px-4 text-center">
-        <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+      <div className="container mx-auto py-24 px-4 text-center min-h-[60vh] flex flex-col items-center justify-center">
+        <Package className="h-20 w-20 text-muted-foreground mb-6" />
         <h1 className="text-2xl font-bold mb-2">Chưa có đơn hàng</h1>
-        <p className="text-muted-foreground mb-6">Bạn chưa có đơn hàng nào</p>
-        <Button asChild>
+        <p className="text-muted-foreground mb-8">Bạn chưa có đơn hàng nào</p>
+        <Button size="lg" asChild>
           <Link href="/products">Mua sắm ngay</Link>
         </Button>
       </div>
@@ -81,17 +73,11 @@ export async function OrderHistoryPage() {
                         {order.items
                           .map((i) => `${i.productName} x${i.quantity}`)
                           .join(", ")}
-                        {order._count.items > 2 &&
-                          ` +${order._count.items - 2} sản phẩm`}
+                        {order.itemCount > 2 &&
+                          ` +${order.itemCount - 2} sản phẩm`}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(order.createdAt).toLocaleDateString("vi-VN", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatDateTime(order.createdAt)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">

@@ -1,14 +1,8 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/shared/lib/auth/config";
-import { headers } from "next/headers";
 import Link from "next/link";
-import {
-  LayoutDashboard,
-  Package,
-  ShoppingCart,
-  DollarSign,
-} from "lucide-react";
-import { prisma } from "@/shared/lib/db/prisma";
+
+import { getCurrentVendorProfile } from "@/entities/vendor";
+import { VENDOR_NAV_ITEMS } from "@/shared/lib/constants";
 
 // ============================================
 // VENDOR LAYOUT
@@ -28,47 +22,12 @@ export default async function VendorLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Auth check
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/login");
-  }
-
   // Check if user is a vendor (has vendorProfile)
-  const vendorProfile = await prisma.vendorProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { id: true, shopName: true },
-  });
+  const vendorProfile = await getCurrentVendorProfile();
 
   if (!vendorProfile) {
-    redirect("/"); // Not a vendor
+    redirect("/login");
   }
-
-  const navItems = [
-    {
-      href: "/vendor",
-      label: "Dashboard",
-      icon: LayoutDashboard,
-    },
-    {
-      href: "/vendor/products",
-      label: "Sản phẩm",
-      icon: Package,
-    },
-    {
-      href: "/vendor/orders",
-      label: "Đơn hàng",
-      icon: ShoppingCart,
-    },
-    {
-      href: "/vendor/earnings",
-      label: "Doanh thu",
-      icon: DollarSign,
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,7 +36,7 @@ export default async function VendorLayout({
           {/* Sidebar */}
           <aside className="w-64 shrink-0">
             <nav className="space-y-1">
-              {navItems.map((item) => {
+              {VENDOR_NAV_ITEMS.map((item) => {
                 const Icon = item.icon;
                 return (
                   <Link

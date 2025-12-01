@@ -26,7 +26,7 @@ const footerLinks = {
     title: "Người bán",
     links: [
       { name: "Đăng ký bán hàng", href: "/seller/register" },
-      { name: "Seller Center", href: "/seller/dashboard" },
+      { name: "Seller Center", href: "/vendor" },
       { name: "Chính sách người bán", href: "/seller/policy" },
       { name: "Hướng dẫn bán hàng", href: "/seller/guide" },
     ],

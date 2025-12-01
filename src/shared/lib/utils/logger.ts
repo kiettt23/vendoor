@@ -8,7 +8,6 @@
 type LogLevel = "debug" | "info" | "warn" | "error";
 
 const isDevelopment = process.env.NODE_ENV === "development";
-const isProduction = process.env.NODE_ENV === "production";
 
 /**
  * Logger class with environment-aware methods
@@ -66,11 +65,8 @@ class Logger {
       console.error(this.format("error", message), error || "");
     }
 
-    // In production, send to error tracking service (e.g., Sentry)
-    if (isProduction) {
-      // TODO: Integrate with Sentry or similar service
-      // Sentry.captureException(error, { extra: { message } });
-    }
+    // In production, integrate with error tracking service (e.g., Sentry)
+    // when needed: Sentry.captureException(error, { extra: { message } });
   }
 
   /**

@@ -1,13 +1,53 @@
 "use server";
 
-import { prisma } from "@/shared/lib";
-import { auth } from "@/shared/lib";
 import { headers } from "next/headers";
+
 import { groupItemsByVendor } from "@/entities/cart";
-import { prepareOrderData, generateOrderNumber } from "@/entities/order";
 import type { CartItem } from "@/entities/cart";
+import { prepareOrderData } from "@/entities/order";
 import type { CreateOrdersResult } from "@/entities/order";
-import type { CheckoutFormData, PaymentMethod } from "../model/schema";
+import { auth, prisma } from "@/shared/lib";
+import { generateOrderNumber } from "@/shared/lib/utils";
+
+import type {
+  CheckoutFormData,
+  PaymentMethod,
+  CheckoutValidationResult,
+  InvalidCartItem,
+} from "../model";
+
+// ============================================
+// Validate Checkout
+// ============================================
+
+export async function validateCheckout(
+  items: CartItem[]
+): Promise<CheckoutValidationResult> {
+  const invalidItems: InvalidCartItem[] = [];
+
+  for (const item of items) {
+    const variant = await prisma.productVariant.findUnique({
+      where: { id: item.variantId },
+      select: { stock: true, name: true, product: { select: { name: true } } },
+    });
+
+    if (!variant || variant.stock < item.quantity) {
+      invalidItems.push({
+        variantId: item.variantId,
+        productName: variant?.product.name || item.productName,
+        variantName: variant?.name || item.variantName,
+        requestedQuantity: item.quantity,
+        availableStock: variant?.stock || 0,
+      });
+    }
+  }
+
+  return { isValid: invalidItems.length === 0, invalidItems };
+}
+
+// ============================================
+// Create Orders
+// ============================================
 
 export async function createOrders(
   cartItems: CartItem[],

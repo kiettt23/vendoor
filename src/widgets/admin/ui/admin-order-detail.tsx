@@ -12,9 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
-import { prisma } from "@/shared/lib/db/prisma";
-import { formatPrice } from "@/shared/lib";
-import { formatShippingAddress } from "@/entities/order";
+import { formatPrice, formatDateTime } from "@/shared/lib";
+import { formatShippingAddress, getAdminOrderById } from "@/entities/order";
 
 const statusMap: Record<
   string,
@@ -38,25 +37,7 @@ interface AdminOrderDetailPageProps {
 export async function AdminOrderDetailPage({
   orderId,
 }: AdminOrderDetailPageProps) {
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: {
-      customer: { select: { name: true, email: true, phone: true } },
-      vendor: { select: { shopName: true } },
-      items: {
-        include: {
-          variant: {
-            include: {
-              product: {
-                include: { images: { take: 1, orderBy: { order: "asc" } } },
-              },
-            },
-          },
-        },
-      },
-      payment: true,
-    },
-  });
+  const order = await getAdminOrderById(orderId);
 
   if (!order) {
     return (
@@ -88,7 +69,7 @@ export async function AdminOrderDetailPage({
         <div>
           <h1 className="text-2xl font-bold">{order.orderNumber}</h1>
           <p className="text-muted-foreground">
-            {new Date(order.createdAt).toLocaleString("vi-VN")}
+            {formatDateTime(order.createdAt)}
           </p>
         </div>
         <Badge variant={status.variant} className="text-base px-4 py-1">

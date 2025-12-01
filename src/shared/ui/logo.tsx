@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { DoorOpen } from "lucide-react";
 
 interface LogoProps {
   /** Kích thước logo: sm (auth), md (mobile menu), lg (header) */
@@ -17,18 +17,18 @@ interface LogoProps {
 
 const sizeConfig = {
   sm: {
-    container: "h-8 w-8 rounded-lg",
-    icon: "h-4 w-4",
+    container: "h-9 w-9 rounded-lg",
+    icon: "h-5 w-5",
     text: "text-xl",
   },
   md: {
-    container: "h-9 w-9 rounded-xl",
-    icon: "h-5 w-5",
+    container: "h-10 w-10 rounded-xl",
+    icon: "h-6 w-6",
     text: "text-xl",
   },
   lg: {
-    container: "h-10 w-10 rounded-xl",
-    icon: "h-5 w-5",
+    container: "h-11 w-11 rounded-xl",
+    icon: "h-6 w-6",
     text: "text-2xl",
   },
 };
@@ -49,10 +49,13 @@ export function Logo({
           config.container
         )}
       >
-        <ShoppingBag className={cn("text-primary-foreground", config.icon)} />
+        <DoorOpen className={cn("text-primary-foreground", config.icon)} />
       </div>
       {showText && (
-        <span className={cn("font-bold", config.text)}>Vendoor</span>
+        <span className={cn("font-bold tracking-tight", config.text)}>
+          <span className="text-primary">Ven</span>
+          <span>door</span>
+        </span>
       )}
     </>
   );

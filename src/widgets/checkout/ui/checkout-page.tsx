@@ -116,11 +116,14 @@ export function CheckoutPage() {
       toast.info("Đang kiểm tra tồn kho...");
       const validation = await validateCheckout(items);
       if (!validation.isValid) {
-        toast.error("Có sản phẩm hết hàng");
         validation.invalidItems.forEach((item) => {
-          toast.error(
-            `${item.productName}: Còn ${item.availableStock}, cần ${item.requestedQuantity}`
-          );
+          if (item.availableStock === 0) {
+            toast.error(`"${item.productName}" đã hết hàng`);
+          } else {
+            toast.error(
+              `"${item.productName}" chỉ còn ${item.availableStock} sản phẩm (bạn đang đặt ${item.requestedQuantity})`
+            );
+          }
         });
         setIsSubmitting(false);
         return;

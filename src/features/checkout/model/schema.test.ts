@@ -17,6 +17,7 @@ describe("checkoutSchema", () => {
     ward: "Phường 1",
     district: "Quận 1",
     city: "TP. Hồ Chí Minh",
+    paymentMethod: "COD" as const,
   };
 
   describe("valid cases", () => {

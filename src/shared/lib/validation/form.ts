@@ -5,8 +5,9 @@
  * Usage: import { formatZodErrors, ValidationMessages } from "@/lib/validation"
  */
 
-import { UseFormReturn, FieldErrors, FieldPath } from "react-hook-form";
-import { ZodError } from "zod";
+import { REGEX_PATTERNS } from "@/shared/lib/constants";
+import type { UseFormReturn, FieldErrors, FieldPath } from "react-hook-form";
+import type { ZodError } from "zod";
 
 /**
  * Format Zod validation errors for React Hook Form
@@ -106,43 +107,31 @@ export const ValidationMessages = {
 };
 
 /**
- * Common validation patterns
- * @deprecated Sử dụng REGEX_PATTERNS từ constants thay thế
- */
-export const ValidationPatterns = {
-  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  phone: /^(0|\+84)[0-9]{9,10}$/,
-  url: /^https?:\/\/.+/,
-  slug: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-  password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
-};
-
-/**
  * Validate phone number (Vietnam)
  */
 export function validatePhone(phone: string): boolean {
-  return ValidationPatterns.phone.test(phone);
+  return REGEX_PATTERNS.PHONE_VN.test(phone);
 }
 
 /**
  * Validate email
  */
 export function validateEmail(email: string): boolean {
-  return ValidationPatterns.email.test(email);
+  return REGEX_PATTERNS.EMAIL.test(email);
 }
 
 /**
  * Validate password strength
  */
 export function validatePassword(password: string): boolean {
-  return ValidationPatterns.password.test(password);
+  return REGEX_PATTERNS.PASSWORD.test(password);
 }
 
 /**
  * Validate slug
  */
 export function validateSlug(slug: string): boolean {
-  return ValidationPatterns.slug.test(slug);
+  return REGEX_PATTERNS.SLUG.test(slug);
 }
 
 /**

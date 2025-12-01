@@ -8,6 +8,15 @@ export type {
   CategoryWithCount,
   PaginationMeta,
   PaginatedProducts,
+  ProductFormInput,
+} from "./model";
+
+// Schemas
+export {
+  productSchema,
+  productVariantSchema,
+  type ProductFormData,
+  type ProductVariantFormData,
 } from "./model";
 
 export {
@@ -16,6 +25,18 @@ export {
   getRelatedProducts,
   getCategories,
   getCategoriesWithCount,
+  getVendorProducts,
+  getVendorProductForEdit,
+  getFeaturedProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+} from "./api";
+
+export type {
+  VendorProduct,
+  VendorProductForEdit,
+  FeaturedProduct,
 } from "./api";
 export {
   ProductCard,

@@ -7,7 +7,8 @@
  * Body: { orderIds: string[], amount: number, customerEmail: string }
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { stripe } from "@/shared/lib/payment/stripe";
 import { auth } from "@/shared/lib";
 import { headers } from "next/headers";

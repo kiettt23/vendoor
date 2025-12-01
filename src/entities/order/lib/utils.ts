@@ -1,15 +1,14 @@
 import type { CartItem } from "@/entities/cart";
-import { SHIPPING_FEE_PER_VENDOR, PLATFORM_FEE_RATE } from "@/entities/cart";
+import { ORDER } from "@/shared/lib/constants";
 
-export function generateOrderNumber(): string {
-  const date = new Date();
-  const dateStr = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `ORD-${dateStr}-${random}`;
-}
-
+/**
+ * Calculate platform commission from subtotal
+ *
+ * @param subtotal - Order subtotal in VND
+ * @returns Commission amount rounded to nearest VND
+ */
 export function calculateCommission(subtotal: number): number {
-  return Math.round(subtotal * PLATFORM_FEE_RATE);
+  return Math.round(subtotal * ORDER.PLATFORM_FEE_RATE);
 }
 
 export function prepareOrderData(
@@ -38,7 +37,7 @@ export function prepareOrderData(
   }));
 
   const subtotal = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
-  const shippingFee = SHIPPING_FEE_PER_VENDOR;
+  const shippingFee = ORDER.SHIPPING_FEE_PER_VENDOR;
   const platformFee = calculateCommission(subtotal);
   const vendorEarnings = subtotal - platformFee;
   const total = subtotal + shippingFee;
@@ -57,15 +56,21 @@ export function prepareOrderData(
     subtotal,
     shippingFee,
     platformFee,
-    platformFeeRate: PLATFORM_FEE_RATE,
+    platformFeeRate: ORDER.PLATFORM_FEE_RATE,
     vendorEarnings,
     total,
   };
 }
 
-export function validateStatusTransition(currentStatus: string, newStatus: string) {
+export function validateStatusTransition(
+  currentStatus: string,
+  newStatus: string
+) {
   if (currentStatus === "PENDING_PAYMENT") {
-    return { isValid: false, message: "Không thể cập nhật đơn hàng đang chờ thanh toán" };
+    return {
+      isValid: false,
+      message: "Không thể cập nhật đơn hàng đang chờ thanh toán",
+    };
   }
 
   const validTransitions: Record<string, string[]> = {
@@ -79,7 +84,10 @@ export function validateStatusTransition(currentStatus: string, newStatus: strin
 
   const allowed = validTransitions[currentStatus] || [];
   if (!allowed.includes(newStatus)) {
-    return { isValid: false, message: `Không thể chuyển từ ${currentStatus} sang ${newStatus}` };
+    return {
+      isValid: false,
+      message: `Không thể chuyển từ ${currentStatus} sang ${newStatus}`,
+    };
   }
   return { isValid: true };
 }
@@ -90,8 +98,29 @@ export function formatShippingAddress(order: {
   shippingDistrict?: string | null;
   shippingCity?: string | null;
 }): string {
-  return [order.shippingAddress, order.shippingWard, order.shippingDistrict, order.shippingCity]
+  return [
+    order.shippingAddress,
+    order.shippingWard,
+    order.shippingDistrict,
+    order.shippingCity,
+  ]
     .filter(Boolean)
     .join(", ");
 }
 
+/**
+ * Format order status in Vietnamese
+ *
+ * @example
+ * formatOrderStatus("PENDING") // "Chờ xác nhận"
+ */
+export function formatOrderStatus(status: string): string {
+  const statusMap: Record<string, string> = {
+    PENDING: "Chờ xác nhận",
+    PROCESSING: "Đang xử lý",
+    SHIPPED: "Đang giao",
+    DELIVERED: "Đã giao",
+    CANCELLED: "Đã hủy",
+  };
+  return statusMap[status] || status;
+}

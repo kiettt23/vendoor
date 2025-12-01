@@ -17,6 +17,8 @@ export interface ProductListItem {
   price: number;
   compareAtPrice: number | null;
   image: string;
+  stock: number;
+  variantId: string;
   vendor: { id: string; name: string };
   category: { name: string; slug: string };
 }
@@ -82,4 +84,19 @@ export interface PaginationMeta {
 export interface PaginatedProducts {
   products: ProductListItem[];
   pagination: PaginationMeta;
+}
+
+// ============================================
+// Action Types
+// ============================================
+
+export interface ProductFormInput {
+  name: string;
+  description: string;
+  categoryId: string;
+  price: number;
+  compareAtPrice?: number;
+  sku: string;
+  stock: number;
+  isActive: boolean;
 }

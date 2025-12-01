@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { ZodError, z } from "zod";
+import { z } from "zod";
 import {
   formatZodErrors,
   getFirstError,

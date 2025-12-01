@@ -25,9 +25,10 @@ export {
   slugify,
   formatOrderNumber,
   formatStockStatus,
-  formatOrderStatus,
-  formatVendorStatus,
 } from "./format";
+
+// ID generation utilities
+export { generateOrderNumber, generateId, generateRandomString } from "./id";
 
 // Logger utilities
 export {
@@ -36,3 +37,17 @@ export {
   PerformanceTimer,
   measurePerformance,
 } from "./logger";
+
+// Result types (Unified error handling)
+export {
+  ok,
+  okVoid,
+  err,
+  tryCatch,
+  isOk,
+  isErr,
+  type Result,
+  type AsyncResult,
+  type VoidResult,
+  type AsyncVoidResult,
+} from "./result";
