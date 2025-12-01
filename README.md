@@ -98,9 +98,8 @@ src/
 | --------------------------------------------- | ------------------------------------------ |
 | [🚀 Getting Started](docs/GETTING_STARTED.md) | **Đọc đầu tiên** - Hướng dẫn cho người mới |
 | [�️ Code Map](docs/CODE_MAP.md)               | **Muốn sửa gì? Xem đây** - Bản đồ code     |
-| [�📐 Architecture](docs/ARCHITECTURE.md)       | Chi tiết cấu trúc FSD                      |
+| [�📐 Architecture](docs/ARCHITECTURE.md)      | Chi tiết cấu trúc FSD                      |
 | [✨ Features](docs/FEATURES.md)               | Danh sách tính năng                        |
-| [🔮 Next Features](docs/NEXT_FEATURES.md)     | Phân tích tính năng tiếp theo              |
 | [🛠️ Commands](docs/COMMANDS.md)               | Tất cả commands hay dùng                   |
 | [🧪 Testing](docs/TESTING.md)                 | Hướng dẫn viết tests                       |
 | [💳 Stripe Setup](docs/STRIPE_SETUP.md)       | Cấu hình thanh toán Stripe                 |

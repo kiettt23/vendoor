@@ -75,6 +75,8 @@ model User {
   products         Product[]
   sessions         Session[]
   vendorProfile    VendorProfile?
+  reviews          Review[]
+  wishlists        Wishlist[]
 
   @@index([email])
   @@map("users")
@@ -206,6 +208,8 @@ model Product {
   // Relations
   variants    ProductVariant[]
   images      ProductImage[]
+  reviews     Review[]
+  wishlists   Wishlist[]
 
   @@index([vendorId])
   @@index([categoryId])
@@ -386,11 +390,77 @@ model Payment {
 }
 
 // ============================================
+// REVIEW & WISHLIST
+// ============================================
+
+enum ReviewStatus {
+  PENDING   // Chờ duyệt (nếu cần moderation)
+  APPROVED  // Đã duyệt, hiển thị
+  REJECTED  // Bị từ chối
+}
+
+model Review {
+  id          String       @id @default(cuid())
+
+  // Relations
+  productId   String
+  product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  orderId     String?      // Link đến order để verify "đã mua hàng"
+  orderItemId String?      // Link đến order item cụ thể
+
+  // Review content
+  rating      Int          // 1-5 stars
+  title       String?      // Tiêu đề review (optional)
+  content     String?      @db.Text // Nội dung review
+  images      String[]     // Cloudinary URLs
+
+  // Verification
+  isVerifiedPurchase Boolean @default(false) // true nếu user đã mua sản phẩm này
+
+  // Vendor reply
+  vendorReply     String?   @db.Text
+  vendorReplyAt   DateTime?
+
+  // Moderation
+  status      ReviewStatus @default(APPROVED) // Skip moderation cho MVP
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([userId, productId]) // 1 user chỉ review 1 lần/sản phẩm
+  @@index([productId])
+  @@index([userId])
+  @@index([rating])
+  @@index([status])
+  @@map("reviews")
+}
+
+model Wishlist {
+  id          String   @id @default(cuid())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, productId]) // 1 user chỉ add 1 lần/sản phẩm
+  @@index([userId])
+  @@index([productId])
+  @@map("wishlists")
+}
+
+// ============================================
 // FUTURE MODELS (Làm sau MVP)
 // ============================================
 
 // model Voucher {}      // Discount system
-// model Review {}       // Product reviews
 // model Notification {} // Push notifications
 // model Conversation {} // Chat vendor-customer
 // model Payout {}       // Vendor payout management

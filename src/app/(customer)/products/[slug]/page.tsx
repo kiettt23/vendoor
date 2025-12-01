@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Store } from "lucide-react";
+import { headers } from "next/headers";
 import {
   getProductBySlug,
   getRelatedProducts,
@@ -9,6 +10,13 @@ import {
   ProductDetailClient,
   calculateDiscount,
 } from "@/entities/product";
+import {
+  getProductReviews,
+  getProductReviewStats,
+  hasUserReviewed,
+  StarRating,
+} from "@/entities/review";
+import { isInWishlist } from "@/entities/wishlist";
 import { Badge } from "@/shared/ui/badge";
 import {
   Breadcrumb,
@@ -18,6 +26,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/shared/ui/breadcrumb";
+import { auth } from "@/shared/lib/auth";
+import { ReviewList, WriteReviewForm } from "@/features/review";
+import { WishlistButton } from "@/features/wishlist";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -38,10 +49,20 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const relatedProducts = await getRelatedProducts(
-    product.category.id,
-    product.id
-  );
+  // Fetch related data in parallel
+  const [relatedProducts, reviewStats, reviews, session] = await Promise.all([
+    getRelatedProducts(product.category.id, product.id),
+    getProductReviewStats(product.id),
+    getProductReviews(product.id, { limit: 5 }),
+    auth.api.getSession({ headers: await headers() }),
+  ]);
+
+  const userId = session?.user?.id;
+  const [userHasReviewed, productInWishlist] = await Promise.all([
+    userId ? hasUserReviewed(userId, product.id) : false,
+    userId ? isInWishlist(userId, product.id) : false,
+  ]);
+
   const defaultVariant =
     product.variants.find((v) => v.isDefault) || product.variants[0];
   const discountPercent = calculateDiscount(
@@ -122,7 +143,26 @@ export default async function ProductDetailPage({ params }: PageProps) {
               {product.vendor.shopName}
             </Link>
             <h1 className="text-3xl font-bold">{product.name}</h1>
+
+            {/* Rating summary */}
+            {reviewStats.totalReviews > 0 && (
+              <div className="flex items-center gap-2 mt-2">
+                <StarRating rating={reviewStats.averageRating} size="sm" />
+                <span className="text-sm text-muted-foreground">
+                  {reviewStats.averageRating.toFixed(1)} (
+                  {reviewStats.totalReviews} đánh giá)
+                </span>
+              </div>
+            )}
           </div>
+
+          {/* Wishlist Button */}
+          <WishlistButton
+            productId={product.id}
+            userId={userId || null}
+            initialIsInWishlist={productInWishlist}
+            variant="button"
+          />
 
           <ProductDetailClient
             product={{
@@ -149,6 +189,34 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </p>
         </div>
       )}
+
+      {/* Reviews Section */}
+      <div className="mb-16">
+        <h2 className="text-2xl font-bold mb-6">Đánh Giá Sản Phẩm</h2>
+
+        <ReviewList reviews={reviews.reviews} stats={reviewStats} />
+
+        {/* Write review form */}
+        {userId && !userHasReviewed && (
+          <div className="mt-8 border-t pt-8">
+            <h3 className="text-lg font-semibold mb-4">
+              Viết đánh giá của bạn
+            </h3>
+            <WriteReviewForm productId={product.id} userId={userId} />
+          </div>
+        )}
+
+        {!userId && (
+          <div className="mt-8 text-center py-6 bg-muted/30 rounded-lg">
+            <p className="text-muted-foreground">
+              <Link href="/login" className="text-primary hover:underline">
+                Đăng nhập
+              </Link>{" "}
+              để viết đánh giá
+            </p>
+          </div>
+        )}
+      </div>
 
       {relatedProducts.length > 0 && (
         <div>
