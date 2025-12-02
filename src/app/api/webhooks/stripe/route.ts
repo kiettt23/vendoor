@@ -6,10 +6,10 @@
  * POST /api/webhooks/stripe
  */
 
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { stripe } from "@/shared/lib/payment/stripe";
-import { prisma } from "@/shared/lib";
+import { prisma } from "@/shared/lib/db";
 import type Stripe from "stripe";
 
 // Disable body parsing, we need raw body for webhook verification

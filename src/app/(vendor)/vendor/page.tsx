@@ -1,4 +1,4 @@
-import { requireVendor } from "@/shared/lib/auth";
+import { requireVendor } from "@/entities/vendor";
 import { VendorDashboardPage } from "@/widgets/vendor";
 
 export default async function VendorDashboardRoute() {

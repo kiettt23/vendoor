@@ -6,7 +6,8 @@ import { groupItemsByVendor } from "@/entities/cart";
 import type { CartItem } from "@/entities/cart";
 import { prepareOrderData } from "@/entities/order";
 import type { CreateOrdersResult } from "@/entities/order";
-import { auth, prisma } from "@/shared/lib";
+import { auth } from "@/shared/lib/auth";
+import { prisma } from "@/shared/lib/db";
 import { generateOrderNumber } from "@/shared/lib/utils";
 
 import type {

@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/shared/lib/auth";
+import { requireAdmin } from "@/entities/user";
 import { AdminOrdersPage } from "@/widgets/admin";
 
 export default async function Page() {

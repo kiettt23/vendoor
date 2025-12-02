@@ -25,10 +25,13 @@ export {
   approveVendor,
   rejectVendor,
   updateVendorStatus,
+  // Guards
+  requireVendor,
 } from "./api";
 
 export type {
   AdminDashboardStats,
   AdminRecentOrder,
   VendorDetailForAdmin,
+  VendorAuthResult,
 } from "./api";

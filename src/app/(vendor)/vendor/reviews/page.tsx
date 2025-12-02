@@ -1,4 +1,4 @@
-import { requireRole } from "@/shared/lib/auth";
+import { requireRole } from "@/entities/user";
 import { VendorReviewsPage } from "@/widgets/vendor";
 
 export const metadata = {

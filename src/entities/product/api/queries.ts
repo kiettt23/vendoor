@@ -1,37 +1,12 @@
 "use server";
 
-import { prisma } from "@/shared/lib";
+import { prisma } from "@/shared/lib/db";
 import { LIMITS } from "@/shared/lib/constants";
 import type {
-  Category,
-  CategoryWithCount,
   ProductDetail,
   ProductListItem,
   PaginatedProducts,
 } from "../model/types";
-
-// ============================================
-// Category Queries
-// ============================================
-
-export async function getCategories(): Promise<Category[]> {
-  return prisma.category.findMany({ orderBy: { name: "asc" } });
-}
-
-export async function getCategoriesWithCount(): Promise<CategoryWithCount[]> {
-  const categories = await prisma.category.findMany({
-    orderBy: { name: "asc" },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
-      image: true,
-      _count: { select: { products: true } },
-    },
-  });
-  return categories as CategoryWithCount[];
-}
 
 // ============================================
 // Product Queries

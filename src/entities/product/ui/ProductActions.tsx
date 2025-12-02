@@ -3,8 +3,21 @@
 import { useState } from "react";
 import { ShoppingCart, Plus, Minus, Check, Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
-import { useCart } from "@/entities/cart";
 import type { ProductVariant } from "../model/types";
+
+export interface AddToCartData {
+  productId: string;
+  productName: string;
+  productSlug: string;
+  variantId: string;
+  variantName: string | null;
+  price: number;
+  quantity: number;
+  image: string;
+  stock: number;
+  vendorId: string;
+  vendorName: string;
+}
 
 interface ProductActionsProps {
   product: {
@@ -18,6 +31,10 @@ interface ProductActionsProps {
   };
   variant: ProductVariant;
   image: string;
+  /**
+   * Callback when user adds to cart. Inject cart logic from features layer.
+   */
+  onAddToCart?: (data: AddToCartData) => void;
 }
 
 export function ProductActions({
@@ -25,18 +42,18 @@ export function ProductActions({
   vendor,
   variant,
   image,
+  onAddToCart,
 }: ProductActionsProps) {
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
-  const addItem = useCart((state) => state.addItem);
 
   const handleAddToCart = () => {
-    if (variant.stock === 0 || isAdding) return;
+    if (variant.stock === 0 || isAdding || !onAddToCart) return;
 
     setIsAdding(true);
 
-    addItem({
+    onAddToCart({
       productId: product.id,
       productName: product.name,
       productSlug: product.slug,
@@ -46,7 +63,7 @@ export function ProductActions({
       quantity,
       image,
       stock: variant.stock,
-      vendorId: vendor.vendorProfileId, // VendorProfile.id, not User.id
+      vendorId: vendor.vendorProfileId,
       vendorName: vendor.shopName,
     });
 
@@ -70,7 +87,7 @@ export function ProductActions({
     }
   };
 
-  const isDisabled = variant.stock === 0 || isAdding;
+  const isDisabled = variant.stock === 0 || isAdding || !onAddToCart;
 
   return (
     <div className="space-y-4">

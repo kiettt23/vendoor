@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowLeft, Save, Loader2, Trash2, ImagePlus } from "lucide-react";
+import { ArrowLeft, Plus, Loader2, ImagePlus } from "lucide-react";
 import {
   showToast,
   showErrorToast,
@@ -26,47 +25,23 @@ import {
 } from "@/shared/ui/select";
 import { Switch } from "@/shared/ui/switch";
 import {
-  updateProduct,
-  deleteProduct,
+  createProduct,
   productSchema,
   type ProductFormData,
 } from "@/entities/product";
+import type { CategoryOption } from "@/entities/category";
 
-interface Category {
-  id: string;
-  name: string;
+interface CreateProductPageProps {
+  categories: CategoryOption[];
+  vendorId: string;
 }
 
-interface ProductData {
-  id: string;
-  name: string;
-  description: string | null;
-  categoryId: string;
-  isActive: boolean;
-  images: { id: string; url: string }[];
-  variants: {
-    id: string;
-    name: string | null;
-    price: number;
-    compareAtPrice: number | null;
-    sku: string | null;
-    stock: number;
-    isDefault: boolean;
-  }[];
-}
-
-interface EditProductPageProps {
-  product: ProductData;
-  categories: Category[];
-}
-
-export function EditProductPage({ product, categories }: EditProductPageProps) {
+export function CreateProductPage({
+  categories,
+  vendorId,
+}: CreateProductPageProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const defaultVariant =
-    product.variants.find((v) => v.isDefault) || product.variants[0];
 
   const {
     register,
@@ -77,43 +52,23 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      name: product.name,
-      description: product.description || "",
-      categoryId: product.categoryId,
-      isActive: product.isActive,
-      price: defaultVariant?.price || 0,
-      compareAtPrice: defaultVariant?.compareAtPrice || undefined,
-      sku: defaultVariant?.sku ?? "",
-      stock: defaultVariant?.stock || 0,
+      isActive: true,
+      stock: 0,
+      price: 0,
+      categoryId: "",
+      description: "",
     },
   });
 
   const onSubmit = async (data: ProductFormData) => {
     setIsSubmitting(true);
     try {
-      const result = await updateProduct(product.id, {
+      const result = await createProduct(vendorId, {
         ...data,
         description: data.description || "",
       });
       if (result.success) {
-        showToast("vendor", "productUpdated");
-        router.refresh();
-      } else {
-        showCustomToast.error(result.error);
-      }
-    } catch {
-      showErrorToast("generic");
-    }
-    setIsSubmitting(false);
-  };
-
-  const handleDelete = async () => {
-    if (!confirm("Xác nhận xóa sản phẩm này?")) return;
-    setIsDeleting(true);
-    try {
-      const result = await deleteProduct(product.id);
-      if (result.success) {
-        showToast("vendor", "productDeleted");
+        showToast("vendor", "productCreated");
         router.push("/vendor/products");
       } else {
         showCustomToast.error(result.error);
@@ -121,7 +76,7 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
     } catch {
       showErrorToast("generic");
     }
-    setIsDeleting(false);
+    setIsSubmitting(false);
   };
 
   return (
@@ -133,48 +88,21 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
         </Link>
       </Button>
 
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Chỉnh Sửa Sản Phẩm</h1>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={handleDelete}
-          disabled={isDeleting}
-        >
-          {isDeleting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Trash2 className="h-4 w-4" />
-          )}
-        </Button>
-      </div>
+      <h1 className="text-3xl font-bold mb-8">Thêm Sản Phẩm Mới</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Image section */}
+        {/* Image Upload Placeholder */}
         <Card>
           <CardHeader>
-            <CardTitle>Hình Ảnh</CardTitle>
+            <CardTitle>Hình Ảnh Sản Phẩm</CardTitle>
           </CardHeader>
           <CardContent>
-            {product.images.length > 0 ? (
-              <div className="flex gap-4 flex-wrap">
-                {product.images.map((img) => (
-                  <div
-                    key={img.id}
-                    className="relative h-24 w-24 rounded overflow-hidden bg-muted"
-                  >
-                    <Image src={img.url} alt="" fill className="object-cover" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-                <ImagePlus className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <p className="text-muted-foreground text-sm">
-                  Tính năng upload hình ảnh sẽ sớm được cập nhật
-                </p>
-              </div>
-            )}
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
+              <ImagePlus className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground text-sm">
+                Tính năng upload hình ảnh sẽ sớm được cập nhật
+              </p>
+            </div>
           </CardContent>
         </Card>
 
@@ -185,7 +113,11 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
           <CardContent className="space-y-5">
             <div className="space-y-2">
               <Label>Tên sản phẩm *</Label>
-              <Input {...register("name")} className="mt-1.5" />
+              <Input
+                {...register("name")}
+                placeholder="iPhone 15 Pro Max"
+                className="mt-1.5"
+              />
               {errors.name && (
                 <p className="text-sm text-destructive mt-1">
                   {errors.name.message}
@@ -196,6 +128,7 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
               <Label>Mô tả</Label>
               <Textarea
                 {...register("description")}
+                placeholder="Mô tả chi tiết sản phẩm..."
                 rows={4}
                 className="mt-1.5"
               />
@@ -207,7 +140,7 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
                 defaultValue={watch("categoryId")}
               >
                 <SelectTrigger className="mt-1.5">
-                  <SelectValue />
+                  <SelectValue placeholder="Chọn danh mục" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((cat) => (
@@ -259,7 +192,11 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>SKU *</Label>
-                <Input {...register("sku")} className="mt-1.5" />
+                <Input
+                  {...register("sku")}
+                  placeholder="SP-001"
+                  className="mt-1.5"
+                />
                 {errors.sku && (
                   <p className="text-sm text-destructive mt-1">
                     {errors.sku.message}
@@ -313,12 +250,12 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Đang lưu...
+              Đang tạo...
             </>
           ) : (
             <>
-              <Save className="mr-2 h-4 w-4" />
-              Lưu Thay Đổi
+              <Plus className="mr-2 h-4 w-4" />
+              Tạo Sản Phẩm
             </>
           )}
         </Button>

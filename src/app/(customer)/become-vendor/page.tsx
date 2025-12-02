@@ -1,4 +1,4 @@
-import { requireAuth } from "@/shared/lib/auth/guards";
+import { requireAuth } from "@/entities/user";
 
 import {
   VendorRegistrationForm,

@@ -1,4 +1,4 @@
-import type { VendorStatus } from "@prisma/client";
+import type { VendorStatus } from "@/generated/prisma/client/enums";
 
 export interface VendorProfile {
   id: string;

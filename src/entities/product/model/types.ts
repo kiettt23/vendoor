@@ -62,18 +62,6 @@ export interface ProductDetail {
   images: ProductImage[];
 }
 
-export interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  image: string | null;
-}
-
-export interface CategoryWithCount extends Category {
-  _count: { products: number };
-}
-
 export interface PaginationMeta {
   page: number;
   limit: number;

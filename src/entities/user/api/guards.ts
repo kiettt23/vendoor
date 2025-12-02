@@ -1,8 +1,8 @@
 /**
- * Auth Guards - Role-based Access Control
+ * User Auth Guards
  *
  * Server-side utilities để kiểm tra authentication và authorization.
- * Giúp tránh code lặp lại ở các protected pages.
+ * Đây là business logic layer - queries Prisma để lấy user data.
  *
  * @example
  * // Trong Server Component
@@ -15,15 +15,14 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
-import { auth } from "./config";
 import { prisma } from "@/shared/lib/db";
 import { ROUTES } from "@/shared/lib/constants";
+import { requireSession, getSession } from "@/shared/lib/auth/session";
 
 export type UserRole = "CUSTOMER" | "VENDOR" | "ADMIN";
 
 export interface AuthResult {
-  session: NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;
+  session: NonNullable<Awaited<ReturnType<typeof getSession>>>;
   user: {
     id: string;
     roles: UserRole[];
@@ -33,18 +32,14 @@ export interface AuthResult {
 }
 
 /**
- * Yêu cầu user đã đăng nhập.
- * Redirect về /login nếu chưa đăng nhập.
+ * Yêu cầu user đã đăng nhập và lấy user data từ DB.
+ * Redirect về /login nếu chưa đăng nhập hoặc user không tồn tại.
  *
  * @returns Session và thông tin user cơ bản
  * @throws Redirect to /login if not authenticated
  */
 export async function requireAuth(): Promise<AuthResult> {
-  const session = await auth.api.getSession({ headers: await headers() });
-
-  if (!session?.user) {
-    redirect(ROUTES.LOGIN);
-  }
+  const session = await requireSession();
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -86,32 +81,6 @@ export async function requireRole(role: UserRole): Promise<AuthResult> {
 }
 
 /**
- * Yêu cầu user là Vendor và trả về vendor profile.
- *
- * @returns Session, user và vendor profile
- * @throws Redirect to /login if not authenticated
- * @throws Redirect to / if not a vendor
- */
-export async function requireVendor() {
-  const { session, user } = await requireRole("VENDOR");
-
-  const vendorProfile = await prisma.vendorProfile.findUnique({
-    where: { userId: user.id },
-    select: {
-      id: true,
-      shopName: true,
-      status: true,
-    },
-  });
-
-  if (!vendorProfile) {
-    redirect(ROUTES.HOME);
-  }
-
-  return { session, user, vendorProfile };
-}
-
-/**
  * Yêu cầu user là Admin.
  *
  * @returns Session và user
@@ -123,23 +92,13 @@ export async function requireAdmin() {
 }
 
 /**
- * Lấy session hiện tại (không redirect).
- * Dùng cho các trang public cần check trạng thái login.
- *
- * @returns Session hoặc null
- */
-export async function getAuthSession() {
-  return auth.api.getSession({ headers: await headers() });
-}
-
-/**
  * Kiểm tra user có role cụ thể không (không redirect).
  *
  * @param role - Role cần kiểm tra
  * @returns true nếu có role
  */
 export async function hasRole(role: UserRole): Promise<boolean> {
-  const session = await getAuthSession();
+  const session = await getSession();
   if (!session?.user) return false;
 
   const user = await prisma.user.findUnique({

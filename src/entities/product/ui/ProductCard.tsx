@@ -1,18 +1,25 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, Check, Loader2, Eye } from "lucide-react";
+import { ShoppingCart, Eye } from "lucide-react";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { formatPrice } from "@/shared/lib";
-import { useCart } from "@/entities/cart";
 import { calculateDiscount } from "../lib/utils";
 import type { ProductListItem } from "../model/types";
 
-type ProductCardProps = ProductListItem;
+export interface ProductCardProps extends ProductListItem {
+  /**
+   * Custom action buttons to render in the quick actions overlay.
+   * Use this to inject cart functionality from features layer.
+   */
+  renderActions?: (props: {
+    product: ProductListItem;
+    isOutOfStock: boolean;
+  }) => React.ReactNode;
+}
 
 export function ProductCard({
   id,
@@ -25,40 +32,22 @@ export function ProductCard({
   variantId,
   vendor,
   category,
+  renderActions,
 }: ProductCardProps) {
   const discountPercent = calculateDiscount(price, compareAtPrice);
-  const [isAdding, setIsAdding] = useState(false);
-  const [isAdded, setIsAdded] = useState(false);
-  const addItem = useCart((state) => state.addItem);
   const isOutOfStock = stock <= 0;
 
-  const handleQuickAdd = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (isAdding || isAdded || isOutOfStock) return;
-
-    setIsAdding(true);
-
-    addItem({
-      productId: id,
-      productName: name,
-      productSlug: slug,
-      variantId: variantId,
-      variantName: null,
-      price,
-      quantity: 1,
-      image: image || "/placeholder.jpg",
-      stock,
-      vendorId: vendor.id,
-      vendorName: vendor.name,
-    });
-
-    setTimeout(() => {
-      setIsAdding(false);
-      setIsAdded(true);
-      setTimeout(() => setIsAdded(false), 2000);
-    }, 300);
+  const productData: ProductListItem = {
+    id,
+    name,
+    slug,
+    price,
+    compareAtPrice,
+    image,
+    stock,
+    variantId,
+    vendor,
+    category,
   };
 
   return (
@@ -87,42 +76,34 @@ export function ProductCard({
               </div>
             )}
 
-            {/* Quick actions overlay */}
+            {/* Quick actions overlay - use custom actions or default */}
             {!isOutOfStock && (
               <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform">
                 <div className="flex gap-1 p-2 bg-black/60 backdrop-blur">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="flex-1 h-9"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    Chi tiết
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={isAdded ? "default" : "default"}
-                    className={`flex-1 h-9 ${
-                      isAdded ? "bg-green-600 hover:bg-green-600" : ""
-                    }`}
-                    onClick={handleQuickAdd}
-                    disabled={isAdding}
-                  >
-                    {isAdding ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : isAdded ? (
-                      <>
-                        <Check className="h-4 w-4 mr-1" />
-                        Đã thêm
-                      </>
-                    ) : (
-                      <>
+                  {renderActions ? (
+                    renderActions({ product: productData, isOutOfStock })
+                  ) : (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="flex-1 h-9"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        Chi tiết
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="flex-1 h-9"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <ShoppingCart className="h-4 w-4 mr-1" />
                         Thêm
-                      </>
-                    )}
-                  </Button>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             )}

@@ -4,8 +4,6 @@ export type {
   ProductVariant,
   ProductImage,
   ProductDetail,
-  Category,
-  CategoryWithCount,
   PaginationMeta,
   PaginatedProducts,
   ProductFormInput,
@@ -23,8 +21,6 @@ export {
   getProducts,
   getProductBySlug,
   getRelatedProducts,
-  getCategories,
-  getCategoriesWithCount,
   getVendorProducts,
   getVendorProductForEdit,
   getFeaturedProducts,
@@ -44,6 +40,8 @@ export {
   ProductStockBadge,
   ProductActions,
   ProductDetailClient,
+  type ProductCardProps,
+  type AddToCartData,
 } from "./ui";
 export {
   calculateDiscount,

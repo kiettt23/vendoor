@@ -22,3 +22,6 @@ export type {
 
 // Actions
 export { approveVendor, rejectVendor, updateVendorStatus } from "./actions";
+
+// Guards
+export { requireVendor, type VendorAuthResult } from "./guards";

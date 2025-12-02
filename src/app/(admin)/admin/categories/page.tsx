@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/shared/lib/auth";
+import { requireAdmin } from "@/entities/user";
 import { AdminCategoriesPage } from "@/widgets/admin";
 import {
   getCategoriesAdmin,

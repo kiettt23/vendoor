@@ -2,12 +2,20 @@
  * Auth Module - Barrel Export
  *
  * Centralized exports for auth utilities
- * Usage: import { auth, authClient, signIn, signOut } from "@/lib/auth"
+ *
+ * ⚠️ IMPORTANT: Guards đã được di chuyển ra entities để tuân thủ FSD
+ * - User guards (requireAuth, requireRole, requireAdmin, hasRole):
+ *   import { requireAuth } from "@/entities/user"
+ * - Vendor guards (requireVendor):
+ *   import { requireVendor } from "@/entities/vendor"
  */
 
 // Server-side auth
 export { auth } from "./config";
 export type { Session } from "./config";
+
+// Session primitives (chỉ check session, không query DB)
+export { getSession, requireSession } from "./session";
 
 // Client-side auth
 export {
@@ -16,19 +24,8 @@ export {
   signUp,
   signOut,
   useSession,
-  getSession,
+  getSession as getClientSession,
 } from "./client";
 
 // Error handling
 export { translateAuthError } from "./error-messages";
-
-// Auth Guards (Server-side)
-export {
-  requireAuth,
-  requireRole,
-  requireVendor,
-  requireAdmin,
-  getAuthSession,
-  hasRole,
-} from "./guards";
-export type { UserRole, AuthResult } from "./guards";

@@ -7,7 +7,6 @@ import {
   getProductBySlug,
   getRelatedProducts,
   ProductCard,
-  ProductDetailClient,
   calculateDiscount,
 } from "@/entities/product";
 import {
@@ -29,6 +28,7 @@ import {
 import { auth } from "@/shared/lib/auth";
 import { ReviewList, WriteReviewForm } from "@/features/review";
 import { WishlistButton } from "@/features/wishlist";
+import { ProductDetailWithCart, ProductCardActions } from "@/features/cart";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -164,7 +164,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             variant="button"
           />
 
-          <ProductDetailClient
+          <ProductDetailWithCart
             product={{
               id: product.id,
               name: product.name,
@@ -223,7 +223,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <h2 className="text-2xl font-bold mb-8">Sản Phẩm Liên Quan</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {relatedProducts.map((p) => (
-              <ProductCard key={p.id} {...p} />
+              <ProductCard
+                key={p.id}
+                {...p}
+                renderActions={(props) => <ProductCardActions {...props} />}
+              />
             ))}
           </div>
         </div>

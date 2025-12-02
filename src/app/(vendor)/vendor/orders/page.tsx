@@ -1,4 +1,4 @@
-import { requireRole } from "@/shared/lib/auth";
+import { requireRole } from "@/entities/user";
 import { VendorOrdersPage } from "@/widgets/vendor";
 
 interface PageProps {

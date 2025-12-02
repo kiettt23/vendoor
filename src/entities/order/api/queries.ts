@@ -5,13 +5,13 @@ import { headers } from "next/headers";
 import { auth } from "@/shared/lib/auth/config";
 import { prisma } from "@/shared/lib/db";
 import { LIMITS } from "@/shared/lib/constants";
-import type { OrderStatus } from "@prisma/client";
+import type { OrderStatus } from "@/generated/prisma/client/enums";
 
 // ============================================
-// Order Queries
+// Order Types (query-specific)
 // ============================================
 
-export interface OrderListItem {
+export interface CustomerOrderListItem {
   id: string;
   orderNumber: string;
   status: string;
@@ -22,10 +22,14 @@ export interface OrderListItem {
   itemCount: number;
 }
 
+// ============================================
+// Order Queries
+// ============================================
+
 /**
  * Lấy danh sách đơn hàng của customer hiện tại
  */
-export async function getCustomerOrders(): Promise<OrderListItem[]> {
+export async function getCustomerOrders(): Promise<CustomerOrderListItem[]> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return [];
 

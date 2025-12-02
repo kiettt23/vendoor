@@ -1,4 +1,4 @@
-export { ProductCard } from "./product-card";
-export { ProductStatusBadge, ProductStockBadge } from "./product-badge";
-export { ProductActions } from "./product-actions";
-export { ProductDetailClient } from "./product-detail-client";
+export { ProductCard, type ProductCardProps } from "./ProductCard";
+export { ProductStatusBadge, ProductStockBadge } from "./ProductBadge";
+export { ProductActions, type AddToCartData } from "./ProductActions";
+export { ProductDetailClient } from "./ProductDetailClient";

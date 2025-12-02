@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/shared/lib/db";
 
-import type { VendorStatus } from "@prisma/client";
+import type { VendorStatus } from "@/generated/prisma/client/enums";
 
 // ============================================
 // Vendor Admin Actions

@@ -1,5 +1,17 @@
-import type { CartItem } from "@/entities/cart";
 import { ORDER } from "@/shared/lib/constants";
+
+/**
+ * Cart item shape required for order preparation.
+ * Matches CartItem from cart entity but defined here to avoid cross-entity import.
+ */
+interface OrderableItem {
+  productId: string;
+  productName: string;
+  variantId: string;
+  variantName: string | null;
+  price: number;
+  quantity: number;
+}
 
 /**
  * Calculate platform commission from subtotal
@@ -13,7 +25,7 @@ export function calculateCommission(subtotal: number): number {
 
 export function prepareOrderData(
   vendorId: string,
-  items: CartItem[],
+  items: OrderableItem[],
   customerId: string,
   shippingInfo: {
     name: string;

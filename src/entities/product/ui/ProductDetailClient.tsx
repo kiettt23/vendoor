@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { formatPrice } from "@/shared/lib";
 import type { ProductVariant } from "../model/types";
-import { ProductActions } from "./product-actions";
+import { ProductActions, type AddToCartData } from "./ProductActions";
 
 interface ProductDetailClientProps {
   product: {
@@ -20,6 +20,10 @@ interface ProductDetailClientProps {
   variants: ProductVariant[];
   defaultVariant: ProductVariant;
   image: string;
+  /**
+   * Callback when user adds to cart. Inject from parent component.
+   */
+  onAddToCart?: (data: AddToCartData) => void;
 }
 
 export function ProductDetailClient({
@@ -28,6 +32,7 @@ export function ProductDetailClient({
   variants,
   defaultVariant,
   image,
+  onAddToCart,
 }: ProductDetailClientProps) {
   const [selectedVariant, setSelectedVariant] =
     useState<ProductVariant>(defaultVariant);
@@ -74,6 +79,7 @@ export function ProductDetailClient({
         vendor={vendor}
         variant={selectedVariant}
         image={image}
+        onAddToCart={onAddToCart}
       />
     </div>
   );

@@ -1,7 +1,7 @@
-export { VendorDashboardPage } from "./ui/vendor-dashboard";
-export { VendorProductsPage } from "./ui/vendor-products-page";
-export { VendorOrdersPage } from "./ui/vendor-orders-page";
-export { VendorOrderDetailPage } from "./ui/vendor-order-detail";
-export { VendorReviewsPage } from "./ui/vendor-reviews-page";
-export { CreateProductPage } from "./ui/create-product-page";
-export { EditProductPage } from "./ui/edit-product-page";
+export { VendorDashboardPage } from "./ui/VendorDashboard";
+export { VendorProductsPage } from "./ui/VendorProductsPage";
+export { VendorOrdersPage } from "./ui/VendorOrdersPage";
+export { VendorOrderDetailPage } from "./ui/VendorOrderDetail";
+export { VendorReviewsPage } from "./ui/VendorReviewsPage";
+export { CreateProductPage } from "./ui/CreateProductPage";
+export { EditProductPage } from "./ui/EditProductPage";

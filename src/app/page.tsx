@@ -1,7 +1,5 @@
-import {
-  getFeaturedProducts,
-  getCategoriesWithCount,
-} from "@/entities/product";
+import { getFeaturedProducts } from "@/entities/product";
+import { getCategoriesWithCount } from "@/entities/category";
 import {
   HeroSection,
   CategoriesSection,

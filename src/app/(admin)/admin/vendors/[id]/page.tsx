@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/shared/lib/auth";
+import { requireAdmin } from "@/entities/user";
 import { AdminVendorDetailPage } from "@/widgets/admin";
 
 interface PageProps {

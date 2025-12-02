@@ -1,8 +1,14 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../src/generated/prisma/client/client";
 import { scrypt, randomBytes, ScryptOptions } from "crypto";
 import { promisify } from "util";
+import "dotenv/config";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+});
+
+const prisma = new PrismaClient({ adapter });
 
 // Password hashing - MUST match Better Auth's exact implementation
 // From: packages/better-auth/src/crypto/password.ts

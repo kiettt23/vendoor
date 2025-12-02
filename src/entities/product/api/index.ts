@@ -3,8 +3,6 @@ export {
   getProducts,
   getProductBySlug,
   getRelatedProducts,
-  getCategories,
-  getCategoriesWithCount,
   getVendorProducts,
   getVendorProductForEdit,
   getFeaturedProducts,

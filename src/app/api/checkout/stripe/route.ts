@@ -7,12 +7,12 @@
  * Body: { orderIds: string[], amount: number, customerEmail: string }
  */
 
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { stripe } from "@/shared/lib/payment/stripe";
-import { auth } from "@/shared/lib";
+import { auth } from "@/shared/lib/auth";
 import { headers } from "next/headers";
-import { prisma } from "@/shared/lib";
+import { prisma } from "@/shared/lib/db";
 
 interface CheckoutRequest {
   orderIds: string[];

@@ -8,7 +8,7 @@ import { formatPrice, formatDate } from "@/shared/lib";
 import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
 import { getCurrentVendorProfile } from "@/entities/vendor";
 import { getVendorOrdersPaginated } from "@/entities/order";
-import type { OrderStatus } from "@prisma/client";
+import type { OrderStatus } from "@/generated/prisma/client/enums";
 
 interface VendorOrdersPageProps {
   status?: string;

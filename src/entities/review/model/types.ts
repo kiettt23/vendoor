@@ -1,4 +1,4 @@
-import type { ReviewStatus } from "@prisma/client";
+import type { ReviewStatus } from "@/generated/prisma/client/enums";
 
 // ============================================
 // Review Types

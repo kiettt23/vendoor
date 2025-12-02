@@ -7,7 +7,7 @@ import { Badge } from "@/shared/ui/badge";
 import { auth } from "@/shared/lib/auth/config";
 import { prisma } from "@/shared/lib/db";
 import { getVendorReviews, StarRating } from "@/entities/review";
-import { ReviewReplyDialog } from "./review-reply-dialog";
+import { ReviewReplyDialog } from "./ReviewReplyDialog";
 
 export async function VendorReviewsPage() {
   const session = await auth.api.getSession({ headers: await headers() });

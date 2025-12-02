@@ -1,7 +1,6 @@
-export { AdminDashboardPage } from "./ui/admin-dashboard";
-export { AdminVendorsPage } from "./ui/admin-vendors-page";
-export { AdminCategoriesPage } from "./ui/admin-categories-page";
-export { AdminOrdersPage } from "./ui/admin-orders-page";
-export { AdminOrderDetailPage } from "./ui/admin-order-detail";
-export { AdminVendorDetailPage } from "./ui/admin-vendor-detail";
-
+export { AdminDashboardPage } from "./ui/AdminDashboard";
+export { AdminVendorsPage } from "./ui/AdminVendorsPage";
+export { AdminCategoriesPage } from "./ui/AdminCategoriesPage";
+export { AdminOrdersPage } from "./ui/AdminOrdersPage";
+export { AdminOrderDetailPage } from "./ui/AdminOrderDetail";
+export { AdminVendorDetailPage } from "./ui/AdminVendorDetail";

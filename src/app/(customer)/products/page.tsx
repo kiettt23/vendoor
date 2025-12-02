@@ -1,8 +1,5 @@
-import {
-  getProducts,
-  getCategoriesWithCount,
-  ProductCard,
-} from "@/entities/product";
+import { getProducts, ProductCard } from "@/entities/product";
+import { getCategoriesWithCount } from "@/entities/category";
 import { Button } from "@/shared/ui/button";
 import { PackageSearch } from "lucide-react";
 import Link from "next/link";

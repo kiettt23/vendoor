@@ -1,4 +1,8 @@
-import type { OrderStatus, PaymentStatus, PaymentMethod } from "@prisma/client";
+import type {
+  OrderStatus,
+  PaymentStatus,
+  PaymentMethod,
+} from "@/generated/prisma/client/enums";
 
 export interface Order {
   id: string;
@@ -67,4 +71,3 @@ export interface CreateOrdersResult {
 }
 
 export type { OrderStatus, PaymentStatus, PaymentMethod };
-

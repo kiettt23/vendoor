@@ -1,7 +1,12 @@
-// API (Queries + Actions)
+// Types
+export type { Category, CategoryWithCount, CategoryOption } from "./model";
+
+// API - Queries
 export {
+  getCategories,
+  getCategoriesWithCount,
   getCategoriesAdmin,
-  createCategory,
-  updateCategory,
-  deleteCategory,
 } from "./api";
+
+// API - Actions
+export { createCategory, updateCategory, deleteCategory } from "./api";

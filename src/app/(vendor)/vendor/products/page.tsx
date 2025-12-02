@@ -1,4 +1,4 @@
-import { requireRole } from "@/shared/lib/auth";
+import { requireRole } from "@/entities/user";
 import { VendorProductsPage } from "@/widgets/vendor";
 
 export default async function Page() {

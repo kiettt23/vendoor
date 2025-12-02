@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { formatPrice } from "@/shared/lib";
-import { requireAuth } from "@/shared/lib/auth/guards";
+import { requireAuth } from "@/entities/user";
 
 import { getUserWishlist, removeFromWishlist } from "@/entities/wishlist";
 

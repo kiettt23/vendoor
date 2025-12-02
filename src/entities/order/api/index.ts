@@ -7,7 +7,7 @@ export {
   getVendorOrdersPaginated,
   getAdminOrders,
   getAdminOrderById,
-  type OrderListItem,
+  type CustomerOrderListItem,
 } from "./queries";
 
 // Types
