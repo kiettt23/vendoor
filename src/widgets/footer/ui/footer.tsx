@@ -10,46 +10,8 @@ import {
   Truck,
   ShieldCheck,
 } from "lucide-react";
-
-const footerLinks = {
-  shop: {
-    title: "Danh mục",
-    links: [
-      { name: "Điện thoại", href: "/products?category=dien-thoai" },
-      { name: "Laptop", href: "/products?category=laptop" },
-      { name: "Tablet", href: "/products?category=tablet" },
-      { name: "Phụ kiện", href: "/products?category=phu-kien" },
-      { name: "Gaming", href: "/products?category=gaming" },
-    ],
-  },
-  seller: {
-    title: "Người bán",
-    links: [
-      { name: "Đăng ký bán hàng", href: "/seller/register" },
-      { name: "Seller Center", href: "/vendor" },
-      { name: "Chính sách người bán", href: "/seller/policy" },
-      { name: "Hướng dẫn bán hàng", href: "/seller/guide" },
-    ],
-  },
-  support: {
-    title: "Hỗ trợ",
-    links: [
-      { name: "Trung tâm trợ giúp", href: "/help" },
-      { name: "Theo dõi đơn hàng", href: "/orders" },
-      { name: "Chính sách đổi trả", href: "/returns" },
-      { name: "Liên hệ", href: "/contact" },
-    ],
-  },
-  company: {
-    title: "Về Vendoor",
-    links: [
-      { name: "Giới thiệu", href: "/about" },
-      { name: "Tuyển dụng", href: "/careers" },
-      { name: "Điều khoản sử dụng", href: "/terms" },
-      { name: "Chính sách bảo mật", href: "/privacy" },
-    ],
-  },
-};
+import { FOOTER_LINKS } from "@/shared/lib/constants";
+import { Logo } from "@/shared/ui/logo";
 
 const socialLinks = [
   { name: "Facebook", icon: Facebook, href: "#" },
@@ -70,13 +32,13 @@ export function Footer() {
     <footer className="bg-foreground text-background">
       <div className="border-b border-background/10">
         <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {features.map((feature) => (
               <div
                 key={feature.text}
-                className="flex items-center justify-center gap-3"
+                className="flex items-center gap-3 md:justify-center"
               >
-                <feature.icon className="h-5 w-5 text-primary" />
+                <feature.icon className="h-5 w-5 text-primary shrink-0" />
                 <span className="text-sm font-medium">{feature.text}</span>
               </div>
             ))}
@@ -87,12 +49,7 @@ export function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-2">
-              <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold">V</span>
-              </div>
-              <span className="text-xl font-bold">Vendoor</span>
-            </Link>
+            <Logo size="sm" showText={true} />
             <p className="text-background/70 mt-4 text-sm">
               Sàn thương mại điện tử công nghệ đa người bán hàng đầu Việt Nam.
             </p>
@@ -109,17 +66,17 @@ export function Footer() {
             </div>
           </div>
 
-          {Object.values(footerLinks).map((section) => (
+          {Object.values(FOOTER_LINKS).map((section) => (
             <div key={section.title}>
               <h3 className="font-semibold mb-4 text-sm">{section.title}</h3>
               <ul className="space-y-3">
                 {section.links.map((link) => (
-                  <li key={link.name}>
+                  <li key={link.href}>
                     <Link
                       href={link.href}
                       className="text-sm text-background/70 hover:text-background"
                     >
-                      {link.name}
+                      {link.label}
                     </Link>
                   </li>
                 ))}

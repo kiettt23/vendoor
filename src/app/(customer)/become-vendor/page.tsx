@@ -16,7 +16,7 @@ export default async function VendorRegisterPage() {
   const vendorStatus = await getVendorRegistrationStatus(user.id);
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-2xl">
+    <div className="container mx-auto py-8 px-4 max-w-2xl min-h-[60vh]">
       {vendorStatus ? (
         <VendorRegistrationStatus
           status={vendorStatus.status}

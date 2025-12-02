@@ -13,22 +13,8 @@ import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
 import { formatPrice, formatDateTime } from "@/shared/lib";
+import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
 import { formatShippingAddress, getAdminOrderById } from "@/entities/order";
-
-const statusMap: Record<
-  string,
-  {
-    label: string;
-    variant: "default" | "secondary" | "destructive" | "outline";
-  }
-> = {
-  PENDING_PAYMENT: { label: "Chờ thanh toán", variant: "secondary" },
-  PENDING: { label: "Chờ xử lý", variant: "default" },
-  PROCESSING: { label: "Đang xử lý", variant: "default" },
-  SHIPPED: { label: "Đang giao", variant: "default" },
-  DELIVERED: { label: "Đã giao", variant: "outline" },
-  CANCELLED: { label: "Đã hủy", variant: "destructive" },
-};
 
 interface AdminOrderDetailPageProps {
   orderId: string;
@@ -51,10 +37,7 @@ export async function AdminOrderDetailPage({
     );
   }
 
-  const status = statusMap[order.status] || {
-    label: order.status,
-    variant: "secondary" as const,
-  };
+  const status = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">

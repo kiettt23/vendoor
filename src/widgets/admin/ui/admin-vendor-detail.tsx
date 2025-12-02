@@ -14,20 +14,8 @@ import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
 import { formatPrice, formatDate } from "@/shared/lib";
+import { VENDOR_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
 import { updateVendorStatus, getVendorDetailForAdmin } from "@/entities/vendor";
-
-const statusMap: Record<
-  string,
-  {
-    label: string;
-    variant: "default" | "secondary" | "destructive" | "outline";
-  }
-> = {
-  PENDING: { label: "Chờ duyệt", variant: "secondary" },
-  APPROVED: { label: "Đã duyệt", variant: "default" },
-  REJECTED: { label: "Từ chối", variant: "destructive" },
-  SUSPENDED: { label: "Tạm ngưng", variant: "outline" },
-};
 
 interface AdminVendorDetailPageProps {
   vendorId: string;
@@ -50,10 +38,7 @@ export async function AdminVendorDetailPage({
     );
   }
 
-  const status = statusMap[vendor.status] || {
-    label: vendor.status,
-    variant: "secondary" as const,
-  };
+  const status = getStatusConfig(vendor.status, VENDOR_STATUS_CONFIG);
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">

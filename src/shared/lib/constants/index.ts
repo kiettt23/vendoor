@@ -15,7 +15,15 @@ export { FILE_UPLOAD, IMAGE_DIMENSIONS } from "./upload";
 export { PRICE_LIMITS, STOCK_LIMITS } from "./product";
 
 // Order & Status
-export { ORDER, STATUS, VENDOR } from "./order";
+export {
+  ORDER,
+  STATUS,
+  VENDOR,
+  ORDER_STATUS_CONFIG,
+  VENDOR_STATUS_CONFIG,
+  getStatusConfig,
+  type StatusConfig,
+} from "./order";
 
 // Auth & Account
 export { AUTH, ACCOUNT } from "./auth";
@@ -39,7 +47,16 @@ export { FEATURE_FLAGS } from "./features";
 export { ROUTES, PROTECTED_ROUTES, ROLE_ROUTES } from "./routes";
 
 // Navigation
-export { VENDOR_NAV_ITEMS, ADMIN_NAV_ITEMS, type NavItem } from "./navigation";
+export {
+  VENDOR_NAV_ITEMS,
+  ADMIN_NAV_ITEMS,
+  HEADER_NAV_ITEMS,
+  HEADER_CATEGORIES,
+  FOOTER_LINKS,
+  type NavItem,
+  type LinkItem,
+  type FooterLinkSection,
+} from "./navigation";
 
 // Query & Display Limits
 export { LIMITS } from "./limits";

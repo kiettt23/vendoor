@@ -6,23 +6,8 @@ import { Button } from "@/shared/ui/button";
 import { auth } from "@/shared/lib/auth/config";
 import { headers } from "next/headers";
 import { formatPrice, formatDateTime } from "@/shared/lib";
+import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
 import { getCustomerOrders } from "@/entities/order";
-
-const statusMap: Record<
-  string,
-  {
-    label: string;
-    variant: "default" | "secondary" | "destructive" | "outline";
-  }
-> = {
-  PENDING_PAYMENT: { label: "Chờ thanh toán", variant: "secondary" },
-  PENDING: { label: "Chờ xử lý", variant: "default" },
-  PROCESSING: { label: "Đang xử lý", variant: "default" },
-  SHIPPED: { label: "Đang giao", variant: "default" },
-  DELIVERED: { label: "Đã giao", variant: "outline" },
-  CANCELLED: { label: "Đã hủy", variant: "destructive" },
-  REFUNDED: { label: "Đã hoàn tiền", variant: "secondary" },
-};
 
 export async function OrderHistoryPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -48,10 +33,7 @@ export async function OrderHistoryPage() {
       <h1 className="text-3xl font-bold mb-8">Đơn Hàng Của Tôi</h1>
       <div className="space-y-4">
         {orders.map((order) => {
-          const status = statusMap[order.status] || {
-            label: order.status,
-            variant: "secondary" as const,
-          };
+          const status = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
           return (
             <Link key={order.id} href={`/orders/${order.id}`}>
               <Card className="hover:shadow-md transition-shadow cursor-pointer">

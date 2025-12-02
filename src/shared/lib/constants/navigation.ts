@@ -8,8 +8,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+// ============================================
+// TYPES
+// ============================================
+
 /**
- * Navigation item definition
+ * Navigation item with icon (for sidebars, dashboards)
  */
 export interface NavItem {
   href: string;
@@ -18,7 +22,103 @@ export interface NavItem {
 }
 
 /**
- * Vendor dashboard navigation items
+ * Simple link item (for header, footer)
+ */
+export interface LinkItem {
+  href: string;
+  label: string;
+}
+
+/**
+ * Footer link section
+ */
+export interface FooterLinkSection {
+  title: string;
+  links: LinkItem[];
+}
+
+// ============================================
+// HEADER NAVIGATION
+// ============================================
+
+/**
+ * Main header navigation (public pages)
+ */
+export const HEADER_NAV_ITEMS: LinkItem[] = [
+  { href: "/", label: "Trang Chủ" },
+  { href: "/stores", label: "Cửa Hàng" },
+  { href: "/products", label: "Sản Phẩm" },
+  { href: "/flash-sale", label: "Flash Sale" },
+  { href: "/support", label: "Hỗ Trợ" },
+];
+
+/**
+ * Header category suggestions (search dropdown)
+ */
+export const HEADER_CATEGORIES = [
+  "Điện thoại",
+  "Laptop",
+  "Tablet",
+  "Phụ kiện",
+  "Đồng hồ thông minh",
+  "Tai nghe",
+  "Gaming",
+  "Smart Home",
+] as const;
+
+// ============================================
+// FOOTER NAVIGATION
+// ============================================
+
+/**
+ * Footer link sections
+ */
+export const FOOTER_LINKS: Record<string, FooterLinkSection> = {
+  shop: {
+    title: "Danh mục",
+    links: [
+      { href: "/products?category=dien-thoai", label: "Điện thoại" },
+      { href: "/products?category=laptop", label: "Laptop" },
+      { href: "/products?category=tablet", label: "Tablet" },
+      { href: "/products?category=phu-kien", label: "Phụ kiện" },
+      { href: "/products?category=gaming", label: "Gaming" },
+    ],
+  },
+  seller: {
+    title: "Người bán",
+    links: [
+      { href: "/become-vendor", label: "Đăng ký bán hàng" },
+      { href: "/vendor", label: "Seller Center" },
+      { href: "/seller/policy", label: "Chính sách người bán" },
+      { href: "/seller/guide", label: "Hướng dẫn bán hàng" },
+    ],
+  },
+  support: {
+    title: "Hỗ trợ",
+    links: [
+      { href: "/help", label: "Trung tâm trợ giúp" },
+      { href: "/orders", label: "Theo dõi đơn hàng" },
+      { href: "/returns", label: "Chính sách đổi trả" },
+      { href: "/contact", label: "Liên hệ" },
+    ],
+  },
+  company: {
+    title: "Về Vendoor",
+    links: [
+      { href: "/about", label: "Giới thiệu" },
+      { href: "/careers", label: "Tuyển dụng" },
+      { href: "/terms", label: "Điều khoản sử dụng" },
+      { href: "/privacy", label: "Chính sách bảo mật" },
+    ],
+  },
+};
+
+// ============================================
+// VENDOR DASHBOARD NAVIGATION
+// ============================================
+
+/**
+ * Vendor dashboard sidebar navigation
  */
 export const VENDOR_NAV_ITEMS: NavItem[] = [
   {
@@ -41,10 +141,14 @@ export const VENDOR_NAV_ITEMS: NavItem[] = [
     label: "Doanh thu",
     icon: DollarSign,
   },
-] as const;
+];
+
+// ============================================
+// ADMIN DASHBOARD NAVIGATION
+// ============================================
 
 /**
- * Admin dashboard navigation items
+ * Admin dashboard sidebar navigation
  */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   {
@@ -67,4 +171,4 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     label: "Danh mục",
     icon: FolderTree,
   },
-] as const;
+];

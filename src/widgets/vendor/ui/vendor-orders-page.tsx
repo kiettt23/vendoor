@@ -5,25 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { formatPrice, formatDate } from "@/shared/lib";
+import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
 import { getCurrentVendorProfile } from "@/entities/vendor";
 import { getVendorOrdersPaginated } from "@/entities/order";
 import type { OrderStatus } from "@prisma/client";
-
-const statusMap: Record<
-  OrderStatus,
-  {
-    label: string;
-    variant: "default" | "secondary" | "destructive" | "outline";
-  }
-> = {
-  PENDING_PAYMENT: { label: "Chờ thanh toán", variant: "secondary" },
-  PENDING: { label: "Chờ xử lý", variant: "default" },
-  PROCESSING: { label: "Đang xử lý", variant: "default" },
-  SHIPPED: { label: "Đang giao", variant: "default" },
-  DELIVERED: { label: "Đã giao", variant: "outline" },
-  CANCELLED: { label: "Đã hủy", variant: "destructive" },
-  REFUNDED: { label: "Hoàn tiền", variant: "secondary" },
-};
 
 interface VendorOrdersPageProps {
   status?: string;
@@ -84,7 +69,9 @@ export async function VendorOrdersPage({
               }
               size="sm"
             >
-              {s === "ALL" ? "Tất cả" : statusMap[s as OrderStatus]?.label || s}
+              {s === "ALL"
+                ? "Tất cả"
+                : getStatusConfig(s, ORDER_STATUS_CONFIG).label}
             </Button>
           </Link>
         ))}
@@ -100,10 +87,7 @@ export async function VendorOrdersPage({
       ) : (
         <div className="space-y-4">
           {orders.map((order) => {
-            const s = statusMap[order.status] || {
-              label: order.status,
-              variant: "secondary" as const,
-            };
+            const s = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
             return (
               <Link key={order.id} href={`/vendor/orders/${order.id}`}>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">

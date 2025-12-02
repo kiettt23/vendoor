@@ -38,3 +38,49 @@ export const STATUS = {
     INACTIVE: "INACTIVE",
   },
 } as const;
+
+// ============================================
+// STATUS DISPLAY CONFIGS (for UI)
+// ============================================
+
+type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
+
+export interface StatusConfig {
+  label: string;
+  variant: BadgeVariant;
+}
+
+/**
+ * Order status display configuration
+ * Used by: order-history-page, order-detail-page, vendor-orders-page, admin-orders-page
+ */
+export const ORDER_STATUS_CONFIG: Record<string, StatusConfig> = {
+  PENDING_PAYMENT: { label: "Chờ thanh toán", variant: "secondary" },
+  PENDING: { label: "Chờ xử lý", variant: "default" },
+  PROCESSING: { label: "Đang xử lý", variant: "default" },
+  SHIPPED: { label: "Đang giao", variant: "default" },
+  DELIVERED: { label: "Đã giao", variant: "outline" },
+  CANCELLED: { label: "Đã hủy", variant: "destructive" },
+  REFUNDED: { label: "Đã hoàn tiền", variant: "secondary" },
+};
+
+/**
+ * Vendor status display configuration
+ * Used by: admin-vendors-page, admin-vendor-detail
+ */
+export const VENDOR_STATUS_CONFIG: Record<string, StatusConfig> = {
+  PENDING: { label: "Chờ duyệt", variant: "secondary" },
+  APPROVED: { label: "Đã duyệt", variant: "default" },
+  REJECTED: { label: "Từ chối", variant: "destructive" },
+  SUSPENDED: { label: "Tạm ngưng", variant: "outline" },
+};
+
+/**
+ * Helper to get status config with fallback
+ */
+export function getStatusConfig(
+  status: string,
+  config: Record<string, StatusConfig>
+): StatusConfig {
+  return config[status] || { label: status, variant: "secondary" };
+}

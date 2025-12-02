@@ -13,29 +13,13 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { formatPrice, formatDateTime } from "@/shared/lib";
+import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
 import { getCurrentVendorProfile } from "@/entities/vendor";
 import {
   formatShippingAddress,
   updateOrderStatusAction,
   getVendorOrderDetail,
 } from "@/entities/order";
-import type { OrderStatus } from "@prisma/client";
-
-const statusMap: Record<
-  OrderStatus,
-  {
-    label: string;
-    variant: "default" | "secondary" | "destructive" | "outline";
-  }
-> = {
-  PENDING_PAYMENT: { label: "Chờ thanh toán", variant: "secondary" },
-  PENDING: { label: "Chờ xử lý", variant: "default" },
-  PROCESSING: { label: "Đang xử lý", variant: "default" },
-  SHIPPED: { label: "Đang giao", variant: "default" },
-  DELIVERED: { label: "Đã giao", variant: "outline" },
-  CANCELLED: { label: "Đã hủy", variant: "destructive" },
-  REFUNDED: { label: "Hoàn tiền", variant: "secondary" },
-};
 
 interface VendorOrderDetailPageProps {
   orderId: string;
@@ -61,10 +45,7 @@ export async function VendorOrderDetailPage({
     );
   }
 
-  const status = statusMap[order.status] || {
-    label: order.status,
-    variant: "secondary" as const,
-  };
+  const status = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">

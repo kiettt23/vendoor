@@ -3,22 +3,8 @@ import { Package, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { formatPrice, formatDateTime } from "@/shared/lib";
+import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
 import { getAdminOrders } from "@/entities/order";
-
-const statusMap: Record<
-  string,
-  {
-    label: string;
-    variant: "default" | "secondary" | "destructive" | "outline";
-  }
-> = {
-  PENDING_PAYMENT: { label: "Chờ thanh toán", variant: "secondary" },
-  PENDING: { label: "Chờ xử lý", variant: "default" },
-  PROCESSING: { label: "Đang xử lý", variant: "default" },
-  SHIPPED: { label: "Đang giao", variant: "default" },
-  DELIVERED: { label: "Đã giao", variant: "outline" },
-  CANCELLED: { label: "Đã hủy", variant: "destructive" },
-};
 
 export async function AdminOrdersPage() {
   const orders = await getAdminOrders();
@@ -37,10 +23,7 @@ export async function AdminOrdersPage() {
       ) : (
         <div className="space-y-4">
           {orders.map((order) => {
-            const s = statusMap[order.status] || {
-              label: order.status,
-              variant: "secondary" as const,
-            };
+            const s = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
             return (
               <Link key={order.id} href={`/admin/orders/${order.id}`}>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">

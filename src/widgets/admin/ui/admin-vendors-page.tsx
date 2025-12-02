@@ -5,21 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { formatDate } from "@/shared/lib";
+import { VENDOR_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
 import { approveVendor, rejectVendor, getVendors } from "@/entities/vendor";
 import type { VendorStatus } from "@prisma/client";
-
-const statusMap: Record<
-  VendorStatus,
-  {
-    label: string;
-    variant: "default" | "secondary" | "destructive" | "outline";
-  }
-> = {
-  PENDING: { label: "Chờ duyệt", variant: "secondary" },
-  APPROVED: { label: "Đã duyệt", variant: "default" },
-  REJECTED: { label: "Từ chối", variant: "destructive" },
-  SUSPENDED: { label: "Tạm ngưng", variant: "outline" },
-};
 
 interface AdminVendorsPageProps {
   status?: string;
@@ -59,7 +47,7 @@ export async function AdminVendorsPage({ status }: AdminVendorsPageProps) {
             >
               {s === "ALL"
                 ? "Tất cả"
-                : statusMap[s as VendorStatus]?.label || s}
+                : getStatusConfig(s, VENDOR_STATUS_CONFIG).label}
             </Button>
           </Link>
         ))}
@@ -75,10 +63,7 @@ export async function AdminVendorsPage({ status }: AdminVendorsPageProps) {
       ) : (
         <div className="space-y-4">
           {vendors.map((vendor) => {
-            const s = statusMap[vendor.status] || {
-              label: vendor.status,
-              variant: "secondary" as const,
-            };
+            const s = getStatusConfig(vendor.status, VENDOR_STATUS_CONFIG);
             return (
               <Card key={vendor.id}>
                 <CardHeader className="pb-2">

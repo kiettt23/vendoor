@@ -33,25 +33,7 @@ import { Logo } from "@/shared/ui/logo";
 import { useCart } from "@/entities/cart";
 import { signOut } from "@/shared/lib/auth/client";
 import { toast } from "sonner";
-
-const navigation = [
-  { name: "Trang Chủ", href: "/" },
-  { name: "Cửa Hàng", href: "/stores" },
-  { name: "Sản Phẩm", href: "/products" },
-  { name: "Flash Sale", href: "/flash-sale" },
-  { name: "Hỗ Trợ", href: "/support" },
-];
-
-const categories = [
-  "Điện thoại",
-  "Laptop",
-  "Tablet",
-  "Phụ kiện",
-  "Đồng hồ thông minh",
-  "Tai nghe",
-  "Gaming",
-  "Smart Home",
-];
+import { HEADER_NAV_ITEMS, HEADER_CATEGORIES } from "@/shared/lib/constants";
 
 type HeaderProps = {
   user?: { name: string | null; email: string | null; roles: string[] } | null;
@@ -120,17 +102,17 @@ export function Header({ user }: HeaderProps) {
                   <Logo size="sm" asLink={false} />
                 </div>
                 <nav className="flex flex-col p-4">
-                  {navigation.map((item, idx) => (
+                  {HEADER_NAV_ITEMS.map((item, idx) => (
                     <Link
-                      key={item.name}
+                      key={item.href}
                       href={item.href}
                       className={`text-base font-medium hover:text-primary py-3 px-2 rounded-lg hover:bg-muted transition-colors ${
-                        idx < navigation.length - 1
+                        idx < HEADER_NAV_ITEMS.length - 1
                           ? "border-b border-border"
                           : ""
                       }`}
                     >
-                      {item.name}
+                      {item.label}
                     </Link>
                   ))}
                 </nav>
@@ -171,7 +153,7 @@ export function Header({ user }: HeaderProps) {
                     <Link href="/products">Tất cả sản phẩm</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  {categories.map((cat) => (
+                  {HEADER_CATEGORIES.map((cat) => (
                     <DropdownMenuItem
                       key={cat}
                       asChild
@@ -206,13 +188,13 @@ export function Header({ user }: HeaderProps) {
           </div>
 
           <nav className="hidden xl:flex items-center gap-6">
-            {navigation.slice(1, 4).map((item) => (
+            {HEADER_NAV_ITEMS.slice(1, 4).map((item) => (
               <Link
-                key={item.name}
+                key={item.href}
                 href={item.href}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground"
               >
-                {item.name}
+                {item.label}
               </Link>
             ))}
           </nav>
@@ -222,7 +204,9 @@ export function Header({ user }: HeaderProps) {
               <Search className="h-5 w-5" />
             </Button>
             <Button variant="ghost" size="icon" className="hidden sm:flex">
-              <Heart className="h-5 w-5" />
+              <Link href="/wishlist">
+                <Heart className="h-5 w-5" />
+              </Link>
             </Button>
 
             <DropdownMenu>
