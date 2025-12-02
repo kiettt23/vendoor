@@ -7,7 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Save, Loader2, Trash2, ImagePlus } from "lucide-react";
-import { toast } from "sonner";
+import {
+  showToast,
+  showErrorToast,
+  showCustomToast,
+} from "@/shared/lib/constants";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -92,13 +96,13 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
         description: data.description || "",
       });
       if (result.success) {
-        toast.success("Đã cập nhật sản phẩm");
+        showToast("vendor", "productUpdated");
         router.refresh();
       } else {
-        toast.error(result.error);
+        showCustomToast.error(result.error);
       }
     } catch {
-      toast.error("Có lỗi xảy ra");
+      showErrorToast("generic");
     }
     setIsSubmitting(false);
   };
@@ -109,13 +113,13 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
     try {
       const result = await deleteProduct(product.id);
       if (result.success) {
-        toast.success("Đã xóa sản phẩm");
+        showToast("vendor", "productDeleted");
         router.push("/vendor/products");
       } else {
-        toast.error(result.error);
+        showCustomToast.error(result.error);
       }
     } catch {
-      toast.error("Có lỗi xảy ra");
+      showErrorToast("generic");
     }
     setIsDeleting(false);
   };

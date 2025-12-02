@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Loader2, Store, CheckCircle } from "lucide-react";
-import { toast } from "sonner";
+import {
+  showToast,
+  showErrorToast,
+  showCustomToast,
+} from "@/shared/lib/constants";
 
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -59,12 +63,12 @@ export function VendorRegistrationForm({
 
       if (result.success) {
         setIsSuccess(true);
-        toast.success("Đã gửi đơn đăng ký thành công!");
+        showToast("vendor", "registered");
       } else {
-        toast.error(result.error);
+        showCustomToast.error(result.error);
       }
     } catch {
-      toast.error("Có lỗi xảy ra, vui lòng thử lại");
+      showErrorToast("generic");
     } finally {
       setIsSubmitting(false);
     }

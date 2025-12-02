@@ -6,7 +6,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { ArrowLeft, Plus, Loader2, ImagePlus } from "lucide-react";
-import { toast } from "sonner";
+import {
+  showToast,
+  showErrorToast,
+  showCustomToast,
+} from "@/shared/lib/constants";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -68,13 +72,13 @@ export function CreateProductPage({
         description: data.description || "",
       });
       if (result.success) {
-        toast.success("Đã tạo sản phẩm");
+        showToast("vendor", "productCreated");
         router.push("/vendor/products");
       } else {
-        toast.error(result.error);
+        showCustomToast.error(result.error);
       }
     } catch {
-      toast.error("Có lỗi xảy ra");
+      showErrorToast("generic");
     }
     setIsSubmitting(false);
   };

@@ -34,7 +34,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await auth.api.getSession({ headers: await headers() });
-  const user = session?.user
+  const initialUser = session?.user
     ? {
         name: session.user.name,
         email: session.user.email,
@@ -48,7 +48,7 @@ export default async function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
         <ReactQueryProvider>
-          <Header user={user} />
+          <Header initialUser={initialUser} />
           <main>{children}</main>
           <Footer />
           <Toaster position="top-center" richColors />

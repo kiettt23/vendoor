@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Mail, User, UserPlus, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { showToast } from "@/shared/lib/constants";
 import { registerSchema, type RegisterFormData } from "@/features/auth";
 import { authClient, useSession } from "@/shared/lib/auth/client";
 import { translateAuthError } from "@/shared/lib/auth/error-messages";
@@ -72,7 +72,7 @@ export default function RegisterPage() {
       }
 
       // Login thành công, redirect về home
-      toast.success("Đăng ký thành công");
+      showToast("auth", "registerSuccess");
       router.push("/");
       router.refresh();
     } catch {

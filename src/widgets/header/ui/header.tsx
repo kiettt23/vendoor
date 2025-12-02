@@ -1,14 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Search,
-  ShoppingCart,
-  User,
   Menu,
-  Heart,
   Store,
   ChevronDown,
   MapPin,
@@ -31,20 +28,60 @@ import {
 } from "@/shared/ui/dropdown-menu";
 import { Logo } from "@/shared/ui/logo";
 import { useCart } from "@/entities/cart";
-import { signOut } from "@/shared/lib/auth/client";
-import { toast } from "sonner";
-import { HEADER_NAV_ITEMS, HEADER_CATEGORIES } from "@/shared/lib/constants";
+import { signOut, useSession } from "@/shared/lib/auth/client";
+import {
+  HEADER_NAV_ITEMS,
+  HEADER_CATEGORIES,
+  HEADER_ICON_BUTTONS,
+  showToast,
+  showErrorToast,
+} from "@/shared/lib/constants";
 
 type HeaderProps = {
-  user?: { name: string | null; email: string | null; roles: string[] } | null;
+  /** Initial user from server - used for SSR, then overridden by useSession */
+  initialUser?: {
+    name: string | null;
+    email: string | null;
+    roles: string[];
+  } | null;
 };
 
-export function Header({ user }: HeaderProps) {
+type UserData = {
+  name: string | null;
+  email: string | null;
+  roles: string[];
+} | null;
+
+/**
+ * Get user initial for avatar badge
+ */
+function getUserInitial(user: UserData): string {
+  if (!user) return "";
+  const name = user.name || user.email || "";
+  return name.charAt(0).toUpperCase();
+}
+
+export function Header({ initialUser }: HeaderProps) {
   const router = useRouter();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const items = useCart((state) => state.items);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Use client-side session for reactive updates after login/logout
+  // Falls back to initialUser from server for SSR
+  const { data: session } = useSession();
+  const user: UserData = useMemo(() => {
+    // Prefer client session (reactive) over server initial (static)
+    if (session?.user) {
+      return {
+        name: session.user.name,
+        email: session.user.email,
+        roles: session.user.roles || [],
+      };
+    }
+    return initialUser ?? null;
+  }, [session, initialUser]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,11 +93,11 @@ export function Header({ user }: HeaderProps) {
   const handleSignOut = async () => {
     try {
       await signOut();
-      toast.success("Đăng xuất thành công");
+      showToast("auth", "logoutSuccess");
       router.push("/");
       router.refresh();
     } catch {
-      toast.error("Có lỗi xảy ra");
+      showErrorToast("generic");
     }
   };
 
@@ -180,7 +217,7 @@ export function Header({ user }: HeaderProps) {
                 type="submit"
                 size="icon"
                 variant="ghost"
-                className="rounded-l-none rounded-r-lg h-10 w-12 hover:bg-primary hover:text-primary-foreground transition-colors"
+                className="rounded-none rounded-r-xl h-10 w-12 hover:bg-primary hover:text-primary-foreground transition-colors"
               >
                 <Search className="h-4 w-4" />
               </Button>
@@ -200,19 +237,95 @@ export function Header({ user }: HeaderProps) {
           </nav>
 
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Search className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="hidden sm:flex">
-              <Link href="/wishlist">
-                <Heart className="h-5 w-5" />
-              </Link>
-            </Button>
+            {/* 1. Search - Mobile only */}
+            {HEADER_ICON_BUTTONS.filter((btn) => btn.id === "search").map(
+              (btn) => (
+                <Button
+                  key={btn.id}
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden"
+                  aria-label={btn.label}
+                >
+                  <btn.icon className="h-5 w-5" />
+                </Button>
+              )
+            )}
 
+            {/* 2. Cart with Badge */}
+            {HEADER_ICON_BUTTONS.filter((btn) => btn.id === "cart").map(
+              (btn) => (
+                <Button
+                  key={btn.id}
+                  variant="ghost"
+                  size="icon"
+                  className="relative"
+                  asChild
+                  aria-label={btn.label}
+                >
+                  <Link href={btn.href!}>
+                    <btn.icon className="h-5 w-5" />
+                    {totalItems > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                      >
+                        {totalItems > 99 ? "99+" : totalItems}
+                      </Badge>
+                    )}
+                  </Link>
+                </Button>
+              )
+            )}
+
+            {/* 3. Wishlist */}
+            {HEADER_ICON_BUTTONS.filter((btn) => btn.id === "wishlist").map(
+              (btn) => (
+                <Button
+                  key={btn.id}
+                  variant="ghost"
+                  size="icon"
+                  className="hidden sm:flex"
+                  asChild
+                  aria-label={btn.label}
+                >
+                  <Link href={btn.href!}>
+                    <btn.icon className="h-5 w-5" />
+                  </Link>
+                </Button>
+              )
+            )}
+
+            {/* 4. User Menu with Avatar */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative"
+                  aria-label="Tài khoản"
+                >
+                  {user ? (
+                    // Logged in: Avatar with initial
+                    <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                      {getUserInitial(user)}
+                    </div>
+                  ) : (
+                    // Not logged in: Simple user icon
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
@@ -271,20 +384,6 @@ export function Header({ user }: HeaderProps) {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <Button variant="ghost" size="icon" className="relative" asChild>
-              <Link href="/cart">
-                <ShoppingCart className="h-5 w-5" />
-                {totalItems > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                  >
-                    {totalItems > 99 ? "99+" : totalItems}
-                  </Badge>
-                )}
-              </Link>
-            </Button>
           </div>
         </div>
       </div>

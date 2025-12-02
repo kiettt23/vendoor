@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/ui/dialog";
-import { toast } from "sonner";
+import { showToast, showCustomToast } from "@/shared/lib/constants";
 
 interface Category {
   id: string;
@@ -47,11 +47,11 @@ export function AdminCategoriesPage({
     if (!newName.trim()) return;
     const result = await onCreate(newName);
     if (result.success) {
-      toast.success("Đã tạo danh mục");
+      showToast("admin", "categoryCreated");
       setNewName("");
       setIsCreateOpen(false);
     } else {
-      toast.error(result.error || "Lỗi");
+      showCustomToast.error(result.error || "Lỗi");
     }
   };
 
@@ -59,24 +59,24 @@ export function AdminCategoriesPage({
     if (!editName.trim()) return;
     const result = await onUpdate(id, editName);
     if (result.success) {
-      toast.success("Đã cập nhật");
+      showToast("admin", "categoryUpdated");
       setEditingId(null);
     } else {
-      toast.error(result.error || "Lỗi");
+      showCustomToast.error(result.error || "Lỗi");
     }
   };
 
   const handleDelete = async (id: string, productCount: number) => {
     if (productCount > 0) {
-      toast.error("Không thể xóa danh mục có sản phẩm");
+      showCustomToast.error("Không thể xóa danh mục có sản phẩm");
       return;
     }
     if (!confirm("Xác nhận xóa?")) return;
     const result = await onDelete(id);
     if (result.success) {
-      toast.success("Đã xóa");
+      showToast("admin", "categoryDeleted");
     } else {
-      toast.error(result.error || "Lỗi");
+      showCustomToast.error(result.error || "Lỗi");
     }
   };
 

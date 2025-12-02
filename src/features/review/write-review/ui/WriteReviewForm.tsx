@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import {
+  showToast,
+  showErrorToast,
+  showCustomToast,
+} from "@/shared/lib/constants";
 
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -37,7 +41,7 @@ export function WriteReviewForm({
     e.preventDefault();
 
     if (rating === 0) {
-      toast.error("Vui lòng chọn số sao đánh giá");
+      showCustomToast.error("Vui lòng chọn số sao đánh giá");
       return;
     }
 
@@ -54,17 +58,17 @@ export function WriteReviewForm({
       const result = await createReview(userId, data);
 
       if (result.success) {
-        toast.success("Đã gửi đánh giá thành công!");
+        showToast("review", "submitted");
         setRating(0);
         setTitle("");
         setContent("");
         router.refresh();
         onSuccess?.();
       } else {
-        toast.error(result.error);
+        showCustomToast.error(result.error);
       }
     } catch {
-      toast.error("Có lỗi xảy ra, vui lòng thử lại");
+      showErrorToast("generic");
     } finally {
       setIsSubmitting(false);
     }

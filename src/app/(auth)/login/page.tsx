@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Mail, LogIn, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { showToast, showInfoToast } from "@/shared/lib/constants";
 import { loginSchema, type LoginFormData } from "@/features/auth";
 import { authClient, useSession } from "@/shared/lib/auth/client";
 import { translateAuthError } from "@/shared/lib/auth/error-messages";
@@ -50,7 +50,7 @@ export default function LoginPage() {
   // Thông báo lý do redirect nếu có callbackUrl (bị bắt đăng nhập)
   useEffect(() => {
     if (searchParams.get("callbackUrl")) {
-      toast.info("Vui lòng đăng nhập để tiếp tục");
+      showInfoToast("auth", "loginRequired");
     }
   }, [searchParams]);
 
@@ -66,7 +66,7 @@ export default function LoginPage() {
         setError(translateAuthError(result.error.message));
         return;
       }
-      toast.success("Đăng nhập thành công");
+      showToast("auth", "loginSuccess");
       router.push(callbackUrl);
       router.refresh();
     } catch {

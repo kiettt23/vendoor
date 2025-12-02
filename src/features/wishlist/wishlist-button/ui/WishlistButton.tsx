@@ -2,7 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { Heart, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import {
+  showToast,
+  showCustomToast,
+  TOAST_MESSAGES,
+} from "@/shared/lib/constants";
 
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
@@ -37,7 +41,7 @@ export function WishlistButton({
 
   const handleClick = () => {
     if (!userId) {
-      toast.error("Vui lòng đăng nhập để thêm vào yêu thích");
+      showCustomToast.error(TOAST_MESSAGES.wishlist.loginRequired);
       return;
     }
 
@@ -46,11 +50,9 @@ export function WishlistButton({
 
       if (result.success) {
         setIsInWishlist(result.data.added);
-        toast.success(
-          result.data.added ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích"
-        );
+        showToast("wishlist", result.data.added ? "added" : "removed");
       } else {
-        toast.error(result.error);
+        showCustomToast.error(result.error);
       }
     });
   };

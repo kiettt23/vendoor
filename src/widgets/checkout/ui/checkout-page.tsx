@@ -13,7 +13,12 @@ import {
   CreditCard,
   Banknote,
 } from "lucide-react";
-import { toast } from "sonner";
+import {
+  TOAST_MESSAGES,
+  showInfoToast,
+  showErrorToast,
+  showCustomToast,
+} from "@/shared/lib/constants";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -113,14 +118,14 @@ export function CheckoutPage() {
   const onSubmit = async (data: CheckoutFormData) => {
     setIsSubmitting(true);
     try {
-      toast.info("Đang kiểm tra tồn kho...");
+      showInfoToast("order", "checkingStock");
       const validation = await validateCheckout(items);
       if (!validation.isValid) {
         validation.invalidItems.forEach((item) => {
           if (item.availableStock === 0) {
-            toast.error(`"${item.productName}" đã hết hàng`);
+            showCustomToast.error(`"${item.productName}" đã hết hàng`);
           } else {
-            toast.error(
+            showCustomToast.error(
               `"${item.productName}" chỉ còn ${item.availableStock} sản phẩm (bạn đang đặt ${item.requestedQuantity})`
             );
           }
@@ -134,21 +139,21 @@ export function CheckoutPage() {
       // Lưu thông tin để dùng lại
       saveCheckoutInfo(shippingInfo);
 
-      toast.info("Đang tạo đơn hàng...");
+      showInfoToast("order", "creating");
       const result = await createOrders(
         items,
         { ...shippingInfo, email, note },
         paymentMethod
       );
       if (!result.success) {
-        toast.error(result.error || "Không thể tạo đơn hàng");
+        showErrorToast("cannotCreateOrder", result.error);
         setIsSubmitting(false);
         return;
       }
 
       // Nếu là Stripe, redirect tới Stripe Checkout
       if (paymentMethod === "STRIPE") {
-        toast.info("Đang chuyển đến trang thanh toán...");
+        showInfoToast("order", "redirecting");
         const response = await fetch("/api/checkout/stripe", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -161,7 +166,7 @@ export function CheckoutPage() {
 
         const { url, error } = await response.json();
         if (error) {
-          toast.error(error);
+          showCustomToast.error(error);
           setIsSubmitting(false);
           return;
         }
@@ -174,14 +179,16 @@ export function CheckoutPage() {
 
       // COD: Xóa giỏ hàng và redirect
       clearCart();
-      toast.success(`Đặt hàng thành công! ${result.orders.length} đơn hàng`);
+      showCustomToast.success(
+        `${TOAST_MESSAGES.order.placed} ${result.orders.length} đơn hàng`
+      );
       router.replace(
         `/orders?success=true&orders=${result.orders
           .map((o) => o.id)
           .join(",")}`
       );
     } catch {
-      toast.error("Có lỗi xảy ra");
+      showErrorToast("generic");
       setIsSubmitting(false);
     }
   };

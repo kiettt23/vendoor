@@ -2,12 +2,18 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { toast } from "sonner";
+import {
+  TOAST_MESSAGES,
+  showToast,
+  showCustomToast,
+} from "@/shared/lib/constants";
 import type { CartStore } from "./types";
 
 function validateQuantity(quantity: number, stock: number) {
-  if (quantity <= 0) return { isValid: false, message: "Số lượng phải lớn hơn 0" };
-  if (quantity > stock) return { isValid: false, message: `Chỉ còn ${stock} sản phẩm` };
+  if (quantity <= 0)
+    return { isValid: false, message: "Số lượng phải lớn hơn 0" };
+  if (quantity > stock)
+    return { isValid: false, message: `Chỉ còn ${stock} sản phẩm` };
   return { isValid: true };
 }
 
@@ -26,7 +32,10 @@ export const useCartStore = create<CartStore>()(
           const validation = validateQuantity(newQuantity, existingItem.stock);
 
           if (!validation.isValid) {
-            toast.error("Không thể thêm", { description: validation.message });
+            showCustomToast.error(
+              TOAST_MESSAGES.cart.cannotAdd,
+              validation.message
+            );
             return;
           }
 
@@ -35,18 +44,24 @@ export const useCartStore = create<CartStore>()(
               item.id === itemId ? { ...item, quantity: newQuantity } : item
             ),
           });
-          toast.success("Đã cập nhật giỏ hàng");
+          showToast("cart", "updated");
         } else {
           const quantity = newItem.quantity || 1;
           const validation = validateQuantity(quantity, newItem.stock);
 
           if (!validation.isValid) {
-            toast.error("Không thể thêm", { description: validation.message });
+            showCustomToast.error(
+              TOAST_MESSAGES.cart.cannotAdd,
+              validation.message
+            );
             return;
           }
 
           set({ items: [...items, { ...newItem, id: itemId, quantity }] });
-          toast.success("Đã thêm vào giỏ", { description: newItem.productName });
+          showCustomToast.success(
+            TOAST_MESSAGES.cart.added,
+            newItem.productName
+          );
         }
       },
 
@@ -57,18 +72,29 @@ export const useCartStore = create<CartStore>()(
 
         const validation = validateQuantity(quantity, item.stock);
         if (!validation.isValid) {
-          toast.warning("Số lượng không hợp lệ", { description: validation.message });
+          showCustomToast.warning(
+            TOAST_MESSAGES.cart.invalidQuantity,
+            validation.message
+          );
           return;
         }
 
-        set({ items: items.map((i) => (i.id === variantId ? { ...i, quantity } : i)) });
+        set({
+          items: items.map((i) =>
+            i.id === variantId ? { ...i, quantity } : i
+          ),
+        });
       },
 
       removeItem: (variantId) => {
         const items = get().items;
         const item = items.find((i) => i.id === variantId);
         set({ items: items.filter((i) => i.id !== variantId) });
-        if (item) toast.success("Đã xóa", { description: item.productName });
+        if (item)
+          showCustomToast.success(
+            TOAST_MESSAGES.cart.removed,
+            item.productName
+          );
       },
 
       clearCart: () => set({ items: [] }),
@@ -78,4 +104,3 @@ export const useCartStore = create<CartStore>()(
 );
 
 export const useCart = useCartStore;
-

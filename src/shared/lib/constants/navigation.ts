@@ -5,6 +5,10 @@ import {
   DollarSign,
   Users,
   FolderTree,
+  Search,
+  Heart,
+  User,
+  Star,
   type LucideIcon,
 } from "lucide-react";
 
@@ -37,6 +41,19 @@ export interface FooterLinkSection {
   links: LinkItem[];
 }
 
+/**
+ * Header icon button configuration
+ */
+export interface HeaderIconButton {
+  id: string;
+  icon: LucideIcon;
+  href: string | null; // null = không có link trực tiếp (dropdown, action)
+  label: string; // Tooltip/aria-label
+  showOnMobile: boolean;
+  requiresAuth: boolean;
+  badge?: "cart"; // Loại badge cần hiển thị
+}
+
 // ============================================
 // HEADER NAVIGATION
 // ============================================
@@ -50,6 +67,46 @@ export const HEADER_NAV_ITEMS: LinkItem[] = [
   { href: "/products", label: "Sản Phẩm" },
   { href: "/flash-sale", label: "Flash Sale" },
   { href: "/support", label: "Hỗ Trợ" },
+];
+
+/**
+ * Header icon buttons (right side)
+ * Thứ tự trong array = thứ tự hiển thị
+ */
+export const HEADER_ICON_BUTTONS: HeaderIconButton[] = [
+  {
+    id: "search",
+    icon: Search,
+    href: null,
+    label: "Tìm kiếm",
+    showOnMobile: true,
+    requiresAuth: false,
+  },
+  {
+    id: "cart",
+    icon: ShoppingCart,
+    href: "/cart",
+    label: "Giỏ hàng",
+    showOnMobile: true,
+    requiresAuth: false,
+    badge: "cart",
+  },
+  {
+    id: "wishlist",
+    icon: Heart,
+    href: "/wishlist",
+    label: "Yêu thích",
+    showOnMobile: false, // Ẩn trên mobile
+    requiresAuth: false, // Vẫn cho xem, redirect login khi click
+  },
+  {
+    id: "user",
+    icon: User,
+    href: null, // Dropdown menu
+    label: "Tài khoản",
+    showOnMobile: true,
+    requiresAuth: false,
+  },
 ];
 
 /**
@@ -137,6 +194,11 @@ export const VENDOR_NAV_ITEMS: NavItem[] = [
     icon: ShoppingCart,
   },
   {
+    href: "/vendor/reviews",
+    label: "Đánh giá",
+    icon: Star,
+  },
+  {
     href: "/vendor/earnings",
     label: "Doanh thu",
     icon: DollarSign,
@@ -156,11 +218,7 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     label: "Dashboard",
     icon: LayoutDashboard,
   },
-  {
-    href: "/admin/vendors",
-    label: "Vendors",
-    icon: Users,
-  },
+
   {
     href: "/admin/orders",
     label: "Đơn hàng",
@@ -170,5 +228,10 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     href: "/admin/categories",
     label: "Danh mục",
     icon: FolderTree,
+  },
+  {
+    href: "/admin/vendors",
+    label: "Vendors",
+    icon: Users,
   },
 ];
