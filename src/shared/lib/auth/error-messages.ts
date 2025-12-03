@@ -17,6 +17,11 @@ const errorTranslations: Record<string, string> = {
   "Password is too long": "Mật khẩu quá dài",
   "Passwords do not match": "Mật khẩu không khớp",
 
+  // Password reset errors
+  "Invalid token": "Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn",
+  "Token expired": "Link đặt lại mật khẩu đã hết hạn",
+  INVALID_TOKEN: "Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn",
+
   // Credential errors
   "Invalid credentials": "Email hoặc mật khẩu không đúng",
   "Invalid email or password": "Email hoặc mật khẩu không đúng",
@@ -26,6 +31,10 @@ const errorTranslations: Record<string, string> = {
   "Session expired": "Phiên đăng nhập đã hết hạn",
   "Invalid session": "Phiên đăng nhập không hợp lệ",
   Unauthorized: "Vui lòng đăng nhập",
+
+  // OAuth errors
+  "OAuth account not linked": "Tài khoản Google chưa được liên kết",
+  "Account already linked": "Tài khoản đã được liên kết với email khác",
 
   // General errors
   "Something went wrong": "Có lỗi xảy ra",

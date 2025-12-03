@@ -7,7 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Mail, User, UserPlus, Loader2 } from "lucide-react";
 import { showToast } from "@/shared/lib/constants";
-import { registerSchema, type RegisterFormData } from "@/features/auth";
+import {
+  registerSchema,
+  type RegisterFormData,
+  GoogleSignInButton,
+} from "@/features/auth";
 import { authClient, useSession } from "@/shared/lib/auth/client";
 import { translateAuthError } from "@/shared/lib/auth/error-messages";
 import { Button } from "@/shared/ui/button";
@@ -190,6 +194,21 @@ export default function RegisterPage() {
                   </>
                 )}
               </Button>
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">
+                    Hoặc
+                  </span>
+                </div>
+              </div>
+
+              {/* Google Sign In */}
+              <GoogleSignInButton className="w-full" />
             </form>
           </CardContent>
           <CardFooter>

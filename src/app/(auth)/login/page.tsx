@@ -7,7 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Mail, LogIn, Loader2 } from "lucide-react";
 import { showToast, showInfoToast } from "@/shared/lib/constants";
-import { loginSchema, type LoginFormData } from "@/features/auth";
+import {
+  loginSchema,
+  type LoginFormData,
+  GoogleSignInButton,
+} from "@/features/auth";
 import { authClient, useSession } from "@/shared/lib/auth/client";
 import { translateAuthError } from "@/shared/lib/auth/error-messages";
 import { Button } from "@/shared/ui/button";
@@ -125,7 +129,15 @@ export default function LoginPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Mật khẩu</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Mật khẩu</Label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-muted-foreground hover:text-primary"
+                  >
+                    Quên mật khẩu?
+                  </Link>
+                </div>
                 <PasswordInput
                   id="password"
                   disabled={isLoading}
@@ -155,6 +167,24 @@ export default function LoginPage() {
                   </>
                 )}
               </Button>
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">
+                    Hoặc
+                  </span>
+                </div>
+              </div>
+
+              {/* Google Sign In */}
+              <GoogleSignInButton
+                callbackUrl={callbackUrl}
+                className="w-full"
+              />
             </form>
           </CardContent>
           <CardFooter>

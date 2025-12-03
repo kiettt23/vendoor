@@ -65,6 +65,8 @@ export const TOAST_MESSAGES = {
     logoutSuccess: "Đăng xuất thành công",
     registerSuccess: "Đăng ký thành công",
     loginRequired: "Vui lòng đăng nhập để tiếp tục",
+    passwordResetSent: "Đã gửi link đặt lại mật khẩu",
+    passwordResetSuccess: "Đặt lại mật khẩu thành công",
   },
 
   // Generic errors
