@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import {
   Star,
   ChevronLeft,
@@ -107,7 +107,7 @@ export function TestimonialsSection() {
                 {/* Author */}
                 <div className="flex flex-col items-center">
                   <div className="relative h-14 w-14 rounded-full overflow-hidden mb-3">
-                    <Image
+                    <OptimizedImage
                       src={
                         testimonials[currentIndex].avatar ||
                         "/placeholder-user.jpg"

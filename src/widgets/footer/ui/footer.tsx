@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import {
   Facebook,
   Instagram,
@@ -99,7 +99,7 @@ export function Footer() {
               "generic-payment-gateway-logo.png",
             ].map((img) => (
               <div key={img} className="relative h-6 w-12">
-                <Image
+                <OptimizedImage
                   src={`/${img}`}
                   alt=""
                   fill

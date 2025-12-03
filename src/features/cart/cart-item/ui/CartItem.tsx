@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, AlertTriangle } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { useCart } from "@/entities/cart";
 import type {
   CartItem as CartItemType,
@@ -45,7 +45,7 @@ export function CartItemCard({ item, stockValidation }: CartItemProps) {
         href={`/products/${item.productSlug}`}
         className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md"
       >
-        <Image
+        <OptimizedImage
           src={item.image}
           alt={item.productName}
           fill

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { ArrowLeft, Plus, Loader2, ImagePlus, X } from "lucide-react";
 import {
   showToast,
@@ -148,7 +148,7 @@ export function CreateProductPage({
             {imagePreview ? (
               <div className="relative">
                 <div className="relative aspect-square w-full max-w-xs mx-auto rounded-lg overflow-hidden">
-                  <Image
+                  <OptimizedImage
                     src={imagePreview}
                     alt="Product preview"
                     fill

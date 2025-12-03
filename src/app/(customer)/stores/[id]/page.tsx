@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import Link from "next/link";
 import { Store, Package, Calendar, ChevronLeft } from "lucide-react";
 
@@ -51,7 +51,7 @@ export default async function StoreDetailPage({
             {/* Logo */}
             <div className="bg-muted flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl">
               {vendor.logo ? (
-                <Image
+                <OptimizedImage
                   src={vendor.logo}
                   alt={vendor.shopName}
                   width={96}

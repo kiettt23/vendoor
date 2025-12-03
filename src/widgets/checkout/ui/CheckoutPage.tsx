@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import {
   ArrowLeft,
   ShoppingBag,
@@ -389,7 +389,7 @@ export function CheckoutPage() {
                   {group.items.map((item) => (
                     <div key={item.id} className="flex gap-3">
                       <div className="relative h-16 w-16 rounded overflow-hidden bg-muted shrink-0">
-                        <Image
+                        <OptimizedImage
                           src={item.image}
                           alt=""
                           fill

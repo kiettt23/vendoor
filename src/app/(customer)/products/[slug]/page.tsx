@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { Store } from "lucide-react";
 import { headers } from "next/headers";
 import {
@@ -106,7 +106,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="space-y-4">
           <div className="relative aspect-square rounded-lg overflow-hidden bg-muted">
             {product.images[0] && (
-              <Image
+              <OptimizedImage
                 src={product.images[0].url}
                 alt={product.name}
                 fill
@@ -126,7 +126,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   key={i}
                   className="relative aspect-square rounded overflow-hidden bg-muted"
                 >
-                  <Image src={img.url} alt="" fill className="object-cover" />
+                  <OptimizedImage src={img.url} alt="" fill className="object-cover" />
                 </div>
               ))}
             </div>

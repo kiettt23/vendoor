@@ -9,7 +9,7 @@
 export { PAGINATION } from "./pagination";
 
 // Upload & Images
-export { FILE_UPLOAD, IMAGE_DIMENSIONS } from "./upload";
+export { FILE_UPLOAD, IMAGE_DIMENSIONS, CLOUDINARY_PRESETS } from "./upload";
 
 // Product
 export { PRICE_LIMITS, STOCK_LIMITS } from "./product";

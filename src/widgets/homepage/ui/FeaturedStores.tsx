@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { ArrowUpRight, BadgeCheck, Star, MapPin, Users } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
@@ -133,7 +133,7 @@ export function FeaturedStores({ stores = mockStores }: FeaturedStoresProps) {
             >
               {/* Cover */}
               <div className="relative h-24 overflow-hidden">
-                <Image
+                <OptimizedImage
                   src={store.cover || "/placeholder.jpg"}
                   alt={store.name}
                   fill
@@ -156,7 +156,7 @@ export function FeaturedStores({ stores = mockStores }: FeaturedStoresProps) {
                 {/* Logo */}
                 <div className="absolute -top-8 left-4">
                   <div className="h-16 w-16 rounded-xl border-4 border-card bg-card overflow-hidden shadow-lg">
-                    <Image
+                    <OptimizedImage
                       src={store.logo || "/placeholder.jpg"}
                       alt={store.name}
                       width={64}

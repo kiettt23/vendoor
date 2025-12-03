@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { Plus, Package } from "lucide-react";
 import { headers } from "next/headers";
 
@@ -53,7 +53,7 @@ export async function VendorProductsPage() {
                   <div className="flex gap-4">
                     <div className="relative h-20 w-20 rounded overflow-hidden bg-muted shrink-0">
                       {product.images[0] && (
-                        <Image
+                        <OptimizedImage
                           src={product.images[0].url}
                           alt=""
                           fill

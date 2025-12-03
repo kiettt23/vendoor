@@ -10,7 +10,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, X, Loader2 } from "lucide-react";
 import { useDebouncedCallback } from "use-debounce";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -179,7 +179,7 @@ export function SearchInputMobile({
                       {/* Product Image */}
                       <div className="relative h-12 w-12 rounded-md overflow-hidden bg-muted shrink-0">
                         {item.image ? (
-                          <Image
+                          <OptimizedImage
                             src={item.image}
                             alt={item.name}
                             fill

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { Store, Package, Search } from "lucide-react";
 
 import { getPublicVendors } from "@/entities/vendor";
@@ -42,7 +42,7 @@ export default async function StoresPage() {
                     {/* Logo */}
                     <div className="bg-muted flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg">
                       {vendor.logo ? (
-                        <Image
+                        <OptimizedImage
                           src={vendor.logo}
                           alt={vendor.shopName}
                           width={64}

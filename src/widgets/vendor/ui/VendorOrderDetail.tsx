@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { ArrowLeft, Package, User, MapPin, CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
@@ -135,7 +135,7 @@ export async function VendorOrderDetailPage({
             <div key={item.id} className="flex gap-4">
               <div className="relative h-20 w-20 rounded overflow-hidden bg-muted shrink-0">
                 {item.variant.product.images[0] && (
-                  <Image
+                  <OptimizedImage
                     src={item.variant.product.images[0].url}
                     alt=""
                     fill

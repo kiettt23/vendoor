@@ -1,6 +1,6 @@
 import { Heart, ShoppingCart, Trash2 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
@@ -69,7 +69,7 @@ async function WishlistItemCard({ item, userId }: WishlistItemCardProps) {
       <Link href={`/products/${product.slug}`}>
         <div className="aspect-square relative bg-muted overflow-hidden">
           {product.image ? (
-            <Image
+            <OptimizedImage
               src={product.image}
               alt={product.name}
               fill

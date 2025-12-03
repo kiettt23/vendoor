@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { ShoppingCart, Eye } from "lucide-react";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { formatPrice } from "@/shared/lib";
 import { calculateDiscount } from "../lib/utils";
 import type { ProductListItem } from "../model/types";
@@ -55,7 +55,7 @@ export function ProductCard({
       <Card className="h-full overflow-hidden border border-border/50 bg-card transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:-translate-y-1 p-0">
         <CardContent className="p-0 flex flex-col h-full">
           <div className="relative aspect-square overflow-hidden bg-muted">
-            <Image
+            <OptimizedImage
               src={image || "/placeholder.jpg"}
               alt={name}
               fill

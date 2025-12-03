@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { Button } from "@/shared/ui/button";
 import { ArrowRight, Shield, Truck, Headphones, Store } from "lucide-react";
 
@@ -78,7 +78,7 @@ export function HeroSection() {
               {/* Main Product */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative w-full h-full">
-                  <Image
+                  <OptimizedImage
                     src="/modern-smartphone-and-laptop-tech-devices-floating.jpg"
                     alt="Sản phẩm công nghệ"
                     fill

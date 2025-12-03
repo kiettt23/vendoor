@@ -16,6 +16,16 @@ export type {
   FileValidationResult,
 } from "./types";
 
+// Cloudinary loader (safe for client - used with next/image)
+export {
+  default as cloudinaryLoader,
+  transformCloudinaryUrl,
+  getBlurPlaceholderUrl,
+  isCloudinaryUrl,
+  buildTransformString,
+  type CloudinaryTransformOptions,
+} from "./cloudinary-loader";
+
 // Validation (safe for client - no Node.js dependencies)
 export {
   validateImageFile,

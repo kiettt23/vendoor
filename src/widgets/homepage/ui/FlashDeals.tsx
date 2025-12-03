@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { ArrowUpRight, Clock, ShoppingCart } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
@@ -156,7 +156,7 @@ export function FlashDeals({ products = mockFlashDeals }: FlashDealsProps) {
                 <Badge className="absolute top-2 left-2 bg-red-500 text-white">
                   -{Math.round((1 - deal.price / deal.originalPrice) * 100)}%
                 </Badge>
-                <Image
+                <OptimizedImage
                   src={deal.image || "/placeholder.svg"}
                   alt={deal.name}
                   fill

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { ArrowLeft, Save, Loader2, Trash2, ImagePlus } from "lucide-react";
 import {
   showToast,
@@ -159,7 +159,12 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
                     key={img.id}
                     className="relative h-24 w-24 rounded overflow-hidden bg-muted"
                   >
-                    <Image src={img.url} alt="" fill className="object-cover" />
+                    <OptimizedImage
+                      src={img.url}
+                      alt=""
+                      fill
+                      className="object-cover"
+                    />
                   </div>
                 ))}
               </div>

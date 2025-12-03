@@ -1,7 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { BadgeCheck, MessageSquare, User } from "lucide-react";
-import Image from "next/image";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { Card, CardContent } from "@/shared/ui/card";
@@ -76,7 +76,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
                 key={index}
                 className="relative h-16 w-16 rounded-lg overflow-hidden border"
               >
-                <Image
+                <OptimizedImage
                   src={image}
                   alt={`Review image ${index + 1}`}
                   fill
