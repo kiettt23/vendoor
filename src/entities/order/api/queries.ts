@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { auth } from "@/shared/lib/auth/config";
 import { prisma } from "@/shared/lib/db";
 import { LIMITS } from "@/shared/lib/constants";
-import type { OrderStatus } from "@/generated/prisma/client/enums";
+import type { OrderStatus } from "@/generated/prisma";
 
 // ============================================
 // Order Types (query-specific)

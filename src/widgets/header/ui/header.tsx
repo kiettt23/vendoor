@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Search,
   Menu,
   Store,
-  ChevronDown,
   MapPin,
   LogOut,
   Package,
@@ -16,7 +14,6 @@ import {
   UserPlus,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
 import { Badge } from "@/shared/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/shared/ui/sheet";
 import {
@@ -36,6 +33,7 @@ import {
   showToast,
   showErrorToast,
 } from "@/shared/lib/constants";
+import { SearchInput, SearchInputMobile } from "@/features/search";
 
 type HeaderProps = {
   /** Initial user from server - used for SSR, then overridden by useSession */
@@ -63,8 +61,6 @@ function getUserInitial(user: UserData): string {
 
 export function Header({ initialUser }: HeaderProps) {
   const router = useRouter();
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const items = useCart((state) => state.items);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -82,13 +78,6 @@ export function Header({ initialUser }: HeaderProps) {
     }
     return initialUser ?? null;
   }, [session, initialUser]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
 
   const handleSignOut = async () => {
     try {
@@ -168,60 +157,9 @@ export function Header({ initialUser }: HeaderProps) {
           {/* Spacer for mobile to push right icons to the end */}
           <div className="flex-1 md:hidden" />
 
+          {/* Desktop Search - sử dụng SearchInput feature */}
           <div className="flex-1 max-w-2xl hidden md:block">
-            <form
-              onSubmit={handleSearch}
-              className={`flex items-center rounded-xl border-2 transition-colors ${
-                isSearchFocused ? "border-primary" : "border-border"
-              } bg-secondary/50`}
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    className="rounded-l-xl rounded-r-none h-10 px-3 cursor-pointer"
-                  >
-                    Danh mục <ChevronDown className="h-4 w-4 ml-1" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/products">Tất cả sản phẩm</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {HEADER_CATEGORIES.map((cat) => (
-                    <DropdownMenuItem
-                      key={cat}
-                      asChild
-                      className="cursor-pointer"
-                    >
-                      <Link href={`/products?category=${cat.toLowerCase()}`}>
-                        {cat}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <div className="h-6 w-px bg-border" />
-              <Input
-                type="search"
-                placeholder="Tìm kiếm sản phẩm..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 border-0 bg-transparent focus-visible:ring-0 h-10"
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
-              />
-              <Button
-                type="submit"
-                size="icon"
-                variant="ghost"
-                className="rounded-none rounded-r-xl h-10 w-12 hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </form>
+            <SearchInput categories={HEADER_CATEGORIES} />
           </div>
 
           <nav className="hidden xl:flex items-center gap-6">
@@ -238,7 +176,10 @@ export function Header({ initialUser }: HeaderProps) {
 
           <div className="flex items-center gap-1">
             {/* 1. Search - Mobile only */}
-            {HEADER_ICON_BUTTONS.filter((btn) => btn.id === "search").map(
+            <SearchInputMobile />
+
+            {/* 2. Other icon buttons */}
+            {HEADER_ICON_BUTTONS.filter((btn) => btn.id !== "search").map(
               (btn) => (
                 <Button
                   key={btn.id}

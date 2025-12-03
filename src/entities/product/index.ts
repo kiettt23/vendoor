@@ -24,9 +24,11 @@ export {
   getVendorProducts,
   getVendorProductForEdit,
   getFeaturedProducts,
+  searchProducts,
   createProduct,
   updateProduct,
   deleteProduct,
+  type SearchSuggestion,
 } from "./api";
 
 export type {

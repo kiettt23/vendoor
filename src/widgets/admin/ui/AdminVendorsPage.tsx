@@ -7,7 +7,7 @@ import { Button } from "@/shared/ui/button";
 import { formatDate } from "@/shared/lib";
 import { VENDOR_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
 import { approveVendor, rejectVendor, getVendors } from "@/entities/vendor";
-import type { VendorStatus } from "@/generated/prisma/client/enums";
+import type { VendorStatus } from "@/generated/prisma";
 
 interface AdminVendorsPageProps {
   status?: string;

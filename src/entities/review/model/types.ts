@@ -1,26 +1,26 @@
-import type { ReviewStatus } from "@/generated/prisma/client/enums";
+/**
+ * Review Types
+ *
+ * Tận dụng Prisma generated types cho base models.
+ */
+
+import type { ReviewModel, ReviewStatus } from "@/generated/prisma";
 
 // ============================================
-// Review Types
+// Base Types (từ Prisma Generated)
 // ============================================
 
-export interface Review {
-  id: string;
-  productId: string;
-  userId: string;
-  orderId: string | null;
-  orderItemId: string | null;
-  rating: number;
-  title: string | null;
-  content: string | null;
-  images: string[];
-  isVerifiedPurchase: boolean;
-  vendorReply: string | null;
-  vendorReplyAt: Date | null;
-  status: ReviewStatus;
-  createdAt: Date;
-  updatedAt: Date;
-}
+/**
+ * Base Review type từ database
+ */
+export type Review = ReviewModel;
+
+// Re-export ReviewStatus for convenience
+export type { ReviewStatus };
+
+// ============================================
+// Derived Types (cho specific use cases)
+// ============================================
 
 /**
  * Review hiển thị trên trang sản phẩm

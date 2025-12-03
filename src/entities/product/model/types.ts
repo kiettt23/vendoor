@@ -1,15 +1,42 @@
-export interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  vendorId: string;
-  categoryId: string;
-}
+/**
+ * Product Types
+ *
+ * Tận dụng Prisma generated types cho base models,
+ * chỉ define thêm các derived types cho specific use cases.
+ */
 
+import type {
+  ProductModel,
+  ProductVariantModel,
+  ProductImageModel,
+} from "@/generated/prisma";
+
+// ============================================
+// Base Types (từ Prisma Generated)
+// ============================================
+
+/**
+ * Base Product type từ database
+ */
+export type Product = ProductModel;
+
+/**
+ * Base ProductVariant type từ database
+ */
+export type ProductVariant = ProductVariantModel;
+
+/**
+ * Base ProductImage type từ database
+ */
+export type ProductImage = ProductImageModel;
+
+// ============================================
+// Derived Types (cho specific use cases)
+// ============================================
+
+/**
+ * Product item cho danh sách (optimized fields)
+ */
 export interface ProductListItem {
   id: string;
   name: string;
@@ -21,27 +48,6 @@ export interface ProductListItem {
   variantId: string;
   vendor: { id: string; name: string };
   category: { name: string; slug: string };
-}
-
-export interface ProductVariant {
-  id: string;
-  productId: string;
-  name: string | null;
-  sku: string | null;
-  color: string | null;
-  size: string | null;
-  price: number;
-  compareAtPrice: number | null;
-  stock: number;
-  isDefault: boolean;
-}
-
-export interface ProductImage {
-  id: string;
-  productId: string;
-  url: string;
-  altText: string | null;
-  order: number;
 }
 
 export interface ProductDetail {

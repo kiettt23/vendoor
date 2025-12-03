@@ -1,5 +1,4 @@
-"use server";
-
+import { cache } from "react";
 import { headers } from "next/headers";
 
 import { auth } from "@/shared/lib/auth/config";
@@ -55,6 +54,89 @@ export async function getCurrentVendorProfile() {
     select: { id: true, shopName: true, status: true },
   });
 }
+
+/**
+ * Lấy danh sách vendors đã approved (public - cho filter)
+ *
+ * @cached React cache cho request deduplication
+ */
+export const getApprovedVendors = cache(async () => {
+  return prisma.vendorProfile.findMany({
+    where: { status: "APPROVED" },
+    select: { id: true, shopName: true },
+    orderBy: { shopName: "asc" },
+  });
+});
+
+/**
+ * Lấy danh sách vendors public với thông tin chi tiết (cho Stores page)
+ *
+ * @cached React cache cho request deduplication
+ */
+export const getPublicVendors = cache(async () => {
+  const vendors = await prisma.vendorProfile.findMany({
+    where: { status: "APPROVED" },
+    select: {
+      id: true,
+      userId: true,
+      shopName: true,
+      description: true,
+      logo: true,
+    },
+    orderBy: { shopName: "asc" },
+  });
+
+  // Get product counts for each vendor
+  const productCounts = await prisma.product.groupBy({
+    by: ["vendorId"],
+    where: {
+      isActive: true,
+      vendorId: { in: vendors.map((v) => v.userId) },
+    },
+    _count: true,
+  });
+
+  const countMap = new Map(productCounts.map((p) => [p.vendorId, p._count]));
+
+  return vendors.map((vendor) => ({
+    id: vendor.id,
+    userId: vendor.userId,
+    shopName: vendor.shopName,
+    description: vendor.description,
+    logo: vendor.logo,
+    productCount: countMap.get(vendor.userId) || 0,
+  }));
+});
+
+/**
+ * Lấy chi tiết vendor theo ID (public)
+ *
+ * @cached React cache cho request deduplication
+ */
+export const getPublicVendorById = cache(async (vendorId: string) => {
+  const vendor = await prisma.vendorProfile.findUnique({
+    where: { id: vendorId, status: "APPROVED" },
+    select: {
+      id: true,
+      userId: true,
+      shopName: true,
+      description: true,
+      logo: true,
+      createdAt: true,
+    },
+  });
+
+  if (!vendor) return null;
+
+  const productCount = await prisma.product.count({
+    where: { vendorId: vendor.userId, isActive: true },
+  });
+
+  return {
+    ...vendor,
+    productCount,
+  };
+});
 
 /**
  * Lấy thống kê dashboard của vendor

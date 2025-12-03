@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/shared/lib/db";
 import { ok, err, type Result } from "@/shared/lib/utils";
 
-import type { OrderStatus } from "@/generated/prisma/client/enums";
+import type { OrderStatus } from "@/generated/prisma";
 
 // ============================================
 // Order Actions

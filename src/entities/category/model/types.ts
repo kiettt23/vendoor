@@ -4,7 +4,7 @@
  * Types cho Category entity, tận dụng Prisma generated types
  */
 
-import type { CategoryModel } from "@/generated/prisma/client/models/Category";
+import type { CategoryModel } from "@/generated/prisma";
 
 /**
  * Base Category type từ Prisma

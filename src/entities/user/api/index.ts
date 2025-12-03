@@ -1,3 +1,13 @@
+// Queries
+export {
+  getCurrentUserProfile,
+  getUserOrderStats,
+  getUserRecentOrders,
+} from "./queries";
+
+// Actions
+export { updateUserProfile, type UpdateProfileInput } from "./actions";
+
 // Guards
 export {
   requireAuth,

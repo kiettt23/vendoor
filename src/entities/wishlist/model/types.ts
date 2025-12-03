@@ -1,13 +1,23 @@
+/**
+ * Wishlist Types
+ *
+ * Tận dụng Prisma generated types cho base models.
+ */
+
+import type { WishlistModel } from "@/generated/prisma";
+
 // ============================================
-// Wishlist Types
+// Base Types (từ Prisma Generated)
 // ============================================
 
-export interface WishlistItem {
-  id: string;
-  userId: string;
-  productId: string;
-  createdAt: Date;
-}
+/**
+ * Base Wishlist item type từ database
+ */
+export type WishlistItem = WishlistModel;
+
+// ============================================
+// Derived Types (cho specific use cases)
+// ============================================
 
 /**
  * Wishlist item với thông tin sản phẩm

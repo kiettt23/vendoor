@@ -1,11 +1,29 @@
+import Link from "next/link";
+import { PackageSearch } from "lucide-react";
+
 import { getProducts, ProductCard } from "@/entities/product";
 import { getCategoriesWithCount } from "@/entities/category";
+import { getApprovedVendors } from "@/entities/vendor";
 import { Button } from "@/shared/ui/button";
-import { PackageSearch } from "lucide-react";
-import Link from "next/link";
+import {
+  ProductFilterBar,
+  ActiveFilterTags,
+  parseFilterParams,
+} from "@/features/product-filter";
 
 interface PageProps {
-  searchParams: Promise<{ category?: string; search?: string; page?: string }>;
+  searchParams: Promise<{
+    category?: string;
+    search?: string;
+    page?: string;
+    // Filter params
+    minPrice?: string;
+    maxPrice?: string;
+    minRating?: string;
+    vendorId?: string;
+    inStock?: string;
+    sort?: string;
+  }>;
 }
 
 export default async function ProductsPage({ searchParams }: PageProps) {
@@ -14,21 +32,48 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const categorySlug = params.category;
   const search = params.search;
 
-  const [{ products, pagination }, categories] = await Promise.all([
-    getProducts({ categorySlug, search, page, limit: 12 }),
+  // Parse filter params từ URL
+  const urlSearchParams = new URLSearchParams(params as Record<string, string>);
+  const filterParams = parseFilterParams(urlSearchParams);
+
+  const [{ products, pagination }, categories, vendors] = await Promise.all([
+    getProducts({
+      categorySlug,
+      search,
+      page,
+      limit: 12,
+      minPrice: filterParams.minPrice,
+      maxPrice: filterParams.maxPrice,
+      minRating: filterParams.minRating,
+      vendorId: filterParams.vendorId,
+      inStock: filterParams.inStock,
+      sort: filterParams.sort as
+        | "newest"
+        | "oldest"
+        | "price-asc"
+        | "price-desc"
+        | "name-asc"
+        | "name-desc"
+        | undefined,
+    }),
     getCategoriesWithCount(),
+    getApprovedVendors(),
   ]);
 
+  // Map vendors cho filter component
+  const vendorsForFilter = vendors.map((v) => ({ id: v.id, name: v.shopName }));
+
   return (
-    <div className="container mx-auto py-12 lg:py-16 px-4">
-      <div className="mb-10">
+    <div className="container mx-auto px-4 py-12 lg:py-16">
+      <div className="mb-8">
         <h1 className="text-3xl font-bold">Sản Phẩm</h1>
         <p className="text-muted-foreground mt-2">
           {pagination.total} sản phẩm
         </p>
       </div>
 
-      <div className="mb-10">
+      {/* Category tabs */}
+      <div className="mb-6">
         <div className="flex flex-wrap gap-2">
           <Link href="/products">
             <Button variant={!categorySlug ? "default" : "outline"} size="sm">
@@ -46,6 +91,20 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             </Link>
           ))}
         </div>
+      </div>
+
+      {/* Filter bar */}
+      <div className="mb-4">
+        <ProductFilterBar
+          totalProducts={pagination.total}
+          showVendorFilter
+          vendors={vendorsForFilter}
+        />
+      </div>
+
+      {/* Active filter tags */}
+      <div className="mb-6">
+        <ActiveFilterTags vendors={vendorsForFilter} />
       </div>
 
       {products.length === 0 ? (
@@ -76,6 +135,12 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                   href={`/products?${new URLSearchParams({
                     ...(categorySlug && { category: categorySlug }),
                     ...(search && { search }),
+                    ...(params.minPrice && { minPrice: params.minPrice }),
+                    ...(params.maxPrice && { maxPrice: params.maxPrice }),
+                    ...(params.minRating && { minRating: params.minRating }),
+                    ...(params.vendorId && { vendorId: params.vendorId }),
+                    ...(params.inStock && { inStock: params.inStock }),
+                    ...(params.sort && { sort: params.sort }),
                     page: String(page - 1),
                   })}`}
                 >
@@ -90,6 +155,12 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                   href={`/products?${new URLSearchParams({
                     ...(categorySlug && { category: categorySlug }),
                     ...(search && { search }),
+                    ...(params.minPrice && { minPrice: params.minPrice }),
+                    ...(params.maxPrice && { maxPrice: params.maxPrice }),
+                    ...(params.minRating && { minRating: params.minRating }),
+                    ...(params.vendorId && { vendorId: params.vendorId }),
+                    ...(params.inStock && { inStock: params.inStock }),
+                    ...(params.sort && { sort: params.sort }),
                     page: String(page + 1),
                   })}`}
                 >
