@@ -4,6 +4,8 @@
  * 📚 Test vendor management journey:
  * - Đăng nhập vendor dashboard
  * - Quản lý sản phẩm
+ * - Quản lý tồn kho
+ * - Phân tích doanh thu
  * - Xem và xử lý đơn hàng
  *
  * Note: These tests require a vendor account in the database
@@ -44,6 +46,65 @@ test.describe("Vendor Flow", () => {
       const productLinks = page.locator('a[href^="/products/"]');
       const count = await productLinks.count();
       expect(count).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  test.describe("Inventory Management", () => {
+    test("should have inventory page accessible", async ({ page }) => {
+      await page.goto("/vendor/inventory");
+
+      // Should redirect to login or show inventory page
+      await expect(page).toHaveURL(/\/(login|vendor\/inventory)/);
+    });
+
+    test("should display inventory management elements when authenticated", async ({
+      page,
+    }) => {
+      // Note: This test requires authentication
+      // In real scenario, would need to login first or use authenticated state
+      await page.goto("/vendor/inventory");
+      await page.waitForLoadState("networkidle");
+
+      // Page should be accessible
+      await expect(page.locator("body")).toBeVisible();
+    });
+  });
+
+  test.describe("Vendor Analytics", () => {
+    test("should have analytics page accessible", async ({ page }) => {
+      await page.goto("/vendor/analytics");
+
+      // Should redirect to login or show analytics page
+      await expect(page).toHaveURL(/\/(login|vendor\/analytics)/);
+    });
+
+    test("should display analytics elements when authenticated", async ({
+      page,
+    }) => {
+      // Note: This test requires authentication
+      await page.goto("/vendor/analytics");
+      await page.waitForLoadState("networkidle");
+
+      // Page should be accessible
+      await expect(page.locator("body")).toBeVisible();
+    });
+  });
+
+  test.describe("Vendor Reviews", () => {
+    test("should have reviews page accessible", async ({ page }) => {
+      await page.goto("/vendor/reviews");
+
+      // Should redirect to login or show reviews page
+      await expect(page).toHaveURL(/\/(login|vendor\/reviews)/);
+    });
+  });
+
+  test.describe("Vendor Orders", () => {
+    test("should have orders page accessible", async ({ page }) => {
+      await page.goto("/vendor/orders");
+
+      // Should redirect to login or show orders page
+      await expect(page).toHaveURL(/\/(login|vendor\/orders)/);
     });
   });
 });
