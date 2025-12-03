@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { ArrowLeft, Plus, Loader2, ImagePlus } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, Plus, Loader2, ImagePlus, X } from "lucide-react";
 import {
   showToast,
   showErrorToast,
@@ -30,6 +31,10 @@ import {
   type ProductFormData,
 } from "@/entities/product";
 import type { CategoryOption } from "@/entities/category";
+import {
+  AIGenerateButton,
+  type AIProductInfo,
+} from "@/features/ai-product-generator";
 
 interface CreateProductPageProps {
   categories: CategoryOption[];
@@ -42,6 +47,8 @@ export function CreateProductPage({
 }: CreateProductPageProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const {
     register,
@@ -59,6 +66,41 @@ export function CreateProductPage({
       description: "",
     },
   });
+
+  // Handle image selection
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle AI generated info
+  const handleAIGenerated = (info: AIProductInfo) => {
+    setValue("name", info.name);
+    setValue("description", `${info.shortDescription}\n\n${info.description}`);
+
+    // Find matching category
+    const matchedCategory = categories.find(
+      (cat) =>
+        cat.name.toLowerCase().includes(info.suggestedCategory.toLowerCase()) ||
+        info.suggestedCategory.toLowerCase().includes(cat.name.toLowerCase())
+    );
+    if (matchedCategory) {
+      setValue("categoryId", matchedCategory.id);
+    }
+  };
+
+  // Remove selected image
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
 
   const onSubmit = async (data: ProductFormData) => {
     setIsSubmitting(true);
@@ -91,18 +133,57 @@ export function CreateProductPage({
       <h1 className="text-3xl font-bold mb-8">Thêm Sản Phẩm Mới</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Image Upload Placeholder */}
+        {/* Image Upload */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Hình Ảnh Sản Phẩm</CardTitle>
+            <AIGenerateButton
+              imageFile={imageFile}
+              existingCategories={categories.map((c) => c.name)}
+              onGenerated={handleAIGenerated}
+              disabled={isSubmitting}
+            />
           </CardHeader>
           <CardContent>
-            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-              <ImagePlus className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground text-sm">
-                Tính năng upload hình ảnh sẽ sớm được cập nhật
-              </p>
-            </div>
+            {imagePreview ? (
+              <div className="relative">
+                <div className="relative aspect-square w-full max-w-xs mx-auto rounded-lg overflow-hidden">
+                  <Image
+                    src={imagePreview}
+                    alt="Product preview"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2"
+                  onClick={handleRemoveImage}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <label className="block cursor-pointer">
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+                  <ImagePlus className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground text-sm mb-2">
+                    Nhấn để chọn hình ảnh
+                  </p>
+                  <p className="text-muted-foreground/70 text-xs">
+                    JPG, PNG, WebP, GIF (tối đa 10MB)
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+              </label>
+            )}
           </CardContent>
         </Card>
 

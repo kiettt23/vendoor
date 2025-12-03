@@ -50,7 +50,9 @@ describe("Category Actions", () => {
       const result = await createCategory("Test");
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Không thể tạo danh mục");
+      if (!result.success) {
+        expect(result.error).toBe("Không thể tạo danh mục");
+      }
     });
   });
 
@@ -80,7 +82,9 @@ describe("Category Actions", () => {
       const result = await updateCategory("999", "Test");
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Không thể cập nhật danh mục");
+      if (!result.success) {
+        expect(result.error).toBe("Không thể cập nhật danh mục");
+      }
     });
   });
 
@@ -109,7 +113,9 @@ describe("Category Actions", () => {
       const result = await deleteCategory("1");
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Không thể xóa danh mục");
+      if (!result.success) {
+        expect(result.error).toBe("Không thể xóa danh mục");
+      }
     });
   });
 });

@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/shared/ui/dialog";
 import { showToast, showCustomToast } from "@/shared/lib/constants";
+import type { Result } from "@/shared/lib/utils";
 
 interface Category {
   id: string;
@@ -24,12 +25,9 @@ interface Category {
 
 interface AdminCategoriesPageProps {
   categories: Category[];
-  onCreate: (name: string) => Promise<{ success: boolean; error?: string }>;
-  onUpdate: (
-    id: string,
-    name: string
-  ) => Promise<{ success: boolean; error?: string }>;
-  onDelete: (id: string) => Promise<{ success: boolean; error?: string }>;
+  onCreate: (name: string) => Promise<Result<void>>;
+  onUpdate: (id: string, name: string) => Promise<Result<void>>;
+  onDelete: (id: string) => Promise<Result<void>>;
 }
 
 export function AdminCategoriesPage({
@@ -51,7 +49,7 @@ export function AdminCategoriesPage({
       setNewName("");
       setIsCreateOpen(false);
     } else {
-      showCustomToast.error(result.error || "Lỗi");
+      showCustomToast.error(result.error);
     }
   };
 
@@ -62,7 +60,7 @@ export function AdminCategoriesPage({
       showToast("admin", "categoryUpdated");
       setEditingId(null);
     } else {
-      showCustomToast.error(result.error || "Lỗi");
+      showCustomToast.error(result.error);
     }
   };
 
@@ -76,7 +74,7 @@ export function AdminCategoriesPage({
     if (result.success) {
       showToast("admin", "categoryDeleted");
     } else {
-      showCustomToast.error(result.error || "Lỗi");
+      showCustomToast.error(result.error);
     }
   };
 

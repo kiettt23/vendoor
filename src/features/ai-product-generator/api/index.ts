@@ -1,0 +1,1 @@
+export { generateProductInfo } from "./actions";

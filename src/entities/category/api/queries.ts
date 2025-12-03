@@ -1,5 +1,3 @@
-"use server";
-
 import { prisma } from "@/shared/lib/db";
 import type { Category, CategoryWithCount } from "../model";
 

@@ -1,5 +1,3 @@
-"use server";
-
 import { cache } from "react";
 
 import { prisma } from "@/shared/lib/db";
