@@ -932,6 +932,207 @@ async function main() {
 
   console.log("✅ Created 24 products total");
 
+  // ============================================
+  // 4. CREATE ORDERS (For analytics)
+  // ============================================
+  console.log("📋 Creating orders for analytics...");
+
+  // Get products to create orders for
+  const products = await prisma.product.findMany({
+    include: {
+      variants: true,
+      vendor: true,
+    },
+    take: 10,
+  });
+
+  // Generate orders over the last 60 days
+  const orderStatuses = [
+    "DELIVERED",
+    "SHIPPED",
+    "PROCESSING",
+    "PENDING",
+  ] as const;
+  const ordersToCreate: Array<{
+    customerId: string;
+    vendorId: string;
+    variantId: string;
+    productName: string;
+    variantName: string | null;
+    price: number;
+    quantity: number;
+    status: (typeof orderStatuses)[number];
+    createdAt: Date;
+  }> = [];
+
+  // Create varied orders over 60 days
+  for (let daysAgo = 0; daysAgo < 60; daysAgo++) {
+    // More orders on some days for realistic data
+    const ordersThisDay = Math.floor(Math.random() * 5) + 1;
+
+    for (let i = 0; i < ordersThisDay; i++) {
+      const product = products[Math.floor(Math.random() * products.length)];
+      const variant =
+        product.variants[Math.floor(Math.random() * product.variants.length)];
+      const quantity = Math.floor(Math.random() * 3) + 1;
+
+      const createdAt = new Date();
+      createdAt.setDate(createdAt.getDate() - daysAgo);
+      createdAt.setHours(Math.floor(Math.random() * 24));
+
+      // Older orders more likely to be delivered
+      const statusIndex =
+        daysAgo > 7 ? 0 : Math.floor(Math.random() * orderStatuses.length);
+
+      ordersToCreate.push({
+        customerId: customerUser.id,
+        vendorId: product.vendor.id,
+        variantId: variant.id,
+        productName: product.name,
+        variantName: variant.name,
+        price: variant.price,
+        quantity,
+        status: orderStatuses[statusIndex],
+        createdAt,
+      });
+    }
+  }
+
+  // Create orders in database
+  let orderNumber = 1;
+  for (const orderData of ordersToCreate) {
+    const subtotal = orderData.price * orderData.quantity;
+    const platformFeeRate = 0.1;
+    const platformFee = subtotal * platformFeeRate;
+    const vendorEarnings = subtotal - platformFee;
+
+    await prisma.order.create({
+      data: {
+        customerId: orderData.customerId,
+        vendorId: orderData.vendorId,
+        orderNumber: `ORD-SEED-${String(orderNumber++).padStart(4, "0")}`,
+        status: orderData.status,
+        subtotal,
+        platformFee,
+        vendorEarnings,
+        platformFeeRate,
+        total: subtotal,
+        shippingName: "Test Customer",
+        shippingPhone: "0901234567",
+        shippingAddress: "123 Đường Test, Quận 1",
+        shippingCity: "Hồ Chí Minh",
+        createdAt: orderData.createdAt,
+        items: {
+          create: {
+            variantId: orderData.variantId,
+            productName: orderData.productName,
+            variantName: orderData.variantName,
+            price: orderData.price,
+            quantity: orderData.quantity,
+            subtotal,
+          },
+        },
+      },
+    });
+  }
+
+  console.log(`✅ Created ${ordersToCreate.length} orders`);
+
+  // ============================================
+  // 5. CREATE REVIEWS (Some with images)
+  // ============================================
+  console.log("⭐ Creating reviews with images...");
+
+  const reviewTexts = [
+    "Sản phẩm rất tốt, đúng như mô tả!",
+    "Giao hàng nhanh, đóng gói cẩn thận.",
+    "Chất lượng tuyệt vời, sẽ mua lại!",
+    "Hàng chính hãng, giá tốt.",
+    "Rất hài lòng với sản phẩm này.",
+    "Mua lần 2 rồi, vẫn tốt như lần đầu.",
+    "Pin trâu, chạy mượt mà.",
+    "Màn hình đẹp, thiết kế sang trọng.",
+    "Tư vấn nhiệt tình, ship nhanh.",
+    "Giá hợp lý cho chất lượng này.",
+  ];
+
+  const reviewImages = [
+    "https://res.cloudinary.com/demo/image/upload/sample.jpg",
+    "https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg",
+  ];
+
+  // Create reviews for delivered orders
+  const deliveredOrders = await prisma.order.findMany({
+    where: { status: "DELIVERED" },
+    include: {
+      items: {
+        include: {
+          variant: {
+            include: { product: true },
+          },
+        },
+      },
+    },
+    take: 30,
+  });
+
+  let reviewCount = 0;
+  for (const order of deliveredOrders) {
+    for (const item of order.items) {
+      // 70% chance to leave a review
+      if (Math.random() > 0.3) {
+        const rating = Math.floor(Math.random() * 2) + 4; // 4-5 stars mostly
+        const text =
+          reviewTexts[Math.floor(Math.random() * reviewTexts.length)];
+
+        // 30% chance to include images
+        const hasImages = Math.random() < 0.3;
+        const images = hasImages
+          ? reviewImages.slice(0, Math.floor(Math.random() * 2) + 1)
+          : [];
+
+        await prisma.review.create({
+          data: {
+            userId: order.customerId,
+            productId: item.variant.product.id,
+            orderId: order.id,
+            rating,
+            content: text,
+            images,
+            isVerifiedPurchase: true,
+            createdAt: new Date(
+              order.createdAt.getTime() +
+                24 * 60 * 60 * 1000 * Math.random() * 7
+            ),
+          },
+        });
+        reviewCount++;
+      }
+    }
+  }
+
+  console.log(`✅ Created ${reviewCount} reviews`);
+
+  // ============================================
+  // 6. CREATE LOW STOCK PRODUCTS
+  // ============================================
+  console.log("📦 Updating some products to low stock...");
+
+  // Get some random variants and set low stock
+  const variantsToUpdate = await prisma.productVariant.findMany({
+    take: 5,
+    skip: 3,
+  });
+
+  for (const variant of variantsToUpdate) {
+    await prisma.productVariant.update({
+      where: { id: variant.id },
+      data: { stock: Math.floor(Math.random() * 10) + 1 }, // 1-10 stock
+    });
+  }
+
+  console.log("✅ Updated 5 products to low stock");
+
   console.log("🎉 V0 seed completed!");
 }
 

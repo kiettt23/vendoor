@@ -19,6 +19,7 @@ import {
   createReview,
   type CreateReviewInput,
 } from "@/entities/review";
+import { ReviewImageUpload } from "./ReviewImageUpload";
 
 interface WriteReviewFormProps {
   productId: string;
@@ -36,6 +37,7 @@ export function WriteReviewForm({
   const [rating, setRating] = useState(0);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [images, setImages] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +55,7 @@ export function WriteReviewForm({
         rating,
         title: title.trim() || undefined,
         content: content.trim() || undefined,
+        images: images.length > 0 ? images : undefined,
       };
 
       const result = await createReview(userId, data);
@@ -62,6 +65,7 @@ export function WriteReviewForm({
         setRating(0);
         setTitle("");
         setContent("");
+        setImages([]);
         router.refresh();
         onSuccess?.();
       } else {
@@ -113,6 +117,12 @@ export function WriteReviewForm({
           {content.length}/2000
         </p>
       </div>
+
+      <ReviewImageUpload
+        images={images}
+        onChange={setImages}
+        disabled={isSubmitting}
+      />
 
       <Button type="submit" disabled={isSubmitting || rating === 0}>
         {isSubmitting ? (

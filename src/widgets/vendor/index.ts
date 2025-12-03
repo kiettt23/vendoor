@@ -3,5 +3,7 @@ export { VendorProductsPage } from "./ui/VendorProductsPage";
 export { VendorOrdersPage } from "./ui/VendorOrdersPage";
 export { VendorOrderDetailPage } from "./ui/VendorOrderDetail";
 export { VendorReviewsPage } from "./ui/VendorReviewsPage";
+export { VendorInventoryPage } from "./ui/VendorInventoryPage";
+export { VendorAnalyticsPage } from "./ui/VendorAnalyticsPage";
 export { CreateProductPage } from "./ui/CreateProductPage";
 export { EditProductPage } from "./ui/EditProductPage";

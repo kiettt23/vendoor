@@ -1,1 +1,1 @@
-export { WriteReviewForm } from "./ui/WriteReviewForm";
+export { WriteReviewForm, ReviewImageUpload } from "./ui";

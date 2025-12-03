@@ -1,13 +1,13 @@
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { BadgeCheck, MessageSquare, User } from "lucide-react";
-import { OptimizedImage } from "@/shared/ui/optimized-image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { Card, CardContent } from "@/shared/ui/card";
 
 import type { ReviewListItem } from "../model";
 import { StarRating } from "./StarRating";
+import { ReviewImageGallery } from "./ReviewImageGallery";
 
 interface ReviewCardProps {
   review: ReviewListItem;
@@ -70,20 +70,8 @@ export function ReviewCard({ review }: ReviewCardProps) {
 
         {/* Review images */}
         {review.images.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            {review.images.map((image, index) => (
-              <div
-                key={index}
-                className="relative h-16 w-16 rounded-lg overflow-hidden border"
-              >
-                <OptimizedImage
-                  src={image}
-                  alt={`Review image ${index + 1}`}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            ))}
+          <div className="mt-3">
+            <ReviewImageGallery images={review.images} />
           </div>
         )}
 

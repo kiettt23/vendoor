@@ -9,6 +9,8 @@ import {
   Heart,
   User,
   Star,
+  Warehouse,
+  BarChart3,
   type LucideIcon,
 } from "lucide-react";
 
@@ -189,6 +191,11 @@ export const VENDOR_NAV_ITEMS: NavItem[] = [
     icon: Package,
   },
   {
+    href: "/vendor/inventory",
+    label: "Tồn kho",
+    icon: Warehouse,
+  },
+  {
     href: "/vendor/orders",
     label: "Đơn hàng",
     icon: ShoppingCart,
@@ -197,6 +204,11 @@ export const VENDOR_NAV_ITEMS: NavItem[] = [
     href: "/vendor/reviews",
     label: "Đánh giá",
     icon: Star,
+  },
+  {
+    href: "/vendor/analytics",
+    label: "Phân tích",
+    icon: BarChart3,
   },
   {
     href: "/vendor/earnings",

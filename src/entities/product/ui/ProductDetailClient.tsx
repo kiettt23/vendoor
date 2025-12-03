@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
-import { formatPrice } from "@/shared/lib";
+import { Alert, AlertDescription } from "@/shared/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { formatPrice, cn } from "@/shared/lib";
 import type { ProductVariant } from "../model/types";
 import { ProductActions, type AddToCartData } from "./ProductActions";
 
@@ -39,6 +41,17 @@ export function ProductDetailClient({
 
   return (
     <div className="space-y-6">
+      {/* Out of stock alert */}
+      {selectedVariant.stock === 0 && (
+        <Alert variant="destructive">
+          <AlertCircle className="size-4" />
+          <AlertDescription>
+            Sản phẩm này hiện đã hết hàng. Vui lòng chọn phân loại khác hoặc
+            quay lại sau.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Price Display */}
       <div className="flex items-baseline gap-3">
         <span className="text-3xl font-bold text-primary">
@@ -57,17 +70,26 @@ export function ProductDetailClient({
           <CardContent className="p-4">
             <h3 className="font-semibold mb-3">Phân loại</h3>
             <div className="flex flex-wrap gap-2">
-              {variants.map((v) => (
-                <Badge
-                  key={v.id}
-                  variant={selectedVariant.id === v.id ? "default" : "outline"}
-                  className="cursor-pointer hover:bg-primary/90 hover:text-primary-foreground transition-colors"
-                  onClick={() => setSelectedVariant(v)}
-                >
-                  {v.name || "Mặc định"} - {formatPrice(v.price)}
-                  {v.stock === 0 && " (Hết hàng)"}
-                </Badge>
-              ))}
+              {variants.map((v) => {
+                const isOutOfStock = v.stock === 0;
+                const isSelected = selectedVariant.id === v.id;
+                return (
+                  <Badge
+                    key={v.id}
+                    variant={isSelected ? "default" : "outline"}
+                    className={cn(
+                      "cursor-pointer transition-colors",
+                      isOutOfStock
+                        ? "opacity-60"
+                        : "hover:bg-primary/90 hover:text-primary-foreground"
+                    )}
+                    onClick={() => setSelectedVariant(v)}
+                  >
+                    {v.name || "Mặc định"} - {formatPrice(v.price)}
+                    {isOutOfStock && " (Hết hàng)"}
+                  </Badge>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
