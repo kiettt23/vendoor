@@ -94,17 +94,18 @@ src/
 
 ## 📚 Documentation
 
-| Tài liệu                                      | Mô tả                                      |
-| --------------------------------------------- | ------------------------------------------ |
-| [🚀 Getting Started](docs/GETTING_STARTED.md) | **Đọc đầu tiên** - Hướng dẫn cho người mới |
-| [�️ Code Map](docs/CODE_MAP.md)               | **Muốn sửa gì? Xem đây** - Bản đồ code     |
-| [�📐 Architecture](docs/ARCHITECTURE.md)      | Chi tiết cấu trúc FSD                      |
-| [✨ Features](docs/FEATURES.md)               | Danh sách tính năng                        |
-| [🛠️ Commands](docs/COMMANDS.md)               | Tất cả commands hay dùng                   |
-| [🧪 Testing](docs/TESTING.md)                 | Hướng dẫn viết tests                       |
-| [💳 Stripe Setup](docs/STRIPE_SETUP.md)       | Cấu hình thanh toán Stripe                 |
-| [🗺️ Roadmap](docs/ROADMAP.md)                 | Kế hoạch phát triển                        |
-| [🤝 Contributing](docs/CONTRIBUTING.md)       | Hướng dẫn đóng góp                         |
+| Tài liệu                                       | Mô tả                                  |
+| ---------------------------------------------- | -------------------------------------- |
+| [⚡ Quick Start](docs/QUICKSTART.md)           | **Bắt đầu nhanh** - Setup 5 phút       |
+| [🗺️ Code Map](docs/CODE_MAP.md)                | **Muốn sửa gì? Xem đây** - Bản đồ code |
+| [📐 Architecture](docs/ARCHITECTURE.md)        | Chi tiết cấu trúc FSD                  |
+| [🗄️ Database Schema](docs/DATABASE_SCHEMA.md) | **Schema database** - ERD & relations  |
+| [✨ Features](docs/FEATURES.md)                | Danh sách tính năng theo role          |
+| [🚀 User Flows](docs/USER_FLOWS.md)            | **Luồng người dùng** - Hiểu hệ thống   |
+| [🧪 Testing](docs/TESTING.md)                  | Test coverage & automated tests        |
+| [🔍 Manual Testing](docs/MANUAL_TESTING.md)    | **Checklist test thủ công** - QA       |
+| [🛠️ Commands](docs/COMMANDS.md)                | Tất cả commands hay dùng               |
+| [💳 Stripe Setup](docs/STRIPE_SETUP.md)        | Cấu hình thanh toán Stripe             |
 
 ---
 

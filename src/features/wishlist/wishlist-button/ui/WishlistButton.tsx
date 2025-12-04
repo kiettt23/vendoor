@@ -11,7 +11,7 @@ import {
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 
-import { toggleWishlist } from "@/entities/wishlist";
+import { toggleWishlist } from "@/entities/wishlist/api/actions";
 
 interface WishlistButtonProps {
   productId: string;

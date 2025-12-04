@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Save } from "lucide-react";
 import { z } from "zod";
 
-import { updateUserProfile } from "@/entities/user";
+import { updateUserProfile } from "@/entities/user/api/actions";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";

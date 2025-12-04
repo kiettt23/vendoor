@@ -1,4 +1,4 @@
-// Queries
+// Queries (Server Components only)
 export {
   getProducts,
   getProductBySlug,
@@ -17,5 +17,10 @@ export type {
   SearchSuggestion,
 } from "./queries";
 
-// Actions
-export { createProduct, updateProduct, deleteProduct } from "./actions";
+// Actions (Server Actions - callable from Client Components)
+export {
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  searchProductsAction,
+} from "./actions";

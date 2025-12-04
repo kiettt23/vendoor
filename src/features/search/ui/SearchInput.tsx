@@ -26,7 +26,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
-import { searchProducts, type SearchSuggestion } from "@/entities/product";
+import {
+  searchProductsAction,
+  type SearchSuggestion,
+} from "@/entities/product/api/actions";
 import { formatPrice } from "@/shared/lib/utils";
 
 interface SearchInputProps {
@@ -87,7 +90,7 @@ export function SearchInput({
 
     setIsLoading(true);
     try {
-      const results = await searchProducts(value, 6);
+      const results = await searchProductsAction(value, 6);
       setSuggestions(results);
     } catch {
       setSuggestions([]);

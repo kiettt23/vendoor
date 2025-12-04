@@ -16,9 +16,11 @@ import { Label } from "@/shared/ui/label";
 
 import {
   StarRatingInput,
+} from "@/entities/review/ui";
+import {
   createReview,
-  type CreateReviewInput,
-} from "@/entities/review";
+} from "@/entities/review/api/actions";
+import type { CreateReviewInput } from "@/entities/review/model";
 import { ReviewImageUpload } from "./ReviewImageUpload";
 
 interface WriteReviewFormProps {

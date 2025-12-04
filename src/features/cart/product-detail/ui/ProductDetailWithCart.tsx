@@ -1,8 +1,8 @@
 "use client";
 
-import { ProductDetailClient, type AddToCartData } from "@/entities/product";
+import { ProductDetailClient, type AddToCartData } from "@/entities/product/ui";
 import { useCart } from "@/entities/cart";
-import type { ProductVariant } from "@/entities/product";
+import type { ProductVariant } from "@/entities/product/model";
 
 interface ProductDetailWithCartProps {
   product: {

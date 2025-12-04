@@ -28,9 +28,11 @@ import { Switch } from "@/shared/ui/switch";
 import {
   updateProduct,
   deleteProduct,
+} from "@/entities/product/api/actions";
+import {
   productSchema,
   type ProductFormData,
-} from "@/entities/product";
+} from "@/entities/product/model";
 import type { CategoryOption } from "@/entities/category";
 
 interface ProductData {

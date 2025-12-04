@@ -18,11 +18,8 @@ import {
   showErrorToast,
   showCustomToast,
 } from "@/shared/lib/constants";
-import {
-  replyToReview,
-  deleteVendorReply,
-  StarRating,
-} from "@/entities/review";
+import { replyToReview, deleteVendorReply } from "@/entities/review/api/actions";
+import { StarRating } from "@/entities/review/ui";
 
 interface ReviewReplyDialogProps {
   reviewId: string;

@@ -14,7 +14,10 @@ import { OptimizedImage } from "@/shared/ui/optimized-image";
 
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import { searchProducts, type SearchSuggestion } from "@/entities/product";
+import {
+  searchProductsAction,
+  type SearchSuggestion,
+} from "@/entities/product/api/actions";
 import { formatPrice } from "@/shared/lib/utils";
 
 interface SearchInputMobileProps {
@@ -73,7 +76,7 @@ export function SearchInputMobile({
 
     setIsLoading(true);
     try {
-      const results = await searchProducts(value, 6);
+      const results = await searchProductsAction(value, 6);
       setSuggestions(results);
     } catch {
       setSuggestions([]);
