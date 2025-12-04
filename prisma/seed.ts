@@ -941,7 +941,11 @@ async function main() {
   const products = await prisma.product.findMany({
     include: {
       variants: true,
-      vendor: true,
+      vendor: {
+        include: {
+          vendorProfile: true,
+        },
+      },
     },
     take: 10,
   });
@@ -984,9 +988,16 @@ async function main() {
       const statusIndex =
         daysAgo > 7 ? 0 : Math.floor(Math.random() * orderStatuses.length);
 
+      // Use VendorProfile.id, not User.id
+      const vendorProfileId = product.vendor.vendorProfile?.id;
+      if (!vendorProfileId) {
+        console.warn(`Skipping product ${product.name} - no vendor profile`);
+        continue;
+      }
+
       ordersToCreate.push({
         customerId: customerUser.id,
-        vendorId: product.vendor.id,
+        vendorId: vendorProfileId,
         variantId: variant.id,
         productName: product.name,
         variantName: variant.name,
@@ -1077,8 +1088,17 @@ async function main() {
   });
 
   let reviewCount = 0;
+  const reviewedProducts = new Set<string>(); // Track user+product to avoid duplicates
+  
   for (const order of deliveredOrders) {
     for (const item of order.items) {
+      const reviewKey = `${order.customerId}-${item.variant.product.id}`;
+      
+      // Skip if already reviewed this product
+      if (reviewedProducts.has(reviewKey)) {
+        continue;
+      }
+      
       // 70% chance to leave a review
       if (Math.random() > 0.3) {
         const rating = Math.floor(Math.random() * 2) + 4; // 4-5 stars mostly
@@ -1106,6 +1126,7 @@ async function main() {
             ),
           },
         });
+        reviewedProducts.add(reviewKey);
         reviewCount++;
       }
     }
