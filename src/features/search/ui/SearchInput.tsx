@@ -34,7 +34,7 @@ import { formatPrice } from "@/shared/lib/utils";
 
 interface SearchInputProps {
   /** Danh sách categories cho dropdown */
-  categories?: readonly string[];
+  categories?: readonly { name: string; slug: string }[];
   /** Placeholder text */
   placeholder?: string;
   /** Debounce delay (ms) - default 300ms */
@@ -204,12 +204,12 @@ export function SearchInput({
                 <DropdownMenuSeparator />
                 {categories.map((cat) => (
                   <DropdownMenuItem
-                    key={cat}
+                    key={cat.slug}
                     asChild
                     className="cursor-pointer"
                   >
-                    <Link href={`/products?category=${cat.toLowerCase()}`}>
-                      {cat}
+                    <Link href={`/products?category=${cat.slug}`}>
+                      {cat.name}
                     </Link>
                   </DropdownMenuItem>
                 ))}

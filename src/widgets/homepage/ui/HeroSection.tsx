@@ -52,7 +52,7 @@ export function HeroSection() {
                 className="gap-2 h-12 px-6 bg-transparent"
                 asChild
               >
-                <Link href="/seller/register">
+                <Link href="/become-vendor">
                   <Store className="h-4 w-4" />
                   Mở cửa hàng
                 </Link>

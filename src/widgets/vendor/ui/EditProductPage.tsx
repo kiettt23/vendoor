@@ -250,7 +250,7 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>Giá so sánh (₫)</Label>
+                <Label>Giá gốc (₫)</Label>
                 <Input
                   {...register("compareAtPrice", { valueAsNumber: true })}
                   type="number"

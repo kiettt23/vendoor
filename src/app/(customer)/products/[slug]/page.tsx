@@ -6,7 +6,6 @@ import { headers } from "next/headers";
 import {
   getProductBySlug,
   getRelatedProducts,
-  ProductCard,
   calculateDiscount,
 } from "@/entities/product";
 import {
@@ -28,7 +27,8 @@ import {
 import { auth } from "@/shared/lib/auth";
 import { ReviewList, WriteReviewForm } from "@/features/review";
 import { WishlistButton } from "@/features/wishlist";
-import { ProductDetailWithCart, ProductCardActions } from "@/features/cart";
+import { ProductDetailWithCart } from "@/features/cart";
+import { ProductGrid } from "@/widgets/product";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -221,15 +221,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       {relatedProducts.length > 0 && (
         <div>
           <h2 className="text-2xl font-bold mb-8">Sản Phẩm Liên Quan</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts.map((p) => (
-              <ProductCard
-                key={p.id}
-                {...p}
-                renderActions={(props) => <ProductCardActions {...props} />}
-              />
-            ))}
-          </div>
+          <ProductGrid products={relatedProducts} columns={4} />
         </div>
       )}
     </div>

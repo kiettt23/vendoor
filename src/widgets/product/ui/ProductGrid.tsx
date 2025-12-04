@@ -1,7 +1,7 @@
 "use client";
 
-import { ProductCard } from "@/entities/product";
-import type { ProductListItem } from "@/entities/product";
+import { ProductCard } from "@/entities/product/ui";
+import type { ProductListItem } from "@/entities/product/model";
 import { ProductCardActions } from "@/features/cart";
 
 interface ProductGridProps {

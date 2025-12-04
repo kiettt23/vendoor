@@ -103,7 +103,7 @@ export function Header({ initialUser }: HeaderProps) {
           </div>
           <div className="flex items-center gap-4">
             <Link
-              href="/seller/register"
+              href="/become-vendor"
               className="hover:underline flex items-center gap-1"
             >
               <Store className="h-3.5 w-3.5" />

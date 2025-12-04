@@ -65,10 +65,9 @@ export interface HeaderIconButton {
  */
 export const HEADER_NAV_ITEMS: LinkItem[] = [
   { href: "/", label: "Trang Chủ" },
-  { href: "/stores", label: "Cửa Hàng" },
-  { href: "/products", label: "Sản Phẩm" },
   { href: "/flash-sale", label: "Flash Sale" },
-  { href: "/support", label: "Hỗ Trợ" },
+  { href: "/products", label: "Sản Phẩm" },
+  { href: "/stores", label: "Cửa Hàng" },
 ];
 
 /**
@@ -115,14 +114,12 @@ export const HEADER_ICON_BUTTONS: HeaderIconButton[] = [
  * Header category suggestions (search dropdown)
  */
 export const HEADER_CATEGORIES = [
-  "Điện thoại",
-  "Laptop",
-  "Tablet",
-  "Phụ kiện",
-  "Đồng hồ thông minh",
-  "Tai nghe",
-  "Gaming",
-  "Smart Home",
+  { name: "Điện thoại", slug: "dien-thoai" },
+  { name: "Laptop", slug: "laptop" },
+  { name: "Tablet", slug: "tablet" },
+  { name: "Phụ kiện", slug: "phu-kien" },
+  { name: "Tai nghe", slug: "tai-nghe" },
+  { name: "Gaming", slug: "gaming" },
 ] as const;
 
 // ============================================
