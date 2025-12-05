@@ -8,7 +8,10 @@ import { Button } from "@/shared/ui/button";
 import {
   ProductFilterBar,
   ActiveFilterTags,
+  CategoryTabs,
+  Pagination,
   parseFilterParams,
+  normalizeSearchText,
 } from "@/features/product-filter";
 
 interface PageProps {
@@ -30,7 +33,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const page = parseInt(params.page || "1");
   const categorySlug = params.category;
-  const search = params.search;
+  // Normalize search text để match cả "lap top" và "laptop"
+  const search = params.search ? normalizeSearchText(params.search) : undefined;
 
   // Parse filter params từ URL
   const urlSearchParams = new URLSearchParams(params as Record<string, string>);
@@ -77,23 +81,11 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 
       {/* Category tabs */}
       <div className="mb-6">
-        <div className="flex flex-wrap gap-2">
-          <Link href="/products">
-            <Button variant={!categorySlug ? "default" : "outline"} size="sm">
-              Tất cả ({totalAllProducts})
-            </Button>
-          </Link>
-          {categories.map((cat) => (
-            <Link key={cat.id} href={`/products?category=${cat.slug}`}>
-              <Button
-                variant={categorySlug === cat.slug ? "default" : "outline"}
-                size="sm"
-              >
-                {cat.name} ({cat._count.products})
-              </Button>
-            </Link>
-          ))}
-        </div>
+        <CategoryTabs
+          categories={categories}
+          currentCategorySlug={categorySlug}
+          totalAllProducts={totalAllProducts}
+        />
       </div>
 
       {/* Filter bar */}
@@ -132,45 +124,10 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </div>
 
           {pagination.totalPages > 1 && (
-            <div className="flex justify-center gap-2">
-              {page > 1 && (
-                <Link
-                  href={`/products?${new URLSearchParams({
-                    ...(categorySlug && { category: categorySlug }),
-                    ...(search && { search }),
-                    ...(params.minPrice && { minPrice: params.minPrice }),
-                    ...(params.maxPrice && { maxPrice: params.maxPrice }),
-                    ...(params.minRating && { minRating: params.minRating }),
-                    ...(params.vendorId && { vendorId: params.vendorId }),
-                    ...(params.inStock && { inStock: params.inStock }),
-                    ...(params.sort && { sort: params.sort }),
-                    page: String(page - 1),
-                  })}`}
-                >
-                  <Button variant="outline">← Trước</Button>
-                </Link>
-              )}
-              <span className="flex items-center px-4">
-                Trang {page} / {pagination.totalPages}
-              </span>
-              {page < pagination.totalPages && (
-                <Link
-                  href={`/products?${new URLSearchParams({
-                    ...(categorySlug && { category: categorySlug }),
-                    ...(search && { search }),
-                    ...(params.minPrice && { minPrice: params.minPrice }),
-                    ...(params.maxPrice && { maxPrice: params.maxPrice }),
-                    ...(params.minRating && { minRating: params.minRating }),
-                    ...(params.vendorId && { vendorId: params.vendorId }),
-                    ...(params.inStock && { inStock: params.inStock }),
-                    ...(params.sort && { sort: params.sort }),
-                    page: String(page + 1),
-                  })}`}
-                >
-                  <Button variant="outline">Sau →</Button>
-                </Link>
-              )}
-            </div>
+            <Pagination
+              currentPage={page}
+              totalPages={pagination.totalPages}
+            />
           )}
         </>
       )}

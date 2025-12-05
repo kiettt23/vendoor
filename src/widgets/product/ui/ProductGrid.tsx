@@ -1,22 +1,16 @@
-"use client";
-
 import { ProductCard } from "@/entities/product/ui";
 import type { ProductListItem } from "@/entities/product/model";
-import { ProductCardActions } from "@/features/cart";
 
 interface ProductGridProps {
   products: ProductListItem[];
   columns?: 2 | 3 | 4;
   emptyMessage?: string;
-  /** If false, renders ProductCard without cart actions */
-  withCartActions?: boolean;
 }
 
 export function ProductGrid({
   products,
   columns = 4,
   emptyMessage = "Không có sản phẩm",
-  withCartActions = true,
 }: ProductGridProps) {
   if (products.length === 0) {
     return (
@@ -35,15 +29,7 @@ export function ProductGrid({
   return (
     <div className={`grid ${gridCols[columns]} gap-4 md:gap-6`}>
       {products.map((product) => (
-        <ProductCard
-          key={product.id}
-          {...product}
-          renderActions={
-            withCartActions
-              ? (props) => <ProductCardActions {...props} />
-              : undefined
-          }
-        />
+        <ProductCard key={product.id} {...product} />
       ))}
     </div>
   );

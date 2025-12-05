@@ -4,4 +4,7 @@ export {
   updateFilterParam,
   clearFilters,
   hasActiveFilters,
+  buildCategoryUrl,
+  buildPaginationUrl,
+  normalizeSearchText,
 } from "./filter-utils";

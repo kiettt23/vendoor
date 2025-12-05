@@ -65,7 +65,7 @@ async function WishlistItemCard({ item, userId }: WishlistItemCardProps) {
   }
 
   return (
-    <Card className="group overflow-hidden">
+    <Card className="group overflow-hidden p-0">
       <Link href={`/products/${product.slug}`}>
         <div className="aspect-square relative bg-muted overflow-hidden">
           {product.image ? (

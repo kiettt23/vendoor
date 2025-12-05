@@ -61,9 +61,17 @@ export const getProducts = cache(
     }
 
     if (search) {
+      // Normalize search: loại bỏ khoảng trắng để match cả "lap top" và "laptop"
+      const normalizedSearch = search.replace(/\s+/g, "");
+      const searchWithSpaces = search.trim();
+      
       where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
+        // Match chính xác với khoảng trắng
+        { name: { contains: searchWithSpaces, mode: "insensitive" } },
+        { description: { contains: searchWithSpaces, mode: "insensitive" } },
+        // Match không khoảng trắng (laptop vs lap top)
+        { name: { contains: normalizedSearch, mode: "insensitive" } },
+        { description: { contains: normalizedSearch, mode: "insensitive" } },
       ];
     }
 

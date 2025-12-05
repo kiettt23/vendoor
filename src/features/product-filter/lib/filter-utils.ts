@@ -7,6 +7,13 @@
 import type { ProductFilterParams, ProductSortOption } from "../model/types";
 
 /**
+ * Normalize search text - loại bỏ khoảng trắng thừa
+ */
+export function normalizeSearchText(text: string): string {
+  return text.trim().replace(/\s+/g, " ");
+}
+
+/**
  * Parse search params thành filter params
  */
 export function parseFilterParams(
@@ -103,17 +110,59 @@ export function clearFilters(
   if (keepSearch) {
     const search = currentParams.get("search");
     if (search) newParams.set("search", search);
+    
+    const category = currentParams.get("category");
+    if (category) newParams.set("category", category);
   }
 
   return newParams;
 }
 
 /**
- * Check có filter active không (ngoài search và page)
+ * Build URL cho category navigation - giữ lại search term
+ */
+export function buildCategoryUrl(
+  currentParams: URLSearchParams,
+  categorySlug: string | null
+): string {
+  const newParams = new URLSearchParams();
+  
+  // Giữ lại search
+  const search = currentParams.get("search");
+  if (search) newParams.set("search", search);
+  
+  // Set category (null = tất cả)
+  if (categorySlug) newParams.set("category", categorySlug);
+  
+  const queryString = newParams.toString();
+  return queryString ? `/products?${queryString}` : "/products";
+}
+
+/**
+ * Build URL cho pagination - giữ lại tất cả params
+ */
+export function buildPaginationUrl(
+  currentParams: URLSearchParams,
+  page: number
+): string {
+  const newParams = new URLSearchParams(currentParams.toString());
+  
+  if (page > 1) {
+    newParams.set("page", String(page));
+  } else {
+    newParams.delete("page");
+  }
+  
+  const queryString = newParams.toString();
+  return queryString ? `/products?${queryString}` : "/products";
+}
+
+/**
+ * Check có filter active không (ngoài search, category, page)
+ * Category là navigation context, không phải filter
  */
 export function hasActiveFilters(params: ProductFilterParams): boolean {
   return !!(
-    params.category ||
     params.minPrice ||
     params.maxPrice ||
     params.minRating ||

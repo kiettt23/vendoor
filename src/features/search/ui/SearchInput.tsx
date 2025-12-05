@@ -66,9 +66,10 @@ export function SearchInput({
   const navigateToSearch = useCallback(
     (searchTerm: string) => {
       const params = new URLSearchParams(searchParams.toString());
+      const normalizedTerm = searchTerm.trim().replace(/\s+/g, " ");
 
-      if (searchTerm.trim()) {
-        params.set("search", searchTerm.trim());
+      if (normalizedTerm) {
+        params.set("search", normalizedTerm);
         params.delete("page"); // Reset pagination
       } else {
         params.delete("search");
