@@ -17,13 +17,13 @@ interface MoveToCartButtonProps {
       name: string;
     };
   };
-  onSuccess?: () => void;
+  productId: string;
   className?: string;
 }
 
 export function MoveToCartButton({
   product,
-  onSuccess,
+  productId,
   className,
 }: MoveToCartButtonProps) {
   const { addItem } = useCart();
@@ -33,18 +33,18 @@ export function MoveToCartButton({
 
     addItem({
       id: product.variantId,
-      variantId: product.variantId,
+      productId,
+      productName: product.name,
       productSlug: product.productSlug,
-      name: product.name,
+      variantId: product.variantId,
+      variantName: null,
       price: product.price,
-      image: product.image || "",
       quantity: 1,
+      image: product.image || "",
       stock: product.stock,
       vendorId: product.vendor.id,
       vendorName: product.vendor.name,
     });
-
-    onSuccess?.();
   };
 
   const isOutOfStock = product.stock === 0;

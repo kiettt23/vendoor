@@ -112,6 +112,7 @@ export function WishlistItemCard({ item, userId }: WishlistItemCardProps) {
                 stock: product.stock,
                 vendor: product.vendor,
               }}
+              productId={product.id}
               className="flex-1"
             />
           ) : (
