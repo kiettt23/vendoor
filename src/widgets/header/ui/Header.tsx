@@ -12,6 +12,7 @@ import {
   Shield,
   LogIn,
   UserPlus,
+  User,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
@@ -281,6 +282,11 @@ export function Header({ initialUser }: HeaderProps) {
                       {user.name || user.email}
                     </div>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/account" className="flex items-center gap-2">
+                        <User className="h-4 w-4" /> Tài khoản
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/orders" className="flex items-center gap-2">
                         <Package className="h-4 w-4" /> Đơn hàng

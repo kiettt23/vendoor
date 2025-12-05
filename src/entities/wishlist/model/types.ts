@@ -34,6 +34,7 @@ export interface WishlistItemWithProduct {
     compareAtPrice: number | null;
     stock: number;
     isActive: boolean;
+    variantId: string;
     vendor: {
       id: string;
       name: string;

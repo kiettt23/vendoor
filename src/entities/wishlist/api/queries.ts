@@ -32,6 +32,7 @@ export const getUserWishlist = cache(
             variants: {
               where: { isDefault: true },
               select: {
+                id: true,
                 price: true,
                 compareAtPrice: true,
                 stock: true,
@@ -60,6 +61,7 @@ export const getUserWishlist = cache(
         price: item.product.variants[0]?.price || 0,
         compareAtPrice: item.product.variants[0]?.compareAtPrice || null,
         stock: item.product.variants[0]?.stock || 0,
+        variantId: item.product.variants[0]?.id || "",
         vendor: {
           id: item.product.vendor.id,
           name: item.product.vendor.name || "Unknown",

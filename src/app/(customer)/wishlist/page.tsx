@@ -1,13 +1,10 @@
-import { Heart, ShoppingCart, Trash2 } from "lucide-react";
+import { Heart } from "lucide-react";
 import Link from "next/link";
-import { OptimizedImage } from "@/shared/ui/optimized-image";
 
 import { Button } from "@/shared/ui/button";
-import { Card, CardContent } from "@/shared/ui/card";
-import { formatPrice } from "@/shared/lib";
 import { requireAuth } from "@/entities/user";
-
-import { getUserWishlist, removeFromWishlist } from "@/entities/wishlist";
+import { getUserWishlist } from "@/entities/wishlist";
+import { WishlistGrid } from "@/widgets/wishlist";
 
 export const metadata = {
   title: "Danh sách yêu thích",
@@ -42,109 +39,7 @@ export default async function WishlistPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {items.map((item) => (
-          <WishlistItemCard key={item.id} item={item} userId={user.id} />
-        ))}
-      </div>
+      <WishlistGrid items={items} userId={user.id} />
     </div>
-  );
-}
-
-interface WishlistItemCardProps {
-  item: Awaited<ReturnType<typeof getUserWishlist>>[number];
-  userId: string;
-}
-
-async function WishlistItemCard({ item, userId }: WishlistItemCardProps) {
-  const { product } = item;
-
-  async function handleRemove() {
-    "use server";
-    await removeFromWishlist(userId, product.id);
-  }
-
-  return (
-    <Card className="group overflow-hidden p-0">
-      <Link href={`/products/${product.slug}`}>
-        <div className="aspect-square relative bg-muted overflow-hidden">
-          {product.image ? (
-            <OptimizedImage
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-cover transition-transform group-hover:scale-105"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <ShoppingCart className="h-12 w-12 text-muted-foreground" />
-            </div>
-          )}
-
-          {!product.isActive && (
-            <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-              <span className="text-sm font-medium text-muted-foreground">
-                Ngừng bán
-              </span>
-            </div>
-          )}
-
-          {product.compareAtPrice && product.compareAtPrice > product.price && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-medium px-2 py-1 rounded">
-              -{Math.round((1 - product.price / product.compareAtPrice) * 100)}%
-            </div>
-          )}
-        </div>
-      </Link>
-
-      <CardContent className="p-4">
-        <Link
-          href={`/products/${product.slug}`}
-          className="font-medium line-clamp-2 hover:text-primary transition-colors"
-        >
-          {product.name}
-        </Link>
-
-        <p className="text-sm text-muted-foreground mt-1">
-          {product.vendor.name}
-        </p>
-
-        <div className="flex items-center gap-2 mt-2">
-          <span className="font-bold text-primary">
-            {formatPrice(product.price)}
-          </span>
-          {product.compareAtPrice && product.compareAtPrice > product.price && (
-            <span className="text-sm text-muted-foreground line-through">
-              {formatPrice(product.compareAtPrice)}
-            </span>
-          )}
-        </div>
-
-        <div className="flex gap-2 mt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            asChild
-            disabled={!product.isActive || product.stock === 0}
-          >
-            <Link href={`/products/${product.slug}`}>
-              {product.stock === 0 ? "Hết hàng" : "Xem chi tiết"}
-            </Link>
-          </Button>
-
-          <form action={handleRemove}>
-            <Button
-              type="submit"
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </form>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
