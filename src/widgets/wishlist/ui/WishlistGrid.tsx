@@ -7,7 +7,7 @@ import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { formatPrice } from "@/shared/lib";
-import { removeFromWishlist } from "@/entities/wishlist";
+import { removeFromWishlist } from "@/entities/wishlist/api/actions";
 import { MoveToCartButton } from "@/features/wishlist";
 
 interface WishlistItem {
