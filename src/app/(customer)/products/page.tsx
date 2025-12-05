@@ -71,7 +71,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   );
 
   // Map vendors cho filter component
-  const vendorsForFilter = vendors.map((v) => ({ id: v.id, name: v.shopName }));
+  // Dùng userId vì Product.vendorId tham chiếu đến User.id, không phải VendorProfile.id
+  const vendorsForFilter = vendors.map((v) => ({ id: v.userId, name: v.shopName }));
 
   return (
     <div className="container mx-auto px-4 py-12 lg:py-16">

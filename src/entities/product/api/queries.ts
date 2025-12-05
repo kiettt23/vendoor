@@ -81,19 +81,27 @@ export const getProducts = cache(
 
     // Price & stock filter on variants
     if (minPrice !== undefined || maxPrice !== undefined || inStock) {
+      // Build price filter object properly to combine gte and lte
+      const priceFilter: { gte?: number; lte?: number } = {};
+      if (minPrice !== undefined) priceFilter.gte = minPrice;
+      if (maxPrice !== undefined) priceFilter.lte = maxPrice;
+
       where.variants = {
         some: {
           isDefault: true,
-          ...(minPrice !== undefined && { price: { gte: minPrice } }),
-          ...(maxPrice !== undefined && { price: { lte: maxPrice } }),
+          ...(Object.keys(priceFilter).length > 0 && { price: priceFilter }),
           ...(inStock && { stock: { gt: 0 } }),
         },
       };
     }
 
-    // Rating filter
+    // Rating filter - filter products có ít nhất 1 review với rating >= minRating
     if (minRating !== undefined) {
-      where.rating = { gte: minRating };
+      where.reviews = {
+        some: {
+          rating: { gte: minRating },
+        },
+      };
     }
 
     // Build orderBy

@@ -63,7 +63,8 @@ export async function getCurrentVendorProfile() {
 export const getApprovedVendors = cache(async () => {
   return prisma.vendorProfile.findMany({
     where: { status: "APPROVED" },
-    select: { id: true, shopName: true },
+    // Return userId (User.id) vì Product.vendorId references User.id
+    select: { id: true, userId: true, shopName: true },
     orderBy: { shopName: "asc" },
   });
 });
