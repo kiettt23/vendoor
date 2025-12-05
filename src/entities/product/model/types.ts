@@ -93,4 +93,5 @@ export interface ProductFormInput {
   sku: string;
   stock: number;
   isActive: boolean;
+  imageUrl?: string;
 }

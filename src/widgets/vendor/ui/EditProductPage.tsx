@@ -257,6 +257,11 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
                   min={0}
                   className="mt-1.5"
                 />
+                {errors.compareAtPrice && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.compareAtPrice.message}
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

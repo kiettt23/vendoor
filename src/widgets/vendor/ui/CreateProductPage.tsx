@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { OptimizedImage } from "@/shared/ui/optimized-image";
+import Image from "next/image";
 import { ArrowLeft, Plus, Loader2, ImagePlus, X } from "lucide-react";
 import {
   showToast,
   showErrorToast,
   showCustomToast,
 } from "@/shared/lib/constants";
+import { uploadImageViaAPI } from "@/shared/lib/upload";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -105,9 +106,28 @@ export function CreateProductPage({
   const onSubmit = async (data: ProductFormData) => {
     setIsSubmitting(true);
     try {
+      let imageUrl: string | undefined;
+
+      // Upload image to Cloudinary first if selected
+      if (imageFile) {
+        try {
+          const uploadResult = await uploadImageViaAPI(imageFile);
+          imageUrl = uploadResult.url;
+        } catch (uploadError) {
+          const message =
+            uploadError instanceof Error
+              ? uploadError.message
+              : "Không thể upload hình ảnh";
+          showCustomToast.error(message);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       const result = await createProduct(vendorId, {
         ...data,
         description: data.description || "",
+        imageUrl,
       });
       if (result.success) {
         showToast("vendor", "productCreated");
@@ -146,20 +166,20 @@ export function CreateProductPage({
           </CardHeader>
           <CardContent>
             {imagePreview ? (
-              <div className="relative">
-                <div className="relative aspect-square w-full max-w-xs mx-auto rounded-lg overflow-hidden">
-                  <OptimizedImage
-                    src={imagePreview}
-                    alt="Product preview"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+              <div className="relative w-64 h-64 mx-auto">
+                <Image
+                  src={imagePreview}
+                  alt="Product preview"
+                  fill
+                  sizes="256px"
+                  className="object-cover rounded-lg"
+                  unoptimized
+                />
                 <Button
                   type="button"
                   variant="destructive"
                   size="icon"
-                  className="absolute top-2 right-2"
+                  className="absolute top-2 right-2 z-10"
                   onClick={handleRemoveImage}
                 >
                   <X className="h-4 w-4" />
@@ -268,6 +288,11 @@ export function CreateProductPage({
                   min={0}
                   className="mt-1.5"
                 />
+                {errors.compareAtPrice && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.compareAtPrice.message}
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

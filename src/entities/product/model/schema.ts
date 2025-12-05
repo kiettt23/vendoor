@@ -8,10 +8,10 @@ export const productSchema = z.object({
   name: z.string().min(3, "Tên sản phẩm phải có ít nhất 3 ký tự"),
   description: z.string().optional(),
   categoryId: z.string().min(1, "Vui lòng chọn danh mục"),
-  price: z.number().min(1000, "Giá phải lớn hơn 1.000₫"),
-  compareAtPrice: z.number().optional(),
+  price: z.number({ error: "Vui lòng nhập giá bán" }).min(1000, "Giá phải lớn hơn 1.000₫"),
+  compareAtPrice: z.number().min(1000, "Giá gốc phải lớn hơn 1.000₫").optional(),
   sku: z.string().min(1, "SKU không được để trống"),
-  stock: z.number().min(1, "Số lượng phải ít nhất là 1"),
+  stock: z.number({ error: "Vui lòng nhập số lượng" }).min(1, "Số lượng phải ít nhất là 1"),
   isActive: z.boolean(),
 });
 

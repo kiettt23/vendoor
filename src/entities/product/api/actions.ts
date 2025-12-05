@@ -105,6 +105,15 @@ export async function createProduct(
             isDefault: true,
           },
         },
+        // Create image if provided
+        ...(data.imageUrl && {
+          images: {
+            create: {
+              url: data.imageUrl,
+              order: 0,
+            },
+          },
+        }),
       },
     });
     revalidatePath("/vendor/products");

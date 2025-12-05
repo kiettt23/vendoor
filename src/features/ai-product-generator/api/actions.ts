@@ -26,31 +26,22 @@ const MODEL = process.env.OPENAI_MODEL || "gemini-2.0-flash";
  */
 function buildPrompt(existingCategories?: string[]): string {
   const categoryHint = existingCategories?.length
-    ? `\nDanh mục có sẵn trong hệ thống: ${existingCategories.join(
-        ", "
-      )}. Ưu tiên gợi ý từ danh mục này nếu phù hợp.`
+    ? `\nDanh mục có sẵn: ${existingCategories.join(", ")}. Ưu tiên chọn từ danh sách này.`
     : "";
 
-  return `Bạn là chuyên gia phân tích sản phẩm e-commerce. Phân tích hình ảnh sản phẩm này và trả về thông tin dưới dạng JSON.
+  return `Phân tích hình ảnh sản phẩm và trả về JSON (tiếng Việt).
 ${categoryHint}
 
 Yêu cầu:
-1. name: Tên sản phẩm ngắn gọn, hấp dẫn (tiếng Việt)
-2. shortDescription: Mô tả ngắn 1-2 câu highlight điểm nổi bật
-3. description: Mô tả chi tiết 3-5 câu về tính năng, chất liệu, công dụng
-4. suggestedCategory: Gợi ý 1 danh mục phù hợp nhất
-5. tags: 3-5 keywords liên quan để SEO
-6. estimatedPriceRange: Ước tính khoảng giá VND nếu có thể đoán được (optional)
+- name: Tên sản phẩm ngắn gọn, hấp dẫn
+- shortDescription: Mô tả 1-2 câu về điểm nổi bật
+- description: Mô tả chi tiết 3-5 câu (tính năng, chất liệu, công dụng)
+- suggestedCategory: 1 danh mục phù hợp nhất
+- tags: 3-5 từ khóa SEO
+- estimatedPriceRange: null (bỏ qua field này)
 
-Trả về CHÍNH XÁC định dạng JSON sau (không có markdown, không có text khác):
-{
-  "name": "string",
-  "shortDescription": "string", 
-  "description": "string",
-  "suggestedCategory": "string",
-  "tags": ["string"],
-  "estimatedPriceRange": { "min": number, "max": number, "currency": "VND" }
-}`;
+CHỈ trả về JSON, không giải thích:
+{"name":"...","shortDescription":"...","description":"...","suggestedCategory":"...","tags":["..."],"estimatedPriceRange":null}`;
 }
 
 /**
@@ -93,12 +84,20 @@ export async function generateProductInfo(
       return err("AI không trả về kết quả");
     }
 
-    // Parse JSON response
-    // Gemini đôi khi wrap trong markdown code block
-    const jsonString = content
-      .replace(/```json\n?/g, "")
-      .replace(/```\n?/g, "")
-      .trim();
+    // Parse JSON response - handle various AI response formats
+    let jsonString = content.trim();
+    
+    // Remove markdown code blocks if present
+    jsonString = jsonString.replace(/```json\n?/g, "").replace(/```\n?/g, "");
+    
+    // Try to extract JSON from response if AI added extra text
+    const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error("AI returned non-JSON response:", content);
+      return err("AI không trả về định dạng JSON hợp lệ");
+    }
+    
+    jsonString = jsonMatch[0];
 
     const parsed = JSON.parse(jsonString);
     const validated = AIProductInfoSchema.parse(parsed);

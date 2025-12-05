@@ -15,6 +15,7 @@ export const AIProductInfoSchema = z.object({
       max: z.number(),
       currency: z.literal("VND"),
     })
+    .nullable()
     .optional()
     .describe("Ước tính khoảng giá (nếu có thể)"),
 });
