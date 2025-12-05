@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, Eye } from "lucide-react";
+import { ShoppingCart, Heart } from "lucide-react";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
@@ -87,16 +87,16 @@ export function ProductCard({
                       <Button
                         size="sm"
                         variant="secondary"
-                        className="flex-1 h-9"
+                        className="flex-1 h-9 cursor-pointer"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Chi tiết
+                        <Heart className="h-4 w-4 mr-1" />
+                        Thích
                       </Button>
                       <Button
                         size="sm"
                         variant="default"
-                        className="flex-1 h-9"
+                        className="flex-1 h-9 cursor-pointer"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <ShoppingCart className="h-4 w-4 mr-1" />

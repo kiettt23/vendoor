@@ -60,6 +60,12 @@ export default async function ProductsPage({ searchParams }: PageProps) {
     getApprovedVendors(),
   ]);
 
+  // Tổng số sản phẩm từ tất cả categories (không đổi khi filter)
+  const totalAllProducts = categories.reduce(
+    (sum, cat) => sum + cat._count.products,
+    0
+  );
+
   // Map vendors cho filter component
   const vendorsForFilter = vendors.map((v) => ({ id: v.id, name: v.shopName }));
 
@@ -77,7 +83,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         <div className="flex flex-wrap gap-2">
           <Link href="/products">
             <Button variant={!categorySlug ? "default" : "outline"} size="sm">
-              Tất cả ({pagination.total})
+              Tất cả ({totalAllProducts})
             </Button>
           </Link>
           {categories.map((cat) => (

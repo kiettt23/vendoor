@@ -178,8 +178,10 @@ export function Header({ initialUser }: HeaderProps) {
             {/* 1. Search - Mobile only */}
             <SearchInputMobile />
 
-            {/* 2. Other icon buttons */}
-            {HEADER_ICON_BUTTONS.filter((btn) => btn.id !== "search").map(
+            {/* 2. Other icon buttons (mobile only, exclude cart) */}
+            {HEADER_ICON_BUTTONS.filter(
+              (btn) => btn.id !== "search" && btn.id !== "cart"
+            ).map(
               (btn) => (
                 <Button
                   key={btn.id}

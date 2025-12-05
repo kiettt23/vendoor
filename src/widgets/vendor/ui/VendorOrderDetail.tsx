@@ -1,17 +1,19 @@
 import Link from "next/link";
 import { OptimizedImage } from "@/shared/ui/optimized-image";
-import { ArrowLeft, Package, User, MapPin, CreditCard } from "lucide-react";
+import {
+  ArrowLeft,
+  Package,
+  User,
+  MapPin,
+  CreditCard,
+  CheckCircle,
+  Truck,
+  XCircle,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 import { formatPrice, formatDateTime } from "@/shared/lib";
 import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
 import { getCurrentVendorProfile } from "@/entities/vendor";
@@ -20,6 +22,24 @@ import {
   updateOrderStatusAction,
   getVendorOrderDetail,
 } from "@/entities/order";
+
+// Define allowed status transitions for vendor
+const VENDOR_STATUS_TRANSITIONS: Record<string, { nextStatus: string; label: string; icon: React.ReactNode; variant: "default" | "secondary" | "destructive" }[]> = {
+  PENDING: [
+    { nextStatus: "PROCESSING", label: "Xác nhận đơn", icon: <CheckCircle className="h-4 w-4 mr-2" />, variant: "default" },
+    { nextStatus: "CANCELLED", label: "Hủy đơn", icon: <XCircle className="h-4 w-4 mr-2" />, variant: "destructive" },
+  ],
+  PROCESSING: [
+    { nextStatus: "SHIPPED", label: "Đã giao cho vận chuyển", icon: <Truck className="h-4 w-4 mr-2" />, variant: "default" },
+    { nextStatus: "CANCELLED", label: "Hủy đơn", icon: <XCircle className="h-4 w-4 mr-2" />, variant: "destructive" },
+  ],
+  SHIPPED: [
+    { nextStatus: "DELIVERED", label: "Xác nhận đã giao", icon: <CheckCircle className="h-4 w-4 mr-2" />, variant: "default" },
+  ],
+  DELIVERED: [],
+  CANCELLED: [],
+  PENDING_PAYMENT: [],
+};
 
 interface VendorOrderDetailPageProps {
   orderId: string;
@@ -107,22 +127,28 @@ export async function VendorOrderDetailPage({
           <CardTitle>Cập Nhật Trạng Thái</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={updateOrderStatusAction} className="flex gap-4">
-            <input type="hidden" name="orderId" value={order.id} />
-            <Select name="status" defaultValue={order.status}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="PENDING">Chờ xử lý</SelectItem>
-                <SelectItem value="PROCESSING">Đang xử lý</SelectItem>
-                <SelectItem value="SHIPPED">Đang giao</SelectItem>
-                <SelectItem value="DELIVERED">Đã giao</SelectItem>
-                <SelectItem value="CANCELLED">Đã hủy</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button type="submit">Cập nhật</Button>
-          </form>
+          {VENDOR_STATUS_TRANSITIONS[order.status]?.length > 0 ? (
+            <div className="flex flex-wrap gap-3">
+              {VENDOR_STATUS_TRANSITIONS[order.status].map((transition) => (
+                <form key={transition.nextStatus} action={updateOrderStatusAction}>
+                  <input type="hidden" name="orderId" value={order.id} />
+                  <input type="hidden" name="status" value={transition.nextStatus} />
+                  <Button type="submit" variant={transition.variant}>
+                    {transition.icon}
+                    {transition.label}
+                  </Button>
+                </form>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-sm">
+              {order.status === "PENDING_PAYMENT"
+                ? "Chờ khách hàng thanh toán"
+                : order.status === "DELIVERED"
+                  ? "Đơn hàng đã hoàn thành"
+                  : "Đơn hàng đã hủy"}
+            </p>
+          )}
         </CardContent>
       </Card>
 

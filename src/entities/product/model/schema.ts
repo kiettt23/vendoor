@@ -11,7 +11,7 @@ export const productSchema = z.object({
   price: z.number().min(1000, "Giá phải lớn hơn 1.000₫"),
   compareAtPrice: z.number().optional(),
   sku: z.string().min(1, "SKU không được để trống"),
-  stock: z.number().min(0, "Số lượng không hợp lệ"),
+  stock: z.number().min(1, "Số lượng phải ít nhất là 1"),
   isActive: z.boolean(),
 });
 

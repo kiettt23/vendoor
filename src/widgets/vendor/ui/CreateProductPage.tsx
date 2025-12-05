@@ -62,8 +62,6 @@ export function CreateProductPage({
     resolver: zodResolver(productSchema),
     defaultValues: {
       isActive: true,
-      stock: 0,
-      price: 0,
       categoryId: "",
       description: "",
     },

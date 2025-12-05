@@ -10,6 +10,7 @@ import {
   forgotPasswordSchema,
   type ForgotPasswordFormData,
 } from "@/features/auth";
+import { authClient } from "@/shared/lib/auth/client";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -41,21 +42,18 @@ export default function ForgotPasswordPage() {
     setError(null);
 
     try {
-      // Call Better Auth API directly
-      const response = await fetch("/api/auth/forget-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: data.email,
-          redirectTo: "/reset-password",
-        }),
+      const { error } = await authClient.requestPasswordReset({
+        email: data.email,
+        redirectTo: "/reset-password",
       });
 
-      if (!response.ok) {
-        throw new Error("Request failed");
+      if (error) {
+        // Luôn hiện success để tránh email enumeration
+        // Không throw error khi email không tồn tại
+        console.error("Forget password error:", error);
       }
 
-      // Luôn hiện success để tránh email enumeration
+      // Luôn hiện success
       setIsSubmitted(true);
     } catch {
       setError("Có lỗi xảy ra. Vui lòng thử lại.");

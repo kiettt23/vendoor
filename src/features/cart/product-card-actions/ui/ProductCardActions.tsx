@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingCart, Check, Loader2, Eye } from "lucide-react";
+import { ShoppingCart, Check, Loader2, Heart } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { useCart } from "@/entities/cart";
 import type { ProductListItem } from "@/entities/product";
@@ -21,6 +21,7 @@ export function ProductCardActions({
 }: ProductCardActionsProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
   const addItem = useCart((state) => state.addItem);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
@@ -52,25 +53,32 @@ export function ProductCardActions({
     }, 300);
   };
 
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Toggle local state only - wishlist is managed by server actions
+    setIsLiked(!isLiked);
+  };
+
   return (
     <>
       <Button
         size="sm"
-        variant="secondary"
-        className="flex-1 h-9"
-        onClick={(e) => e.stopPropagation()}
+        variant={isLiked ? "default" : "secondary"}
+        className={`flex-1 h-9 cursor-pointer ${isLiked ? "bg-red-500 hover:bg-red-600" : ""}`}
+        onClick={handleWishlistToggle}
       >
-        <Eye className="h-4 w-4 mr-1" />
-        Chi tiết
+        <Heart className={`h-4 w-4 mr-1 ${isLiked ? "fill-current" : ""}`} />
+        {isLiked ? "Đã thích" : "Thích"}
       </Button>
       <Button
         size="sm"
         variant="default"
-        className={`flex-1 h-9 ${
+        className={`flex-1 h-9 cursor-pointer ${
           isAdded ? "bg-green-600 hover:bg-green-600" : ""
         }`}
         onClick={handleQuickAdd}
-        disabled={isAdding}
+        disabled={isAdding || isOutOfStock}
       >
         {isAdding ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -79,6 +87,8 @@ export function ProductCardActions({
             <Check className="h-4 w-4 mr-1" />
             Đã thêm
           </>
+        ) : isOutOfStock ? (
+          "Hết hàng"
         ) : (
           <>
             <ShoppingCart className="h-4 w-4 mr-1" />
