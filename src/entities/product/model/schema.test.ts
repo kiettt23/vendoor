@@ -230,7 +230,7 @@ describe("productSchema", () => {
       expect(result.success).toBe(true);
     });
 
-    it("accepts zero stock", () => {
+    it("rejects zero stock (minimum is 1)", () => {
       const result = productSchema.safeParse({
         name: "Product Name",
         categoryId: "cat_123",
@@ -240,7 +240,8 @@ describe("productSchema", () => {
         isActive: true,
       });
 
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0].message).toContain("ít nhất là 1");
     });
 
     it("rejects negative stock", () => {
@@ -254,7 +255,7 @@ describe("productSchema", () => {
       });
 
       expect(result.success).toBe(false);
-      expect(result.error?.issues[0].message).toContain("không hợp lệ");
+      expect(result.error?.issues[0].message).toContain("ít nhất là 1");
     });
   });
 

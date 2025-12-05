@@ -54,3 +54,4 @@ export * from "./tooltip";
 export * from "./logo";
 export * from "./optimized-image";
 export * from "./image-lightbox";
+export * from "./error-boundary";
