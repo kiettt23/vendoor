@@ -55,7 +55,10 @@ export async function AdminOrderDetailPage({
             {formatDateTime(order.createdAt)}
           </p>
         </div>
-        <Badge variant={status.variant} className="text-base px-4 py-1">
+        <Badge
+          variant={status.variant}
+          className={`${status.className || ""} text-base px-4 py-1`}
+        >
           {status.label}
         </Badge>
       </div>

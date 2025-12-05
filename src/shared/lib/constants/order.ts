@@ -48,6 +48,7 @@ type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 export interface StatusConfig {
   label: string;
   variant: BadgeVariant;
+  className?: string;
 }
 
 /**
@@ -55,13 +56,41 @@ export interface StatusConfig {
  * Used by: order-history-page, order-detail-page, vendor-orders-page, admin-orders-page
  */
 export const ORDER_STATUS_CONFIG: Record<string, StatusConfig> = {
-  PENDING_PAYMENT: { label: "Chờ thanh toán", variant: "secondary" },
-  PENDING: { label: "Chờ xử lý", variant: "default" },
-  PROCESSING: { label: "Đang xử lý", variant: "default" },
-  SHIPPED: { label: "Đang giao", variant: "default" },
-  DELIVERED: { label: "Đã giao", variant: "outline" },
-  CANCELLED: { label: "Đã hủy", variant: "destructive" },
-  REFUNDED: { label: "Đã hoàn tiền", variant: "secondary" },
+  PENDING_PAYMENT: {
+    label: "Chờ thanh toán",
+    variant: "secondary",
+    className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+  },
+  PENDING: {
+    label: "Chờ xử lý",
+    variant: "secondary",
+    className: "bg-orange-100 text-orange-800 hover:bg-orange-200",
+  },
+  PROCESSING: {
+    label: "Đang xử lý",
+    variant: "secondary",
+    className: "bg-blue-100 text-blue-800 hover:bg-blue-200",
+  },
+  SHIPPED: {
+    label: "Đang giao",
+    variant: "secondary",
+    className: "bg-purple-100 text-purple-800 hover:bg-purple-200",
+  },
+  DELIVERED: {
+    label: "Đã giao",
+    variant: "secondary",
+    className: "bg-green-100 text-green-800 hover:bg-green-200",
+  },
+  CANCELLED: {
+    label: "Đã hủy",
+    variant: "secondary",
+    className: "bg-red-100 text-red-800 hover:bg-red-200",
+  },
+  REFUNDED: {
+    label: "Đã hoàn tiền",
+    variant: "secondary",
+    className: "bg-slate-100 text-slate-800 hover:bg-slate-200",
+  },
 };
 
 /**

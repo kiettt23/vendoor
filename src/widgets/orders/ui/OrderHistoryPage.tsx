@@ -31,18 +31,23 @@ export async function OrderHistoryPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <h1 className="text-3xl font-bold mb-8">Đơn Hàng Của Tôi</h1>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {orders.map((order) => {
           const status = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
           return (
-            <Link key={order.id} href={`/orders/${order.id}`}>
+            <Link key={order.id} href={`/orders/${order.id}`} className="block">
               <Card className="hover:shadow-md transition-shadow cursor-pointer">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base">
                       {order.orderNumber}
                     </CardTitle>
-                    <Badge variant={status.variant}>{status.label}</Badge>
+                    <Badge
+                      variant={status.variant}
+                      className={status.className}
+                    >
+                      {status.label}
+                    </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {order.vendor.shopName}
@@ -51,19 +56,22 @@ export async function OrderHistoryPage() {
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm">
+                      <p className="text-sm line-clamp-1">
                         {order.items
                           .map((i) => `${i.productName} x${i.quantity}`)
                           .join(", ")}
-                        {order.itemCount > 2 &&
-                          ` +${order.itemCount - 2} sản phẩm`}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      {order.itemCount > 1 && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          +{order.itemCount - 1} sản phẩm khác
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
                         {formatDateTime(order.createdAt)}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-primary">
+                    <div className="flex items-center gap-4">
+                      <span className="font-bold text-primary whitespace-nowrap">
                         {formatPrice(order.total)}
                       </span>
                       <ChevronRight className="h-5 w-5 text-muted-foreground" />

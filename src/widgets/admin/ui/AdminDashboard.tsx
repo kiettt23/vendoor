@@ -1,7 +1,18 @@
-import { Users, ShoppingCart, DollarSign, Package, Store } from "lucide-react";
+import Link from "next/link";
+import {
+  Users,
+  ShoppingCart,
+  DollarSign,
+  Package,
+  Store,
+  ArrowRight,
+} from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Badge } from "@/shared/ui/badge";
+import { Button } from "@/shared/ui/button";
 import { formatPrice } from "@/shared/lib";
+import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
 import {
   getAdminDashboardStats,
   getPendingVendorsCount,
@@ -70,7 +81,7 @@ export async function AdminDashboardPage() {
 
       {pendingVendors > 0 && (
         <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="pt-6">
+          <CardContent className="py-2">
             <p className="text-orange-800">
               <strong>{pendingVendors}</strong> nhà bán đang chờ duyệt
             </p>
@@ -79,31 +90,43 @@ export async function AdminDashboardPage() {
       )}
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Đơn Hàng Gần Đây</CardTitle>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/admin/orders">
+              Xem tất cả <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {recentOrders.map((order) => (
-              <div
-                key={order.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-              >
-                <div>
-                  <p className="font-medium">{order.orderNumber}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {order.customer.name || order.customer.email} →{" "}
-                    {order.vendor.shopName}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">{formatPrice(order.total)}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {order.status}
-                  </p>
-                </div>
-              </div>
-            ))}
+            {recentOrders.map((order) => {
+              const status = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
+              return (
+                <Link
+                  key={order.id}
+                  href={`/admin/orders/${order.id}`}
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors"
+                >
+                  <div>
+                    <p className="font-semibold">{order.orderNumber}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {order.customer.name || order.customer.email} →{" "}
+                      {order.vendor.shopName}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">{formatPrice(order.total)}</p>
+                    <Badge
+                      variant={status.variant}
+                      className={status.className}
+                    >
+                      {status.label}
+                    </Badge>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

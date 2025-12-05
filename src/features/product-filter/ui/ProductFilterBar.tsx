@@ -117,44 +117,11 @@ export function ProductFilterBar({
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-      {/* Results count */}
-      <div className="text-sm text-muted-foreground">
-        {totalProducts} sản phẩm
-        {hasFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleClearFilters}
-            className="ml-2 h-auto p-1 text-xs"
-          >
-            <X className="h-3 w-3 mr-1" />
-            Xóa bộ lọc
-          </Button>
-        )}
-      </div>
-
       <div className="flex items-center gap-2">
-        {/* Sort dropdown - always visible */}
-        <Select
-          value={filterParams.sort || "newest"}
-          onValueChange={handleSortChange}
-        >
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Sắp xếp" />
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         {/* Filter Sheet - Mobile & Desktop */}
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="sm" className="relative">
+            <Button variant="outline" size="sm" className="relative h-9">
               <SlidersHorizontal className="h-4 w-4 mr-2" />
               Bộ lọc
               {activeFilterCount > 0 && (
@@ -167,116 +134,192 @@ export function ProductFilterBar({
               )}
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-            <SheetHeader>
-              <SheetTitle className="flex items-center gap-2">
+          <SheetContent
+            side="left"
+            className="w-[300px] sm:w-[400px] flex flex-col p-0 gap-0"
+          >
+            <SheetHeader className="px-6 py-4 border-b">
+              <SheetTitle className="flex items-center gap-2 text-xl">
                 <Filter className="h-5 w-5" />
                 Bộ lọc sản phẩm
               </SheetTitle>
             </SheetHeader>
 
-            <div className="space-y-6 mt-6">
-              {/* Price Range */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Khoảng giá</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Từ"
-                    value={filterParams.minPrice || ""}
-                    onChange={(e) =>
-                      handlePriceChange("minPrice", e.target.value)
-                    }
-                    className="h-9"
-                    min={0}
-                  />
-                  <span className="text-muted-foreground">-</span>
-                  <Input
-                    type="number"
-                    placeholder="Đến"
-                    value={filterParams.maxPrice || ""}
-                    onChange={(e) =>
-                      handlePriceChange("maxPrice", e.target.value)
-                    }
-                    className="h-9"
-                    min={0}
-                  />
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-8">
+                {/* Price Range */}
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">Khoảng giá</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">
+                        Thấp nhất
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          value={filterParams.minPrice || ""}
+                          onChange={(e) =>
+                            handlePriceChange("minPrice", e.target.value)
+                          }
+                          className="h-10 pr-8"
+                          min={0}
+                        />
+                        <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">
+                          ₫
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">
+                        Cao nhất
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          placeholder="∞"
+                          value={filterParams.maxPrice || ""}
+                          onChange={(e) =>
+                            handlePriceChange("maxPrice", e.target.value)
+                          }
+                          className="h-10 pr-8"
+                          min={0}
+                        />
+                        <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">
+                          ₫
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Rating Filter */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Đánh giá</Label>
-                <Select
-                  value={filterParams.minRating?.toString() || "all"}
-                  onValueChange={handleRatingChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Tất cả đánh giá" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả đánh giá</SelectItem>
-                    {RATING_OPTIONS.map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value.toString()}
-                      >
-                        {option.label} ⭐
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Vendor Filter */}
-              {showVendorFilter && vendors.length > 0 && (
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium">Cửa hàng</Label>
+                {/* Rating Filter */}
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">Đánh giá</Label>
                   <Select
-                    value={filterParams.vendorId || "all"}
-                    onValueChange={handleVendorChange}
+                    value={filterParams.minRating?.toString() || "all"}
+                    onValueChange={handleRatingChange}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tất cả cửa hàng" />
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Tất cả đánh giá" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Tất cả cửa hàng</SelectItem>
-                      {vendors.map((vendor) => (
-                        <SelectItem key={vendor.id} value={vendor.id}>
-                          {vendor.name}
+                      <SelectItem value="all">Tất cả đánh giá</SelectItem>
+                      {RATING_OPTIONS.map((option) => (
+                        <SelectItem
+                          key={option.value}
+                          value={option.value.toString()}
+                        >
+                          <span className="flex items-center gap-2">
+                            {option.label}
+                            <span className="text-yellow-500">
+                              {"★".repeat(option.value)}
+                              <span className="text-muted-foreground/30">
+                                {"★".repeat(5 - option.value)}
+                              </span>
+                            </span>
+                          </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-              )}
 
-              {/* In Stock Filter */}
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="inStock"
-                  checked={filterParams.inStock || false}
-                  onCheckedChange={handleStockChange}
-                />
-                <Label htmlFor="inStock" className="text-sm cursor-pointer">
-                  Chỉ hiện còn hàng
-                </Label>
+                {/* Vendor Filter */}
+                {showVendorFilter && vendors.length > 0 && (
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Cửa hàng</Label>
+                    <Select
+                      value={filterParams.vendorId || "all"}
+                      onValueChange={handleVendorChange}
+                    >
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Tất cả cửa hàng" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tất cả cửa hàng</SelectItem>
+                        {vendors.map((vendor) => (
+                          <SelectItem key={vendor.id} value={vendor.id}>
+                            {vendor.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* In Stock Filter */}
+                <div className="flex items-center space-x-3 p-4 rounded-lg border bg-muted/30">
+                  <Checkbox
+                    id="inStock"
+                    checked={filterParams.inStock || false}
+                    onCheckedChange={handleStockChange}
+                    className="h-5 w-5"
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <Label
+                      htmlFor="inStock"
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      Chỉ hiện còn hàng
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Ẩn các sản phẩm đã hết hàng
+                    </p>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              {/* Clear Filters Button */}
-              {hasFilters && (
+            {/* Footer Actions */}
+            <div className="p-6 border-t mt-auto bg-background">
+              <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant="outline"
-                  className="w-full"
                   onClick={handleClearFilters}
+                  disabled={!hasFilters}
+                  className="w-full"
                 >
-                  <X className="h-4 w-4 mr-2" />
-                  Xóa tất cả bộ lọc
+                  Xóa bộ lọc
                 </Button>
-              )}
+                <SheetTrigger asChild>
+                  <Button className="w-full">Xem kết quả</Button>
+                </SheetTrigger>
+              </div>
             </div>
           </SheetContent>
         </Sheet>
+
+        {/* Sort dropdown - always visible */}
+        <Select
+          value={filterParams.sort || "newest"}
+          onValueChange={handleSortChange}
+        >
+          <SelectTrigger className="w-40 h-9">
+            <SelectValue placeholder="Sắp xếp" />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Clear Filters Badge Button */}
+        {hasFilters && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleClearFilters}
+            className="h-9 px-3 text-xs font-medium hover:bg-destructive/10 hover:text-destructive transition-colors"
+          >
+            <X className="h-3.5 w-3.5 mr-1" />
+            Xóa bộ lọc
+          </Button>
+        )}
       </div>
     </div>
   );

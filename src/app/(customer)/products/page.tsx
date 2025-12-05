@@ -73,9 +73,6 @@ export default async function ProductsPage({ searchParams }: PageProps) {
     <div className="container mx-auto px-4 py-12 lg:py-16">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Sản Phẩm</h1>
-        <p className="text-muted-foreground mt-2">
-          {pagination.total} sản phẩm
-        </p>
       </div>
 
       {/* Category tabs */}

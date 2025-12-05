@@ -85,18 +85,24 @@ export async function VendorOrdersPage({
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {orders.map((order) => {
             const s = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
             return (
-              <Link key={order.id} href={`/vendor/orders/${order.id}`}>
+              <Link
+                key={order.id}
+                href={`/vendor/orders/${order.id}`}
+                className="block"
+              >
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base">
                         {order.orderNumber}
                       </CardTitle>
-                      <Badge variant={s.variant}>{s.label}</Badge>
+                      <Badge variant={s.variant} className={s.className}>
+                        {s.label}
+                      </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {order.customer.name || order.customer.email}

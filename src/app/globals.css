@@ -4,55 +4,54 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================
-   DESIGN TOKENS - Vendoor E-commerce
+   DESIGN TOKENS - Vendoor Premium Tech Theme
    ============================================ */
 
-/* Brand Colors - Tech Marketplace Theme */
 :root {
-  /* Background & Foreground */
-  --background: oklch(0.98 0.005 250);
+  /* Background & Foreground - Clean & Bright */
+  --background: oklch(0.99 0.005 240);
   --foreground: oklch(0.13 0.02 260);
 
-  /* Card & Popover */
+  /* Card & Popover - Glassy White */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.13 0.02 260);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.13 0.02 260);
 
-  /* Primary - Blue */
-  --primary: oklch(0.55 0.2 255);
+  /* Primary - Electric Blue */
+  --primary: oklch(0.55 0.25 260);
   --primary-foreground: oklch(0.98 0 0);
 
-  /* Secondary */
+  /* Secondary - Soft Cool Gray */
   --secondary: oklch(0.96 0.01 250);
   --secondary-foreground: oklch(0.2 0.02 260);
 
-  /* Muted */
-  --muted: oklch(0.95 0.01 250);
+  /* Muted - Subtle Gray */
+  --muted: oklch(0.96 0.01 250);
   --muted-foreground: oklch(0.45 0.02 260);
 
-  /* Accent - Cyan */
-  --accent: oklch(0.7 0.18 180);
+  /* Accent - Neon Cyan */
+  --accent: oklch(0.75 0.18 190);
   --accent-foreground: oklch(0.13 0.02 260);
 
-  /* Destructive */
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
+  /* Destructive - Vivid Red */
+  --destructive: oklch(0.6 0.25 25);
+  --destructive-foreground: oklch(0.98 0 0);
 
   /* Border & Input */
-  --border: oklch(0.9 0.01 250);
+  --border: oklch(0.92 0.01 250);
   --input: oklch(0.92 0.01 250);
-  --ring: oklch(0.55 0.2 255);
+  --ring: oklch(0.55 0.25 260);
 
-  /* Charts */
-  --chart-1: oklch(0.55 0.2 255);
-  --chart-2: oklch(0.7 0.18 180);
-  --chart-3: oklch(0.65 0.2 290);
-  --chart-4: oklch(0.75 0.15 60);
-  --chart-5: oklch(0.6 0.2 340);
+  /* Charts - Vibrant Spectrum */
+  --chart-1: oklch(0.55 0.25 260); /* Blue */
+  --chart-2: oklch(0.75 0.18 190); /* Cyan */
+  --chart-3: oklch(0.65 0.25 300); /* Purple */
+  --chart-4: oklch(0.75 0.2 60);   /* Orange */
+  --chart-5: oklch(0.6 0.25 340);  /* Pink */
 
-  /* Radius */
-  --radius: 0.75rem;
+  /* Radius - Modern Rounded */
+  --radius: 1rem;
 
   /* Sidebar */
   --sidebar: oklch(0.985 0 0);
@@ -64,27 +63,22 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* ============================================
-     BRAND TOKENS - Custom for Vendoor
-     ============================================ */
-
-  /* Brand Primary - Blue */
-  --brand-primary: oklch(0.55 0.2 255);
-  --brand-primary-hover: oklch(0.48 0.22 255);
-  --brand-primary-light: oklch(0.92 0.05 255);
-
-  /* Brand Secondary - Cyan/Teal */
-  --brand-secondary: oklch(0.7 0.18 180);
-  --brand-secondary-hover: oklch(0.62 0.2 180);
+  /* Brand Colors */
+  --brand-primary: oklch(0.55 0.25 260);
+  --brand-primary-hover: oklch(0.48 0.25 260);
+  --brand-primary-light: oklch(0.94 0.05 260);
+  
+  --brand-secondary: oklch(0.75 0.18 190);
+  --brand-secondary-hover: oklch(0.65 0.2 190);
 
   /* Semantic Colors */
   --success: oklch(0.65 0.2 145);
   --success-foreground: oklch(1 0 0);
-  --warning: oklch(0.75 0.18 85);
+  --warning: oklch(0.8 0.18 85);
   --warning-foreground: oklch(0.2 0.05 85);
-  --error: oklch(0.577 0.245 27);
+  --error: oklch(0.6 0.25 25);
   --error-foreground: oklch(1 0 0);
-  --info: oklch(0.6 0.18 240);
+  --info: oklch(0.6 0.2 240);
   --info-foreground: oklch(1 0 0);
 
   /* Spacing Tokens */
@@ -92,12 +86,12 @@
   --spacing-tight: 0.5rem;
   --spacing-component: 1rem;
   --spacing-content: 1.5rem;
-  --spacing-section: 3rem;
+  --spacing-section: 4rem;
 
   /* Timing Tokens */
   --timing-fast: 150ms;
-  --timing-base: 200ms;
-  --timing-slow: 300ms;
+  --timing-base: 250ms;
+  --timing-slow: 400ms;
 
   /* Typography */
   --text-body: 1rem;
@@ -106,51 +100,71 @@
 }
 
 .dark {
-  --background: oklch(0.1 0.02 260);
-  --foreground: oklch(0.98 0.005 250);
-  --card: oklch(0.14 0.02 260);
-  --card-foreground: oklch(0.98 0.005 250);
-  --popover: oklch(0.14 0.02 260);
-  --popover-foreground: oklch(0.98 0.005 250);
-  --primary: oklch(0.65 0.2 255);
+  /* Background - Deep Space Blue */
+  --background: oklch(0.1 0.05 260);
+  --foreground: oklch(0.98 0.01 250);
+
+  /* Card - Glassy Dark */
+  --card: oklch(0.14 0.05 260);
+  --card-foreground: oklch(0.98 0.01 250);
+  --popover: oklch(0.14 0.05 260);
+  --popover-foreground: oklch(0.98 0.01 250);
+
+  /* Primary - Neon Blue */
+  --primary: oklch(0.65 0.25 260);
   --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.18 0.02 260);
-  --secondary-foreground: oklch(0.98 0.005 250);
-  --muted: oklch(0.2 0.02 260);
-  --muted-foreground: oklch(0.65 0.01 250);
-  --accent: oklch(0.7 0.18 180);
-  --accent-foreground: oklch(0.98 0.005 250);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.25 0.02 260);
-  --input: oklch(0.25 0.02 260);
-  --ring: oklch(0.65 0.2 255);
-  --chart-1: oklch(0.65 0.2 255);
-  --chart-2: oklch(0.7 0.18 180);
-  --chart-3: oklch(0.7 0.2 290);
-  --chart-4: oklch(0.8 0.15 60);
-  --chart-5: oklch(0.65 0.2 340);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+
+  /* Secondary - Dark Gray Blue */
+  --secondary: oklch(0.2 0.05 260);
+  --secondary-foreground: oklch(0.98 0.01 250);
+
+  /* Muted */
+  --muted: oklch(0.2 0.05 260);
+  --muted-foreground: oklch(0.7 0.05 260);
+
+  /* Accent - Neon Cyan */
+  --accent: oklch(0.75 0.18 190);
+  --accent-foreground: oklch(0.98 0.01 250);
+
+  /* Destructive */
+  --destructive: oklch(0.4 0.2 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Border */
+  --border: oklch(0.25 0.05 260);
+  --input: oklch(0.25 0.05 260);
+  --ring: oklch(0.65 0.25 260);
+
+  /* Charts */
+  --chart-1: oklch(0.65 0.25 260);
+  --chart-2: oklch(0.75 0.18 190);
+  --chart-3: oklch(0.7 0.25 300);
+  --chart-4: oklch(0.8 0.2 60);
+  --chart-5: oklch(0.65 0.25 340);
+
+  /* Sidebar */
+  --sidebar: oklch(0.12 0.05 260);
+  --sidebar-foreground: oklch(0.98 0.01 250);
+  --sidebar-primary: oklch(0.65 0.25 260);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.2 0.05 260);
+  --sidebar-accent-foreground: oklch(0.98 0.01 250);
+  --sidebar-border: oklch(0.25 0.05 260);
+  --sidebar-ring: oklch(0.65 0.25 260);
 
   /* Brand Colors - Dark Mode */
-  --brand-primary: oklch(0.65 0.2 255);
-  --brand-primary-hover: oklch(0.58 0.22 255);
-  --brand-primary-light: oklch(0.25 0.08 255);
-  --brand-secondary: oklch(0.7 0.18 180);
-  --brand-secondary-hover: oklch(0.62 0.2 180);
+  --brand-primary: oklch(0.65 0.25 260);
+  --brand-primary-hover: oklch(0.6 0.25 260);
+  --brand-primary-light: oklch(0.25 0.1 260);
+  
+  --brand-secondary: oklch(0.75 0.18 190);
+  --brand-secondary-hover: oklch(0.7 0.2 190);
 
   /* Semantic Colors - Dark Mode */
   --success: oklch(0.7 0.2 145);
   --warning: oklch(0.8 0.18 85);
-  --error: oklch(0.65 0.22 27);
-  --info: oklch(0.65 0.18 240);
+  --error: oklch(0.65 0.25 25);
+  --info: oklch(0.65 0.2 240);
 }
 
 @theme inline {
@@ -235,5 +249,28 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Glassmorphism Utilities */
+@layer utilities {
+  .glass {
+    @apply bg-background/60 backdrop-blur-md border border-white/20 shadow-sm;
+  }
+  
+  .glass-hover {
+    @apply hover:bg-background/80 hover:shadow-md transition-all duration-300;
+  }
+
+  .glass-dark {
+    @apply bg-black/40 backdrop-blur-md border border-white/10;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+  }
+
+  .text-gradient-subtle {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-foreground to-muted-foreground;
   }
 }

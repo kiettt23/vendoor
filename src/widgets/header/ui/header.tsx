@@ -91,20 +91,25 @@ export function Header({ initialUser }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur border-b">
-      <div className="bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 py-2 flex items-center justify-between text-sm">
-          <div className="flex items-center gap-4">
+    <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b">
+      <div className="bg-primary text-primary-foreground w-full px-8 md:px-24 lg:px-48">
+        <div className="w-full px-2 md:px-6 lg:px-12 py-2 flex items-center justify-between text-sm">
+          <div className="flex items-center gap-4 text-primary-foreground/90">
             <span className="flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" />
               Giao hàng toàn quốc
             </span>
-            <span className="hidden sm:inline">Hotline: 0912 444 449</span>
+            <span className="hidden sm:inline text-primary-foreground/80">
+              Hotline:{" "}
+              <span className="text-primary-foreground font-medium">
+                0912 444 449
+              </span>
+            </span>
           </div>
           <div className="flex items-center gap-4">
             <Link
               href="/become-vendor"
-              className="hover:underline flex items-center gap-1"
+              className="hover:text-white transition-colors flex items-center gap-1 text-primary-foreground/90 font-medium"
             >
               <Store className="h-3.5 w-3.5" />
               Trở thành người bán
@@ -113,8 +118,8 @@ export function Header({ initialUser }: HeaderProps) {
         </div>
       </div>
 
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center gap-4 relative">
+      <div className="w-full px-8 md:px-24 lg:px-48">
+        <div className="flex h-16 items-center justify-between gap-4 relative">
           {/* Mobile: Menu button - only on small screens */}
           <div className="md:hidden shrink-0">
             <Sheet>
@@ -162,12 +167,12 @@ export function Header({ initialUser }: HeaderProps) {
             <SearchInput categories={HEADER_CATEGORIES} />
           </div>
 
-          <nav className="hidden xl:flex items-center gap-6">
+          <nav className="hidden xl:flex items-center gap-1">
             {HEADER_NAV_ITEMS.slice(1, 4).map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                className="text-sm font-medium text-muted-foreground hover:text-primary px-4 py-2 rounded-full hover:bg-primary/10 transition-all duration-300"
               >
                 {item.label}
               </Link>
@@ -181,19 +186,17 @@ export function Header({ initialUser }: HeaderProps) {
             {/* 2. Other icon buttons (mobile only, exclude cart) */}
             {HEADER_ICON_BUTTONS.filter(
               (btn) => btn.id !== "search" && btn.id !== "cart"
-            ).map(
-              (btn) => (
-                <Button
-                  key={btn.id}
-                  variant="ghost"
-                  size="icon"
-                  className="md:hidden"
-                  aria-label={btn.label}
-                >
-                  <btn.icon className="h-5 w-5" />
-                </Button>
-              )
-            )}
+            ).map((btn) => (
+              <Button
+                key={btn.id}
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                aria-label={btn.label}
+              >
+                <btn.icon className="h-5 w-5" />
+              </Button>
+            ))}
 
             {/* 2. Cart with Badge */}
             {HEADER_ICON_BUTTONS.filter((btn) => btn.id === "cart").map(

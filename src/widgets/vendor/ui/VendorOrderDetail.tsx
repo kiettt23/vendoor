@@ -24,17 +24,50 @@ import {
 } from "@/entities/order";
 
 // Define allowed status transitions for vendor
-const VENDOR_STATUS_TRANSITIONS: Record<string, { nextStatus: string; label: string; icon: React.ReactNode; variant: "default" | "secondary" | "destructive" }[]> = {
+const VENDOR_STATUS_TRANSITIONS: Record<
+  string,
+  {
+    nextStatus: string;
+    label: string;
+    icon: React.ReactNode;
+    variant: "default" | "secondary" | "destructive";
+  }[]
+> = {
   PENDING: [
-    { nextStatus: "PROCESSING", label: "Xác nhận đơn", icon: <CheckCircle className="h-4 w-4 mr-2" />, variant: "default" },
-    { nextStatus: "CANCELLED", label: "Hủy đơn", icon: <XCircle className="h-4 w-4 mr-2" />, variant: "destructive" },
+    {
+      nextStatus: "PROCESSING",
+      label: "Xác nhận đơn",
+      icon: <CheckCircle className="h-4 w-4 mr-2" />,
+      variant: "default",
+    },
+    {
+      nextStatus: "CANCELLED",
+      label: "Hủy đơn",
+      icon: <XCircle className="h-4 w-4 mr-2" />,
+      variant: "destructive",
+    },
   ],
   PROCESSING: [
-    { nextStatus: "SHIPPED", label: "Đã giao cho vận chuyển", icon: <Truck className="h-4 w-4 mr-2" />, variant: "default" },
-    { nextStatus: "CANCELLED", label: "Hủy đơn", icon: <XCircle className="h-4 w-4 mr-2" />, variant: "destructive" },
+    {
+      nextStatus: "SHIPPED",
+      label: "Đã giao cho vận chuyển",
+      icon: <Truck className="h-4 w-4 mr-2" />,
+      variant: "default",
+    },
+    {
+      nextStatus: "CANCELLED",
+      label: "Hủy đơn",
+      icon: <XCircle className="h-4 w-4 mr-2" />,
+      variant: "destructive",
+    },
   ],
   SHIPPED: [
-    { nextStatus: "DELIVERED", label: "Xác nhận đã giao", icon: <CheckCircle className="h-4 w-4 mr-2" />, variant: "default" },
+    {
+      nextStatus: "DELIVERED",
+      label: "Xác nhận đã giao",
+      icon: <CheckCircle className="h-4 w-4 mr-2" />,
+      variant: "default",
+    },
   ],
   DELIVERED: [],
   CANCELLED: [],
@@ -83,7 +116,10 @@ export async function VendorOrderDetailPage({
             {formatDateTime(order.createdAt)}
           </p>
         </div>
-        <Badge variant={status.variant} className="text-base px-4 py-1">
+        <Badge
+          variant={status.variant}
+          className={`${status.className || ""} text-base px-4 py-1`}
+        >
           {status.label}
         </Badge>
       </div>
@@ -130,9 +166,16 @@ export async function VendorOrderDetailPage({
           {VENDOR_STATUS_TRANSITIONS[order.status]?.length > 0 ? (
             <div className="flex flex-wrap gap-3">
               {VENDOR_STATUS_TRANSITIONS[order.status].map((transition) => (
-                <form key={transition.nextStatus} action={updateOrderStatusAction}>
+                <form
+                  key={transition.nextStatus}
+                  action={updateOrderStatusAction}
+                >
                   <input type="hidden" name="orderId" value={order.id} />
-                  <input type="hidden" name="status" value={transition.nextStatus} />
+                  <input
+                    type="hidden"
+                    name="status"
+                    value={transition.nextStatus}
+                  />
                   <Button type="submit" variant={transition.variant}>
                     {transition.icon}
                     {transition.label}
@@ -145,8 +188,8 @@ export async function VendorOrderDetailPage({
               {order.status === "PENDING_PAYMENT"
                 ? "Chờ khách hàng thanh toán"
                 : order.status === "DELIVERED"
-                  ? "Đơn hàng đã hoàn thành"
-                  : "Đơn hàng đã hủy"}
+                ? "Đơn hàng đã hoàn thành"
+                : "Đơn hàng đã hủy"}
             </p>
           )}
         </CardContent>
