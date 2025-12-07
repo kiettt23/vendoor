@@ -33,8 +33,8 @@ import { revalidatePath } from "next/cache";
 import {
   updateStock,
   bulkUpdateStock,
-} from "@/features/inventory-management/api/actions";
-import { getInventoryStats } from "@/features/inventory-management/api/queries";
+  getInventoryStats,
+} from "@/features/inventory-management";
 
 describe("Inventory Management - Integration", () => {
   beforeEach(() => {

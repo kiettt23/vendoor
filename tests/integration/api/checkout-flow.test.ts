@@ -58,7 +58,7 @@ vi.mock("@/shared/lib/db", () => ({
 }));
 
 // Import after mocks
-import { validateCheckout, createOrders } from "@/features/checkout/api/actions";
+import { validateCheckout, createOrders } from "@/features/checkout";
 import type { CartItem } from "@/entities/cart";
 
 // Test data

@@ -22,7 +22,7 @@ vi.mock("@/shared/lib/db", () => ({
 }));
 
 import { prisma } from "@/shared/lib/db";
-import { getVendorAnalytics } from "@/features/vendor-analytics/api/queries";
+import { getVendorAnalytics } from "@/features/vendor-analytics";
 
 describe("Vendor Analytics - Integration", () => {
   beforeEach(() => {
