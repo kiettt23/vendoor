@@ -212,7 +212,9 @@ describe("Checkout Flow - Integration", () => {
       const result = await createOrders(mockCartItems, mockShippingInfo, "COD");
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("đăng nhập");
+      if (!result.success) {
+        expect(result.error).toContain("đăng nhập");
+      }
     });
 
     it("should reject empty cart", async () => {
@@ -221,7 +223,9 @@ describe("Checkout Flow - Integration", () => {
       const result = await createOrders([], mockShippingInfo, "COD");
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("trống");
+      if (!result.success) {
+        expect(result.error).toContain("trống");
+      }
     });
 
     it("should validate vendor exists", async () => {
@@ -231,7 +235,9 @@ describe("Checkout Flow - Integration", () => {
       const result = await createOrders(mockCartItems, mockShippingInfo, "COD");
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("không hợp lệ");
+      if (!result.success) {
+        expect(result.error).toContain("không hợp lệ");
+      }
     });
 
     it("should create COD order with PENDING status", async () => {
@@ -334,7 +340,9 @@ describe("Checkout Flow - Integration", () => {
       const result = await createOrders(mockCartItems, mockShippingInfo, "COD");
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("không đủ hàng");
+      if (!result.success) {
+        expect(result.error).toContain("không đủ hàng");
+      }
     });
 
     it("should calculate correct total amount", async () => {
