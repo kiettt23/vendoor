@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/shared/ui/button";
+import { ROUTES } from "@/shared/lib/constants";
 import { ArrowRight, Smartphone, Laptop } from "lucide-react";
 
 export function PromoSection() {
@@ -26,7 +27,7 @@ export function PromoSection() {
                 className="gap-2 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
                 asChild
               >
-                <Link href="/products?category=dien-thoai">
+                <Link href={`${ROUTES.PRODUCTS}?category=dien-thoai`}>
                   Xem ngay
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -51,7 +52,7 @@ export function PromoSection() {
                 đồng.
               </p>
               <Button size="lg" className="gap-2" asChild>
-                <Link href="/products?category=laptop">
+                <Link href={`${ROUTES.PRODUCTS}?category=laptop`}>
                   Khám phá
                   <ArrowRight className="h-4 w-4" />
                 </Link>

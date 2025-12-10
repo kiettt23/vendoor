@@ -1,19 +1,10 @@
-/**
- * Vendor Auth Guards
- *
- * Server-side utilities để kiểm tra vendor authorization.
- *
- * @example
- * const { session, user, vendorProfile } = await requireVendor();
- */
-
 "use server";
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/shared/lib/db";
 import { ROUTES } from "@/shared/lib/constants";
-import { requireSession } from "@/shared/lib/auth";
-import type { Session } from "@/shared/lib/auth/config";
+import { requireSession } from "@/shared/lib/auth/session";
+import type { Session } from "@/shared/lib/auth";
 
 interface VendorUser {
   id: string;
@@ -32,17 +23,9 @@ export interface VendorAuthResult {
   };
 }
 
-/**
- * Yêu cầu user là Vendor và trả về vendor profile.
- *
- * @returns Session, user và vendor profile
- * @throws Redirect to /login if not authenticated
- * @throws Redirect to / if not a vendor or not approved
- */
 export async function requireVendor(): Promise<VendorAuthResult> {
   const session = await requireSession();
 
-  // Check if user has VENDOR role
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {

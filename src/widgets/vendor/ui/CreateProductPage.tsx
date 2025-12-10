@@ -5,12 +5,11 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowLeft, Plus, Loader2, ImagePlus, X } from "lucide-react";
 import {
   showToast,
   showErrorToast,
-  showCustomToast,
+  ROUTES,
 } from "@/shared/lib/constants";
 import { uploadImageViaAPI } from "@/shared/lib/upload";
 import { Button } from "@/shared/ui/button";
@@ -26,13 +25,12 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { Switch } from "@/shared/ui/switch";
+import { OptimizedImage } from "@/shared/ui/optimized-image";
 import {
   createProduct,
-} from "@/entities/product/api/actions";
-import {
   productSchema,
   type ProductFormData,
-} from "@/entities/product/model";
+} from "@/entities/product";
 import type { CategoryOption } from "@/entities/category";
 import {
   AIGenerateButton,
@@ -118,7 +116,7 @@ export function CreateProductPage({
             uploadError instanceof Error
               ? uploadError.message
               : "Không thể upload hình ảnh";
-          showCustomToast.error(message);
+          showErrorToast("generic", message);
           setIsSubmitting(false);
           return;
         }
@@ -131,9 +129,9 @@ export function CreateProductPage({
       });
       if (result.success) {
         showToast("vendor", "productCreated");
-        router.push("/vendor/products");
+        router.push(ROUTES.VENDOR_PRODUCTS);
       } else {
-        showCustomToast.error(result.error);
+        showErrorToast("generic", result.error);
       }
     } catch {
       showErrorToast("generic");
@@ -144,7 +142,7 @@ export function CreateProductPage({
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
       <Button variant="ghost" size="sm" asChild className="mb-6">
-        <Link href="/vendor/products">
+        <Link href={ROUTES.VENDOR_PRODUCTS}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Danh sách sản phẩm
         </Link>
@@ -167,12 +165,13 @@ export function CreateProductPage({
           <CardContent>
             {imagePreview ? (
               <div className="relative w-64 h-64 mx-auto">
-                <Image
+                <OptimizedImage
                   src={imagePreview}
                   alt="Product preview"
                   fill
                   sizes="256px"
                   className="object-cover rounded-lg"
+                  enableBlur={false}
                   unoptimized
                 />
                 <Button

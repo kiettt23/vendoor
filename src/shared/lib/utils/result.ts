@@ -4,26 +4,11 @@
  * Pattern để xử lý kết quả action một cách nhất quán.
  * Tránh throw error và try-catch scattered khắp nơi.
  *
- * @example
- * // Trong action
- * export async function createProduct(data): Promise<Result<string>> {
- *   if (!valid) return err("Invalid data");
- *   const id = await db.create(data);
- *   return ok(id);
- * }
- *
- * // Trong component
- * const result = await createProduct(data);
- * if (!result.success) {
- *   toast.error(result.error);
- *   return;
- * }
- * redirect(`/products/${result.data}`);
  */
 
-// ============================================
-// Types
-// ============================================
+import { createLogger } from "./logger";
+
+const logger = createLogger("result");
 
 export type Result<T, E = string> =
   | { success: true; data: T }
@@ -31,13 +16,8 @@ export type Result<T, E = string> =
 
 export type AsyncResult<T, E = string> = Promise<Result<T, E>>;
 
-// Result không cần trả data (chỉ cần success/fail)
 export type VoidResult<E = string> = Result<void, E>;
 export type AsyncVoidResult<E = string> = Promise<VoidResult<E>>;
-
-// ============================================
-// Constructors
-// ============================================
 
 /**
  * Tạo Result thành công với data
@@ -60,10 +40,6 @@ export function err<E = string>(error: E): Result<never, E> {
   return { success: false, error };
 }
 
-// ============================================
-// Utilities
-// ============================================
-
 /**
  * Wrap async function trong try-catch và trả về Result
  */
@@ -75,7 +51,7 @@ export async function tryCatch<T>(
     const data = await fn();
     return ok(data);
   } catch (error) {
-    console.error(error);
+    logger.error(errorMessage, error);
     return err(errorMessage);
   }
 }

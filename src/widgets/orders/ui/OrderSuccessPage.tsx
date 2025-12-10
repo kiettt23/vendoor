@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { CheckCircle, Package, ArrowRight } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
+import { ROUTES } from "@/shared/lib/constants";
 
 export function OrderSuccessPage() {
   const searchParams = useSearchParams();
@@ -36,12 +37,12 @@ export function OrderSuccessPage() {
 
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Button asChild>
-          <Link href="/orders">
+          <Link href={ROUTES.ORDERS}>
             Xem đơn hàng <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/products">Tiếp tục mua sắm</Link>
+          <Link href={ROUTES.PRODUCTS}>Tiếp tục mua sắm</Link>
         </Button>
       </div>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, FolderOpen } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -13,7 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/ui/dialog";
-import { showToast, showCustomToast } from "@/shared/lib/constants";
+import { EmptyCategories } from "@/shared/ui/feedback";
+import { showToast, showErrorToast } from "@/shared/lib/constants";
 import type { Result } from "@/shared/lib/utils";
 
 interface Category {
@@ -49,7 +50,7 @@ export function AdminCategoriesPage({
       setNewName("");
       setIsCreateOpen(false);
     } else {
-      showCustomToast.error(result.error);
+      showErrorToast("generic", result.error);
     }
   };
 
@@ -60,13 +61,13 @@ export function AdminCategoriesPage({
       showToast("admin", "categoryUpdated");
       setEditingId(null);
     } else {
-      showCustomToast.error(result.error);
+      showErrorToast("generic", result.error);
     }
   };
 
   const handleDelete = async (id: string, productCount: number) => {
     if (productCount > 0) {
-      showCustomToast.error("Không thể xóa danh mục có sản phẩm");
+      showErrorToast("generic", "Không thể xóa danh mục có sản phẩm");
       return;
     }
     if (!confirm("Xác nhận xóa?")) return;
@@ -74,7 +75,7 @@ export function AdminCategoriesPage({
     if (result.success) {
       showToast("admin", "categoryDeleted");
     } else {
-      showCustomToast.error(result.error);
+      showErrorToast("generic", result.error);
     }
   };
 
@@ -112,9 +113,8 @@ export function AdminCategoriesPage({
 
       {categories.length === 0 ? (
         <Card>
-          <CardContent className="py-16 text-center">
-            <FolderOpen className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold">Chưa có danh mục</h3>
+          <CardContent className="py-8">
+            <EmptyCategories />
           </CardContent>
         </Card>
       ) : (

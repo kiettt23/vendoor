@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ProductCard, type FeaturedProduct } from "@/entities/product";
+import { ProductCard, type FeaturedProduct, calculateAverageRating } from "@/entities/product";
+import { ROUTES } from "@/shared/lib/constants";
 import { ArrowUpRight } from "lucide-react";
 
 interface FeaturedProductsProps {
@@ -7,18 +8,28 @@ interface FeaturedProductsProps {
 }
 
 export function FeaturedProducts({ products }: FeaturedProductsProps) {
-  const formatted = products.map((p) => ({
-    id: p.id,
-    name: p.name,
-    slug: p.slug,
-    price: p.variants[0]?.price || 0,
-    compareAtPrice: p.variants[0]?.compareAtPrice || null,
-    image: p.images[0]?.url || "",
-    stock: p.variants[0]?.stock ?? 0,
-    variantId: p.variants[0]?.id || "",
-    vendor: { id: p.vendor.id, name: p.vendor.name || "Unknown" },
-    category: { name: p.category.name, slug: p.category.slug },
-  }));
+  const formatted = products.map((p) => {
+    const reviewCount = p.reviews.length;
+    const avgRating = calculateAverageRating(p.reviews);
+
+    return {
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      price: p.variants[0]?.price || 0,
+      compareAtPrice: p.variants[0]?.compareAtPrice || null,
+      image: p.images[0]?.url || "",
+      stock: p.variants[0]?.stock ?? 0,
+      variantId: p.variants[0]?.id || "",
+      vendor: {
+        id: p.vendor.id,
+        shopName: p.vendor.vendorProfile?.shopName || "Vendoor",
+      },
+      category: { name: p.category.name, slug: p.category.slug },
+      rating: avgRating,
+      reviewCount,
+    };
+  });
 
   return (
     <section className="py-16 lg:py-24">
@@ -31,7 +42,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
             </p>
           </div>
           <Link
-            href="/products"
+            href={ROUTES.PRODUCTS}
             className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
           >
             Xem tất cả

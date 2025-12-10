@@ -1,12 +1,8 @@
 // Types
 export type { Category, CategoryWithCount, CategoryOption } from "./model";
 
-// API - Queries
-export {
-  getCategories,
-  getCategoriesWithCount,
-  getCategoriesAdmin,
-} from "./api";
+// ⚠️ Queries KHÔNG được export từ barrel file vì chứa server-only code (prisma)
+// Server Components: import trực tiếp từ "@/entities/category/api/queries"
 
-// API - Actions
+// API - Actions (Server Actions - callable from Client Components)
 export { createCategory, updateCategory, deleteCategory } from "./api";

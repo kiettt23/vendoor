@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ROUTES } from "@/shared/lib/constants";
 import {
   ArrowUpRight,
   Smartphone,
@@ -9,6 +10,15 @@ import {
   Gamepad2,
   Cpu,
   Home,
+  Camera,
+  Tv,
+  Speaker,
+  MonitorSmartphone,
+  Keyboard,
+  Mouse,
+  HardDrive,
+  Wifi,
+  type LucideIcon,
 } from "lucide-react";
 import type { CategoryWithCount } from "@/entities/category";
 
@@ -16,65 +26,105 @@ interface CategoriesSectionProps {
   categories: CategoryWithCount[];
 }
 
-// Mapping icon và màu sắc cho từng category theo slug
-const categoryConfig: Record<
-  string,
-  { icon: React.ElementType; color: string; gradient: string }
-> = {
-  "dien-thoai": {
-    icon: Smartphone,
+const STYLE_CONFIGS = [
+  {
     color: "text-blue-600",
     gradient: "from-blue-500/20 to-blue-600/5",
+    icon: Smartphone,
   },
-  laptop: {
-    icon: Laptop,
+  {
     color: "text-purple-600",
     gradient: "from-purple-500/20 to-purple-600/5",
+    icon: Laptop,
   },
-  tablet: {
-    icon: Tablet,
+  {
     color: "text-green-600",
     gradient: "from-green-500/20 to-green-600/5",
+    icon: Tablet,
   },
-  "tai-nghe": {
-    icon: Headphones,
+  {
     color: "text-orange-600",
     gradient: "from-orange-500/20 to-orange-600/5",
+    icon: Headphones,
   },
-  "dong-ho": {
-    icon: Watch,
+  {
     color: "text-pink-600",
     gradient: "from-pink-500/20 to-pink-600/5",
+    icon: Watch,
   },
-  gaming: {
-    icon: Gamepad2,
+  {
     color: "text-red-600",
     gradient: "from-red-500/20 to-red-600/5",
+    icon: Gamepad2,
   },
-  "linh-kien": {
-    icon: Cpu,
+  {
     color: "text-cyan-600",
     gradient: "from-cyan-500/20 to-cyan-600/5",
+    icon: Cpu,
   },
-  "smart-home": {
-    icon: Home,
+  {
     color: "text-amber-600",
     gradient: "from-amber-500/20 to-amber-600/5",
+    icon: Home,
   },
-  "phu-kien": {
-    icon: Headphones,
+  {
     color: "text-indigo-600",
     gradient: "from-indigo-500/20 to-indigo-600/5",
+    icon: Camera,
   },
-};
+  {
+    color: "text-teal-600",
+    gradient: "from-teal-500/20 to-teal-600/5",
+    icon: Tv,
+  },
+  {
+    color: "text-rose-600",
+    gradient: "from-rose-500/20 to-rose-600/5",
+    icon: Speaker,
+  },
+  {
+    color: "text-violet-600",
+    gradient: "from-violet-500/20 to-violet-600/5",
+    icon: MonitorSmartphone,
+  },
+  {
+    color: "text-emerald-600",
+    gradient: "from-emerald-500/20 to-emerald-600/5",
+    icon: Keyboard,
+  },
+  {
+    color: "text-sky-600",
+    gradient: "from-sky-500/20 to-sky-600/5",
+    icon: Mouse,
+  },
+  {
+    color: "text-fuchsia-600",
+    gradient: "from-fuchsia-500/20 to-fuchsia-600/5",
+    icon: HardDrive,
+  },
+  {
+    color: "text-lime-600",
+    gradient: "from-lime-500/20 to-lime-600/5",
+    icon: Wifi,
+  },
+];
 
-const defaultConfig = {
-  icon: Cpu,
-  color: "text-slate-600",
-  gradient: "from-slate-500/20 to-slate-600/5",
-};
+/** Hash slug để tạo style consistent cho mỗi category */
+function getStyleBySlug(slug: string): {
+  color: string;
+  gradient: string;
+  icon: LucideIcon;
+} {
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = slug.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return STYLE_CONFIGS[Math.abs(hash) % STYLE_CONFIGS.length];
+}
 
 export function CategoriesSection({ categories }: CategoriesSectionProps) {
+  const showScrollHint = categories.length > 8;
+
   return (
     <section className="py-20 lg:py-32 relative">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -88,7 +138,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
             </p>
           </div>
           <Link
-            href="/products"
+            href={ROUTES.PRODUCTS}
             className="group flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors px-4 py-2 rounded-full bg-primary/5 hover:bg-primary/10"
           >
             Xem tất cả
@@ -96,39 +146,62 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-6">
-          {categories.slice(0, 8).map((category) => {
-            const config = categoryConfig[category.slug] || defaultConfig;
-            const IconComponent = config.icon;
+        {/* Scrollable container for many categories */}
+        <div
+          className={
+            showScrollHint
+              ? "overflow-x-auto pb-4 -mx-4 px-4 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent"
+              : ""
+          }
+        >
+          <div
+            className={
+              showScrollHint
+                ? "flex gap-4 min-w-max"
+                : "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-6"
+            }
+          >
+            {categories.map((category) => {
+              const { color, gradient, icon: Icon } = getStyleBySlug(category.slug);
 
-            return (
-              <Link
-                key={category.id}
-                href={`/products?category=${category.slug}`}
-                className="group relative flex flex-col items-center gap-4 p-6 rounded-3xl bg-white/50 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1"
-              >
-                <div
-                  className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${config.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
-                />
-
-                <div
-                  className={`relative h-16 w-16 rounded-2xl bg-white dark:bg-white/10 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${config.color}`}
+              return (
+                <Link
+                  key={category.id}
+                  href={`/products?category=${category.slug}`}
+                  className={`group relative flex flex-col items-center gap-4 p-6 rounded-3xl bg-white/50 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 ${
+                    showScrollHint ? "w-32 shrink-0" : ""
+                  }`}
                 >
-                  <IconComponent className="h-8 w-8" />
-                </div>
+                  <div
+                    className={`absolute inset-0 rounded-3xl bg-linear-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+                  />
 
-                <div className="relative text-center z-10">
-                  <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
-                    {category.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {category._count.products} sản phẩm
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
+                  <div
+                    className={`relative h-16 w-16 rounded-2xl bg-white dark:bg-white/10 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${color}`}
+                  >
+                    <Icon className="h-8 w-8" />
+                  </div>
+
+                  <div className="relative text-center z-10">
+                    <h3 className="font-semibold text-sm group-hover:text-primary transition-colors line-clamp-2">
+                      {category.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {category._count.products} sản phẩm
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Scroll hint */}
+        {showScrollHint && (
+          <p className="text-xs text-muted-foreground mt-4 text-center lg:hidden">
+            ← Vuốt để xem thêm →
+          </p>
+        )}
       </div>
     </section>
   );

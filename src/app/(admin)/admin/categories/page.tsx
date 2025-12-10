@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/entities/user";
 import { AdminCategoriesPage } from "@/widgets/admin";
+import { getCategoriesAdmin } from "@/entities/category/api/queries";
 import {
-  getCategoriesAdmin,
   createCategory,
   updateCategory,
   deleteCategory,

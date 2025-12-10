@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { Alert, AlertDescription } from "@/shared/ui/alert";
+import { PriceDisplay } from "@/shared/ui/price-display";
 import { AlertCircle } from "lucide-react";
 import { formatPrice, cn } from "@/shared/lib";
 import type { ProductVariant } from "../model/types";
@@ -53,16 +54,11 @@ export function ProductDetailClient({
       )}
 
       {/* Price Display */}
-      <div className="flex items-baseline gap-3">
-        <span className="text-3xl font-bold text-primary">
-          {formatPrice(selectedVariant.price)}
-        </span>
-        {selectedVariant.compareAtPrice && (
-          <span className="text-xl text-muted-foreground line-through">
-            {formatPrice(selectedVariant.compareAtPrice)}
-          </span>
-        )}
-      </div>
+      <PriceDisplay
+        price={selectedVariant.price}
+        compareAtPrice={selectedVariant.compareAtPrice}
+        size="lg"
+      />
 
       {/* Variant Selector - chỉ hiển thị khi có nhiều hơn 1 variant */}
       {variants.length > 1 && (

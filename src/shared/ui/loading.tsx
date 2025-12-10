@@ -111,3 +111,26 @@ export function OrderSummaryLoading() {
   );
 }
 
+export function FormLoadingSkeleton({ fields = 3 }: { fields?: number }) {
+  return (
+    <div className="space-y-6">
+      {Array.from({ length: fields }).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      ))}
+      <Skeleton className="h-10 w-32" />
+    </div>
+  );
+}
+
+export function ProfileCardLoading() {
+  return (
+    <div className="flex flex-col items-center">
+      <Skeleton className="h-20 w-20 rounded-full" />
+      <Skeleton className="h-6 w-32 mt-4" />
+      <Skeleton className="h-4 w-40 mt-2" />
+    </div>
+  );
+}

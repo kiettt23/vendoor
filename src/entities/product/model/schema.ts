@@ -1,8 +1,6 @@
 import { z } from "zod";
 
-// ============================================
-// Product Form Schema
-// ============================================
+// Product Form Schema (for Create - includes variant info)
 
 export const productSchema = z.object({
   name: z.string().min(3, "Tên sản phẩm phải có ít nhất 3 ký tự"),
@@ -17,9 +15,18 @@ export const productSchema = z.object({
 
 export type ProductFormData = z.infer<typeof productSchema>;
 
-// ============================================
+// Product Edit Schema (basic info only - variants managed separately)
+
+export const productEditSchema = z.object({
+  name: z.string().min(3, "Tên sản phẩm phải có ít nhất 3 ký tự"),
+  description: z.string().optional(),
+  categoryId: z.string().min(1, "Vui lòng chọn danh mục"),
+  isActive: z.boolean(),
+});
+
+export type ProductEditFormData = z.infer<typeof productEditSchema>;
+
 // Product Variant Schema
-// ============================================
 
 export const productVariantSchema = z.object({
   name: z.string().optional(),

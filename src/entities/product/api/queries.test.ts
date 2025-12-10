@@ -29,6 +29,7 @@ const sampleProduct = {
   category: { id: "cat-1", name: "Test Category", slug: "test-category" },
   variants: [{ id: "var-1", price: 100000, compareAtPrice: 120000, stock: 10, isDefault: true }],
   images: [{ url: "https://example.com/image.jpg", order: 0 }],
+  reviews: [{ rating: 5 }, { rating: 4 }],
 };
 
 // Import after mocks

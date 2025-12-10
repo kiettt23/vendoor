@@ -17,9 +17,7 @@ import {
   ValidationMessages,
 } from "./form";
 
-// ============================================================
 // formatZodErrors - Convert Zod errors sang object
-// ============================================================
 describe("formatZodErrors", () => {
   it("should format single field error", () => {
     const schema = z.object({
@@ -63,9 +61,7 @@ describe("formatZodErrors", () => {
   });
 });
 
-// ============================================================
 // getFirstError - Lấy error message đầu tiên
-// ============================================================
 describe("getFirstError", () => {
   it("should return first error message", () => {
     const errors = {
@@ -83,9 +79,7 @@ describe("getFirstError", () => {
   });
 });
 
-// ============================================================
 // hasErrors - Kiểm tra có lỗi không
-// ============================================================
 describe("hasErrors", () => {
   it("should return true when errors exist", () => {
     const errors = {
@@ -99,9 +93,7 @@ describe("hasErrors", () => {
   });
 });
 
-// ============================================================
 // validatePhone - Validate số điện thoại VN
-// ============================================================
 describe("validatePhone", () => {
   // Valid cases
   it("should accept valid phone starting with 0", () => {
@@ -128,9 +120,7 @@ describe("validatePhone", () => {
   });
 });
 
-// ============================================================
 // validateEmail - Validate email
-// ============================================================
 describe("validateEmail", () => {
   it("should accept valid email", () => {
     expect(validateEmail("test@example.com")).toBe(true);
@@ -146,9 +136,7 @@ describe("validateEmail", () => {
   });
 });
 
-// ============================================================
 // validatePassword - Validate password strength
-// ============================================================
 describe("validatePassword", () => {
   it("should accept strong password", () => {
     expect(validatePassword("Password123")).toBe(true);
@@ -172,9 +160,7 @@ describe("validatePassword", () => {
   });
 });
 
-// ============================================================
 // validateSlug - Validate URL slug
-// ============================================================
 describe("validateSlug", () => {
   it("should accept valid slug", () => {
     expect(validateSlug("valid-slug")).toBe(true);
@@ -201,9 +187,7 @@ describe("validateSlug", () => {
   });
 });
 
-// ============================================================
 // ValidationMessages - Vietnamese messages
-// ============================================================
 describe("ValidationMessages", () => {
   it("should generate required message", () => {
     expect(ValidationMessages.required("Email")).toBe("Email là bắt buộc");

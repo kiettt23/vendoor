@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-
 import { prisma } from "@/shared/lib/db";
 import { ok, err, type Result } from "@/shared/lib/utils";
+import { REVALIDATION_PATHS } from "@/shared/lib/constants";
+import { getZodFirstError } from "@/shared/lib/validation";
 
 import {
   bulkUpdateStockSchema,
@@ -12,16 +13,13 @@ import {
   type UpdateStockInput,
 } from "../model/types";
 
-/**
- * Update stock for a single variant
- */
 export async function updateStock(
   vendorId: string,
   input: UpdateStockInput
 ): Promise<Result<void>> {
   const parsed = updateStockSchema.safeParse(input);
   if (!parsed.success) {
-    return err(parsed.error.issues[0]?.message || "Dữ liệu không hợp lệ");
+    return err(getZodFirstError(parsed.error));
   }
 
   const { variantId, stock } = parsed.data;
@@ -44,24 +42,20 @@ export async function updateStock(
       data: { stock },
     });
 
-    revalidatePath("/vendor/inventory");
-    revalidatePath("/vendor/products");
+    REVALIDATION_PATHS.VENDOR_PRODUCTS.forEach(p => revalidatePath(p));
     return ok(undefined);
   } catch {
     return err("Không thể cập nhật tồn kho");
   }
 }
 
-/**
- * Bulk update stock for multiple variants
- */
 export async function bulkUpdateStock(
   vendorId: string,
   input: BulkUpdateStockInput
 ): Promise<Result<{ updated: number }>> {
   const parsed = bulkUpdateStockSchema.safeParse(input);
   if (!parsed.success) {
-    return err(parsed.error.issues[0]?.message || "Dữ liệu không hợp lệ");
+    return err(getZodFirstError(parsed.error));
   }
 
   const { updates } = parsed.data;
@@ -94,8 +88,7 @@ export async function bulkUpdateStock(
       )
     );
 
-    revalidatePath("/vendor/inventory");
-    revalidatePath("/vendor/products");
+    REVALIDATION_PATHS.VENDOR_PRODUCTS.forEach(p => revalidatePath(p));
     return ok({ updated: updates.length });
   } catch {
     return err("Không thể cập nhật tồn kho");

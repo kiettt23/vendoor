@@ -8,27 +8,14 @@ export type {
 
 export { formatVendorStatus } from "./lib";
 
-// API (Queries + Actions)
+// ⚠️ Queries KHÔNG được export từ barrel file vì chứa server-only code (prisma)
+// Server Components: import trực tiếp từ "@/entities/vendor/api/queries"
+
+// Actions (Server Actions - callable from Client Components)
 export {
-  getVendors,
-  getVendorById,
-  getCurrentVendorProfile,
-  getApprovedVendors,
-  getPublicVendors,
-  getPublicVendorById,
-  getVendorDashboardStats,
-  getVendorRecentOrders,
-  getVendorDashboardData,
-  // Admin queries
-  getAdminDashboardStats,
-  getPendingVendorsCount,
-  getAdminRecentOrders,
-  getVendorDetailForAdmin,
-  // Actions
   approveVendor,
   rejectVendor,
   updateVendorStatus,
-  // Guards
   requireVendor,
 } from "./api";
 
@@ -37,4 +24,5 @@ export type {
   AdminRecentOrder,
   VendorDetailForAdmin,
   VendorAuthResult,
+  FeaturedVendor,
 } from "./api";

@@ -2,15 +2,14 @@ import { cache } from "react";
 
 import { prisma } from "@/shared/lib/db";
 import { LIMITS } from "@/shared/lib/constants";
+import { calculateAverageRating } from "../lib/utils";
 import type {
   ProductDetail,
   ProductListItem,
   PaginatedProducts,
 } from "../model/types";
 
-// ============================================
 // Product Queries
-// ============================================
 
 interface GetProductsParams {
   categorySlug?: string;
@@ -52,7 +51,7 @@ export const getProducts = cache(
       sort = "newest",
     } = params;
 
-    // Build where clause - sử dụng Prisma.ProductWhereInput type
+    // Build where clause dynamically - any để hỗ trợ conditional properties
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = { isActive: true };
 
@@ -112,13 +111,22 @@ export const getProducts = cache(
     const products = await prisma.product.findMany({
       where,
       include: {
-        vendor: { select: { id: true, name: true } },
+        vendor: {
+          select: {
+            id: true,
+            vendorProfile: { select: { shopName: true } },
+          },
+        },
         category: { select: { name: true, slug: true } },
         variants: {
           where: { isDefault: true },
           select: { id: true, price: true, compareAtPrice: true, stock: true },
         },
         images: { where: { order: 0 }, take: 1, select: { url: true } },
+        reviews: {
+          where: { status: "APPROVED" },
+          select: { rating: true },
+        },
       },
       orderBy,
       skip: (page - 1) * limit,
@@ -127,18 +135,28 @@ export const getProducts = cache(
 
     // Post-filter for price (vì price nằm trong variant)
     // Note: Đã filter trong where.variants.some nhưng cần double check
-    let productsFormatted: ProductListItem[] = products.map((product) => ({
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      price: product.variants[0]?.price || 0,
-      compareAtPrice: product.variants[0]?.compareAtPrice || null,
-      stock: product.variants[0]?.stock ?? 0,
-      variantId: product.variants[0]?.id || "",
-      image: product.images[0]?.url || "",
-      vendor: { id: product.vendor.id, name: product.vendor.name || "Unknown" },
-      category: { name: product.category.name, slug: product.category.slug },
-    }));
+    let productsFormatted: ProductListItem[] = products.map((product) => {
+      const reviewCount = product.reviews.length;
+      const avgRating = calculateAverageRating(product.reviews);
+
+      return {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        price: product.variants[0]?.price || 0,
+        compareAtPrice: product.variants[0]?.compareAtPrice || null,
+        stock: product.variants[0]?.stock ?? 0,
+        variantId: product.variants[0]?.id || "",
+        image: product.images[0]?.url || "",
+        vendor: {
+          id: product.vendor.id,
+          shopName: product.vendor.vendorProfile?.shopName || "Vendoor",
+        },
+        category: { name: product.category.name, slug: product.category.slug },
+        rating: avgRating,
+        reviewCount,
+      };
+    });
 
     // Client-side sort for price (vì Prisma không hỗ trợ sort theo nested relation)
     if (sort === "price-asc") {
@@ -240,36 +258,55 @@ export const getRelatedProducts = cache(
     const products = await prisma.product.findMany({
       where: { categoryId, isActive: true, id: { not: currentProductId } },
       include: {
-        vendor: { select: { id: true, name: true } },
+        vendor: {
+          select: {
+            id: true,
+            vendorProfile: { select: { shopName: true } },
+          },
+        },
         category: { select: { name: true, slug: true } },
         variants: {
           where: { isDefault: true },
           select: { id: true, price: true, compareAtPrice: true, stock: true },
         },
         images: { where: { order: 0 }, take: 1, select: { url: true } },
+        reviews: {
+          where: { status: "APPROVED" },
+          select: { rating: true },
+        },
       },
       take: limit,
       orderBy: { createdAt: "desc" },
     });
 
-    return products.map((product) => ({
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      price: product.variants[0]?.price || 0,
-      compareAtPrice: product.variants[0]?.compareAtPrice || null,
-      stock: product.variants[0]?.stock ?? 0,
-      variantId: product.variants[0]?.id || "",
-      image: product.images[0]?.url || "",
-      vendor: { id: product.vendor.id, name: product.vendor.name || "Unknown" },
-      category: { name: product.category.name, slug: product.category.slug },
-    }));
+    return products
+      .filter((p) => p.vendor.vendorProfile)
+      .map((product) => {
+        const reviewCount = product.reviews.length;
+        const avgRating = calculateAverageRating(product.reviews);
+
+        return {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: product.variants[0]?.price || 0,
+          compareAtPrice: product.variants[0]?.compareAtPrice || null,
+          stock: product.variants[0]?.stock ?? 0,
+          variantId: product.variants[0]?.id || "",
+          image: product.images[0]?.url || "",
+          vendor: {
+            id: product.vendor.id,
+            shopName: product.vendor.vendorProfile!.shopName,
+          },
+          category: { name: product.category.name, slug: product.category.slug },
+          rating: avgRating,
+          reviewCount,
+        };
+      });
   }
 );
 
-// ============================================
 // Vendor Product Queries
-// ============================================
 
 /**
  * Lấy danh sách sản phẩm của vendor (cho vendor dashboard)
@@ -310,6 +347,8 @@ export const getVendorProductForEdit = cache(
           select: {
             id: true,
             name: true,
+            color: true,
+            size: true,
             price: true,
             compareAtPrice: true,
             sku: true,
@@ -336,7 +375,12 @@ export const getFeaturedProducts = cache(
     return prisma.product.findMany({
       where: { isActive: true },
       include: {
-        vendor: { select: { id: true, name: true } },
+        vendor: {
+          select: {
+            id: true,
+            vendorProfile: { select: { shopName: true } },
+          },
+        },
         category: { select: { name: true, slug: true } },
         variants: {
           where: { isDefault: true },
@@ -346,6 +390,10 @@ export const getFeaturedProducts = cache(
           where: { order: 0 },
           take: LIMITS.FIRST_IMAGE,
           select: { url: true },
+        },
+        reviews: {
+          where: { status: "APPROVED" },
+          select: { rating: true },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -358,9 +406,7 @@ export type FeaturedProduct = Awaited<
   ReturnType<typeof getFeaturedProducts>
 >[number];
 
-// ============================================
 // Search Suggestions
-// ============================================
 
 /**
  * Tìm kiếm sản phẩm cho search suggestions
@@ -425,3 +471,87 @@ export interface SearchSuggestion {
   category: string | null;
   categorySlug: string | null;
 }
+
+// Flash Sale Products
+
+export interface FlashSaleProduct {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  originalPrice: number;
+  discountPercent: number;
+  image: string;
+  sold: number;
+  total: number;
+  store: string;
+}
+
+/**
+ * Lấy sản phẩm Flash Sale - sắp xếp theo % giảm giá cao nhất
+ * Products có compareAtPrice (giá gốc) > price (giá sale)
+ */
+export const getFlashSaleProducts = cache(
+  async (limit = 5): Promise<FlashSaleProduct[]> => {
+    const products = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        variants: {
+          some: {
+            compareAtPrice: { not: null },
+            stock: { gt: 0 },
+          },
+        },
+      },
+      include: {
+        variants: {
+          where: { compareAtPrice: { not: null } },
+          orderBy: { isDefault: "desc" },
+          take: 1,
+        },
+        images: { orderBy: { order: "asc" }, take: 1 },
+        vendor: {
+          select: {
+            vendorProfile: { select: { shopName: true } },
+          },
+        },
+      },
+      // Lấy nhiều hơn để sort theo % giảm
+      take: limit * 3,
+    });
+
+    // Tính % giảm và sort
+    const productsWithDiscount = products
+      .map((p) => {
+        const variant = p.variants[0];
+        const price = variant?.price ?? 0;
+        const originalPrice = variant?.compareAtPrice ?? price;
+        const discountPercent =
+          originalPrice > 0
+            ? Math.round(((originalPrice - price) / originalPrice) * 100)
+            : 0;
+        const stock = variant?.stock ?? 0;
+        // Simulate sold based on stock (temporary)
+        const total = stock + Math.floor(Math.random() * 50) + 10;
+        const sold = total - stock;
+
+        return {
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          price,
+          originalPrice,
+          discountPercent,
+          image: p.images[0]?.url ?? "/placeholder.jpg",
+          sold,
+          total,
+          store: p.vendor?.vendorProfile?.shopName ?? "Vendoor",
+        };
+      })
+      .filter((p) => p.discountPercent > 0)
+      .sort((a, b) => b.discountPercent - a.discountPercent)
+      .slice(0, limit);
+
+    return productsWithDiscount;
+  }
+);

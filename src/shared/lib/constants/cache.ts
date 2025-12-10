@@ -1,6 +1,3 @@
-/**
- * Cache durations (seconds)
- */
 export const CACHE_DURATION = {
   STATIC_DATA: 3600, // 1 hour
   PRODUCTS: 300, // 5 minutes
@@ -8,9 +5,6 @@ export const CACHE_DURATION = {
   USER_PROFILE: 600, // 10 minutes
 } as const;
 
-/**
- * Revalidation tags for Next.js cache
- */
 export const REVALIDATE_TAGS = {
   PRODUCTS: "products",
   PRODUCT_DETAIL: (slug: string) => `product:${slug}`,

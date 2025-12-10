@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { Button } from "@/shared/ui/button";
+import { ROUTES } from "@/shared/lib/constants";
 import {
   ArrowRight,
   Shield,
@@ -66,7 +67,7 @@ export function HeroSection() {
                 className="h-14 px-8 text-base rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300"
                 asChild
               >
-                <Link href="/products">
+                <Link href={ROUTES.PRODUCTS}>
                   Khám phá ngay
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Link>
@@ -77,7 +78,7 @@ export function HeroSection() {
                 className="h-14 px-8 text-base rounded-full border-2 hover:bg-secondary/50 backdrop-blur-sm"
                 asChild
               >
-                <Link href="/become-vendor">
+                <Link href={ROUTES.BECOME_VENDOR}>
                   <Store className="h-5 w-5 mr-2" />
                   Mở cửa hàng
                 </Link>
@@ -150,7 +151,7 @@ export function HeroSection() {
 
         {/* Features Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-10 border-t border-border/50">
-          {features.map((feature, idx) => (
+          {features.map((feature) => (
             <div
               key={feature.label}
               className="flex flex-col sm:flex-row items-center justify-center gap-4 p-4 rounded-2xl hover:bg-secondary/50 transition-colors cursor-default"

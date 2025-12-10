@@ -1,15 +1,50 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Star } from "lucide-react";
 import { Badge } from "@/shared/ui/badge";
 import { Card, CardContent } from "@/shared/ui/card";
 import { OptimizedImage } from "@/shared/ui/optimized-image";
-import { formatPrice } from "@/shared/lib";
+import { PriceDisplay } from "@/shared/ui/price-display";
 import { calculateDiscount } from "../lib/utils";
 import type { ProductListItem } from "../model/types";
 
 export type ProductCardProps = ProductListItem;
+
+function RatingStars({ rating, reviewCount }: { rating: number | null; reviewCount: number }) {
+  if (rating === null || reviewCount === 0) {
+    return <span className="text-xs text-muted-foreground">Chưa có đánh giá</span>;
+  }
+
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  return (
+    <div className="flex items-center gap-1">
+      <div className="flex">
+        {/* Full stars */}
+        {Array.from({ length: fullStars }).map((_, i) => (
+          <Star key={`full-${i}`} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+        ))}
+        {/* Half star */}
+        {hasHalfStar && (
+          <div className="relative">
+            <Star className="h-3.5 w-3.5 text-gray-300" />
+            <div className="absolute inset-0 overflow-hidden w-1/2">
+              <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+            </div>
+          </div>
+        )}
+        {/* Empty stars */}
+        {Array.from({ length: emptyStars }).map((_, i) => (
+          <Star key={`empty-${i}`} className="h-3.5 w-3.5 text-gray-300" />
+        ))}
+      </div>
+      <span className="text-xs text-muted-foreground">({reviewCount})</span>
+    </div>
+  );
+}
 
 export function ProductCard({
   name,
@@ -19,6 +54,8 @@ export function ProductCard({
   image,
   stock,
   vendor,
+  rating,
+  reviewCount,
 }: ProductCardProps) {
   const discountPercent = calculateDiscount(price, compareAtPrice);
   const isOutOfStock = stock <= 0;
@@ -60,23 +97,33 @@ export function ProductCard({
           </div>
 
           {/* Content area */}
-          <div className="flex-1 flex flex-col gap-2 p-4">
+          <div className="flex-1 flex flex-col p-4">
+            {/* Vendor name */}
             <p className="text-xs uppercase tracking-wider text-muted-foreground">
-              {vendor.name}
+              {vendor.shopName}
             </p>
-            <h3 className="line-clamp-2 font-semibold group-hover:text-primary transition-colors">
+            
+            {/* Product name */}
+            <h3 className="line-clamp-2 font-semibold group-hover:text-primary transition-colors mt-1.5">
               {name}
             </h3>
+            
+            {/* Rating */}
+            <div className="mt-1.5">
+              <RatingStars rating={rating} reviewCount={reviewCount} />
+            </div>
+            
+            {/* Spacer */}
             <div className="flex-1" />
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg font-bold text-primary">
-                {formatPrice(price)}
-              </span>
-              {compareAtPrice && (
-                <span className="text-sm text-muted-foreground line-through">
-                  {formatPrice(compareAtPrice)}
-                </span>
-              )}
+            
+            {/* Price - Always at bottom */}
+            <div className="mt-3">
+              <PriceDisplay
+                price={price}
+                compareAtPrice={compareAtPrice}
+                size="md"
+                showDiscount={false}
+              />
             </div>
           </div>
         </CardContent>

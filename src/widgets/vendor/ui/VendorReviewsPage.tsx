@@ -1,25 +1,16 @@
 import Link from "next/link";
 import { Star, ExternalLink } from "lucide-react";
-import { headers } from "next/headers";
 
 import { Card, CardContent } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
-import { auth } from "@/shared/lib/auth/config";
-import { prisma } from "@/shared/lib/db";
-import { getVendorReviews, StarRating } from "@/entities/review";
+import { formatDate } from "@/shared/lib";
+import { requireVendor } from "@/entities/vendor";
+import { getVendorReviews } from "@/entities/review/api/queries";
+import { StarRating } from "@/entities/review";
 import { ReviewReplyDialog } from "./ReviewReplyDialog";
 
 export async function VendorReviewsPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return null;
-
-  // Lấy vendor profile
-  const vendorProfile = await prisma.vendorProfile.findFirst({
-    where: { userId: session.user.id },
-    select: { id: true, userId: true },
-  });
-
-  if (!vendorProfile) return null;
+  const { user, vendorProfile } = await requireVendor();
 
   const { reviews, total } = await getVendorReviews(vendorProfile.id);
 
@@ -73,9 +64,7 @@ export async function VendorReviewsPage() {
                         <div className="flex items-center gap-2">
                           <StarRating rating={review.rating} size="sm" />
                           <span className="text-xs text-muted-foreground">
-                            {new Date(review.createdAt).toLocaleDateString(
-                              "vi-VN"
-                            )}
+                            {formatDate(review.createdAt)}
                           </span>
                         </div>
                       </div>
@@ -104,10 +93,7 @@ export async function VendorReviewsPage() {
                     {review.vendorReply && (
                       <div className="mt-3 pl-4 border-l-2 border-primary/30">
                         <p className="text-xs text-muted-foreground mb-1">
-                          Phản hồi của bạn (
-                          {new Date(review.vendorReplyAt!).toLocaleDateString(
-                            "vi-VN"
-                          )}
+                          Phản hồi của bạn ({formatDate(review.vendorReplyAt!)}
                           ):
                         </p>
                         <p className="text-sm">{review.vendorReply}</p>
@@ -118,7 +104,7 @@ export async function VendorReviewsPage() {
                   {/* Action - Client Component */}
                   <ReviewReplyDialog
                     reviewId={review.id}
-                    vendorUserId={vendorProfile.userId}
+                    vendorUserId={user.id}
                     existingReply={review.vendorReply}
                     userName={review.user.name}
                     rating={review.rating}

@@ -2,12 +2,17 @@ import Link from "next/link";
 import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { ArrowLeft, Package, Store, MapPin, CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
 import { formatPrice, formatDateTime } from "@/shared/lib";
-import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
-import { formatShippingAddress, getOrderById } from "@/entities/order";
+import { ROUTES } from "@/shared/lib/constants";
+import { getOrderById } from "@/entities/order/api/queries";
+import {
+  formatShippingAddress,
+  OrderSummary,
+  OrderStatusBadge,
+} from "@/entities/order";
+import { PendingPaymentBanner } from "./PendingPaymentBanner";
 
 interface OrderDetailPageProps {
   orderId: string;
@@ -22,39 +27,40 @@ export async function OrderDetailPage({ orderId }: OrderDetailPageProps) {
         <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
         <h1 className="text-2xl font-bold mb-2">Không tìm thấy đơn hàng</h1>
         <Button asChild>
-          <Link href="/orders">Về danh sách đơn hàng</Link>
+          <Link href={ROUTES.ORDERS}>Về danh sách đơn hàng</Link>
         </Button>
       </div>
     );
   }
 
-  const status = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
-
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <Button variant="ghost" size="sm" asChild className="mb-6">
-        <Link href="/orders">
+    <div className="container mx-auto py-6 sm:py-8 px-4 max-w-4xl">
+      <Button variant="ghost" size="sm" asChild className="mb-4 sm:mb-6">
+        <Link href={ROUTES.ORDERS}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Danh sách đơn hàng
         </Link>
       </Button>
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl font-bold">{order.orderNumber}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold">{order.orderNumber}</h1>
+          <p className="text-sm text-muted-foreground">
             {formatDateTime(order.createdAt)}
           </p>
         </div>
-        <Badge
-          variant={status.variant}
-          className={`${status.className || ""} text-base px-4 py-1`}
-        >
-          {status.label}
-        </Badge>
+        <OrderStatusBadge status={order.status} size="lg" />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
+      {/* Debug: Check payment info */}
+      {order.status === "PENDING_PAYMENT" && (
+        <PendingPaymentBanner
+          orderId={order.id}
+          orderNumber={order.orderNumber}
+        />
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -85,14 +91,14 @@ export async function OrderDetailPage({ orderId }: OrderDetailPageProps) {
         </Card>
       </div>
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Sản phẩm</CardTitle>
+      <Card className="mb-6 sm:mb-8">
+        <CardHeader className="px-4 sm:px-6">
+          <CardTitle className="text-base sm:text-lg">Sản phẩm</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 px-4 sm:px-6">
           {order.items.map((item) => (
-            <div key={item.id} className="flex gap-4">
-              <div className="relative h-20 w-20 rounded overflow-hidden bg-muted shrink-0">
+            <div key={item.id} className="flex gap-3 sm:gap-4">
+              <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded overflow-hidden bg-muted shrink-0">
                 {item.variant.product.images[0] && (
                   <OptimizedImage
                     src={item.variant.product.images[0].url}
@@ -102,40 +108,25 @@ export async function OrderDetailPage({ orderId }: OrderDetailPageProps) {
                   />
                 )}
               </div>
-              <div className="flex-1">
-                <p className="font-semibold">{item.productName}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm sm:text-base line-clamp-2">{item.productName}</p>
                 {item.variantName && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     {item.variantName}
                   </p>
                 )}
-                <p className="text-sm">x{item.quantity}</p>
+                <p className="text-xs sm:text-sm">x{item.quantity}</p>
               </div>
-              <p className="font-semibold">{formatPrice(item.subtotal)}</p>
+              <p className="font-semibold text-sm sm:text-base shrink-0">{formatPrice(item.subtotal)}</p>
             </div>
           ))}
           <Separator />
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Tạm tính</span>
-              <span>{formatPrice(order.subtotal)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Phí vận chuyển</span>
-              <span>{formatPrice(order.shippingFee)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>
-                Phí nền tảng ({(order.platformFeeRate * 100).toFixed(0)}%)
-              </span>
-              <span>{formatPrice(order.platformFee)}</span>
-            </div>
-            <Separator />
-            <div className="flex justify-between font-bold text-lg">
-              <span>Tổng cộng</span>
-              <span className="text-primary">{formatPrice(order.total)}</span>
-            </div>
-          </div>
+          <OrderSummary
+            subtotal={order.subtotal}
+            shippingFee={order.shippingFee}
+            total={order.total}
+            variant="customer"
+          />
         </CardContent>
       </Card>
 

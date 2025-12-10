@@ -1,29 +1,21 @@
-// Queries
-export {
-  getVendors,
-  getVendorById,
-  getCurrentVendorProfile,
-  getApprovedVendors,
-  getPublicVendors,
-  getPublicVendorById,
-  getVendorDashboardStats,
-  getVendorRecentOrders,
-  getVendorDashboardData,
-  // Admin queries
-  getAdminDashboardStats,
-  getPendingVendorsCount,
-  getAdminRecentOrders,
-  getVendorDetailForAdmin,
-} from "./queries";
+/**
+ * Vendor API - Barrel Export
+ *
+ * ⚠️ IMPORTANT: Queries được export riêng để tránh leak server-code vào client.
+ *
+ * Client Components: import từ đây (actions, types)
+ * Server Components: import queries từ "@/entities/vendor/api/queries"
+ */
 
-// Types
+// Types (safe for client - type-only)
 export type {
   AdminDashboardStats,
   AdminRecentOrder,
   VendorDetailForAdmin,
+  FeaturedVendor,
 } from "./queries";
 
-// Actions
+// Actions (Server Actions - callable from Client Components)
 export { approveVendor, rejectVendor, updateVendorStatus } from "./actions";
 
 // Guards

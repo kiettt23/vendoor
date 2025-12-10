@@ -7,9 +7,7 @@
 import { describe, it, expect } from "vitest";
 import { loginSchema, registerSchema } from "./schema";
 
-// ============================================================
 // loginSchema - Schema đăng nhập
-// ============================================================
 describe("loginSchema", () => {
   describe("valid cases", () => {
     it("should accept valid login data", () => {
@@ -71,9 +69,7 @@ describe("loginSchema", () => {
   });
 });
 
-// ============================================================
 // registerSchema - Schema đăng ký
-// ============================================================
 describe("registerSchema", () => {
   const validData = {
     name: "Nguyễn Văn A",

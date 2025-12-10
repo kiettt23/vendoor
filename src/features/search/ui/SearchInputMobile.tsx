@@ -1,29 +1,17 @@
-/**
- * SearchInputMobile Component
- *
- * Mobile search với slide-down panel và search suggestions.
- */
-
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, X, Loader2 } from "lucide-react";
-import { useDebouncedCallback } from "use-debounce";
 import { OptimizedImage } from "@/shared/ui/optimized-image";
 
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import {
-  searchProductsAction,
-  type SearchSuggestion,
-} from "@/entities/product/api/actions";
+import { useSearchSuggestions } from "../use-search";
 import { formatPrice } from "@/shared/lib/utils";
 
 interface SearchInputMobileProps {
-  /** Placeholder text */
   placeholder?: string;
-  /** Debounce delay (ms) */
   debounceDelay?: number;
 }
 
@@ -38,17 +26,20 @@ export function SearchInputMobile({
   const [isOpen, setIsOpen] = useState(false);
   const initialQuery = searchParams.get("search") ?? "";
   const [query, setQuery] = useState(initialQuery);
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  // Focus input when opened
+  const {
+    suggestions,
+    isLoading,
+    setQuery: setSearchQuery,
+    clearSuggestions,
+  } = useSearchSuggestions({ debounceMs: debounceDelay });
+
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isOpen]);
 
-  // Navigate to search results
   const navigateToSearch = useCallback(
     (searchTerm: string) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -66,35 +57,10 @@ export function SearchInputMobile({
     [router, searchParams]
   );
 
-  // Fetch suggestions với debounce
-  const fetchSuggestions = useDebouncedCallback(async (value: string) => {
-    if (value.trim().length < 2) {
-      setSuggestions([]);
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const results = await searchProductsAction(value, 6);
-      setSuggestions(results);
-    } catch {
-      setSuggestions([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, debounceDelay);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
-
-    if (value.trim().length >= 2) {
-      setIsLoading(true);
-      fetchSuggestions(value);
-    } else {
-      setSuggestions([]);
-    }
+    setSearchQuery(value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -105,7 +71,7 @@ export function SearchInputMobile({
   const handleClose = () => {
     setIsOpen(false);
     setQuery("");
-    setSuggestions([]);
+    clearSuggestions();
   };
 
   const handleSelectProduct = (slug: string) => {

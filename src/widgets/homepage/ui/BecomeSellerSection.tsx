@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/shared/ui/button";
+import { ROUTES } from "@/shared/lib/constants";
 import {
   Store,
   TrendingUp,
@@ -81,13 +82,13 @@ export function BecomeSellerSection() {
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <Button size="lg" className="gap-2" asChild>
-                <Link href="/become-vendor">
+                <Link href={ROUTES.BECOME_VENDOR}>
                   Đăng ký bán hàng
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/seller">Tìm hiểu thêm</Link>
+                <Link href={ROUTES.BECOME_VENDOR}>Tìm hiểu thêm</Link>
               </Button>
             </div>
           </div>

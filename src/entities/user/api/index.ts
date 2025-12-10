@@ -1,14 +1,7 @@
-// Queries
-export {
-  getCurrentUserProfile,
-  getUserOrderStats,
-  getUserRecentOrders,
-} from "./queries";
-
-// Actions
+// Actions (safe to import from Client Components)
 export { updateUserProfile, type UpdateProfileInput } from "./actions";
 
-// Guards
+// Guards (safe to import from Server Components only)
 export {
   requireAuth,
   requireRole,
@@ -17,3 +10,7 @@ export {
   type UserRole,
   type AuthResult,
 } from "./guards";
+
+// Note: For queries (getCurrentUserProfile, getUserOrderStats, getUserRecentOrders),
+// import directly from "@/entities/user/api/queries"
+// They use Prisma and cannot be imported from Client Components

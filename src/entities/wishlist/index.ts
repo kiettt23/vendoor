@@ -1,19 +1,12 @@
-// ============================================
-// Wishlist Entity
-// ============================================
-
-// Model - Types
 export type { WishlistItem, WishlistItemWithProduct } from "./model";
 
-// API - Queries
-export {
-  getUserWishlist,
-  isInWishlist,
-  getWishlistCount,
-  getWishlistProductIds,
-} from "./api";
-
-// API - Actions
+/**
+ * ⚠️ Wishlist API Exports
+ *
+ * - Actions: Available here (callable from Client Components)
+ * - Queries (getUserWishlist, isInWishlist, etc.): Import directly from
+ *   "@/entities/wishlist/api/queries" in Server Components only
+ */
 export {
   addToWishlist,
   removeFromWishlist,

@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
-import { authClient } from "@/shared/lib/auth/client";
+import { authClient } from "@/shared/lib/auth";
 import { Button } from "@/shared/ui/button";
+import { createLogger } from "@/shared/lib/utils";
+
+const logger = createLogger("google-signin");
 
 interface GoogleSignInButtonProps {
   callbackUrl?: string;
@@ -12,10 +15,6 @@ interface GoogleSignInButtonProps {
   className?: string;
 }
 
-/**
- * Google Sign In Button
- * Sử dụng Better Auth OAuth flow
- */
 export function GoogleSignInButton({
   callbackUrl = "/",
   variant = "outline",
@@ -31,7 +30,7 @@ export function GoogleSignInButton({
         callbackURL: callbackUrl,
       });
     } catch (error) {
-      console.error("Google sign in error:", error);
+      logger.error("Google sign in error:", error);
       setIsLoading(false);
     }
   };

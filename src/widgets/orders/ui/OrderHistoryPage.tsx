@@ -1,62 +1,49 @@
 import Link from "next/link";
-import { Package, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
-import { Button } from "@/shared/ui/button";
-import { auth } from "@/shared/lib/auth/config";
-import { headers } from "next/headers";
+import { EmptyOrders } from "@/shared/ui/feedback";
+import { getSession } from "@/shared/lib/auth/session";
 import { formatPrice, formatDateTime } from "@/shared/lib";
-import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
-import { getCustomerOrders } from "@/entities/order";
+import { getCustomerOrders } from "@/entities/order/api/queries";
+import { OrderStatusBadge } from "@/entities/order";
 
 export async function OrderHistoryPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSession();
   if (!session?.user) return null;
 
   const orders = await getCustomerOrders();
 
   if (orders.length === 0) {
     return (
-      <div className="container mx-auto py-24 px-4 text-center min-h-[60vh] flex flex-col items-center justify-center">
-        <Package className="h-20 w-20 text-muted-foreground mb-6" />
-        <h1 className="text-2xl font-bold mb-2">Chưa có đơn hàng</h1>
-        <p className="text-muted-foreground mb-8">Bạn chưa có đơn hàng nào</p>
-        <Button size="lg" asChild>
-          <Link href="/products">Mua sắm ngay</Link>
-        </Button>
+      <div className="container mx-auto py-24 px-4 min-h-[60vh] flex items-center justify-center">
+        <EmptyOrders />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">Đơn Hàng Của Tôi</h1>
-      <div className="space-y-6">
+    <div className="container mx-auto py-6 sm:py-8 px-4 max-w-4xl">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Đơn Hàng Của Tôi</h1>
+      <div className="space-y-4 sm:space-y-6">
         {orders.map((order) => {
-          const status = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
           return (
             <Link key={order.id} href={`/orders/${order.id}`} className="block">
               <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">
+                <CardHeader className="pb-2 px-4 sm:px-6">
+                  <div className="flex items-center justify-between gap-2">
+                    <CardTitle className="text-sm sm:text-base truncate">
                       {order.orderNumber}
                     </CardTitle>
-                    <Badge
-                      variant={status.variant}
-                      className={status.className}
-                    >
-                      {status.label}
-                    </Badge>
+                    <OrderStatusBadge status={order.status} />
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">
                     {order.vendor.shopName}
                   </p>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm line-clamp-1">
+                <CardContent className="px-4 sm:px-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm line-clamp-1">
                         {order.items
                           .map((i) => `${i.productName} x${i.quantity}`)
                           .join(", ")}
@@ -70,11 +57,11 @@ export async function OrderHistoryPage() {
                         {formatDateTime(order.createdAt)}
                       </p>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="font-bold text-primary whitespace-nowrap">
+                    <div className="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-0">
+                      <span className="font-bold text-primary text-sm sm:text-base whitespace-nowrap">
                         {formatPrice(order.total)}
                       </span>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                      <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                     </div>
                   </div>
                 </CardContent>

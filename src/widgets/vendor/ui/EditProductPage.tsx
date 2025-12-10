@@ -10,7 +10,7 @@ import { ArrowLeft, Save, Loader2, Trash2, ImagePlus } from "lucide-react";
 import {
   showToast,
   showErrorToast,
-  showCustomToast,
+  ROUTES,
 } from "@/shared/lib/constants";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -28,11 +28,10 @@ import { Switch } from "@/shared/ui/switch";
 import {
   updateProduct,
   deleteProduct,
-} from "@/entities/product/api/actions";
-import {
-  productSchema,
-  type ProductFormData,
-} from "@/entities/product/model";
+  productEditSchema,
+  type ProductEditFormData,
+} from "@/entities/product";
+import { VariantManager } from "@/features/product-variants";
 import type { CategoryOption } from "@/entities/category";
 
 interface ProductData {
@@ -45,6 +44,8 @@ interface ProductData {
   variants: {
     id: string;
     name: string | null;
+    color: string | null;
+    size: string | null;
     price: number;
     compareAtPrice: number | null;
     sku: string | null;
@@ -62,31 +63,24 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const defaultVariant =
-    product.variants.find((v) => v.isDefault) || product.variants[0];
+  const [isActive, setIsActive] = useState(product.isActive);
 
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
-  } = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
+  } = useForm<ProductEditFormData>({
+    resolver: zodResolver(productEditSchema),
     defaultValues: {
       name: product.name,
       description: product.description || "",
       categoryId: product.categoryId,
       isActive: product.isActive,
-      price: defaultVariant?.price || 0,
-      compareAtPrice: defaultVariant?.compareAtPrice || undefined,
-      sku: defaultVariant?.sku ?? "",
-      stock: defaultVariant?.stock || 0,
     },
   });
 
-  const onSubmit = async (data: ProductFormData) => {
+  const onSubmit = async (data: ProductEditFormData) => {
     setIsSubmitting(true);
     try {
       const result = await updateProduct(product.id, {
@@ -97,7 +91,7 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
         showToast("vendor", "productUpdated");
         router.refresh();
       } else {
-        showCustomToast.error(result.error);
+        showErrorToast("generic", result.error);
       }
     } catch {
       showErrorToast("generic");
@@ -112,9 +106,9 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
       const result = await deleteProduct(product.id);
       if (result.success) {
         showToast("vendor", "productDeleted");
-        router.push("/vendor/products");
+        router.push(ROUTES.VENDOR_PRODUCTS);
       } else {
-        showCustomToast.error(result.error);
+        showErrorToast("generic", result.error);
       }
     } catch {
       showErrorToast("generic");
@@ -125,7 +119,7 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
       <Button variant="ghost" size="sm" asChild className="mb-6">
-        <Link href="/vendor/products">
+        <Link href={ROUTES.VENDOR_PRODUCTS}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Danh sách sản phẩm
         </Link>
@@ -207,7 +201,7 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
               <Label>Danh mục *</Label>
               <Select
                 onValueChange={(v) => setValue("categoryId", v)}
-                defaultValue={watch("categoryId")}
+                defaultValue={product.categoryId}
               >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue />
@@ -229,68 +223,8 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Giá & Kho</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Giá bán (₫) *</Label>
-                <Input
-                  {...register("price", { valueAsNumber: true })}
-                  type="number"
-                  min={0}
-                  className="mt-1.5"
-                />
-                {errors.price && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.price.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>Giá gốc (₫)</Label>
-                <Input
-                  {...register("compareAtPrice", { valueAsNumber: true })}
-                  type="number"
-                  min={0}
-                  className="mt-1.5"
-                />
-                {errors.compareAtPrice && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.compareAtPrice.message}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>SKU *</Label>
-                <Input {...register("sku")} className="mt-1.5" />
-                {errors.sku && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.sku.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>Số lượng tồn kho *</Label>
-                <Input
-                  {...register("stock", { valueAsNumber: true })}
-                  type="number"
-                  min={0}
-                  className="mt-1.5"
-                />
-                {errors.stock && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.stock.message}
-                  </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Variant Manager - outside form since it has its own actions */}
+        <VariantManager productId={product.id} variants={product.variants} />
 
         <Card>
           <CardHeader>
@@ -305,8 +239,11 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
                 </p>
               </div>
               <Switch
-                checked={watch("isActive")}
-                onCheckedChange={(v) => setValue("isActive", v)}
+                checked={isActive}
+                onCheckedChange={(v) => {
+                  setIsActive(v);
+                  setValue("isActive", v);
+                }}
               />
             </div>
           </CardContent>

@@ -7,27 +7,23 @@ export type {
   PaginationMeta,
   PaginatedProducts,
   ProductFormInput,
+  ProductEditInput,
 } from "./model";
 
-// Schemas
 export {
   productSchema,
+  productEditSchema,
   productVariantSchema,
   type ProductFormData,
+  type ProductEditFormData,
   type ProductVariantFormData,
 } from "./model";
 
 export {
-  getProducts,
-  getProductBySlug,
-  getRelatedProducts,
-  getVendorProducts,
-  getVendorProductForEdit,
-  getFeaturedProducts,
-  searchProducts,
   createProduct,
   updateProduct,
   deleteProduct,
+  searchProductsAction,
   type SearchSuggestion,
 } from "./api";
 
@@ -35,7 +31,12 @@ export type {
   VendorProduct,
   VendorProductForEdit,
   FeaturedProduct,
+  FlashSaleProduct,
 } from "./api";
+
+// ⚠️ Queries KHÔNG được export từ barrel file vì chứa server-only code (prisma)
+// Server Components: import trực tiếp từ "@/entities/product/api/queries"
+
 export {
   ProductCard,
   ProductStatusBadge,
@@ -45,9 +46,4 @@ export {
   type ProductCardProps,
   type AddToCartData,
 } from "./ui";
-export {
-  calculateDiscount,
-  hasDiscount,
-  validateSKU,
-  generateUniqueSlug,
-} from "./lib";
+export { calculateDiscount, hasDiscount, validateSKU, calculateAverageRating } from "./lib";

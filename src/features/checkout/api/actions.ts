@@ -1,12 +1,10 @@
 "use server";
 
-import { headers } from "next/headers";
-
 import { groupItemsByVendor } from "@/entities/cart";
 import type { CartItem } from "@/entities/cart";
 import { prepareOrderData } from "@/entities/order";
 import type { CreateOrdersResult } from "@/entities/order";
-import { auth } from "@/shared/lib/auth";
+import { getSession } from "@/shared/lib/auth/session";
 import { prisma } from "@/shared/lib/db";
 import { generateOrderNumber } from "@/shared/lib/utils";
 
@@ -17,9 +15,7 @@ import type {
   InvalidCartItem,
 } from "../model";
 
-// ============================================
 // Validate Checkout
-// ============================================
 
 export async function validateCheckout(
   items: CartItem[]
@@ -46,9 +42,7 @@ export async function validateCheckout(
   return { isValid: invalidItems.length === 0, invalidItems };
 }
 
-// ============================================
 // Create Orders
-// ============================================
 
 export async function createOrders(
   cartItems: CartItem[],
@@ -56,7 +50,7 @@ export async function createOrders(
   paymentMethod: PaymentMethod
 ): Promise<CreateOrdersResult> {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await getSession();
     if (!session?.user) {
       return {
         success: false,
@@ -127,10 +121,12 @@ export async function createOrders(
             product: { select: { name: true } },
           },
         });
-        if (!variant) throw new Error(`Sản phẩm không tồn tại`);
+        if (!variant) {
+          throw new Error("Sản phẩm không tồn tại hoặc đã bị xóa");
+        }
         if (variant.stock < qty) {
           throw new Error(
-            `${variant.product.name} không đủ hàng (còn ${variant.stock}, cần ${qty})`
+            `${variant.product.name} - ${variant.name || "Mặc định"} không đủ hàng (còn ${variant.stock}, cần ${qty})`
           );
         }
         await tx.productVariant.update({

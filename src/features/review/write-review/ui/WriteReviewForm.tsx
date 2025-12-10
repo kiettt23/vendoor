@@ -6,7 +6,6 @@ import { Loader2 } from "lucide-react";
 import {
   showToast,
   showErrorToast,
-  showCustomToast,
 } from "@/shared/lib/constants";
 
 import { Button } from "@/shared/ui/button";
@@ -16,11 +15,9 @@ import { Label } from "@/shared/ui/label";
 
 import {
   StarRatingInput,
-} from "@/entities/review/ui";
-import {
   createReview,
-} from "@/entities/review/api/actions";
-import type { CreateReviewInput } from "@/entities/review/model";
+  type CreateReviewInput,
+} from "@/entities/review";
 import { ReviewImageUpload } from "./ReviewImageUpload";
 
 interface WriteReviewFormProps {
@@ -45,7 +42,7 @@ export function WriteReviewForm({
     e.preventDefault();
 
     if (rating === 0) {
-      showCustomToast.error("Vui lòng chọn số sao đánh giá");
+      showErrorToast("validation", "Vui lòng chọn số sao đánh giá");
       return;
     }
 
@@ -71,7 +68,7 @@ export function WriteReviewForm({
         router.refresh();
         onSuccess?.();
       } else {
-        showCustomToast.error(result.error);
+        showErrorToast("generic", result.error);
       }
     } catch {
       showErrorToast("generic");

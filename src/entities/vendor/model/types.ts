@@ -6,9 +6,7 @@
 
 import type { VendorProfileModel, VendorStatus } from "@/generated/prisma";
 
-// ============================================
 // Base Types (từ Prisma Generated)
-// ============================================
 
 /**
  * Base VendorProfile type từ database
@@ -18,9 +16,7 @@ export type VendorProfile = VendorProfileModel;
 // Re-export VendorStatus for convenience
 export type { VendorStatus };
 
-// ============================================
 // Derived Types (cho specific use cases)
-// ============================================
 
 export interface VendorListItem {
   id: string;

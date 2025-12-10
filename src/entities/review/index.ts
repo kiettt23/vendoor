@@ -1,8 +1,3 @@
-// ============================================
-// Review Entity
-// ============================================
-
-// Model - Types
 export type {
   Review,
   ReviewListItem,
@@ -10,7 +5,6 @@ export type {
   ReviewFormInput,
 } from "./model";
 
-// Model - Schemas
 export {
   createReviewSchema,
   vendorReplySchema,
@@ -18,17 +12,13 @@ export {
   type VendorReplyInput,
 } from "./model";
 
-// API - Queries
-export {
-  getProductReviews,
-  getProductReviewStats,
-  hasUserReviewed,
-  hasUserPurchased,
-  getVendorReviews,
-  getUserReview,
-} from "./api";
-
-// API - Actions
+/**
+ * ⚠️ Review API Exports
+ *
+ * - Actions: Available here (callable from Client Components)
+ * - Queries (getProductReviews, etc.): Import directly from
+ *   "@/entities/review/api/queries" in Server Components only
+ */
 export {
   createReview,
   updateReview,
@@ -37,7 +27,6 @@ export {
   deleteVendorReply,
 } from "./api";
 
-// UI Components
 export {
   StarRating,
   StarRatingInput,

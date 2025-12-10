@@ -8,83 +8,14 @@ import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { Progress } from "@/shared/ui/progress";
 import { formatPrice } from "@/shared/lib";
-
-interface FlashDealProduct {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  originalPrice: number;
-  image: string;
-  sold: number;
-  total: number;
-  store: string;
-}
+import { ROUTES } from "@/shared/lib/constants";
+import type { FlashSaleProduct } from "@/entities/product";
 
 interface FlashDealsProps {
-  products?: FlashDealProduct[];
+  products: FlashSaleProduct[];
 }
 
-// Mock data - sau này sẽ thay bằng data thật từ API
-const mockFlashDeals: FlashDealProduct[] = [
-  {
-    id: "1",
-    name: "iPhone 15 Pro Max 256GB",
-    slug: "iphone-15-pro-max",
-    price: 28990000,
-    originalPrice: 34990000,
-    image: "/iphone-15-pro-max.png",
-    sold: 85,
-    total: 100,
-    store: "Apple Store VN",
-  },
-  {
-    id: "2",
-    name: "MacBook Air M3 13 inch",
-    slug: "macbook-air-m3",
-    price: 24990000,
-    originalPrice: 28990000,
-    image: "/macbook-air-m3-laptop-silver.jpg",
-    sold: 62,
-    total: 80,
-    store: "TechZone",
-  },
-  {
-    id: "3",
-    name: "AirPods Pro 2",
-    slug: "airpods-pro-2",
-    price: 4990000,
-    originalPrice: 6990000,
-    image: "/airpods-pro-2-earbuds-white.jpg",
-    sold: 120,
-    total: 150,
-    store: "AudioPro",
-  },
-  {
-    id: "4",
-    name: "Samsung Galaxy S24 Ultra",
-    slug: "samsung-galaxy-s24-ultra",
-    price: 26990000,
-    originalPrice: 33990000,
-    image: "/samsung-galaxy-s24-ultra.png",
-    sold: 45,
-    total: 60,
-    store: "Samsung Official",
-  },
-  {
-    id: "5",
-    name: "iPad Pro M4 11 inch",
-    slug: "ipad-pro-m4",
-    price: 22990000,
-    originalPrice: 27990000,
-    image: "/ipad-pro-m4-tablet.jpg",
-    sold: 38,
-    total: 50,
-    store: "iStore VN",
-  },
-];
-
-export function FlashDeals({ products = mockFlashDeals }: FlashDealsProps) {
+export function FlashDeals({ products }: FlashDealsProps) {
   const [timeLeft, setTimeLeft] = useState({
     hours: 5,
     minutes: 32,
@@ -107,8 +38,10 @@ export function FlashDeals({ products = mockFlashDeals }: FlashDealsProps) {
     return () => clearInterval(timer);
   }, []);
 
+  if (products.length === 0) return null;
+
   return (
-    <section className="py-16 lg:py-24 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5">
+    <section className="py-16 lg:py-24 bg-linear-to-r from-primary/5 via-accent/5 to-primary/5">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
           <div className="flex items-center gap-4">
@@ -138,7 +71,7 @@ export function FlashDeals({ products = mockFlashDeals }: FlashDealsProps) {
             </div>
           </div>
           <Link
-            href="/flash-sale"
+            href={ROUTES.FLASH_SALE}
             className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
           >
             Xem tất cả
@@ -147,46 +80,46 @@ export function FlashDeals({ products = mockFlashDeals }: FlashDealsProps) {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {products.map((deal) => (
+          {products.map((product) => (
             <div
-              key={deal.id}
+              key={product.id}
               className="group bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all"
             >
               <div className="relative aspect-square p-4 bg-secondary/30">
                 <Badge className="absolute top-2 left-2 bg-red-500 text-white">
-                  -{Math.round((1 - deal.price / deal.originalPrice) * 100)}%
+                  -{product.discountPercent}%
                 </Badge>
                 <OptimizedImage
-                  src={deal.image || "/placeholder.svg"}
-                  alt={deal.name}
+                  src={product.image || "/placeholder.svg"}
+                  alt={product.name}
                   fill
                   className="object-contain p-2 group-hover:scale-105 transition-transform"
                 />
               </div>
               <div className="p-4 space-y-3">
-                <p className="text-xs text-muted-foreground">{deal.store}</p>
+                <p className="text-xs text-muted-foreground">{product.store}</p>
                 <h3 className="font-semibold text-sm line-clamp-2 h-10">
-                  {deal.name}
+                  {product.name}
                 </h3>
                 <div>
                   <span className="font-bold text-primary">
-                    {formatPrice(deal.price)}
+                    {formatPrice(product.price)}
                   </span>
                   <span className="text-xs text-muted-foreground line-through ml-2">
-                    {formatPrice(deal.originalPrice)}
+                    {formatPrice(product.originalPrice)}
                   </span>
                 </div>
                 <div className="space-y-1">
                   <Progress
-                    value={(deal.sold / deal.total) * 100}
+                    value={(product.sold / product.total) * 100}
                     className="h-2"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Đã bán {deal.sold}/{deal.total}
+                    Đã bán {product.sold}/{product.total}
                   </p>
                 </div>
                 <Button className="w-full gap-2" size="sm" asChild>
-                  <Link href={`/products/${deal.slug}`}>
+                  <Link href={`/products/${product.slug}`}>
                     <ShoppingCart className="h-4 w-4" />
                     Mua ngay
                   </Link>

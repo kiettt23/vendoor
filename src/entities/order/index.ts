@@ -17,17 +17,19 @@ export {
   formatOrderStatus,
 } from "./lib";
 
-// API (Queries + Actions)
-export {
-  getCustomerOrders,
-  getOrderById,
-  getVendorOrders,
-  getVendorOrderDetail,
-  getVendorOrdersPaginated,
-  getAdminOrders,
-  getAdminOrderById,
-  updateOrderStatus,
-  updateOrderStatusAction,
-} from "./api";
+export { OrderSummary, OrderStatusBadge } from "./ui";
 
-export type { VendorOrderItem, VendorOrdersPaginated } from "./api";
+/**
+ * ⚠️ Order API Exports
+ *
+ * - Actions (updateOrderStatus): Available here
+ * - Queries (getCustomerOrders, etc.): Import directly from
+ *   "@/entities/order/api/queries" in Server Components only
+ */
+export { updateOrderStatus, updateOrderStatusAction } from "./api";
+
+export type {
+  VendorOrderItem,
+  VendorOrdersPaginated,
+  CustomerOrderListItem,
+} from "./api";

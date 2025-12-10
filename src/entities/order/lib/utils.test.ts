@@ -6,9 +6,7 @@ import {
   formatShippingAddress,
 } from "./utils";
 
-// ============================================================
 // calculateCommission - Tính hoa hồng sàn (2%)
-// ============================================================
 describe("calculateCommission", () => {
   it("should calculate 2% commission correctly", () => {
     expect(calculateCommission(100000)).toBe(2000);
@@ -25,9 +23,7 @@ describe("calculateCommission", () => {
   });
 });
 
-// ============================================================
 // validateStatusTransition - Kiểm tra chuyển trạng thái
-// ============================================================
 describe("validateStatusTransition", () => {
   // Valid transitions
   it("should allow PENDING -> PROCESSING", () => {
@@ -78,9 +74,7 @@ describe("validateStatusTransition", () => {
   });
 });
 
-// ============================================================
 // formatShippingAddress - Format địa chỉ giao hàng
-// ============================================================
 describe("formatShippingAddress", () => {
   it("should format full address", () => {
     const order = {
@@ -114,9 +108,7 @@ describe("formatShippingAddress", () => {
   });
 });
 
-// ============================================================
 // formatOrderStatus - Format trạng thái đơn hàng
-// ============================================================
 describe("formatOrderStatus", () => {
   it("should format PENDING status", () => {
     expect(formatOrderStatus("PENDING")).toBe("Chờ xác nhận");

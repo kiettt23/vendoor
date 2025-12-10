@@ -9,25 +9,18 @@ import {
   uploadImageViaAPI,
   type UploadResult,
 } from "@/shared/lib/upload";
-import { showCustomToast } from "@/shared/lib/constants";
+import { showErrorToast } from "@/shared/lib/constants";
+import { createLogger } from "@/shared/lib/utils";
 
+const logger = createLogger("review-image-upload");
 const MAX_IMAGES = 5;
 
 interface ReviewImageUploadProps {
-  /** Current images (Cloudinary URLs) */
   images: string[];
-  /** Callback when images change */
   onChange: (images: string[]) => void;
-  /** Disabled state */
   disabled?: boolean;
 }
 
-/**
- * Multi-image upload component cho review
- * - Drag & drop hoặc click để chọn
- * - Preview ảnh trước khi submit
- * - Tối đa 5 ảnh
- */
 export function ReviewImageUpload({
   images,
   onChange,
@@ -42,7 +35,7 @@ export function ReviewImageUpload({
 
       const remainingSlots = MAX_IMAGES - images.length;
       if (remainingSlots <= 0) {
-        showCustomToast.error(`Tối đa ${MAX_IMAGES} hình ảnh`);
+        showErrorToast("validation", `Tối đa ${MAX_IMAGES} hình ảnh`);
         return;
       }
 
@@ -52,7 +45,7 @@ export function ReviewImageUpload({
       for (const file of filesToUpload) {
         const validation = validateImageFile(file);
         if (!validation.valid) {
-          showCustomToast.error(validation.error || "File không hợp lệ");
+          showErrorToast("validation", validation.error || "File không hợp lệ");
           return;
         }
       }
@@ -67,8 +60,8 @@ export function ReviewImageUpload({
           const result: UploadResult = await uploadImageViaAPI(file);
           uploadedUrls.push(result.url);
         } catch (error) {
-          console.error("Upload error:", error);
-          showCustomToast.error("Upload ảnh thất bại");
+          logger.error("Upload error:", error);
+          showErrorToast("uploadFailed");
         }
       }
 

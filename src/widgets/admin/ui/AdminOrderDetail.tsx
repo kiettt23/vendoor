@@ -9,12 +9,16 @@ import {
   CreditCard,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
 import { formatPrice, formatDateTime } from "@/shared/lib";
-import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
-import { formatShippingAddress, getAdminOrderById } from "@/entities/order";
+import { ROUTES } from "@/shared/lib/constants";
+import { getAdminOrderById } from "@/entities/order/api/queries";
+import {
+  formatShippingAddress,
+  OrderSummary,
+  OrderStatusBadge,
+} from "@/entities/order";
 
 interface AdminOrderDetailPageProps {
   orderId: string;
@@ -31,18 +35,16 @@ export async function AdminOrderDetailPage({
         <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
         <h1 className="text-2xl font-bold mb-2">Không tìm thấy đơn hàng</h1>
         <Button asChild>
-          <Link href="/admin/orders">Về danh sách đơn hàng</Link>
+          <Link href={ROUTES.ADMIN_ORDERS}>Về danh sách đơn hàng</Link>
         </Button>
       </div>
     );
   }
 
-  const status = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
-
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <Button variant="ghost" size="sm" asChild className="mb-6">
-        <Link href="/admin/orders">
+        <Link href={ROUTES.ADMIN_ORDERS}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Danh sách đơn hàng
         </Link>
@@ -55,12 +57,7 @@ export async function AdminOrderDetailPage({
             {formatDateTime(order.createdAt)}
           </p>
         </div>
-        <Badge
-          variant={status.variant}
-          className={`${status.className || ""} text-base px-4 py-1`}
-        >
-          {status.label}
-        </Badge>
+        <OrderStatusBadge status={order.status} size="lg" />
       </div>
 
       <div className="grid md:grid-cols-3 gap-6 mb-8">
@@ -135,31 +132,15 @@ export async function AdminOrderDetailPage({
             </div>
           ))}
           <Separator />
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span>Tạm tính</span>
-              <span>{formatPrice(order.subtotal)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Phí vận chuyển</span>
-              <span>{formatPrice(order.shippingFee)}</span>
-            </div>
-            <div className="flex justify-between text-blue-600">
-              <span>
-                Phí nền tảng ({(order.platformFeeRate * 100).toFixed(0)}%)
-              </span>
-              <span>{formatPrice(order.platformFee)}</span>
-            </div>
-            <div className="flex justify-between text-green-600">
-              <span>Vendor thu</span>
-              <span>{formatPrice(order.vendorEarnings)}</span>
-            </div>
-            <Separator />
-            <div className="flex justify-between font-bold text-lg">
-              <span>Tổng đơn hàng</span>
-              <span className="text-primary">{formatPrice(order.total)}</span>
-            </div>
-          </div>
+          <OrderSummary
+            subtotal={order.subtotal}
+            shippingFee={order.shippingFee}
+            total={order.total}
+            platformFee={order.platformFee}
+            platformFeeRate={order.platformFeeRate}
+            vendorEarnings={order.vendorEarnings}
+            variant="admin"
+          />
         </CardContent>
       </Card>
 

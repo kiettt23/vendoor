@@ -11,19 +11,19 @@ import {
   XCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
 import { formatPrice, formatDateTime } from "@/shared/lib";
-import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
-import { getCurrentVendorProfile } from "@/entities/vendor";
+import { ROUTES } from "@/shared/lib/constants";
+import { getCurrentVendorProfile } from "@/entities/vendor/api/queries";
+import { getVendorOrderDetail } from "@/entities/order/api/queries";
 import {
   formatShippingAddress,
   updateOrderStatusAction,
-  getVendorOrderDetail,
+  OrderSummary,
+  OrderStatusBadge,
 } from "@/entities/order";
 
-// Define allowed status transitions for vendor
 const VENDOR_STATUS_TRANSITIONS: Record<
   string,
   {
@@ -92,18 +92,16 @@ export async function VendorOrderDetailPage({
         <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
         <h1 className="text-2xl font-bold mb-2">Không tìm thấy đơn hàng</h1>
         <Button asChild>
-          <Link href="/vendor/orders">Về danh sách đơn hàng</Link>
+          <Link href={ROUTES.VENDOR_ORDERS}>Về danh sách đơn hàng</Link>
         </Button>
       </div>
     );
   }
 
-  const status = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
-
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <Button variant="ghost" size="sm" asChild className="mb-6">
-        <Link href="/vendor/orders">
+        <Link href={ROUTES.VENDOR_ORDERS}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Danh sách đơn hàng
         </Link>
@@ -116,12 +114,7 @@ export async function VendorOrderDetailPage({
             {formatDateTime(order.createdAt)}
           </p>
         </div>
-        <Badge
-          variant={status.variant}
-          className={`${status.className || ""} text-base px-4 py-1`}
-        >
-          {status.label}
-        </Badge>
+        <OrderStatusBadge status={order.status} size="lg" />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -225,25 +218,13 @@ export async function VendorOrderDetailPage({
             </div>
           ))}
           <Separator />
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span>Tạm tính</span>
-              <span>{formatPrice(order.subtotal)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Phí vận chuyển</span>
-              <span>{formatPrice(order.shippingFee)}</span>
-            </div>
-            <div className="flex justify-between text-green-600">
-              <span>Thu nhập (sau phí nền tảng)</span>
-              <span>{formatPrice(order.vendorEarnings)}</span>
-            </div>
-            <Separator />
-            <div className="flex justify-between font-bold text-lg">
-              <span>Tổng đơn hàng</span>
-              <span className="text-primary">{formatPrice(order.total)}</span>
-            </div>
-          </div>
+          <OrderSummary
+            subtotal={order.subtotal}
+            shippingFee={order.shippingFee}
+            total={order.total}
+            vendorEarnings={order.vendorEarnings}
+            variant="vendor"
+          />
         </CardContent>
       </Card>
 

@@ -31,9 +31,7 @@ import {
   formatFileSize,
 } from "./format";
 
-// ============================================================
 // formatPrice - Format tiền VND với symbol ₫
-// ============================================================
 describe("formatPrice", () => {
   // Happy path - trường hợp bình thường
   it("should format price with thousand separator and ₫ symbol", () => {
@@ -60,9 +58,7 @@ describe("formatPrice", () => {
   });
 });
 
-// ============================================================
 // formatPriceNumber - Format số không có symbol (dùng cho input)
-// ============================================================
 describe("formatPriceNumber", () => {
   it("should format without currency symbol", () => {
     expect(formatPriceNumber(100000)).toBe("100.000");
@@ -74,9 +70,7 @@ describe("formatPriceNumber", () => {
   });
 });
 
-// ============================================================
 // parsePrice - Parse từ string về number
-// ============================================================
 describe("parsePrice", () => {
   it("should parse formatted price back to number", () => {
     expect(parsePrice("100.000")).toBe(100000);
@@ -96,9 +90,7 @@ describe("parsePrice", () => {
   });
 });
 
-// ============================================================
 // formatDate - Format ngày theo chuẩn VN (dd/mm/yyyy)
-// ============================================================
 describe("formatDate", () => {
   it("should format Date object", () => {
     const date = new Date("2025-11-27");
@@ -114,9 +106,7 @@ describe("formatDate", () => {
   });
 });
 
-// ============================================================
 // formatPhone - Format số điện thoại VN
-// ============================================================
 describe("formatPhone", () => {
   it("should format 10-digit phone", () => {
     expect(formatPhone("0123456789")).toBe("012 345 6789");
@@ -135,9 +125,7 @@ describe("formatPhone", () => {
   });
 });
 
-// ============================================================
 // formatFileSize - Format kích thước file
-// ============================================================
 describe("formatFileSize", () => {
   it("should format bytes", () => {
     expect(formatFileSize(500)).toBe("500 B");

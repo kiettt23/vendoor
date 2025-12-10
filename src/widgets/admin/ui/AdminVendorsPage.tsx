@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { formatDate } from "@/shared/lib";
-import { VENDOR_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
-import { approveVendor, rejectVendor, getVendors } from "@/entities/vendor";
+import { VENDOR_STATUS_BADGE, getBadgeConfig } from "@/shared/lib/constants";
+import { approveVendor, rejectVendor } from "@/entities/vendor";
+import { getVendors } from "@/entities/vendor/api/queries";
 import type { VendorStatus } from "@/generated/prisma";
 
 interface AdminVendorsPageProps {
@@ -47,7 +48,7 @@ export async function AdminVendorsPage({ status }: AdminVendorsPageProps) {
             >
               {s === "ALL"
                 ? "Tất cả"
-                : getStatusConfig(s, VENDOR_STATUS_CONFIG).label}
+                : getBadgeConfig(s, VENDOR_STATUS_BADGE).label}
             </Button>
           </Link>
         ))}
@@ -63,7 +64,7 @@ export async function AdminVendorsPage({ status }: AdminVendorsPageProps) {
       ) : (
         <div className="space-y-4">
           {vendors.map((vendor) => {
-            const s = getStatusConfig(vendor.status, VENDOR_STATUS_CONFIG);
+            const s = getBadgeConfig(vendor.status, VENDOR_STATUS_BADGE);
             return (
               <Card key={vendor.id}>
                 <CardHeader className="pb-2">

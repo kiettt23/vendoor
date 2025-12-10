@@ -1,10 +1,10 @@
-import { headers } from "next/headers";
 import Link from "next/link";
 import { Package } from "lucide-react";
 
 import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
-import { auth } from "@/shared/lib/auth/config";
+import { ROUTES } from "@/shared/lib/constants";
+import { requireVendor } from "@/entities/vendor";
 
 import {
   getVendorInventory,
@@ -25,11 +25,10 @@ export async function VendorInventoryPage({
   search,
   page = 1,
 }: VendorInventoryPageProps) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return null;
+  const { user } = await requireVendor();
 
   const { items, total, stats } = await getVendorInventory({
-    vendorId: session.user.id,
+    vendorId: user.id,
     filter,
     search,
     page,
@@ -49,7 +48,7 @@ export async function VendorInventoryPage({
           </p>
         </div>
         <Button asChild variant="outline">
-          <Link href="/vendor/products">
+          <Link href={ROUTES.VENDOR_PRODUCTS}>
             <Package className="mr-2 size-4" />
             Quản lý sản phẩm
           </Link>
@@ -68,7 +67,7 @@ export async function VendorInventoryPage({
       {/* Table */}
       <Card>
         <CardContent className="p-0">
-          <StockTable items={items} vendorId={session.user.id} />
+          <StockTable items={items} vendorId={user.id} />
         </CardContent>
       </Card>
 

@@ -9,15 +9,15 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { formatPrice } from "@/shared/lib";
-import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
+import { ROUTES } from "@/shared/lib/constants";
 import {
   getAdminDashboardStats,
   getPendingVendorsCount,
   getAdminRecentOrders,
-} from "@/entities/vendor";
+} from "@/entities/vendor/api/queries";
+import { OrderStatusBadge } from "@/entities/order";
 
 export async function AdminDashboardPage() {
   const [dashboardStats, pendingVendors, recentOrders] = await Promise.all([
@@ -93,7 +93,7 @@ export async function AdminDashboardPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Đơn Hàng Gần Đây</CardTitle>
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin/orders">
+            <Link href={ROUTES.ADMIN_ORDERS}>
               Xem tất cả <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
@@ -101,11 +101,10 @@ export async function AdminDashboardPage() {
         <CardContent>
           <div className="space-y-4">
             {recentOrders.map((order) => {
-              const status = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
               return (
                 <Link
                   key={order.id}
-                  href={`/admin/orders/${order.id}`}
+                  href={ROUTES.ADMIN_ORDER_DETAIL(order.id)}
                   className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors"
                 >
                   <div>
@@ -117,12 +116,7 @@ export async function AdminDashboardPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">{formatPrice(order.total)}</p>
-                    <Badge
-                      variant={status.variant}
-                      className={status.className}
-                    >
-                      {status.label}
-                    </Badge>
+                    <OrderStatusBadge status={order.status} />
                   </div>
                 </Link>
               );

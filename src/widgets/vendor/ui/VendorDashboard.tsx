@@ -8,14 +8,16 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
-import { Badge } from "@/shared/ui/badge";
 import { formatPrice, formatDate } from "@/shared/lib";
-import { getVendorDashboardData } from "@/entities/vendor";
+import { ROUTES } from "@/shared/lib/constants";
+import { getVendorDashboardData } from "@/entities/vendor/api/queries";
+import { OrderStatusBadge } from "@/entities/order";
+import type { OrderStatus } from "@/entities/order";
 
 interface RecentOrder {
   id: string;
   orderNumber: string;
-  status: string;
+  status: OrderStatus;
   total: number;
   createdAt: Date;
 }
@@ -60,22 +62,22 @@ export async function VendorDashboardPage({
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground">{vendorProfile.shopName}</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {statItems.map((stat) => (
           <Card key={stat.label}>
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
+                  <p className="text-lg sm:text-2xl font-bold">{stat.value}</p>
                 </div>
-                <stat.icon className={`h-8 w-8 ${stat.color}`} />
+                <stat.icon className={`h-6 w-6 sm:h-8 sm:w-8 ${stat.color}`} />
               </div>
             </CardContent>
           </Card>
@@ -83,10 +85,10 @@ export async function VendorDashboardPage({
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Đơn Hàng Gần Đây</CardTitle>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <CardTitle className="text-base sm:text-lg">Đơn Hàng Gần Đây</CardTitle>
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/vendor/orders">
+            <Link href={ROUTES.VENDOR_ORDERS}>
               Xem tất cả <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
@@ -97,22 +99,22 @@ export async function VendorDashboardPage({
               Chưa có đơn hàng
             </p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {recentOrders.map((order: RecentOrder) => (
                 <Link
                   key={order.id}
                   href={`/vendor/orders/${order.id}`}
                   className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors"
                 >
-                  <div>
-                    <p className="font-semibold">{order.orderNumber}</p>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm sm:text-base truncate">{order.orderNumber}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       {formatDate(order.createdAt)}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{formatPrice(order.total)}</p>
-                    <Badge variant="outline">{order.status}</Badge>
+                  <div className="text-right shrink-0 ml-4">
+                    <p className="font-semibold text-sm sm:text-base">{formatPrice(order.total)}</p>
+                    <OrderStatusBadge status={order.status} size="sm" />
                   </div>
                 </Link>
               ))}

@@ -11,9 +11,7 @@ import type {
   ProductImageModel,
 } from "@/generated/prisma";
 
-// ============================================
 // Base Types (từ Prisma Generated)
-// ============================================
 
 /**
  * Base Product type từ database
@@ -30,9 +28,7 @@ export type ProductVariant = ProductVariantModel;
  */
 export type ProductImage = ProductImageModel;
 
-// ============================================
 // Derived Types (cho specific use cases)
-// ============================================
 
 /**
  * Product item cho danh sách (optimized fields)
@@ -46,8 +42,10 @@ export interface ProductListItem {
   image: string;
   stock: number;
   variantId: string;
-  vendor: { id: string; name: string };
+  vendor: { id: string; shopName: string };
   category: { name: string; slug: string };
+  rating: number | null;
+  reviewCount: number;
 }
 
 export interface ProductDetail {
@@ -80,10 +78,9 @@ export interface PaginatedProducts {
   pagination: PaginationMeta;
 }
 
-// ============================================
 // Action Types
-// ============================================
 
+// For creating product with default variant
 export interface ProductFormInput {
   name: string;
   description: string;
@@ -94,4 +91,12 @@ export interface ProductFormInput {
   stock: number;
   isActive: boolean;
   imageUrl?: string;
+}
+
+// For editing product basic info (variants managed separately)
+export interface ProductEditInput {
+  name: string;
+  description: string;
+  categoryId: string;
+  isActive: boolean;
 }

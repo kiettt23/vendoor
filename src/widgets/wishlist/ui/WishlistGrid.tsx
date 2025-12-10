@@ -1,13 +1,16 @@
 "use client";
 
-import { Heart, ShoppingCart, Trash2 } from "lucide-react";
+import { ShoppingCart, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useTransition } from "react";
 import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { Button } from "@/shared/ui/button";
+import { Badge } from "@/shared/ui/badge";
 import { Card, CardContent } from "@/shared/ui/card";
-import { formatPrice } from "@/shared/lib";
-import { removeFromWishlist } from "@/entities/wishlist/api/actions";
+import { PriceDisplay } from "@/shared/ui/price-display";
+import { EmptyWishlist } from "@/shared/ui/feedback";
+import { calculateDiscount } from "@/entities/product";
+import { removeFromWishlist } from "@/entities/wishlist";
 import { MoveToCartButton } from "@/features/wishlist";
 
 interface WishlistItem {
@@ -69,10 +72,13 @@ export function WishlistItemCard({ item, userId }: WishlistItemCardProps) {
             </div>
           )}
 
-          {product.compareAtPrice && product.compareAtPrice > product.price && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-medium px-2 py-1 rounded">
-              -{Math.round((1 - product.price / product.compareAtPrice) * 100)}%
-            </div>
+          {calculateDiscount(product.price, product.compareAtPrice) && (
+            <Badge
+              variant="destructive"
+              className="absolute top-2 left-2 font-medium"
+            >
+              -{calculateDiscount(product.price, product.compareAtPrice)}%
+            </Badge>
           )}
         </div>
       </Link>
@@ -89,16 +95,12 @@ export function WishlistItemCard({ item, userId }: WishlistItemCardProps) {
           {product.vendor.name}
         </p>
 
-        <div className="flex items-center gap-2 mt-2">
-          <span className="font-bold text-primary">
-            {formatPrice(product.price)}
-          </span>
-          {product.compareAtPrice && product.compareAtPrice > product.price && (
-            <span className="text-sm text-muted-foreground line-through">
-              {formatPrice(product.compareAtPrice)}
-            </span>
-          )}
-        </div>
+        <PriceDisplay
+          price={product.price}
+          compareAtPrice={product.compareAtPrice}
+          size="sm"
+          className="mt-2"
+        />
 
         <div className="flex gap-2 mt-4">
           {product.isActive && product.stock > 0 ? (
@@ -149,18 +151,7 @@ interface WishlistGridProps {
 
 export function WishlistGrid({ items, userId }: WishlistGridProps) {
   if (items.length === 0) {
-    return (
-      <div className="text-center py-16">
-        <Heart className="h-20 w-20 text-muted-foreground mx-auto mb-6" />
-        <h2 className="text-2xl font-bold mb-2">Chưa có sản phẩm yêu thích</h2>
-        <p className="text-muted-foreground mb-8">
-          Hãy thêm sản phẩm vào danh sách yêu thích để theo dõi
-        </p>
-        <Button size="lg" asChild>
-          <Link href="/products">Khám phá sản phẩm</Link>
-        </Button>
-      </div>
-    );
+    return <EmptyWishlist />;
   }
 
   return (

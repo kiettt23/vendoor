@@ -1,10 +1,13 @@
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/shared/ui/button";
-
-/**
- * Reusable empty state component
- * Used across all routes when no data is available
- */
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from "@/shared/ui/empty";
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -15,59 +18,43 @@ interface EmptyStateProps {
     onClick?: () => void;
     href?: string;
   };
+  className?: string;
 }
 
-/**
- * Generic empty state component
- *
- * @example
- * <EmptyState
- *   icon={Package}
- *   title="Chưa có sản phẩm"
- *   description="Bắt đầu bằng cách tạo sản phẩm đầu tiên của bạn"
- *   action={{
- *     label: "Tạo sản phẩm",
- *     href: "/vendor/products/new"
- *   }}
- * />
- */
+/** Wrapper component sử dụng shadcn Empty làm base */
 export function EmptyState({
   icon: Icon,
   title,
   description,
   action,
+  className,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-      {Icon && (
-        <div className="mb-4 rounded-full bg-muted p-6">
-          <Icon className="h-10 w-10 text-muted-foreground" />
-        </div>
+    <Empty className={className}>
+      <EmptyHeader>
+        {Icon && (
+          <EmptyMedia variant="icon">
+            <Icon />
+          </EmptyMedia>
+        )}
+        <EmptyTitle>{title}</EmptyTitle>
+        {description && <EmptyDescription>{description}</EmptyDescription>}
+      </EmptyHeader>
+      {action && (
+        <EmptyContent>
+          {action.href ? (
+            <Button asChild>
+              <a href={action.href}>{action.label}</a>
+            </Button>
+          ) : (
+            <Button onClick={action.onClick}>{action.label}</Button>
+          )}
+        </EmptyContent>
       )}
-
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-
-      {description && (
-        <p className="text-sm text-muted-foreground max-w-md mb-6">
-          {description}
-        </p>
-      )}
-
-      {action &&
-        (action.href ? (
-          <Button asChild>
-            <a href={action.href}>{action.label}</a>
-          </Button>
-        ) : (
-          <Button onClick={action.onClick}>{action.label}</Button>
-        ))}
-    </div>
+    </Empty>
   );
 }
 
-/**
- * Empty state for products page (customer view)
- */
 export function EmptyProducts() {
   return (
     <EmptyState
@@ -77,9 +64,6 @@ export function EmptyProducts() {
   );
 }
 
-/**
- * Empty state for cart page
- */
 export function EmptyCart() {
   return (
     <EmptyState
@@ -93,9 +77,6 @@ export function EmptyCart() {
   );
 }
 
-/**
- * Empty state for orders page (customer view)
- */
 export function EmptyOrders() {
   return (
     <EmptyState
@@ -109,9 +90,6 @@ export function EmptyOrders() {
   );
 }
 
-/**
- * Empty state for vendor products
- */
 export function EmptyVendorProducts() {
   return (
     <EmptyState
@@ -125,9 +103,6 @@ export function EmptyVendorProducts() {
   );
 }
 
-/**
- * Empty state for vendor orders
- */
 export function EmptyVendorOrders() {
   return (
     <EmptyState
@@ -137,9 +112,6 @@ export function EmptyVendorOrders() {
   );
 }
 
-/**
- * Empty state for admin vendors (pending approval)
- */
 export function EmptyPendingVendors() {
   return (
     <EmptyState
@@ -149,9 +121,6 @@ export function EmptyPendingVendors() {
   );
 }
 
-/**
- * Empty state for admin categories
- */
 export function EmptyCategories() {
   return (
     <EmptyState
@@ -161,9 +130,19 @@ export function EmptyCategories() {
   );
 }
 
-/**
- * Empty state for search results
- */
+export function EmptyWishlist() {
+  return (
+    <EmptyState
+      title="Chưa có sản phẩm yêu thích"
+      description="Hãy thêm sản phẩm vào danh sách yêu thích để theo dõi"
+      action={{
+        label: "Khám phá sản phẩm",
+        href: "/products",
+      }}
+    />
+  );
+}
+
 export function EmptySearchResults({ query }: { query?: string }) {
   return (
     <EmptyState
@@ -173,6 +152,19 @@ export function EmptySearchResults({ query }: { query?: string }) {
           : "Không tìm thấy kết quả"
       }
       description="Thử tìm kiếm với từ khóa khác hoặc kiểm tra lại chính tả"
+    />
+  );
+}
+
+export function EmptyStoreProducts() {
+  return (
+    <EmptyState
+      title="Chưa có sản phẩm nào"
+      description="Cửa hàng này chưa đăng bán sản phẩm nào"
+      action={{
+        label: "Xem sản phẩm khác",
+        href: "/products",
+      }}
     />
   );
 }

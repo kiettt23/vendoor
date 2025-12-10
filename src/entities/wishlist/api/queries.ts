@@ -3,13 +3,6 @@ import { cache } from "react";
 import { prisma } from "@/shared/lib/db";
 import type { WishlistItemWithProduct } from "../model";
 
-// ============================================
-// Wishlist Queries
-// ============================================
-
-/**
- * Lấy danh sách wishlist của user
- */
 export const getUserWishlist = cache(
   async (userId: string): Promise<WishlistItemWithProduct[]> => {
     const items = await prisma.wishlist.findMany({
@@ -71,9 +64,6 @@ export const getUserWishlist = cache(
   }
 );
 
-/**
- * Kiểm tra sản phẩm có trong wishlist không
- */
 export const isInWishlist = cache(
   async (userId: string, productId: string): Promise<boolean> => {
     const item = await prisma.wishlist.findUnique({
@@ -87,18 +77,12 @@ export const isInWishlist = cache(
   }
 );
 
-/**
- * Lấy số lượng items trong wishlist
- */
 export const getWishlistCount = cache(
   async (userId: string): Promise<number> => {
     return prisma.wishlist.count({ where: { userId } });
   }
 );
 
-/**
- * Lấy danh sách productIds trong wishlist (cho bulk check)
- */
 export const getWishlistProductIds = cache(
   async (userId: string): Promise<string[]> => {
     const items = await prisma.wishlist.findMany({

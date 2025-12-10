@@ -14,8 +14,9 @@ import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
 import { formatPrice, formatDate } from "@/shared/lib";
-import { VENDOR_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
-import { updateVendorStatus, getVendorDetailForAdmin } from "@/entities/vendor";
+import { VENDOR_STATUS_BADGE, getBadgeConfig, ROUTES } from "@/shared/lib/constants";
+import { updateVendorStatus } from "@/entities/vendor";
+import { getVendorDetailForAdmin } from "@/entities/vendor/api/queries";
 
 interface AdminVendorDetailPageProps {
   vendorId: string;
@@ -32,18 +33,18 @@ export async function AdminVendorDetailPage({
         <Store className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
         <h1 className="text-2xl font-bold mb-2">Không tìm thấy nhà bán</h1>
         <Button asChild>
-          <Link href="/admin/vendors">Về danh sách nhà bán</Link>
+          <Link href={ROUTES.ADMIN_VENDORS}>Về danh sách nhà bán</Link>
         </Button>
       </div>
     );
   }
 
-  const status = getStatusConfig(vendor.status, VENDOR_STATUS_CONFIG);
+  const status = getBadgeConfig(vendor.status, VENDOR_STATUS_BADGE);
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <Button variant="ghost" size="sm" asChild className="mb-6">
-        <Link href="/admin/vendors">
+        <Link href={ROUTES.ADMIN_VENDORS}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Danh sách nhà bán
         </Link>

@@ -9,6 +9,7 @@ import {
   showToast,
   showErrorToast,
   showCustomToast,
+  ROUTES,
 } from "@/shared/lib/constants";
 
 import { Button } from "@/shared/ui/button";
@@ -87,7 +88,7 @@ export function VendorRegistrationForm({
             <br />
             Chúng tôi sẽ thông báo cho bạn qua email khi có kết quả.
           </p>
-          <Button onClick={() => router.push("/account")}>
+          <Button onClick={() => router.push(ROUTES.ACCOUNT)}>
             Về trang tài khoản
           </Button>
         </CardContent>

@@ -5,9 +5,7 @@
 import { describe, it, expect } from "vitest";
 import { calculateDiscount, hasDiscount, validateSKU } from "./utils";
 
-// ============================================================
 // calculateDiscount - Tính % giảm giá
-// ============================================================
 describe("calculateDiscount", () => {
   it("should calculate discount percentage correctly", () => {
     expect(calculateDiscount(80000, 100000)).toBe(20);
@@ -30,9 +28,7 @@ describe("calculateDiscount", () => {
   });
 });
 
-// ============================================================
 // hasDiscount - Kiểm tra có giảm giá không
-// ============================================================
 describe("hasDiscount", () => {
   it("should return true when compareAtPrice > price", () => {
     expect(hasDiscount(80000, 100000)).toBe(true);
@@ -48,9 +44,7 @@ describe("hasDiscount", () => {
   });
 });
 
-// ============================================================
 // validateSKU - Validate mã SKU
-// ============================================================
 describe("validateSKU", () => {
   // Valid SKUs
   it("should accept alphanumeric SKU", () => {

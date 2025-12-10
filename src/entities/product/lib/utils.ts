@@ -1,5 +1,3 @@
-import { slugify } from "@/shared/lib";
-
 export function calculateDiscount(price: number, compareAtPrice: number | null): number | null {
   if (!compareAtPrice || compareAtPrice <= price) return null;
   return Math.round(((compareAtPrice - price) / compareAtPrice) * 100);
@@ -14,14 +12,9 @@ export function validateSKU(sku: string): boolean {
   return sku.length >= 3 && sku.length <= 20 && skuRegex.test(sku);
 }
 
-export async function generateUniqueSlug(
-  baseText: string,
-  checkExists: (slug: string) => Promise<boolean>
-): Promise<string> {
-  const baseSlug = slugify(baseText);
-  const exists = await checkExists(baseSlug);
-  if (!exists) return baseSlug;
-  const randomSuffix = Math.random().toString(36).substring(2, 8);
-  return `${baseSlug}-${randomSuffix}`;
+export function calculateAverageRating(reviews: { rating: number }[]): number | null {
+  if (reviews.length === 0) return null;
+  const total = reviews.reduce((sum, r) => sum + r.rating, 0);
+  return Math.round((total / reviews.length) * 10) / 10;
 }
 

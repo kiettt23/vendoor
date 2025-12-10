@@ -1,9 +1,5 @@
 import { toast } from "sonner";
 
-/**
- * Centralized toast messages
- * Dễ quản lý, thay đổi wording, và hỗ trợ i18n sau này
- */
 export const TOAST_MESSAGES = {
   // Cart
   cart: {
@@ -28,6 +24,7 @@ export const TOAST_MESSAGES = {
     updated: "Đã cập nhật đánh giá",
     deleted: "Đã xóa đánh giá",
     replyAdded: "Đã gửi phản hồi",
+    replyDeleted: "Đã xóa phản hồi",
     ratingRequired: "Vui lòng chọn số sao đánh giá",
   },
 
@@ -49,6 +46,7 @@ export const TOAST_MESSAGES = {
     productCreated: "Đã tạo sản phẩm",
     productUpdated: "Đã cập nhật sản phẩm",
     productDeleted: "Đã xóa sản phẩm",
+    stockUpdated: "Cập nhật tồn kho thành công",
   },
 
   // Admin
@@ -69,6 +67,16 @@ export const TOAST_MESSAGES = {
     passwordResetSuccess: "Đặt lại mật khẩu thành công",
   },
 
+  // Profile
+  profile: {
+    updated: "Cập nhật thông tin thành công",
+  },
+
+  // AI
+  ai: {
+    generated: "Đã tạo thông tin sản phẩm từ AI!",
+  },
+
   // Generic errors
   error: {
     generic: "Có lỗi xảy ra, vui lòng thử lại",
@@ -77,6 +85,11 @@ export const TOAST_MESSAGES = {
     notFound: "Không tìm thấy dữ liệu",
     validation: "Dữ liệu không hợp lệ",
     cannotCreateOrder: "Không thể tạo đơn hàng",
+    invalidQuantity: "Số lượng không hợp lệ",
+    uploadFailed: "Upload ảnh thất bại",
+    imageRequired: "Vui lòng upload hình ảnh trước",
+    invalidImageType: "Chỉ hỗ trợ file JPG, PNG, WebP, GIF",
+    imageTooLarge: "File ảnh không được vượt quá 10MB",
   },
 } as const;
 

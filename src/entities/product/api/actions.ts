@@ -3,11 +3,11 @@
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/shared/lib/db";
-import { slugify, ok, err, type Result } from "@/shared/lib/utils";
+import { generateTimestampSlug, ok, err, type Result } from "@/shared/lib/utils";
+import { ROUTES } from "@/shared/lib/constants";
 
-import type { ProductFormInput } from "../model";
+import type { ProductFormInput, ProductEditInput } from "../model";
 
-// Re-export SearchSuggestion type for Client Components
 export type SearchSuggestion = {
   id: string;
   name: string;
@@ -18,14 +18,6 @@ export type SearchSuggestion = {
   categorySlug: string | null;
 };
 
-// ============================================
-// Search Action (cho Client Components)
-// ============================================
-
-/**
- * Server action để search products từ Client Component
- * Wrap query function để có thể gọi từ client
- */
 export async function searchProductsAction(
   query: string,
   limit = 5
@@ -75,16 +67,12 @@ export async function searchProductsAction(
   }));
 }
 
-// ============================================
-// Actions
-// ============================================
-
 export async function createProduct(
   vendorId: string,
   data: ProductFormInput
 ): Promise<Result<string>> {
   // Thêm timestamp để đảm bảo slug unique
-  const slug = `${slugify(data.name)}-${Date.now().toString(36)}`;
+  const slug = generateTimestampSlug(data.name);
 
   try {
     const product = await prisma.product.create({
@@ -116,7 +104,7 @@ export async function createProduct(
         }),
       },
     });
-    revalidatePath("/vendor/products");
+    revalidatePath(ROUTES.VENDOR_PRODUCTS);
     return ok(product.id);
   } catch {
     return err("Không thể tạo sản phẩm");
@@ -125,7 +113,7 @@ export async function createProduct(
 
 export async function updateProduct(
   productId: string,
-  data: ProductFormInput
+  data: ProductEditInput
 ): Promise<Result<void>> {
   try {
     await prisma.product.update({
@@ -135,20 +123,9 @@ export async function updateProduct(
         description: data.description || null,
         categoryId: data.categoryId,
         isActive: data.isActive,
-        variants: {
-          updateMany: {
-            where: { isDefault: true },
-            data: {
-              price: data.price,
-              compareAtPrice: data.compareAtPrice || null,
-              sku: data.sku,
-              stock: data.stock,
-            },
-          },
-        },
       },
     });
-    revalidatePath("/vendor/products");
+    revalidatePath(ROUTES.VENDOR_PRODUCTS);
     return ok(undefined);
   } catch {
     return err("Không thể cập nhật sản phẩm");
@@ -158,7 +135,7 @@ export async function updateProduct(
 export async function deleteProduct(productId: string): Promise<Result<void>> {
   try {
     await prisma.product.delete({ where: { id: productId } });
-    revalidatePath("/vendor/products");
+    revalidatePath(ROUTES.VENDOR_PRODUCTS);
     return ok(undefined);
   } catch {
     return err("Không thể xóa sản phẩm");

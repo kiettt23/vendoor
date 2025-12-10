@@ -3,108 +3,24 @@ import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { ArrowUpRight, BadgeCheck, Star, MapPin, Users } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-
-interface Store {
-  id: string;
-  name: string;
-  logo: string;
-  cover: string;
-  rating: number;
-  followers: string;
-  products: number;
-  location: string;
-  verified: boolean;
-  badge: string | null;
-}
+import { ROUTES } from "@/shared/lib/constants";
+import type { FeaturedVendor } from "@/entities/vendor";
 
 interface FeaturedStoresProps {
-  stores?: Store[];
+  stores: FeaturedVendor[];
 }
-
-// Mock data - sau này sẽ thay bằng data thật từ API
-const mockStores: Store[] = [
-  {
-    id: "1",
-    name: "Apple Store VN",
-    logo: "/apple-logo-minimal.jpg",
-    cover: "/apple-store-modern-interior.jpg",
-    rating: 4.9,
-    followers: "125K",
-    products: 234,
-    location: "TP. Hồ Chí Minh",
-    verified: true,
-    badge: "Premium",
-  },
-  {
-    id: "2",
-    name: "Samsung Official",
-    logo: "/samsung-logo-blue.jpg",
-    cover: "/samsung-store-display.jpg",
-    rating: 4.8,
-    followers: "98K",
-    products: 456,
-    location: "Hà Nội",
-    verified: true,
-    badge: "Top Seller",
-  },
-  {
-    id: "3",
-    name: "TechZone",
-    logo: "/placeholder.jpg",
-    cover: "/placeholder.jpg",
-    rating: 4.7,
-    followers: "67K",
-    products: 1234,
-    location: "Đà Nẵng",
-    verified: true,
-    badge: null,
-  },
-  {
-    id: "4",
-    name: "Gaming Gear Pro",
-    logo: "/placeholder.jpg",
-    cover: "/placeholder.jpg",
-    rating: 4.9,
-    followers: "89K",
-    products: 567,
-    location: "TP. Hồ Chí Minh",
-    verified: true,
-    badge: "Gaming",
-  },
-  {
-    id: "5",
-    name: "AudioPro Store",
-    logo: "/placeholder.jpg",
-    cover: "/placeholder.jpg",
-    rating: 4.8,
-    followers: "45K",
-    products: 189,
-    location: "Hà Nội",
-    verified: false,
-    badge: null,
-  },
-  {
-    id: "6",
-    name: "Smart Home VN",
-    logo: "/placeholder.jpg",
-    cover: "/placeholder.jpg",
-    rating: 4.6,
-    followers: "32K",
-    products: 345,
-    location: "TP. Hồ Chí Minh",
-    verified: true,
-    badge: "New",
-  },
-];
 
 const badgeColors: Record<string, string> = {
   Premium: "bg-amber-500",
   "Top Seller": "bg-green-500",
+  Verified: "bg-blue-500",
   Gaming: "bg-purple-500",
   New: "bg-primary",
 };
 
-export function FeaturedStores({ stores = mockStores }: FeaturedStoresProps) {
+export function FeaturedStores({ stores }: FeaturedStoresProps) {
+  if (stores.length === 0) return null;
+
   return (
     <section className="py-16 lg:py-24 bg-secondary/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -116,7 +32,7 @@ export function FeaturedStores({ stores = mockStores }: FeaturedStoresProps) {
             </p>
           </div>
           <Link
-            href="/stores"
+            href={ROUTES.STORES}
             className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
           >
             Xem tất cả cửa hàng
@@ -128,7 +44,7 @@ export function FeaturedStores({ stores = mockStores }: FeaturedStoresProps) {
           {stores.map((store) => (
             <Link
               key={store.id}
-              href={`/stores/${store.id}`}
+              href={ROUTES.STORE_DETAIL(store.slug || store.id)}
               className="group bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl hover:border-primary/30 transition-all"
             >
               {/* Cover */}
@@ -139,7 +55,7 @@ export function FeaturedStores({ stores = mockStores }: FeaturedStoresProps) {
                   fill
                   className="object-cover group-hover:scale-105 transition-transform"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-foreground/60 to-transparent" />
                 {store.badge && (
                   <Badge
                     className={`absolute top-3 right-3 ${
@@ -177,7 +93,7 @@ export function FeaturedStores({ stores = mockStores }: FeaturedStoresProps) {
                   <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
                     <span className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                      {store.rating}
+                      {store.rating.toFixed(1)}
                     </span>
                     <span className="flex items-center gap-1">
                       <Users className="h-4 w-4" />

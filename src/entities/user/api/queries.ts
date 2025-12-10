@@ -1,7 +1,6 @@
 import { cache } from "react";
-import { headers } from "next/headers";
 
-import { auth } from "@/shared/lib/auth/config";
+import { getSession } from "@/shared/lib/auth/session";
 import { prisma } from "@/shared/lib/db";
 
 /**
@@ -10,7 +9,7 @@ import { prisma } from "@/shared/lib/db";
  * @cached React cache cho request deduplication
  */
 export const getCurrentUserProfile = cache(async () => {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSession();
   if (!session?.user) return null;
 
   const user = await prisma.user.findUnique({
@@ -34,7 +33,7 @@ export const getCurrentUserProfile = cache(async () => {
  * Lấy thống kê orders của user hiện tại
  */
 export const getUserOrderStats = cache(async () => {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSession();
   if (!session?.user) return null;
 
   const [totalOrders, pendingOrders, completedOrders, totalSpent] =
@@ -64,7 +63,7 @@ export const getUserOrderStats = cache(async () => {
  * Lấy recent orders của user hiện tại
  */
 export const getUserRecentOrders = cache(async (limit = 5) => {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSession();
   if (!session?.user) return [];
 
   return prisma.order.findMany({

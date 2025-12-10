@@ -10,7 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/shared/ui/tooltip";
-import { showCustomToast } from "@/shared/lib/constants";
+import { showToast, showErrorToast } from "@/shared/lib/constants";
 
 import { generateProductInfo } from "../api";
 import type { AIProductInfo } from "../model";
@@ -43,20 +43,20 @@ export function AIGenerateButton({
 
   const handleGenerate = useCallback(async () => {
     if (!imageFile) {
-      showCustomToast.error("Vui lòng upload hình ảnh trước");
+      showErrorToast("imageRequired");
       return;
     }
 
     // Validate file type
     const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (!validTypes.includes(imageFile.type)) {
-      showCustomToast.error("Chỉ hỗ trợ file JPG, PNG, WebP, GIF");
+      showErrorToast("invalidImageType");
       return;
     }
 
     // Validate file size (max 10MB)
     if (imageFile.size > 10 * 1024 * 1024) {
-      showCustomToast.error("File ảnh không được vượt quá 10MB");
+      showErrorToast("imageTooLarge");
       return;
     }
 
@@ -80,14 +80,14 @@ export function AIGenerateButton({
       if (result.success) {
         setStatus("success");
         onGenerated(result.data);
-        showCustomToast.success("Đã tạo thông tin sản phẩm từ AI!");
+        showToast("ai", "generated");
       } else {
         setStatus("error");
-        showCustomToast.error(result.error);
+        showErrorToast("generic", result.error);
       }
     } catch {
       setStatus("error");
-      showCustomToast.error("Có lỗi xảy ra khi xử lý");
+      showErrorToast("generic");
     } finally {
       setIsLoading(false);
       // Reset status after 3s

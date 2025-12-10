@@ -1,21 +1,14 @@
 /**
- * Auth Module - Barrel Export
+ * ⚠️ IMPORTANT: File này chỉ export CLIENT-SAFE code
+ * 
+ * Để import server-only code:
+ * - Auth config: import { auth } from "@/shared/lib/auth/config"
+ * - Server session: import { getSession, requireSession } from "@/shared/lib/auth/session"
  *
- * Centralized exports for auth utilities
- *
- * ⚠️ IMPORTANT: Guards đã được di chuyển ra entities để tuân thủ FSD
- * - User guards (requireAuth, requireRole, requireAdmin, hasRole):
- *   import { requireAuth } from "@/entities/user"
- * - Vendor guards (requireVendor):
- *   import { requireVendor } from "@/entities/vendor"
  */
 
-// Server-side auth
-export { auth } from "./config";
+// Re-export Session type (type-only, safe for client)
 export type { Session } from "./config";
-
-// Session primitives (chỉ check session, không query DB)
-export { getSession, requireSession } from "./session";
 
 // Client-side auth
 export {
@@ -26,6 +19,4 @@ export {
   useSession,
   getSession as getClientSession,
 } from "./client";
-
-// Error handling
 export { translateAuthError } from "./error-messages";

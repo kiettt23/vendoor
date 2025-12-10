@@ -1,17 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { Heart, Loader2 } from "lucide-react";
-import {
-  showToast,
-  showCustomToast,
-  TOAST_MESSAGES,
-} from "@/shared/lib/constants";
 
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
-
-import { toggleWishlist } from "@/entities/wishlist/api/actions";
+import { useWishlistMutation } from "../use-wishlist-mutation";
 
 interface WishlistButtonProps {
   productId: string;
@@ -36,31 +29,16 @@ export function WishlistButton({
   size = "md",
   className,
 }: WishlistButtonProps) {
-  const [isInWishlist, setIsInWishlist] = useState(initialIsInWishlist);
-  const [isPending, startTransition] = useTransition();
-
-  const handleClick = () => {
-    if (!userId) {
-      showCustomToast.error(TOAST_MESSAGES.wishlist.loginRequired);
-      return;
-    }
-
-    startTransition(async () => {
-      const result = await toggleWishlist(userId, productId);
-
-      if (result.success) {
-        setIsInWishlist(result.data.added);
-        showToast("wishlist", result.data.added ? "added" : "removed");
-      } else {
-        showCustomToast.error(result.error);
-      }
-    });
-  };
+  const { isInWishlist, isPending, toggle } = useWishlistMutation({
+    productId,
+    userId,
+    initialIsInWishlist,
+  });
 
   if (variant === "icon") {
     return (
       <button
-        onClick={handleClick}
+        onClick={toggle}
         disabled={isPending}
         className={cn(
           "p-2 rounded-full transition-colors",
@@ -91,7 +69,7 @@ export function WishlistButton({
     <Button
       variant={isInWishlist ? "secondary" : "outline"}
       size="sm"
-      onClick={handleClick}
+      onClick={toggle}
       disabled={isPending}
       className={className}
     >

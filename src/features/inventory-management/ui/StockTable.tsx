@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Check, X, Pencil, Package } from "lucide-react";
-import { toast } from "sonner";
 
 import {
   Table,
@@ -16,7 +15,9 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { OptimizedImage } from "@/shared/ui/optimized-image";
+import { Skeleton } from "@/shared/ui/skeleton";
 import { formatPrice } from "@/shared/lib/utils";
+import { showToast, showErrorToast } from "@/shared/lib/constants";
 
 import type { InventoryItem } from "../model/types";
 import { updateStock } from "../api/actions";
@@ -45,18 +46,18 @@ export function StockTable({ items, vendorId }: StockTableProps) {
   const handleSave = (variantId: string) => {
     const stock = parseInt(editValue, 10);
     if (isNaN(stock) || stock < 0) {
-      toast.error("Số lượng không hợp lệ");
+      showErrorToast("invalidQuantity");
       return;
     }
 
     startTransition(async () => {
       const result = await updateStock(vendorId, { variantId, stock });
       if (result.success) {
-        toast.success("Cập nhật tồn kho thành công");
+        showToast("vendor", "stockUpdated");
         setEditingId(null);
         setEditValue("");
       } else {
-        toast.error(result.error);
+        showErrorToast("generic", result.error);
       }
     });
   };
@@ -190,6 +191,53 @@ export function StockTable({ items, vendorId }: StockTableProps) {
                     <Pencil className="size-4" />
                   </Button>
                 )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+export function StockTableSkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <div className="rounded-lg border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-16">Ảnh</TableHead>
+            <TableHead>Sản phẩm</TableHead>
+            <TableHead className="w-32">SKU</TableHead>
+            <TableHead className="w-28 text-right">Giá</TableHead>
+            <TableHead className="w-32 text-center">Tồn kho</TableHead>
+            <TableHead className="w-28">Trạng thái</TableHead>
+            <TableHead className="w-20" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: rows }).map((_, i) => (
+            <TableRow key={i}>
+              <TableCell>
+                <Skeleton className="size-10 rounded" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-5 w-40" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-20" />
+              </TableCell>
+              <TableCell className="text-right">
+                <Skeleton className="ml-auto h-5 w-24" />
+              </TableCell>
+              <TableCell className="text-center">
+                <Skeleton className="mx-auto h-5 w-12" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-6 w-20 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="size-8" />
               </TableCell>
             </TableRow>
           ))}

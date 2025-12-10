@@ -1,19 +1,8 @@
-/**
- * SearchInput Component
- *
- * Desktop search input với:
- * - Debounced search suggestions (300ms delay)
- * - Dropdown gợi ý sản phẩm khi gõ
- * - Category dropdown
- * - Keyboard navigation
- */
-
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, ChevronDown, Loader2 } from "lucide-react";
-import { useDebouncedCallback } from "use-debounce";
 import { OptimizedImage } from "@/shared/ui/optimized-image";
 import Link from "next/link";
 
@@ -26,20 +15,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
-import {
-  searchProductsAction,
-  type SearchSuggestion,
-} from "@/entities/product/api/actions";
+import { useSearchSuggestions } from "../use-search";
 import { formatPrice } from "@/shared/lib/utils";
+import { ROUTES } from "@/shared/lib/constants";
 
 interface SearchInputProps {
-  /** Danh sách categories cho dropdown */
   categories?: readonly { name: string; slug: string }[];
-  /** Placeholder text */
   placeholder?: string;
-  /** Debounce delay (ms) - default 300ms */
   debounceDelay?: number;
-  /** CSS class */
   className?: string;
 }
 
@@ -53,16 +36,18 @@ export function SearchInput({
   const searchParams = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Get initial value from URL
   const initialQuery = searchParams.get("search") ?? "";
   const [query, setQuery] = useState(initialQuery);
   const [isFocused, setIsFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
-  // Navigate to search results
+  const {
+    suggestions,
+    isLoading,
+    setQuery: setSearchQuery,
+  } = useSearchSuggestions({ debounceMs: debounceDelay });
+
   const navigateToSearch = useCallback(
     (searchTerm: string) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -70,7 +55,7 @@ export function SearchInput({
 
       if (normalizedTerm) {
         params.set("search", normalizedTerm);
-        params.delete("page"); // Reset pagination
+        params.delete("page");
       } else {
         params.delete("search");
       }
@@ -81,42 +66,19 @@ export function SearchInput({
     [router, searchParams]
   );
 
-  // Fetch suggestions với debounce
-  const fetchSuggestions = useDebouncedCallback(async (value: string) => {
-    if (value.trim().length < 2) {
-      setSuggestions([]);
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const results = await searchProductsAction(value, 6);
-      setSuggestions(results);
-    } catch {
-      setSuggestions([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, debounceDelay);
-
-  // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
     setHighlightedIndex(-1);
+    setSearchQuery(value);
 
     if (value.trim().length >= 2) {
-      setIsLoading(true);
       setShowSuggestions(true);
-      fetchSuggestions(value);
     } else {
-      setSuggestions([]);
       setShowSuggestions(false);
     }
   };
 
-  // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!showSuggestions || suggestions.length === 0) {
       if (e.key === "Enter") {
@@ -156,13 +118,11 @@ export function SearchInput({
     }
   };
 
-  // Handle form submit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     navigateToSearch(query);
   };
 
-  // Click outside to close suggestions
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -200,7 +160,7 @@ export function SearchInput({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link href="/products">Tất cả sản phẩm</Link>
+                  <Link href={ROUTES.PRODUCTS}>Tất cả sản phẩm</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {categories.map((cat) => (
@@ -209,7 +169,7 @@ export function SearchInput({
                     asChild
                     className="cursor-pointer"
                   >
-                    <Link href={`/products?category=${cat.slug}`}>
+                    <Link href={`${ROUTES.PRODUCTS}?category=${cat.slug}`}>
                       {cat.name}
                     </Link>
                   </DropdownMenuItem>

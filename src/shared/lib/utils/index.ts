@@ -1,10 +1,3 @@
-/**
- * Utils Module - Barrel Export
- *
- * Centralized exports for utility functions.
- * Usage: import { cn, formatPrice, createLogger } from "@/lib/utils"
- */
-
 // Class names utility
 export { cn } from "./cn";
 
@@ -51,3 +44,10 @@ export {
   type VoidResult,
   type AsyncVoidResult,
 } from "./result";
+
+// Slug utilities
+export {
+  generateTimestampSlug,
+  generateRandomSlug,
+  generateUniqueSlug,
+} from "./slug";

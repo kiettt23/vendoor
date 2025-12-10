@@ -6,9 +6,7 @@
 
 import type { ReviewModel, ReviewStatus } from "@/generated/prisma";
 
-// ============================================
 // Base Types (từ Prisma Generated)
-// ============================================
 
 /**
  * Base Review type từ database
@@ -18,9 +16,7 @@ export type Review = ReviewModel;
 // Re-export ReviewStatus for convenience
 export type { ReviewStatus };
 
-// ============================================
 // Derived Types (cho specific use cases)
-// ============================================
 
 /**
  * Review hiển thị trên trang sản phẩm

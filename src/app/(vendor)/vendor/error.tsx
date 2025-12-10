@@ -1,16 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
-import { AlertCircle } from "lucide-react";
-import { Button } from "@/shared/ui/button";
+import { VendorErrorPage } from "@/shared/ui/feedback";
 import { createLogger } from "@/shared/lib/utils/logger";
 
 const logger = createLogger("VendorError");
 
-/**
- * Error boundary for vendor dashboard
- */
 export default function Error({
   error,
   reset,
@@ -22,28 +17,5 @@ export default function Error({
     logger.error("Vendor dashboard error caught by error boundary", error);
   }, [error]);
 
-  return (
-    <div className="p-6">
-      <div className="max-w-md mx-auto text-center">
-        <div className="mb-6 flex justify-center">
-          <div className="rounded-full bg-destructive/10 p-6">
-            <AlertCircle className="h-10 w-10 text-destructive" />
-          </div>
-        </div>
-
-        <h2 className="text-2xl font-bold mb-3">Không thể tải dashboard</h2>
-
-        <p className="text-muted-foreground mb-6">
-          Đã có lỗi xảy ra khi tải thông tin dashboard. Vui lòng thử lại.
-        </p>
-
-        <div className="flex gap-3 justify-center">
-          <Button onClick={reset}>Thử lại</Button>
-          <Button variant="outline" asChild>
-            <Link href="/">Về trang chủ</Link>
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+  return <VendorErrorPage error={error} reset={reset} />;
 }

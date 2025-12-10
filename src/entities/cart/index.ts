@@ -5,5 +5,6 @@ export type {
   StockValidationItem,
   StockValidationResult,
 } from "./model";
-export { useCartStore, useCart } from "./model";
+export { useCartStore, useCart, useCartStock } from "./model";
 export { groupItemsByVendor, calculateCartTotals } from "./lib";
+export { getCartItemsStock, type StockInfo } from "./api";

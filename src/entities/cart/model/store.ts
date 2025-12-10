@@ -98,6 +98,21 @@ export const useCartStore = create<CartStore>()(
       },
 
       clearCart: () => set({ items: [] }),
+
+      syncStock: (stockData) => {
+        const items = get().items;
+        const updatedItems = items.map((item) => {
+          const stockInfo = stockData.find((s) => s.variantId === item.variantId);
+          if (stockInfo) {
+            const newStock = stockInfo.currentStock;
+            // Auto-adjust quantity if exceeds new stock
+            const newQuantity = Math.min(item.quantity, newStock);
+            return { ...item, stock: newStock, quantity: newQuantity > 0 ? newQuantity : item.quantity };
+          }
+          return item;
+        });
+        set({ items: updatedItems });
+      },
     }),
     { name: "cart-storage" }
   )

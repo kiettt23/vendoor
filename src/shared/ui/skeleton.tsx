@@ -1,9 +1,5 @@
 import { cn } from "@/shared/lib/utils/cn";
 
-// ============================================
-// LOADING SKELETON COMPONENT
-// ============================================
-
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -14,14 +10,6 @@ function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-// ============================================
-// PRESET SKELETONS
-// ============================================
-
-/**
- * Product Card Skeleton
- * Use in product listings while loading
- */
 function ProductCardSkeleton() {
   return (
     <div className="space-y-(--spacing-xs)">
@@ -46,10 +34,6 @@ function ProductCardSkeleton() {
   );
 }
 
-/**
- * Table Row Skeleton
- * Use in admin tables while loading
- */
 function TableRowSkeleton({ columns = 4 }: { columns?: number }) {
   return (
     <div className="flex items-center gap-(--spacing-component) py-(--spacing-component)">
@@ -60,10 +44,6 @@ function TableRowSkeleton({ columns = 4 }: { columns?: number }) {
   );
 }
 
-/**
- * Form Field Skeleton
- * Use in forms while loading data
- */
 function FormFieldSkeleton() {
   return (
     <div className="space-y-(--spacing-tight)">
@@ -73,10 +53,6 @@ function FormFieldSkeleton() {
   );
 }
 
-/**
- * Card Skeleton
- * Use in dashboards while loading stats
- */
 function CardSkeleton() {
   return (
     <div className="rounded-lg border-2 p-(--spacing-content) space-y-(--spacing-component)">

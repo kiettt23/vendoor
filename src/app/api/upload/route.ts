@@ -5,13 +5,10 @@ import { validateImageFile } from "@/shared/lib/upload";
 import { auth } from "@/shared/lib/auth/config";
 import { createLogger } from "@/shared/lib/utils/logger";
 
-// ============================================
-// POST /api/upload
-// ============================================
+const logger = createLogger("UploadAPI");
 
 export async function POST(request: NextRequest) {
   try {
-    // 0. Check authentication
     const session = await auth.api.getSession({
       headers: request.headers,
     });
@@ -23,7 +20,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Parse FormData
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
@@ -31,7 +27,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // 2. Validate file using shared validation
     const validationResult = validateImageFile(file);
     if (!validationResult.valid) {
       return NextResponse.json(
@@ -40,7 +35,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Upload to Cloudinary
     const result = await uploadImage(file, {
       folder: "vendoor/products",
       transformation: {
@@ -51,14 +45,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 4. Return result
     return NextResponse.json({
       success: true,
       url: result.url,
       publicId: result.publicId,
     });
   } catch (error) {
-    const logger = createLogger("UploadAPI");
     logger.error("Upload failed", error);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }

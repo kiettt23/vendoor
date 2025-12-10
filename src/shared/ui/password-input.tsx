@@ -4,20 +4,6 @@ import * as React from "react";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { cn } from "@/shared/lib/utils/cn";
 
-// ============================================
-// PASSWORD INPUT COMPONENT
-// ============================================
-
-/**
- * Password Input với toggle hiển thị/ẩn password
- *
- * **Features:**
- * - Toggle button để show/hide password
- * - Icon eye/eye-off
- * - Icon lock ở bên trái
- * - Kế thừa styling từ Input component
- */
-
 type PasswordInputProps = Omit<React.ComponentProps<"input">, "type">;
 
 function PasswordInput({ className, ...props }: PasswordInputProps) {

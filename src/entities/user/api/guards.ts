@@ -1,17 +1,3 @@
-/**
- * User Auth Guards
- *
- * Server-side utilities để kiểm tra authentication và authorization.
- * Đây là business logic layer - queries Prisma để lấy user data.
- *
- * @example
- * // Trong Server Component
- * const { session, user } = await requireAuth();
- *
- * // Yêu cầu role cụ thể
- * const { session, user } = await requireRole("VENDOR");
- */
-
 "use server";
 
 import { redirect } from "next/navigation";
@@ -31,13 +17,6 @@ export interface AuthResult {
   };
 }
 
-/**
- * Yêu cầu user đã đăng nhập và lấy user data từ DB.
- * Redirect về /login nếu chưa đăng nhập hoặc user không tồn tại.
- *
- * @returns Session và thông tin user cơ bản
- * @throws Redirect to /login if not authenticated
- */
 export async function requireAuth(): Promise<AuthResult> {
   const session = await requireSession();
 
@@ -61,15 +40,6 @@ export async function requireAuth(): Promise<AuthResult> {
   };
 }
 
-/**
- * Yêu cầu user có role cụ thể.
- * Redirect về homepage nếu không có quyền.
- *
- * @param role - Role cần kiểm tra
- * @returns Session và thông tin user
- * @throws Redirect to /login if not authenticated
- * @throws Redirect to / if role not matched
- */
 export async function requireRole(role: UserRole): Promise<AuthResult> {
   const { session, user } = await requireAuth();
 
@@ -80,23 +50,10 @@ export async function requireRole(role: UserRole): Promise<AuthResult> {
   return { session, user };
 }
 
-/**
- * Yêu cầu user là Admin.
- *
- * @returns Session và user
- * @throws Redirect to /login if not authenticated
- * @throws Redirect to / if not admin
- */
 export async function requireAdmin() {
   return requireRole("ADMIN");
 }
 
-/**
- * Kiểm tra user có role cụ thể không (không redirect).
- *
- * @param role - Role cần kiểm tra
- * @returns true nếu có role
- */
 export async function hasRole(role: UserRole): Promise<boolean> {
   const session = await getSession();
   if (!session?.user) return false;

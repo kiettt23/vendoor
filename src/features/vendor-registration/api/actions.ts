@@ -3,23 +3,27 @@
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/shared/lib/db";
-import { slugify, ok, err, type Result } from "@/shared/lib/utils";
+import {
+  generateUniqueSlug,
+  ok,
+  err,
+  type Result,
+  createLogger,
+} from "@/shared/lib/utils";
+import { ROUTES } from "@/shared/lib/constants";
 
 import { vendorRegistrationSchema } from "../model";
 import type { VendorRegistrationInput } from "../model";
 
-/**
- * Đăng ký làm Vendor
- */
+const logger = createLogger("vendor-registration");
+
 export async function registerAsVendor(
   userId: string,
   data: VendorRegistrationInput
 ): Promise<Result<string>> {
   try {
-    // 1. Validate input
     const validated = vendorRegistrationSchema.parse(data);
 
-    // 2. Kiểm tra user đã có vendor profile chưa
     const existingProfile = await prisma.vendorProfile.findUnique({
       where: { userId },
       select: { id: true, status: true },
@@ -42,19 +46,14 @@ export async function registerAsVendor(
       }
     }
 
-    // 3. Kiểm tra shopName đã tồn tại chưa
-    const baseSlug = slugify(validated.shopName);
-    const existingSlug = await prisma.vendorProfile.findUnique({
-      where: { slug: baseSlug },
-      select: { id: true },
+    const slug = await generateUniqueSlug(validated.shopName, async (s) => {
+      const existing = await prisma.vendorProfile.findUnique({
+        where: { slug: s },
+        select: { id: true },
+      });
+      return !!existing;
     });
 
-    // Tạo slug unique
-    const slug = existingSlug
-      ? `${baseSlug}-${Date.now().toString(36)}`
-      : baseSlug;
-
-    // 4. Tạo vendor profile
     const vendorProfile = await prisma.vendorProfile.create({
       data: {
         userId,
@@ -64,24 +63,20 @@ export async function registerAsVendor(
         businessAddress: validated.businessAddress || null,
         businessPhone: validated.businessPhone || null,
         businessEmail: validated.businessEmail || null,
-        status: "PENDING", // Chờ admin duyệt
+        status: "PENDING",
       },
     });
 
-    // 5. Revalidate
-    revalidatePath("/account");
-    revalidatePath("/admin/vendors");
+    revalidatePath(ROUTES.ACCOUNT);
+    revalidatePath(ROUTES.ADMIN_VENDORS);
 
     return ok(vendorProfile.id);
   } catch (error) {
-    console.error("registerAsVendor error:", error);
+    logger.error("registerAsVendor error:", error);
     return err("Không thể đăng ký. Vui lòng thử lại sau.");
   }
 }
 
-/**
- * Kiểm tra trạng thái đăng ký vendor của user
- */
 export async function getVendorRegistrationStatus(userId: string) {
   const profile = await prisma.vendorProfile.findUnique({
     where: { userId },

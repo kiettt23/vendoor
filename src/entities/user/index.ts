@@ -12,9 +12,6 @@ export {
   type AuthResult,
 } from "./api/guards";
 
-// API - Queries (Server Components only - DO NOT import from Client Components)
-export {
-  getCurrentUserProfile,
-  getUserOrderStats,
-  getUserRecentOrders,
-} from "./api/queries";
+// Note: For queries (getCurrentUserProfile, getUserOrderStats, getUserRecentOrders),
+// import directly from "@/entities/user/api/queries"
+// They use Prisma and cannot be imported from Client Components

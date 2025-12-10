@@ -3,9 +3,7 @@ import { cache } from "react";
 import { prisma } from "@/shared/lib/db";
 import type { ReviewListItem, ReviewStats } from "../model";
 
-// ============================================
 // Review Queries
-// ============================================
 
 /**
  * Lấy danh sách reviews của sản phẩm

@@ -26,6 +26,7 @@ export interface CartStore {
   updateQuantity: (variantId: string, quantity: number) => void;
   removeItem: (variantId: string) => void;
   clearCart: () => void;
+  syncStock: (stockData: { variantId: string; currentStock: number }[]) => void;
 }
 
 export interface StockValidationItem {

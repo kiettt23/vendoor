@@ -1,8 +1,4 @@
-import { headers } from "next/headers";
-import { BarChart } from "lucide-react";
-
-import { auth } from "@/shared/lib/auth/config";
-import { prisma } from "@/shared/lib/db";
+import { requireVendor } from "@/entities/vendor";
 
 import {
   getVendorAnalytics,
@@ -20,26 +16,7 @@ interface VendorAnalyticsPageProps {
 export async function VendorAnalyticsPage({
   timeRange = "30d",
 }: VendorAnalyticsPageProps) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return null;
-
-  // Get vendor profile
-  const vendorProfile = await prisma.vendorProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { id: true },
-  });
-
-  if (!vendorProfile) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <BarChart className="mb-4 size-12 text-muted-foreground" />
-        <p className="text-lg font-medium">Không tìm thấy hồ sơ vendor</p>
-        <p className="text-sm text-muted-foreground">
-          Vui lòng đăng ký trở thành nhà bán hàng trước
-        </p>
-      </div>
-    );
-  }
+  const { vendorProfile } = await requireVendor();
 
   const analytics = await getVendorAnalytics(vendorProfile.id, timeRange);
 

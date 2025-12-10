@@ -16,10 +16,8 @@ import {
 import {
   showToast,
   showErrorToast,
-  showCustomToast,
 } from "@/shared/lib/constants";
-import { replyToReview, deleteVendorReply } from "@/entities/review/api/actions";
-import { StarRating } from "@/entities/review/ui";
+import { replyToReview, deleteVendorReply, StarRating } from "@/entities/review";
 
 interface ReviewReplyDialogProps {
   reviewId: string;
@@ -58,7 +56,7 @@ export function ReviewReplyDialog({
         setIsOpen(false);
         router.refresh();
       } else {
-        showCustomToast.error(result.error);
+        showErrorToast("generic", result.error);
       }
     } catch {
       showErrorToast("generic");
@@ -74,12 +72,12 @@ export function ReviewReplyDialog({
       const result = await deleteVendorReply(vendorUserId, reviewId);
 
       if (result.success) {
-        showCustomToast.success("Đã xóa phản hồi");
+        showToast("review", "replyDeleted");
         setReply("");
         setIsOpen(false);
         router.refresh();
       } else {
-        showCustomToast.error(result.error);
+        showErrorToast("generic", result.error);
       }
     } catch {
       showErrorToast("generic");

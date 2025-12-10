@@ -6,18 +6,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { OptimizedImage } from "@/shared/ui/optimized-image";
-import {
-  ArrowLeft,
-  ShoppingBag,
-  Loader2,
-  CreditCard,
-  Banknote,
-} from "lucide-react";
+import { ArrowLeft, Loader2, CreditCard, Banknote, ShoppingBag } from "lucide-react";
 import {
   TOAST_MESSAGES,
   showInfoToast,
   showErrorToast,
   showCustomToast,
+  ROUTES,
 } from "@/shared/lib/constants";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -26,11 +21,13 @@ import { Textarea } from "@/shared/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Separator } from "@/shared/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/shared/ui/radio-group";
+import { EmptyCart } from "@/shared/ui/feedback";
 import {
   useCart,
   groupItemsByVendor,
   calculateCartTotals,
 } from "@/entities/cart";
+import { OrderSummary } from "@/entities/order";
 import {
   checkoutSchema,
   type CheckoutFormData,
@@ -102,15 +99,8 @@ export function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto py-16 px-4 text-center">
-        <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-        <h1 className="text-2xl font-bold mb-2">Giỏ hàng trống</h1>
-        <p className="text-muted-foreground mb-6">
-          Thêm sản phẩm trước khi thanh toán
-        </p>
-        <Button asChild>
-          <Link href="/products">Mua sắm ngay</Link>
-        </Button>
+      <div className="container mx-auto py-16 px-4 flex items-center justify-center">
+        <EmptyCart />
       </div>
     );
   }
@@ -136,7 +126,6 @@ export function CheckoutPage() {
 
       const { paymentMethod, note, email, ...shippingInfo } = data;
 
-      // Lưu thông tin để dùng lại
       saveCheckoutInfo(shippingInfo);
 
       showInfoToast("order", "creating");
@@ -151,7 +140,6 @@ export function CheckoutPage() {
         return;
       }
 
-      // Nếu là Stripe, redirect tới Stripe Checkout
       if (paymentMethod === "STRIPE") {
         showInfoToast("order", "redirecting");
         const response = await fetch("/api/checkout/stripe", {
@@ -171,13 +159,11 @@ export function CheckoutPage() {
           return;
         }
 
-        // Redirect to Stripe Checkout URL
         clearCart();
         router.push(url);
         return;
       }
 
-      // COD: Xóa giỏ hàng và redirect
       clearCart();
       showCustomToast.success(
         `${TOAST_MESSAGES.order.placed} ${result.orders.length} đơn hàng`
@@ -194,18 +180,67 @@ export function CheckoutPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <Button variant="ghost" size="sm" asChild className="mb-6">
-        <Link href="/cart">
+    <div className="container mx-auto py-6 sm:py-8 px-4 max-w-6xl pb-24 lg:pb-8">
+      <Button variant="ghost" size="sm" asChild className="mb-4 sm:mb-6">
+        <Link href={ROUTES.CART}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Quay lại giỏ hàng
         </Link>
       </Button>
 
-      <h1 className="text-3xl font-bold mb-8">Thanh Toán</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Thanh Toán</h1>
 
-      <div className="grid lg:grid-cols-2 gap-8">
-        <div>
+      <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+        {/* Order Summary - Show first on mobile, second on desktop */}
+        <div className="lg:order-2">
+          <Card className="lg:sticky lg:top-24">
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-base sm:text-lg">Đơn Hàng ({totals.itemCount} sản phẩm)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 sm:space-y-4">
+              {vendorGroups.map((group) => (
+                <div key={group.vendorId} className="space-y-2 sm:space-y-3">
+                  <p className="font-semibold text-sm">{group.vendorName}</p>
+                  {group.items.map((item) => (
+                    <div key={item.id} className="flex gap-2 sm:gap-3">
+                      <div className="relative h-12 w-12 sm:h-16 sm:w-16 rounded overflow-hidden bg-muted shrink-0">
+                        <OptimizedImage
+                          src={item.image}
+                          alt=""
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs sm:text-sm font-semibold line-clamp-1">
+                          {item.productName}
+                        </p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
+                          x{item.quantity}
+                        </p>
+                        <p className="text-xs sm:text-sm font-semibold">
+                          {formatPrice(item.price * item.quantity)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <Separator />
+                </div>
+              ))}
+              <div className="space-y-2 pt-2">
+                <OrderSummary
+                  subtotal={totals.subtotal}
+                  shippingFee={totals.shippingFee}
+                  total={totals.total}
+                  variant="customer"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Form - Show second on mobile, first on desktop */}
+        <div className="lg:order-1">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <Card>
               <CardHeader>
@@ -359,7 +394,7 @@ export function CheckoutPage() {
             <Button
               type="submit"
               size="lg"
-              className="w-full"
+              className="w-full hidden lg:flex"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -376,62 +411,33 @@ export function CheckoutPage() {
             </Button>
           </form>
         </div>
+      </div>
 
-        <div>
-          <Card className="sticky top-24">
-            <CardHeader>
-              <CardTitle>Đơn Hàng ({totals.itemCount} sản phẩm)</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {vendorGroups.map((group) => (
-                <div key={group.vendorId} className="space-y-3">
-                  <p className="font-semibold text-sm">{group.vendorName}</p>
-                  {group.items.map((item) => (
-                    <div key={item.id} className="flex gap-3">
-                      <div className="relative h-16 w-16 rounded overflow-hidden bg-muted shrink-0">
-                        <OptimizedImage
-                          src={item.image}
-                          alt=""
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold truncate">
-                          {item.productName}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          x{item.quantity}
-                        </p>
-                        <p className="text-sm font-semibold">
-                          {formatPrice(item.price * item.quantity)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  <Separator />
-                </div>
-              ))}
-              <div className="space-y-2 pt-2">
-                <div className="flex justify-between text-sm">
-                  <span>Tạm tính</span>
-                  <span>{formatPrice(totals.subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Phí vận chuyển</span>
-                  <span>{formatPrice(totals.shippingFee)}</span>
-                </div>
-                <Separator />
-                <div className="flex justify-between font-bold text-lg">
-                  <span>Tổng cộng</span>
-                  <span className="text-primary">
-                    {formatPrice(totals.total)}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Mobile: Fixed bottom bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 lg:hidden z-40">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm text-muted-foreground">Tổng cộng:</span>
+          <span className="text-lg font-bold text-primary">{formatPrice(totals.total)}</span>
         </div>
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full"
+          disabled={isSubmitting}
+          onClick={handleSubmit(onSubmit)}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Đang xử lý...
+            </>
+          ) : (
+            <>
+              <ShoppingBag className="mr-2 h-4 w-4" />
+              Đặt Hàng ({totals.itemCount})
+            </>
+          )}
+        </Button>
       </div>
     </div>
   );

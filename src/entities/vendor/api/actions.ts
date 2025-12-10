@@ -1,18 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-
 import { prisma } from "@/shared/lib/db";
+import { REVALIDATION_PATHS } from "@/shared/lib/constants";
 
 import type { VendorStatus } from "@/generated/prisma";
 
-// ============================================
-// Vendor Admin Actions
-// ============================================
-
-/**
- * Duyệt vendor và cấp role VENDOR cho user
- */
 export async function approveVendor(vendorId: string) {
   await prisma.vendorProfile.update({
     where: { id: vendorId },
@@ -37,25 +30,17 @@ export async function approveVendor(vendorId: string) {
     }
   }
 
-  revalidatePath("/admin/vendors");
-  revalidatePath(`/admin/vendors/${vendorId}`);
+  REVALIDATION_PATHS.ADMIN_VENDORS(vendorId).forEach(p => revalidatePath(p));
 }
 
-/**
- * Từ chối vendor
- */
 export async function rejectVendor(vendorId: string) {
   await prisma.vendorProfile.update({
     where: { id: vendorId },
     data: { status: "REJECTED" },
   });
-  revalidatePath("/admin/vendors");
-  revalidatePath(`/admin/vendors/${vendorId}`);
+  REVALIDATION_PATHS.ADMIN_VENDORS(vendorId).forEach(p => revalidatePath(p));
 }
 
-/**
- * Cập nhật status vendor (PENDING, APPROVED, REJECTED, SUSPENDED)
- */
 export async function updateVendorStatus(
   vendorId: string,
   status: VendorStatus
@@ -65,7 +50,6 @@ export async function updateVendorStatus(
     data: { status },
   });
 
-  // Nếu approve thì thêm role VENDOR
   if (status === "APPROVED") {
     const vendor = await prisma.vendorProfile.findUnique({
       where: { id: vendorId },
@@ -85,6 +69,5 @@ export async function updateVendorStatus(
     }
   }
 
-  revalidatePath("/admin/vendors");
-  revalidatePath(`/admin/vendors/${vendorId}`);
+  REVALIDATION_PATHS.ADMIN_VENDORS(vendorId).forEach(p => revalidatePath(p));
 }

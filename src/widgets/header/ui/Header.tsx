@@ -1,43 +1,22 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  Menu,
-  Store,
-  MapPin,
-  LogOut,
-  Package,
-  Shield,
-  LogIn,
-  UserPlus,
-  User,
-} from "lucide-react";
+import { Menu, Store, MapPin } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/shared/ui/sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
 import { Logo } from "@/shared/ui/logo";
 import { useCart } from "@/entities/cart";
-import { signOut, useSession } from "@/shared/lib/auth/client";
 import {
   HEADER_NAV_ITEMS,
   HEADER_CATEGORIES,
   HEADER_ICON_BUTTONS,
-  showToast,
-  showErrorToast,
+  ROUTES,
 } from "@/shared/lib/constants";
 import { SearchInput, SearchInputMobile } from "@/features/search";
+import { UserMenu } from "./UserMenu";
 
-type HeaderProps = {
-  /** Initial user from server - used for SSR, then overridden by useSession */
+export type HeaderProps = {
   initialUser?: {
     name: string | null;
     email: string | null;
@@ -45,56 +24,14 @@ type HeaderProps = {
   } | null;
 };
 
-type UserData = {
-  name: string | null;
-  email: string | null;
-  roles: string[];
-} | null;
-
-/**
- * Get user initial for avatar badge
- */
-function getUserInitial(user: UserData): string {
-  if (!user) return "";
-  const name = user.name || user.email || "";
-  return name.charAt(0).toUpperCase();
-}
-
 export function Header({ initialUser }: HeaderProps) {
-  const router = useRouter();
   const items = useCart((state) => state.items);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Use client-side session for reactive updates after login/logout
-  // Falls back to initialUser from server for SSR
-  const { data: session } = useSession();
-  const user: UserData = useMemo(() => {
-    // Prefer client session (reactive) over server initial (static)
-    if (session?.user) {
-      return {
-        name: session.user.name,
-        email: session.user.email,
-        roles: session.user.roles || [],
-      };
-    }
-    return initialUser ?? null;
-  }, [session, initialUser]);
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      showToast("auth", "logoutSuccess");
-      router.push("/");
-      router.refresh();
-    } catch {
-      showErrorToast("generic");
-    }
-  };
-
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b">
-      <div className="bg-primary text-primary-foreground w-full px-8 md:px-24 lg:px-48">
-        <div className="w-full px-2 md:px-6 lg:px-12 py-2 flex items-center justify-between text-sm">
+      <div className="bg-primary text-primary-foreground w-full">
+        <div className="w-full px-4 sm:px-6 md:px-12 lg:px-24 py-1.5 sm:py-2 flex items-center justify-between text-xs sm:text-sm">
           <div className="flex items-center gap-4 text-primary-foreground/90">
             <span className="flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" />
@@ -109,18 +46,19 @@ export function Header({ initialUser }: HeaderProps) {
           </div>
           <div className="flex items-center gap-4">
             <Link
-              href="/become-vendor"
+              href={ROUTES.BECOME_VENDOR}
               className="hover:text-white transition-colors flex items-center gap-1 text-primary-foreground/90 font-medium"
             >
               <Store className="h-3.5 w-3.5" />
-              Trở thành người bán
+              <span className="hidden sm:inline">Trở thành người bán</span>
+              <span className="sm:hidden">Bán hàng</span>
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="w-full px-8 md:px-24 lg:px-48">
-        <div className="flex h-16 items-center justify-between gap-4 relative">
+      <div className="w-full px-4 sm:px-6 md:px-12 lg:px-24">
+        <div className="flex h-14 sm:h-16 items-center justify-between gap-2 sm:gap-4 relative">
           {/* Mobile: Menu button - only on small screens */}
           <div className="md:hidden shrink-0">
             <Sheet>
@@ -184,22 +122,7 @@ export function Header({ initialUser }: HeaderProps) {
             {/* 1. Search - Mobile only */}
             <SearchInputMobile />
 
-            {/* 2. Other icon buttons (mobile only, exclude cart) */}
-            {HEADER_ICON_BUTTONS.filter(
-              (btn) => btn.id !== "search" && btn.id !== "cart"
-            ).map((btn) => (
-              <Button
-                key={btn.id}
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-                aria-label={btn.label}
-              >
-                <btn.icon className="h-5 w-5" />
-              </Button>
-            ))}
-
-            {/* 2. Cart with Badge */}
+            {/* 2. Cart with Badge - Always visible */}
             {HEADER_ICON_BUTTONS.filter((btn) => btn.id === "cart").map(
               (btn) => (
                 <Button
@@ -225,7 +148,7 @@ export function Header({ initialUser }: HeaderProps) {
               )
             )}
 
-            {/* 3. Wishlist */}
+            {/* 3. Wishlist - Hidden on mobile (xs), shown sm+ */}
             {HEADER_ICON_BUTTONS.filter((btn) => btn.id === "wishlist").map(
               (btn) => (
                 <Button
@@ -243,99 +166,8 @@ export function Header({ initialUser }: HeaderProps) {
               )
             )}
 
-            {/* 4. User Menu with Avatar */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative"
-                  aria-label="Tài khoản"
-                >
-                  {user ? (
-                    // Logged in: Avatar with initial
-                    <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-                      {getUserInitial(user)}
-                    </div>
-                  ) : (
-                    // Not logged in: Simple user icon
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {user ? (
-                  <>
-                    <div className="px-2 py-1.5 text-sm font-medium">
-                      {user.name || user.email}
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/account" className="flex items-center gap-2">
-                        <User className="h-4 w-4" /> Tài khoản
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/orders" className="flex items-center gap-2">
-                        <Package className="h-4 w-4" /> Đơn hàng
-                      </Link>
-                    </DropdownMenuItem>
-                    {user.roles.includes("VENDOR") && (
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href="/vendor"
-                          className="flex items-center gap-2"
-                        >
-                          <Store className="h-4 w-4" /> Quản lý Shop
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    {user.roles.includes("ADMIN") && (
-                      <DropdownMenuItem asChild>
-                        <Link href="/admin" className="flex items-center gap-2">
-                          <Shield className="h-4 w-4" /> Admin Panel
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleSignOut}
-                      className="text-destructive cursor-pointer"
-                    >
-                      <LogOut className="h-4 w-4 mr-2" /> Đăng xuất
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link href="/login" className="flex items-center gap-2">
-                        <LogIn className="h-4 w-4" /> Đăng nhập
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/register"
-                        className="flex items-center gap-2"
-                      >
-                        <UserPlus className="h-4 w-4" /> Đăng ký
-                      </Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* 4. User Menu */}
+            <UserMenu initialUser={initialUser} showRoleLinks />
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { requireRole } from "@/entities/user";
-import { getCategories } from "@/entities/category";
+import { getCategories } from "@/entities/category/api/queries";
 import { CreateProductPage } from "@/widgets/vendor";
 
 export default async function Page() {

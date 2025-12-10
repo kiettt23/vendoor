@@ -1,94 +1,81 @@
-/**
- * Form Validation Utilities
- *
- * Enhanced form handling with Vietnamese error messages.
- * Usage: import { formatZodErrors, ValidationMessages } from "@/lib/validation"
- */
-
 import { REGEX_PATTERNS } from "@/shared/lib/constants";
 import type { UseFormReturn, FieldErrors, FieldPath } from "react-hook-form";
-import type { ZodError } from "zod";
+import type { ZodError, ZodType } from "zod";
 
-/**
- * Format Zod validation errors for React Hook Form
- *
- * @example
- * const result = schema.safeParse(data);
- * if (!result.success) {
- *   const errors = formatZodErrors(result.error);
- *   // Set errors in form
- * }
- */
+/** Lấy error message đầu tiên từ Zod validation error */
+export function getZodFirstError(
+  error: ZodError,
+  fallback = "Dữ liệu không hợp lệ"
+): string {
+  return error.issues[0]?.message || fallback;
+}
+
+/** Parse data với schema, trả về data hoặc error message */
+export function safeParseWithError<T>(
+  schema: ZodType<T>,
+  data: unknown,
+  fallback = "Dữ liệu không hợp lệ"
+): { success: true; data: T } | { success: false; error: string } {
+  const result = schema.safeParse(data);
+  if (result.success) {
+    return { success: true, data: result.data };
+  }
+  return { success: false, error: getZodFirstError(result.error, fallback) };
+}
+
+/** Convert Zod errors thành object { fieldPath: message } cho React Hook Form */
 export function formatZodErrors(error: ZodError): Record<string, string> {
   const errors: Record<string, string> = {};
-
-  error.issues.forEach((err) => {
-    const path = err.path.join(".");
-    errors[path] = err.message;
-  });
-
+  for (const issue of error.issues) {
+    const path = issue.path.join(".");
+    if (!errors[path]) {
+      errors[path] = issue.message;
+    }
+  }
   return errors;
 }
 
-/**
- * Get first error message from form errors
- */
+/** Lấy error message đầu tiên từ form errors */
 export function getFirstError(errors: FieldErrors): string | undefined {
-  const firstErrorKey = Object.keys(errors)[0];
-  if (!firstErrorKey) return undefined;
-
-  const error = errors[firstErrorKey];
-  return error?.message as string | undefined;
+  const firstKey = Object.keys(errors)[0];
+  return firstKey ? (errors[firstKey]?.message as string) : undefined;
 }
 
-/**
- * Check if form has errors
- */
+/** Check form có errors không */
 export function hasErrors(errors: FieldErrors): boolean {
   return Object.keys(errors).length > 0;
 }
 
-/**
- * Get error message for a specific field
- */
+/** Lấy error message cho 1 field cụ thể */
 export function getFieldError<T extends Record<string, unknown>>(
   errors: FieldErrors<T>,
   field: FieldPath<T>
 ): string | undefined {
-  const error = errors[field];
-  return error?.message as string | undefined;
+  return errors[field]?.message as string | undefined;
 }
 
-/**
- * Validate field on blur
- */
+/** Tạo handler validate field khi blur */
 export function validateOnBlur<T extends Record<string, unknown>>(
   form: UseFormReturn<T>,
   field: FieldPath<T>
 ) {
-  return async () => {
-    await form.trigger(field);
-  };
+  return () => form.trigger(field);
 }
 
-/**
- * Clear errors for specific fields
- */
+/** Clear errors cho nhiều fields */
 export function clearFieldErrors<T extends Record<string, unknown>>(
   form: UseFormReturn<T>,
   fields: FieldPath<T>[]
 ) {
-  fields.forEach((field) => {
-    form.clearErrors(field);
-  });
+  fields.forEach((field) => form.clearErrors(field));
 }
 
-/**
- * Custom validation messages (Vietnamese)
- */
+/** Vietnamese validation messages */
 export const ValidationMessages = {
   required: (field: string) => `${field} là bắt buộc`,
   email: "Email không hợp lệ",
+  phone: "Số điện thoại không hợp lệ",
+  url: "URL không hợp lệ",
   min: (field: string, min: number) => `${field} phải có ít nhất ${min} ký tự`,
   max: (field: string, max: number) =>
     `${field} không được vượt quá ${max} ký tự`,
@@ -97,56 +84,32 @@ export const ValidationMessages = {
   maxValue: (field: string, max: number) =>
     `${field} phải nhỏ hơn hoặc bằng ${max}`,
   pattern: (field: string) => `${field} không đúng định dạng`,
-  phone: "Số điện thoại không hợp lệ",
-  url: "URL không hợp lệ",
   match: (field1: string, field2: string) =>
     `${field1} và ${field2} không khớp`,
   unique: (field: string) => `${field} đã tồn tại`,
   weakPassword:
     "Mật khẩu quá yếu. Cần có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số",
-};
+} as const;
+
+/** Validate phone Vietnam (0xxxxxxxxx) */
+export const validatePhone = (phone: string) =>
+  REGEX_PATTERNS.PHONE_VN.test(phone);
+
+/** Validate email format */
+export const validateEmail = (email: string) =>
+  REGEX_PATTERNS.EMAIL.test(email);
+
+/** Validate password strength */
+export const validatePassword = (password: string) =>
+  REGEX_PATTERNS.PASSWORD.test(password);
+
+/** Validate slug format */
+export const validateSlug = (slug: string) => REGEX_PATTERNS.SLUG.test(slug);
 
 /**
- * Validate phone number (Vietnam)
- */
-export function validatePhone(phone: string): boolean {
-  return REGEX_PATTERNS.PHONE_VN.test(phone);
-}
-
-/**
- * Validate email
- */
-export function validateEmail(email: string): boolean {
-  return REGEX_PATTERNS.EMAIL.test(email);
-}
-
-/**
- * Validate password strength
- */
-export function validatePassword(password: string): boolean {
-  return REGEX_PATTERNS.PASSWORD.test(password);
-}
-
-/**
- * Validate slug
- */
-export function validateSlug(slug: string): boolean {
-  return REGEX_PATTERNS.SLUG.test(slug);
-}
-
-/**
- * Create Zod refinement for unique check
- *
+ * Wrapper cho async unique check trong Zod refine
  * @example
- * const schema = z.object({
- *   email: z.string().email().refine(
- *     uniqueCheck(async (email) => {
- *       const exists = await checkEmailExists(email);
- *       return !exists;
- *     }),
- *     { message: "Email đã tồn tại" }
- *   )
- * })
+ * z.string().refine(uniqueCheck(checkEmailExists), { message: "Email đã tồn tại" })
  */
 export function uniqueCheck<T>(
   checkFn: (value: T) => Promise<boolean>
@@ -155,21 +118,18 @@ export function uniqueCheck<T>(
     try {
       return await checkFn(value);
     } catch {
-      return true; // Allow on error (will show network error instead)
+      return true; // Allow on error để hiện network error thay vì validation error
     }
   };
 }
 
-/**
- * Debounce validation
- */
-export function debounceValidation(
-  fn: (...args: unknown[]) => void,
-  delay: number = 300
+/** Debounce function cho validation real-time */
+export function debounceValidation<T extends unknown[]>(
+  fn: (...args: T) => void,
+  delay = 300
 ) {
   let timeoutId: NodeJS.Timeout;
-
-  return (...args: unknown[]) => {
+  return (...args: T) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn(...args), delay);
   };

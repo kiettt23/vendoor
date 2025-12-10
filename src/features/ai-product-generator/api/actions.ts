@@ -2,7 +2,7 @@
 
 import OpenAI from "openai";
 
-import { ok, err, type Result } from "@/shared/lib/utils";
+import { ok, err, type Result, createLogger } from "@/shared/lib/utils";
 
 import {
   AIProductInfoSchema,
@@ -10,9 +10,7 @@ import {
   type GenerateProductInfoInput,
 } from "../model";
 
-// ============================================
-// AI Product Generator Action
-// ============================================
+const logger = createLogger("ai-product-generator");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -21,9 +19,6 @@ const openai = new OpenAI({
 
 const MODEL = process.env.OPENAI_MODEL || "gemini-2.0-flash";
 
-/**
- * Prompt template cho việc phân tích hình ảnh sản phẩm
- */
 function buildPrompt(existingCategories?: string[]): string {
   const categoryHint = existingCategories?.length
     ? `\nDanh mục có sẵn: ${existingCategories.join(", ")}. Ưu tiên chọn từ danh sách này.`
@@ -44,12 +39,6 @@ CHỈ trả về JSON, không giải thích:
 {"name":"...","shortDescription":"...","description":"...","suggestedCategory":"...","tags":["..."],"estimatedPriceRange":null}`;
 }
 
-/**
- * Generate thông tin sản phẩm từ hình ảnh bằng AI
- *
- * @param input - Hình ảnh base64 và metadata
- * @returns Thông tin sản phẩm được AI generate
- */
 export async function generateProductInfo(
   input: GenerateProductInfoInput
 ): Promise<Result<AIProductInfo>> {
@@ -93,7 +82,7 @@ export async function generateProductInfo(
     // Try to extract JSON from response if AI added extra text
     const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.error("AI returned non-JSON response:", content);
+      logger.error("AI returned non-JSON response:", content);
       return err("AI không trả về định dạng JSON hợp lệ");
     }
     
@@ -104,19 +93,29 @@ export async function generateProductInfo(
 
     return ok(validated);
   } catch (error) {
-    console.error("AI Generation Error:", error);
+    logger.error("AI Generation Error:", error);
 
     if (error instanceof SyntaxError) {
       return err("Không thể parse response từ AI");
     }
 
+    // Handle API errors with status codes
+    if (error && typeof error === "object" && "status" in error) {
+      const status = (error as { status: number }).status;
+      if (status === 429) {
+        return err("Đã vượt quá giới hạn request AI, vui lòng thử lại sau 1 phút");
+      }
+      if (status === 401 || status === 403) {
+        return err("Lỗi xác thực API key");
+      }
+    }
+
     if (error instanceof Error) {
-      // Check for API errors
       if (error.message.includes("API key")) {
         return err("Lỗi cấu hình API key");
       }
-      if (error.message.includes("rate limit")) {
-        return err("Đã vượt quá giới hạn request, vui lòng thử lại sau");
+      if (error.message.includes("rate limit") || error.message.includes("429")) {
+        return err("Đã vượt quá giới hạn request AI, vui lòng thử lại sau 1 phút");
       }
     }
 

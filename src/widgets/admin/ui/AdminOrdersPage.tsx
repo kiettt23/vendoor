@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Package, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
+import { EmptyState } from "@/shared/ui/feedback";
 import { formatPrice, formatDateTime } from "@/shared/lib";
-import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
-import { getAdminOrders } from "@/entities/order";
+import { getAdminOrders } from "@/entities/order/api/queries";
+import { OrderStatusBadge } from "@/entities/order";
 
 export async function AdminOrdersPage() {
   const orders = await getAdminOrders();
@@ -15,15 +15,16 @@ export async function AdminOrdersPage() {
 
       {orders.length === 0 ? (
         <Card>
-          <CardContent className="py-16 text-center">
-            <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold">Chưa có đơn hàng</h3>
+          <CardContent className="py-8">
+            <EmptyState
+              title="Chưa có đơn hàng"
+              description="Đơn hàng sẽ xuất hiện ở đây khi có giao dịch mới"
+            />
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-6">
           {orders.map((order) => {
-            const s = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
             return (
               <Link
                 key={order.id}
@@ -36,9 +37,7 @@ export async function AdminOrdersPage() {
                       <CardTitle className="text-base">
                         {order.orderNumber}
                       </CardTitle>
-                      <Badge variant={s.variant} className={s.className}>
-                        {s.label}
-                      </Badge>
+                      <OrderStatusBadge status={order.status} />
                     </div>
                   </CardHeader>
                   <CardContent>

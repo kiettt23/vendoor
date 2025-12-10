@@ -1,4 +1,7 @@
+import { cache } from "react";
+
 import { prisma } from "@/shared/lib/db";
+import { LIMITS } from "@/shared/lib/constants";
 
 import {
   type TimeRange,
@@ -11,11 +14,14 @@ import {
 
 /**
  * Get vendor analytics data
+ *
+ * @cached React cache cho request deduplication
  */
-export async function getVendorAnalytics(
-  vendorProfileId: string,
-  timeRange: TimeRange = "30d"
-): Promise<VendorAnalytics> {
+export const getVendorAnalytics = cache(
+  async (
+    vendorProfileId: string,
+    timeRange: TimeRange = "30d"
+  ): Promise<VendorAnalytics> => {
   const { start, end } = getDateRange(timeRange);
 
   // Get previous period for comparison
@@ -74,7 +80,7 @@ export async function getVendorAnalytics(
           subtotal: "desc",
         },
       },
-      take: 5,
+      take: LIMITS.TOP_PRODUCTS,
     }),
 
     // Daily revenue (raw orders, group in JS for flexibility)
@@ -134,7 +140,7 @@ export async function getVendorAnalytics(
     revenueChart,
     topProducts,
   };
-}
+});
 
 /**
  * Group orders by day for chart

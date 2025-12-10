@@ -1,10 +1,3 @@
-/**
- * Constants Module - Barrel Export
- *
- * Centralized exports for app constants.
- * Usage: import { PAGINATION, ROUTES } from "@/lib/constants"
- */
-
 // Pagination
 export { PAGINATION } from "./pagination";
 
@@ -25,14 +18,31 @@ export {
   type StatusConfig,
 } from "./order";
 
+// Badge Config (centralized)
+export {
+  ORDER_STATUS_BADGE,
+  VENDOR_STATUS_BADGE,
+  PRODUCT_STATUS_BADGE,
+  STOCK_STATUS_BADGE,
+  DISCOUNT_BADGE,
+  getProductStatusBadge,
+  getStockStatusBadge,
+  getDiscountBadge,
+  getBadgeConfig,
+  type BadgeConfig,
+} from "./badge-config";
+
 // Auth & Account
 export { AUTH, ACCOUNT } from "./auth";
 
 // Cache
 export { CACHE_DURATION, REVALIDATE_TAGS } from "./cache";
 
+// React Query Keys
+export { queryKeys, type QueryKeys } from "./query-keys";
+
 // External services
-export { RATE_LIMIT, EXTERNAL_URLS } from "./external";
+export { RATE_LIMIT, EXTERNAL_URLS, APP_URL } from "./external";
 
 // Formats & Patterns
 export { REGEX_PATTERNS, DATE_FORMATS } from "./formats";
@@ -40,11 +50,8 @@ export { REGEX_PATTERNS, DATE_FORMATS } from "./formats";
 // Currency
 export { CURRENCY } from "./currency";
 
-// Feature flags
-export { FEATURE_FLAGS } from "./features";
-
 // Route constants
-export { ROUTES, PROTECTED_ROUTES, ROLE_ROUTES } from "./routes";
+export { ROUTES, REVALIDATION_PATHS } from "./routes";
 
 // Navigation
 export {
@@ -54,10 +61,12 @@ export {
   HEADER_CATEGORIES,
   HEADER_ICON_BUTTONS,
   FOOTER_LINKS,
+  DASHBOARD_CONFIG,
   type NavItem,
   type LinkItem,
   type FooterLinkSection,
   type HeaderIconButton,
+  type DashboardType,
 } from "./navigation";
 
 // Toast messages

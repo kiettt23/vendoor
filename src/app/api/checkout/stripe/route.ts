@@ -1,18 +1,12 @@
-/**
- * Stripe Checkout Session API
- *
- * Creates a Stripe Checkout session for payment
- *
- * POST /api/checkout/stripe
- * Body: { orderIds: string[], amount: number, customerEmail: string }
- */
-
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { stripe } from "@/shared/lib/payment/stripe";
-import { auth } from "@/shared/lib/auth";
-import { headers } from "next/headers";
+import { getSession } from "@/shared/lib/auth/session";
 import { prisma } from "@/shared/lib/db";
+import { createLogger } from "@/shared/lib/utils";
+import { APP_URL } from "@/shared/lib/constants";
+
+const logger = createLogger("stripe-checkout");
 
 interface CheckoutRequest {
   orderIds: string[];
@@ -22,7 +16,7 @@ interface CheckoutRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await getSession();
     if (!session?.user) {
       return NextResponse.json(
         { error: "Vui lòng đăng nhập" },
@@ -37,7 +31,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Không có đơn hàng" }, { status: 400 });
     }
 
-    // Fetch orders with items
     const orders = await prisma.order.findMany({
       where: {
         id: { in: orderIds },
@@ -56,7 +49,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create line items from orders
     const lineItems = orders.flatMap((order) =>
       order.items.map((item) => ({
         price_data: {
@@ -73,7 +65,6 @@ export async function POST(request: NextRequest) {
       }))
     );
 
-    // Add shipping fees
     const totalShipping = orders.reduce((sum, o) => sum + o.shippingFee, 0);
     if (totalShipping > 0) {
       lineItems.push({
@@ -89,19 +80,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create Stripe Checkout Session
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${
-        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-      }/orders?success=true&session_id={CHECKOUT_SESSION_ID}&orders=${orderIds.join(
+      success_url: `${APP_URL}/orders?success=true&session_id={CHECKOUT_SESSION_ID}&orders=${orderIds.join(
         ","
       )}`,
-      cancel_url: `${
-        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-      }/checkout?canceled=true`,
+      cancel_url: `${APP_URL}/checkout?canceled=true`,
       customer_email: customerEmail,
       metadata: {
         userId: session.user.id,
@@ -115,7 +101,7 @@ export async function POST(request: NextRequest) {
       url: checkoutSession.url,
     });
   } catch (error) {
-    console.error("Stripe checkout error:", error);
+    logger.error("Stripe checkout error:", error);
     return NextResponse.json(
       { error: "Không thể tạo phiên thanh toán" },
       { status: 500 }

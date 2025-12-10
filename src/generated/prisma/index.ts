@@ -10,9 +10,7 @@
  * ```
  */
 
-// ============================================
 // Models
-// ============================================
 export type { UserModel } from "./client/models/User";
 export type { SessionModel } from "./client/models/Session";
 export type { AccountModel } from "./client/models/Account";
@@ -28,9 +26,7 @@ export type { PaymentModel } from "./client/models/Payment";
 export type { ReviewModel } from "./client/models/Review";
 export type { WishlistModel } from "./client/models/Wishlist";
 
-// ============================================
 // Enums (both type and runtime value)
-// ============================================
 export {
   Role,
   VendorStatus,

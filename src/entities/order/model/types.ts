@@ -1,9 +1,3 @@
-/**
- * Order Types
- *
- * Tận dụng Prisma generated types cho base models.
- */
-
 import type {
   OrderModel,
   OrderItemModel,
@@ -12,30 +6,10 @@ import type {
   PaymentMethod,
 } from "@/generated/prisma";
 
-// ============================================
-// Base Types (từ Prisma Generated)
-// ============================================
-
-/**
- * Base Order type từ database
- */
 export type Order = OrderModel;
-
-/**
- * Base OrderItem type từ database
- */
 export type OrderItem = OrderItemModel;
-
-// Re-export enums for convenience
 export type { OrderStatus, PaymentStatus, PaymentMethod };
 
-// ============================================
-// Derived Types (cho specific use cases)
-// ============================================
-
-/**
- * Order item cho danh sách customer (optimized)
- */
 export interface OrderListItem {
   id: string;
   orderNumber: string;
@@ -56,10 +30,18 @@ export interface CreatedOrder {
   status: OrderStatus;
 }
 
-export interface CreateOrdersResult {
-  success: boolean;
-  orders: CreatedOrder[];
-  paymentId?: string;
-  totalAmount: number;
-  error?: string;
-}
+/** Discriminated union cho type-safe error handling */
+export type CreateOrdersResult =
+  | {
+      success: true;
+      orders: CreatedOrder[];
+      paymentId: string;
+      totalAmount: number;
+    }
+  | {
+      success: false;
+      orders: [];
+      totalAmount: 0;
+      error: string;
+    };
+

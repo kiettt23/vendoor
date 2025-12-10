@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { Package, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
+import { EmptyVendorOrders } from "@/shared/ui/feedback";
 import { formatPrice, formatDate } from "@/shared/lib";
-import { ORDER_STATUS_CONFIG, getStatusConfig } from "@/shared/lib/constants";
-import { getCurrentVendorProfile } from "@/entities/vendor";
-import { getVendorOrdersPaginated } from "@/entities/order";
+import { ORDER_STATUS_BADGE, getBadgeConfig } from "@/shared/lib/constants";
+import { getCurrentVendorProfile } from "@/entities/vendor/api/queries";
+import { getVendorOrdersPaginated } from "@/entities/order/api/queries";
+import { OrderStatusBadge } from "@/entities/order";
 import type { OrderStatus } from "@/generated/prisma";
 
 interface VendorOrdersPageProps {
@@ -51,13 +52,13 @@ export async function VendorOrdersPage({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Đơn Hàng</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Đơn Hàng</h1>
         <p className="text-muted-foreground">{pagination.total} đơn hàng</p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
         {statuses.map((s) => (
           <Link
             key={s}
@@ -71,7 +72,7 @@ export async function VendorOrdersPage({
             >
               {s === "ALL"
                 ? "Tất cả"
-                : getStatusConfig(s, ORDER_STATUS_CONFIG).label}
+                : getBadgeConfig(s, ORDER_STATUS_BADGE).label}
             </Button>
           </Link>
         ))}
@@ -79,15 +80,13 @@ export async function VendorOrdersPage({
 
       {orders.length === 0 ? (
         <Card>
-          <CardContent className="py-16 text-center">
-            <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Chưa có đơn hàng</h3>
+          <CardContent className="py-8">
+            <EmptyVendorOrders />
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {orders.map((order) => {
-            const s = getStatusConfig(order.status, ORDER_STATUS_CONFIG);
             return (
               <Link
                 key={order.id}
@@ -95,36 +94,34 @@ export async function VendorOrdersPage({
                 className="block"
               >
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">
+                  <CardHeader className="pb-2 px-4 sm:px-6">
+                    <div className="flex items-center justify-between gap-2">
+                      <CardTitle className="text-sm sm:text-base truncate">
                         {order.orderNumber}
                       </CardTitle>
-                      <Badge variant={s.variant} className={s.className}>
-                        {s.label}
-                      </Badge>
+                      <OrderStatusBadge status={order.status} />
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
                       {order.customer.name || order.customer.email}
                     </p>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm">
+                  <CardContent className="px-4 sm:px-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-xs sm:text-sm line-clamp-1">
                           {order.items
                             .map((i) => `${i.productName} x${i.quantity}`)
                             .join(", ")}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           {formatDate(order.createdAt)}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-primary">
+                      <div className="flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-0">
+                        <span className="font-bold text-primary text-sm sm:text-base">
                           {formatPrice(order.total)}
                         </span>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                       </div>
                     </div>
                   </CardContent>

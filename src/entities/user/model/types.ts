@@ -6,9 +6,7 @@
 
 import type { UserModel, Role } from "@/generated/prisma";
 
-// ============================================
 // Base Types (từ Prisma Generated)
-// ============================================
 
 /**
  * Base User type từ database
@@ -20,9 +18,7 @@ export type User = UserModel;
  */
 export type UserRole = Role;
 
-// ============================================
 // Derived Types (cho specific use cases)
-// ============================================
 
 /**
  * User trong session (minimal fields)

@@ -1,11 +1,3 @@
-/**
- * ProductFilterBar Component
- *
- * Filter bar với Sort, Price, Rating, Stock options
- * Mobile: Collapsible drawer
- * Desktop: Horizontal bar
- */
-
 "use client";
 
 import { useCallback, useMemo } from "react";
@@ -41,16 +33,13 @@ import {
 } from "../lib/filter-utils";
 
 interface ProductFilterBarProps {
-  /** Tổng số sản phẩm (sau khi filter) */
   totalProducts: number;
-  /** Show vendor filter */
   showVendorFilter?: boolean;
-  /** Available vendors for filter */
   vendors?: { id: string; name: string }[];
 }
 
 export function ProductFilterBar({
-  totalProducts,
+  totalProducts: _totalProducts,
   showVendorFilter = false,
   vendors = [],
 }: ProductFilterBarProps) {
@@ -63,7 +52,6 @@ export function ProductFilterBar({
   );
   const hasFilters = hasActiveFilters(filterParams);
 
-  // Count active filters
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (filterParams.category) count++;
@@ -74,7 +62,6 @@ export function ProductFilterBar({
     return count;
   }, [filterParams]);
 
-  // Update URL helper
   const updateUrl = useCallback(
     (key: string, value: string | number | boolean | undefined) => {
       const newParams = updateFilterParam(searchParams, key, value);
@@ -83,34 +70,28 @@ export function ProductFilterBar({
     [router, searchParams]
   );
 
-  // Clear all filters
   const handleClearFilters = useCallback(() => {
     const newParams = clearFilters(searchParams);
     router.push(`/products?${newParams.toString()}`, { scroll: false });
   }, [router, searchParams]);
 
-  // Sort change handler
   const handleSortChange = (value: string) => {
     updateUrl("sort", value === "newest" ? undefined : value);
   };
 
-  // Price filter handlers
   const handlePriceChange = (type: "minPrice" | "maxPrice", value: string) => {
     const numValue = value ? parseInt(value, 10) : undefined;
     updateUrl(type, numValue);
   };
 
-  // Rating filter handler
   const handleRatingChange = (value: string) => {
     updateUrl("minRating", value === "all" ? undefined : parseInt(value, 10));
   };
 
-  // Stock filter handler
   const handleStockChange = (checked: boolean) => {
     updateUrl("inStock", checked || undefined);
   };
 
-  // Vendor filter handler
   const handleVendorChange = (value: string) => {
     updateUrl("vendor", value === "all" ? undefined : value);
   };

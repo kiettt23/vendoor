@@ -13,39 +13,24 @@ import {
   BarChart3,
   type LucideIcon,
 } from "lucide-react";
+import { ROUTES } from "./routes";
 
-// ============================================
-// TYPES
-// ============================================
-
-/**
- * Navigation item with icon (for sidebars, dashboards)
- */
 export interface NavItem {
   href: string;
   label: string;
   icon: LucideIcon;
 }
 
-/**
- * Simple link item (for header, footer)
- */
 export interface LinkItem {
   href: string;
   label: string;
 }
 
-/**
- * Footer link section
- */
 export interface FooterLinkSection {
   title: string;
   links: LinkItem[];
 }
 
-/**
- * Header icon button configuration
- */
 export interface HeaderIconButton {
   id: string;
   icon: LucideIcon;
@@ -56,24 +41,13 @@ export interface HeaderIconButton {
   badge?: "cart"; // Loại badge cần hiển thị
 }
 
-// ============================================
-// HEADER NAVIGATION
-// ============================================
-
-/**
- * Main header navigation (public pages)
- */
 export const HEADER_NAV_ITEMS: LinkItem[] = [
-  { href: "/", label: "Trang Chủ" },
-  { href: "/flash-sale", label: "Flash Sale" },
-  { href: "/products", label: "Sản Phẩm" },
-  { href: "/stores", label: "Cửa Hàng" },
+  { href: ROUTES.HOME, label: "Trang Chủ" },
+  { href: ROUTES.FLASH_SALE, label: "Flash Sale" },
+  { href: ROUTES.PRODUCTS, label: "Sản Phẩm" },
+  { href: ROUTES.STORES, label: "Cửa Hàng" },
 ];
 
-/**
- * Header icon buttons (right side)
- * Thứ tự trong array = thứ tự hiển thị
- */
 export const HEADER_ICON_BUTTONS: HeaderIconButton[] = [
   {
     id: "search",
@@ -86,7 +60,7 @@ export const HEADER_ICON_BUTTONS: HeaderIconButton[] = [
   {
     id: "cart",
     icon: ShoppingCart,
-    href: "/cart",
+    href: ROUTES.CART,
     label: "Giỏ hàng",
     showOnMobile: true,
     requiresAuth: false,
@@ -95,7 +69,7 @@ export const HEADER_ICON_BUTTONS: HeaderIconButton[] = [
   {
     id: "wishlist",
     icon: Heart,
-    href: "/wishlist",
+    href: ROUTES.WISHLIST,
     label: "Yêu thích",
     showOnMobile: false, // Ẩn trên mobile
     requiresAuth: false, // Vẫn cho xem, redirect login khi click
@@ -110,9 +84,7 @@ export const HEADER_ICON_BUTTONS: HeaderIconButton[] = [
   },
 ];
 
-/**
- * Header category suggestions (search dropdown)
- */
+// Header category suggestions (search dropdown)
 export const HEADER_CATEGORIES = [
   { name: "Điện thoại", slug: "dien-thoai" },
   { name: "Laptop", slug: "laptop" },
@@ -122,29 +94,22 @@ export const HEADER_CATEGORIES = [
   { name: "Gaming", slug: "gaming" },
 ] as const;
 
-// ============================================
-// FOOTER NAVIGATION
-// ============================================
-
-/**
- * Footer link sections
- */
 export const FOOTER_LINKS: Record<string, FooterLinkSection> = {
   shop: {
     title: "Danh mục",
     links: [
-      { href: "/products?category=dien-thoai", label: "Điện thoại" },
-      { href: "/products?category=laptop", label: "Laptop" },
-      { href: "/products?category=tablet", label: "Tablet" },
-      { href: "/products?category=phu-kien", label: "Phụ kiện" },
-      { href: "/products?category=gaming", label: "Gaming" },
+      { href: `${ROUTES.PRODUCTS}?category=dien-thoai`, label: "Điện thoại" },
+      { href: `${ROUTES.PRODUCTS}?category=laptop`, label: "Laptop" },
+      { href: `${ROUTES.PRODUCTS}?category=tablet`, label: "Tablet" },
+      { href: `${ROUTES.PRODUCTS}?category=phu-kien`, label: "Phụ kiện" },
+      { href: `${ROUTES.PRODUCTS}?category=gaming`, label: "Gaming" },
     ],
   },
   seller: {
     title: "Người bán",
     links: [
-      { href: "/become-vendor", label: "Đăng ký bán hàng" },
-      { href: "/vendor", label: "Seller Center" },
+      { href: ROUTES.BECOME_VENDOR, label: "Đăng ký bán hàng" },
+      { href: ROUTES.VENDOR_DASHBOARD, label: "Seller Center" },
       { href: "/seller/policy", label: "Chính sách người bán" },
       { href: "/seller/guide", label: "Hướng dẫn bán hàng" },
     ],
@@ -153,7 +118,7 @@ export const FOOTER_LINKS: Record<string, FooterLinkSection> = {
     title: "Hỗ trợ",
     links: [
       { href: "/help", label: "Trung tâm trợ giúp" },
-      { href: "/orders", label: "Theo dõi đơn hàng" },
+      { href: ROUTES.ORDERS, label: "Theo dõi đơn hàng" },
       { href: "/returns", label: "Chính sách đổi trả" },
       { href: "/contact", label: "Liên hệ" },
     ],
@@ -169,78 +134,79 @@ export const FOOTER_LINKS: Record<string, FooterLinkSection> = {
   },
 };
 
-// ============================================
-// VENDOR DASHBOARD NAVIGATION
-// ============================================
-
-/**
- * Vendor dashboard sidebar navigation
- */
 export const VENDOR_NAV_ITEMS: NavItem[] = [
   {
-    href: "/vendor",
+    href: ROUTES.VENDOR_DASHBOARD,
     label: "Dashboard",
     icon: LayoutDashboard,
   },
   {
-    href: "/vendor/products",
+    href: ROUTES.VENDOR_PRODUCTS,
     label: "Sản phẩm",
     icon: Package,
   },
   {
-    href: "/vendor/inventory",
+    href: ROUTES.VENDOR_INVENTORY,
     label: "Tồn kho",
     icon: Warehouse,
   },
   {
-    href: "/vendor/orders",
+    href: ROUTES.VENDOR_ORDERS,
     label: "Đơn hàng",
     icon: ShoppingCart,
   },
   {
-    href: "/vendor/reviews",
+    href: ROUTES.VENDOR_REVIEWS,
     label: "Đánh giá",
     icon: Star,
   },
   {
-    href: "/vendor/analytics",
+    href: ROUTES.VENDOR_ANALYTICS,
     label: "Phân tích",
     icon: BarChart3,
   },
   {
-    href: "/vendor/earnings",
+    href: ROUTES.VENDOR_EARNINGS,
     label: "Doanh thu",
     icon: DollarSign,
   },
 ];
 
-// ============================================
-// ADMIN DASHBOARD NAVIGATION
-// ============================================
-
-/**
- * Admin dashboard sidebar navigation
- */
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   {
-    href: "/admin",
+    href: ROUTES.ADMIN_DASHBOARD,
     label: "Dashboard",
     icon: LayoutDashboard,
   },
 
   {
-    href: "/admin/orders",
+    href: ROUTES.ADMIN_ORDERS,
     label: "Đơn hàng",
     icon: ShoppingCart,
   },
   {
-    href: "/admin/categories",
+    href: ROUTES.ADMIN_CATEGORIES,
     label: "Danh mục",
     icon: FolderTree,
   },
   {
-    href: "/admin/vendors",
+    href: ROUTES.ADMIN_VENDORS,
     label: "Vendors",
     icon: Users,
   },
 ];
+
+export const DASHBOARD_CONFIG = {
+  vendor: {
+    title: "Vendor Dashboard",
+    baseRoute: ROUTES.VENDOR_DASHBOARD,
+    navItems: VENDOR_NAV_ITEMS,
+  },
+  admin: {
+    title: "Admin Panel",
+    baseRoute: ROUTES.ADMIN_DASHBOARD,
+    navItems: ADMIN_NAV_ITEMS,
+  },
+} as const;
+
+export type DashboardType = keyof typeof DASHBOARD_CONFIG;

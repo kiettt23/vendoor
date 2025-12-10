@@ -1,18 +1,13 @@
-/**
- * Stripe Webhook Handler
- *
- * Handles Stripe events like successful payments
- *
- * POST /api/webhooks/stripe
- */
-
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { stripe } from "@/shared/lib/payment/stripe";
 import { prisma } from "@/shared/lib/db";
+import { createLogger } from "@/shared/lib/utils";
 import type Stripe from "stripe";
 
-// Disable body parsing, we need raw body for webhook verification
+const logger = createLogger("stripe-webhook");
+
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
@@ -34,20 +29,19 @@ export async function POST(request: NextRequest) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch (err) {
-    console.error("Webhook signature verification failed:", err);
+  } catch (error) {
+    logger.error("Webhook signature verification failed:", error);
     return NextResponse.json(
       { error: "Webhook signature verification failed" },
       { status: 400 }
     );
   }
 
-  // Handle the event
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
 
-      console.log("✅ Payment successful:", {
+      logger.info("Payment successful:", {
         sessionId: session.id,
         customerEmail: session.customer_email,
         amountTotal: session.amount_total,
@@ -86,7 +80,13 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        console.log(`Updated ${orderIds.length} orders to PENDING status`);
+        // Revalidate order pages để UI update
+        revalidatePath("/orders");
+        for (const orderId of orderIds) {
+          revalidatePath(`/orders/${orderId}`);
+        }
+
+        logger.info(`Updated ${orderIds.length} orders to PENDING status`);
       }
 
       break;
@@ -94,25 +94,23 @@ export async function POST(request: NextRequest) {
 
     case "checkout.session.expired": {
       const session = event.data.object as Stripe.Checkout.Session;
-      console.log("⏰ Checkout session expired:", session.id);
+      logger.warn("Checkout session expired:", session.id);
 
-      // Revert order status to CANCELLED or keep as PENDING_PAYMENT
       const orderIds = session.metadata?.orderIds?.split(",") || [];
       if (orderIds.length > 0) {
-        // Có thể giữ PENDING_PAYMENT hoặc cancel
-        console.log(`Checkout expired for orders: ${orderIds.join(", ")}`);
+        logger.info(`Checkout expired for orders: ${orderIds.join(", ")}`);
       }
       break;
     }
 
     case "payment_intent.payment_failed": {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      console.log("❌ Payment failed:", paymentIntent.id);
+      logger.error("Payment failed:", paymentIntent.id);
       break;
     }
 
     default:
-      console.log(`Unhandled event type: ${event.type}`);
+      logger.debug(`Unhandled event type: ${event.type}`);
   }
 
   return NextResponse.json({ received: true });
