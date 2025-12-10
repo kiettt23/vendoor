@@ -17,7 +17,8 @@ test.describe("Admin Flow", () => {
 
       // Login form elements (using getByLabel)
       await expect(page.getByLabel("Email")).toBeVisible();
-      await expect(page.getByLabel("Mật khẩu")).toBeVisible();
+      // Use locator for password input to avoid matching toggle button
+      await expect(page.locator('input[type="password"], input[name="password"]')).toBeVisible();
       await expect(
         page.getByRole("button", { name: "Đăng nhập" })
       ).toBeVisible();

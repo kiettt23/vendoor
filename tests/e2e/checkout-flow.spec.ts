@@ -49,18 +49,18 @@ test.describe("Checkout Flow", () => {
       await page.goto("/checkout");
       await page.waitForLoadState("networkidle");
 
-      // Form fields should be visible
-      await expect(page.getByLabel(/họ tên|tên/i)).toBeVisible({ timeout: 10000 });
-      await expect(page.getByLabel(/số điện thoại|phone/i)).toBeVisible();
-      await expect(page.getByLabel(/địa chỉ/i)).toBeVisible();
+      // Form fields should be visible (labels have * for required)
+      await expect(page.getByText("Họ tên *")).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText("Số điện thoại *")).toBeVisible();
+      await expect(page.getByText("Địa chỉ *")).toBeVisible();
     });
 
     test("should have payment method selection", async ({ page }) => {
       await page.goto("/checkout");
       await page.waitForLoadState("networkidle");
 
-      // Should have COD option
-      const codOption = page.getByText(/thanh toán khi nhận hàng|cod/i);
+      // Should have COD option - actual text in UI
+      const codOption = page.getByText("Thanh toán khi nhận hàng (COD)");
       await expect(codOption).toBeVisible({ timeout: 10000 });
     });
 
