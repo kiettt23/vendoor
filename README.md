@@ -2,11 +2,23 @@
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![Prisma](https://img.shields.io/badge/Prisma-6-2D3748)
+![Prisma](https://img.shields.io/badge/Prisma-7-2D3748)
 ![FSD](https://img.shields.io/badge/Architecture-FSD-purple)
 ![Tests](https://img.shields.io/badge/Tests-533%20passing-green)
 
 Sàn thương mại điện tử đa người bán (Multi-Vendor Marketplace) - tương tự Shopee, Lazada.
+
+## 📚 Documentation
+
+| Tài liệu | Mô tả |
+|----------|-------|
+| **[📖 Full Documentation](./docs/INDEX.md)** | Index tất cả docs |
+| [Quick Start](./docs/QUICKSTART.md) | Setup trong 5 phút |
+| [Architecture](./docs/ARCHITECTURE.md) | FSD structure |
+| [Features](./docs/FEATURES.md) | Tính năng theo role |
+| [Database Schema](./docs/DATABASE_SCHEMA.md) | Prisma models |
+| [Caching Strategy](./docs/CACHING_STRATEGY.md) | Performance optimization |
+| [Testing](./docs/TESTING.md) | Test strategy |
 
 ---
 
@@ -36,21 +48,22 @@ Mở http://localhost:3000 🎉
 
 ## 🛠️ Tech Stack
 
-| Công nghệ      | Phiên bản | Vai trò                  |
-| -------------- | --------- | ------------------------ |
-| **Next.js**    | 16        | Framework, App Router    |
-| **React**      | 19        | UI Library               |
-| **TypeScript** | 5         | Type Safety              |
-| **Prisma**     | 7         | Database ORM             |
-| **PostgreSQL** | -         | Database                 |
-| **Better Auth**| 1.3       | Authentication           |
-| **Zustand**    | 5         | Client State (Cart)      |
-| **Tailwind**   | 4         | Styling                  |
-| **Shadcn/UI**  | -         | UI Components            |
-| **Cloudinary** | -         | Image Optimization       |
-| **Stripe**     | -         | Payment Processing       |
-| **Vitest**     | 4         | Unit/Integration Testing |
-| **Playwright** | 1.57      | E2E Testing              |
+| Công nghệ         | Phiên bản | Vai trò                  |
+| ----------------- | --------- | ------------------------ |
+| **Next.js**       | 16        | Framework, App Router    |
+| **React**         | 19        | UI Library               |
+| **TypeScript**    | 5         | Type Safety              |
+| **Prisma**        | 7         | Database ORM             |
+| **PostgreSQL**    | -         | Database                 |
+| **Better Auth**   | 1.3       | Authentication           |
+| **Zustand**       | 5         | Client State (Cart)      |
+| **Tanstack Query**| 5         | Server State             |
+| **Tailwind**      | 4         | Styling                  |
+| **Shadcn/UI**     | -         | UI Components            |
+| **Cloudinary**    | -         | Image Optimization       |
+| **Stripe**        | -         | Payment Processing       |
+| **Vitest**        | 4         | Unit/Integration Testing |
+| **Playwright**    | 1.57      | E2E Testing              |
 
 ---
 
