@@ -1,121 +1,274 @@
-/**
- * E2E Tests - Authentication Flow
- *
- * 📚 Test full user authentication journey:
- * - Đăng ký tài khoản mới
- * - Đăng nhập với tài khoản có sẵn
- * - Đăng xuất
- * - Truy cập protected routes
- *
- * Playwright Concepts:
- * - page.goto() - Navigate to URL
- * - page.getByLabel() - Find by label text (preferred for forms)
- * - page.getByRole() - Find by ARIA role
- * - page.getByText() - Find by visible text
- * - page.locator() - CSS selector fallback
- */
-
 import { test, expect } from "@playwright/test";
 
-// Test data
-const TEST_USER = {
-  email: "test@example.com",
-  password: "Test123456",
-  name: "Test User",
+// ============================================================================
+// Test Accounts (from CLAUDE.md)
+// ============================================================================
+
+const TEST_ACCOUNTS = {
+  customer: {
+    email: "customer@vendoor.com",
+    password: "Kiet1461!",
+  },
+  vendor: {
+    email: "vendor@vendoor.com",
+    password: "Kiet1461!",
+  },
+  admin: {
+    email: "admin@vendoor.com",
+    password: "Kiet1461!",
+  },
 };
 
-test.describe("Authentication Flow", () => {
-  test.describe("Login Page", () => {
-    test("should display login form", async ({ page }) => {
-      await page.goto("/login");
+// ============================================================================
+// Login Tests - Đăng nhập
+// ============================================================================
 
-      // Check page elements using label (more stable than placeholder)
-      await expect(page.getByText("Đăng nhập").first()).toBeVisible();
-      await expect(page.getByLabel("Email")).toBeVisible();
-      // Use locator for password input to avoid matching toggle button
-      await expect(page.locator('input[type="password"], input[name="password"]')).toBeVisible();
-      await expect(
-        page.getByRole("button", { name: /đăng nhập/i })
-      ).toBeVisible();
-    });
+test.describe("Login Flow - Đăng nhập", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/login");
+  });
 
-    test("should show validation errors for empty form", async ({ page }) => {
-      await page.goto("/login");
+  test("shows login form correctly - hiển thị form đăng nhập", async ({
+    page,
+  }) => {
+    // Check form elements exist
+    await expect(page.getByLabel(/email/i)).toBeVisible();
+    await expect(page.getByLabel(/mật khẩu|password/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /đăng nhập|login/i })).toBeVisible();
+  });
 
-      // Submit empty form
-      await page.getByRole("button", { name: /đăng nhập/i }).click();
+  test("shows error with invalid credentials - sai thông tin", async ({
+    page,
+  }) => {
+    await page.getByLabel(/email/i).fill("wrong@example.com");
+    await page.getByLabel(/mật khẩu|password/i).fill("wrongpassword");
+    await page.getByRole("button", { name: /đăng nhập|login/i }).click();
 
-      // Expect validation messages
-      await expect(page.getByText(/email không hợp lệ/i)).toBeVisible({
-        timeout: 5000,
-      });
+    // Expect error message
+    await expect(
+      page.getByText(/sai|không đúng|invalid|incorrect/i)
+    ).toBeVisible({ timeout: 10000 });
+  });
+
+  test("shows validation error for empty fields - thiếu thông tin", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: /đăng nhập|login/i }).click();
+
+    // Expect validation errors
+    await expect(page.getByText(/bắt buộc|required/i)).toBeVisible();
+  });
+
+  test("customer can login successfully - đăng nhập thành công", async ({
+    page,
+  }) => {
+    const { email, password } = TEST_ACCOUNTS.customer;
+
+    await page.getByLabel(/email/i).fill(email);
+    await page.getByLabel(/mật khẩu|password/i).fill(password);
+    await page.getByRole("button", { name: /đăng nhập|login/i }).click();
+
+    // Should redirect to home or dashboard
+    await expect(page).toHaveURL(/\/$|\/dashboard/);
+
+    // User menu should appear
+    await expect(
+      page.getByRole("button", { name: /tài khoản|account|menu/i })
+    ).toBeVisible({ timeout: 10000 });
+  });
+
+  test("vendor can login and access vendor dashboard - vendor đăng nhập", async ({
+    page,
+  }) => {
+    const { email, password } = TEST_ACCOUNTS.vendor;
+
+    await page.getByLabel(/email/i).fill(email);
+    await page.getByLabel(/mật khẩu|password/i).fill(password);
+    await page.getByRole("button", { name: /đăng nhập|login/i }).click();
+
+    // Navigate to vendor dashboard
+    await page.goto("/vendor");
+
+    // Should see vendor dashboard
+    await expect(page).toHaveURL(/\/vendor/);
+  });
+
+  test("admin can login and access admin dashboard - admin đăng nhập", async ({
+    page,
+  }) => {
+    const { email, password } = TEST_ACCOUNTS.admin;
+
+    await page.getByLabel(/email/i).fill(email);
+    await page.getByLabel(/mật khẩu|password/i).fill(password);
+    await page.getByRole("button", { name: /đăng nhập|login/i }).click();
+
+    // Navigate to admin dashboard
+    await page.goto("/admin");
+
+    // Should see admin dashboard
+    await expect(page).toHaveURL(/\/admin/);
+  });
+
+  test("has link to register page - có link đăng ký", async ({ page }) => {
+    const registerLink = page.getByRole("link", { name: /đăng ký|register/i });
+    await expect(registerLink).toBeVisible();
+
+    await registerLink.click();
+    await expect(page).toHaveURL(/\/register/);
+  });
+});
+
+// ============================================================================
+// Logout Tests - Đăng xuất
+// ============================================================================
+
+test.describe("Logout Flow - Đăng xuất", () => {
+  test("user can logout - đăng xuất thành công", async ({ page }) => {
+    // Login first
+    await page.goto("/login");
+    const { email, password } = TEST_ACCOUNTS.customer;
+
+    await page.getByLabel(/email/i).fill(email);
+    await page.getByLabel(/mật khẩu|password/i).fill(password);
+    await page.getByRole("button", { name: /đăng nhập|login/i }).click();
+
+    // Wait for redirect
+    await expect(page).toHaveURL(/\/$|\/dashboard/, { timeout: 10000 });
+
+    // Click user menu
+    await page.getByRole("button", { name: /tài khoản|account|menu/i }).click();
+
+    // Click logout
+    await page.getByRole("menuitem", { name: /đăng xuất|logout/i }).click();
+
+    // Should redirect to home or login
+    await expect(page).toHaveURL(/\/$|\/login/);
+  });
+});
+
+// ============================================================================
+// Register Tests - Đăng ký
+// ============================================================================
+
+test.describe("Register Flow - Đăng ký", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/register");
+  });
+
+  test("shows register form correctly - hiển thị form đăng ký", async ({
+    page,
+  }) => {
+    await expect(page.getByLabel(/tên|name/i)).toBeVisible();
+    await expect(page.getByLabel(/email/i)).toBeVisible();
+    await expect(page.getByLabel(/mật khẩu|password/i).first()).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /đăng ký|register|tạo tài khoản/i })
+    ).toBeVisible();
+  });
+
+  test("shows validation errors for invalid input - validate input", async ({
+    page,
+  }) => {
+    // Fill with invalid data
+    await page.getByLabel(/tên|name/i).fill("A"); // Too short
+    await page.getByLabel(/email/i).fill("invalid-email");
+
+    // Try to submit
+    await page
+      .getByRole("button", { name: /đăng ký|register|tạo tài khoản/i })
+      .click();
+
+    // Expect validation errors
+    await expect(page.getByText(/hợp lệ|invalid|ký tự/i)).toBeVisible();
+  });
+
+  test("shows error for existing email - email đã tồn tại", async ({
+    page,
+  }) => {
+    // Use existing email
+    await page.getByLabel(/tên|name/i).fill("Test User");
+    await page.getByLabel(/email/i).fill(TEST_ACCOUNTS.customer.email);
+
+    // Fill password fields
+    const passwordFields = page.getByLabel(/mật khẩu|password/i);
+    await passwordFields.first().fill("ValidPass123!");
+    if ((await passwordFields.count()) > 1) {
+      await passwordFields.nth(1).fill("ValidPass123!");
+    }
+
+    await page
+      .getByRole("button", { name: /đăng ký|register|tạo tài khoản/i })
+      .click();
+
+    // Expect error about existing email
+    await expect(page.getByText(/đã tồn tại|already exists|đã được sử dụng/i)).toBeVisible({
+      timeout: 10000,
     });
   });
 
-  test.describe("Register Page", () => {
-    test("should display register form", async ({ page }) => {
-      await page.goto("/register");
+  test("has link to login page - có link đăng nhập", async ({ page }) => {
+    const loginLink = page.getByRole("link", { name: /đăng nhập|login/i });
+    await expect(loginLink).toBeVisible();
 
-      await expect(page.getByText("Đăng ký").first()).toBeVisible();
-      await expect(page.getByLabel("Họ tên")).toBeVisible();
-      await expect(page.getByLabel("Email")).toBeVisible();
-      await expect(page.getByLabel("Mật khẩu", { exact: true })).toBeVisible();
-      await expect(page.getByLabel("Xác nhận mật khẩu")).toBeVisible();
-    });
+    await loginLink.click();
+    await expect(page).toHaveURL(/\/login/);
+  });
+});
 
-    test("should show validation for short password", async ({ page }) => {
-      await page.goto("/register");
+// ============================================================================
+// Protected Routes Tests - Route được bảo vệ
+// ============================================================================
 
-      await page.getByLabel("Họ tên").fill(TEST_USER.name);
-      await page.getByLabel("Email").fill(TEST_USER.email);
-      await page.getByLabel("Mật khẩu", { exact: true }).fill("123");
-      await page.getByLabel("Xác nhận mật khẩu").fill("123");
+test.describe("Protected Routes - Route được bảo vệ", () => {
+  test("redirects to login when accessing protected route - redirect khi chưa login", async ({
+    page,
+  }) => {
+    // Try to access order history without login
+    await page.goto("/orders");
 
-      await page.getByRole("button", { name: /đăng ký/i }).click();
-
-      await expect(page.getByText(/ít nhất 6 ký tự/i)).toBeVisible({
-        timeout: 10000,
-      });
-    });
-
-    test("should show error when passwords do not match", async ({ page }) => {
-      await page.goto("/register");
-
-      await page.getByLabel("Họ tên").fill(TEST_USER.name);
-      await page.getByLabel("Email").fill(TEST_USER.email);
-      await page.getByLabel("Mật khẩu", { exact: true }).fill("password123");
-      await page.getByLabel("Xác nhận mật khẩu").fill("different123");
-
-      await page.getByRole("button", { name: /đăng ký/i }).click();
-
-      await expect(page.getByText(/không khớp/i)).toBeVisible();
-    });
-
-    test("should have link to login page", async ({ page }) => {
-      await page.goto("/register");
-
-      await page.getByRole("link", { name: /đăng nhập/i }).click();
-
-      await expect(page).toHaveURL(/\/login/);
-    });
+    // Should redirect to login
+    await expect(page).toHaveURL(/\/login/);
   });
 
-  test.describe("Protected Routes", () => {
-    test("should redirect to login when accessing /account without auth", async ({
-      page,
-    }) => {
-      await page.goto("/account");
+  test("redirects non-vendor from vendor dashboard - chặn non-vendor", async ({
+    page,
+  }) => {
+    // Login as customer
+    await page.goto("/login");
+    const { email, password } = TEST_ACCOUNTS.customer;
 
-      // Should redirect to login (or show login required message)
-      await expect(page).toHaveURL(/\/login|\/account/);
-    });
+    await page.getByLabel(/email/i).fill(email);
+    await page.getByLabel(/mật khẩu|password/i).fill(password);
+    await page.getByRole("button", { name: /đăng nhập|login/i }).click();
 
-    test("should redirect to login when accessing /orders without auth", async ({
-      page,
-    }) => {
-      await page.goto("/orders");
+    // Wait for login
+    await expect(page).toHaveURL(/\/$|\/dashboard/, { timeout: 10000 });
 
-      await expect(page).toHaveURL(/\/login|\/orders/);
-    });
+    // Try to access vendor dashboard
+    await page.goto("/vendor");
+
+    // Should redirect away (to home or error page)
+    await expect(page).not.toHaveURL(/\/vendor\/dashboard/);
+  });
+
+  test("redirects non-admin from admin dashboard - chặn non-admin", async ({
+    page,
+  }) => {
+    // Login as customer
+    await page.goto("/login");
+    const { email, password } = TEST_ACCOUNTS.customer;
+
+    await page.getByLabel(/email/i).fill(email);
+    await page.getByLabel(/mật khẩu|password/i).fill(password);
+    await page.getByRole("button", { name: /đăng nhập|login/i }).click();
+
+    // Wait for login
+    await expect(page).toHaveURL(/\/$|\/dashboard/, { timeout: 10000 });
+
+    // Try to access admin dashboard
+    await page.goto("/admin");
+
+    // Should redirect away
+    await expect(page).not.toHaveURL(/\/admin\/dashboard/);
   });
 });

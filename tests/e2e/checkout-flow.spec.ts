@@ -1,229 +1,327 @@
-/**
- * E2E Tests - Checkout Flow
- *
- * Test complete checkout journey:
- * - Add product to cart
- * - Navigate to checkout
- * - Fill shipping form
- * - Select payment method (COD)
- * - Complete order
- */
-
 import { test, expect } from "@playwright/test";
 
-test.describe("Checkout Flow", () => {
-  test.describe("Cart to Checkout Navigation", () => {
-    test("should navigate from cart to checkout", async ({ page }) => {
-      await page.goto("/cart");
-      await page.waitForLoadState("networkidle");
+// ============================================================================
+// Test Account
+// ============================================================================
 
-      // Check if checkout button exists (may be disabled if cart empty)
-      const checkoutButton = page.getByRole("link", { name: /thanh toán|checkout/i });
-      const buttonExists = await checkoutButton.count();
-      
-      if (buttonExists > 0) {
-        await checkoutButton.click();
-        await expect(page).toHaveURL(/\/checkout/);
-      } else {
-        // Cart is empty - verify empty state
-        await expect(page.getByText(/giỏ hàng trống|chưa có sản phẩm/i)).toBeVisible();
-      }
-    });
+const CUSTOMER = {
+  email: "customer@vendoor.com",
+  password: "Kiet1461!",
+};
 
-    test("should show empty cart message when no items", async ({ page }) => {
-      // Clear localStorage to ensure empty cart
-      await page.goto("/");
-      await page.evaluate(() => localStorage.clear());
-      
-      await page.goto("/cart");
-      await page.waitForLoadState("networkidle");
+// ============================================================================
+// Helper Functions
+// ============================================================================
 
-      // Should show empty state
-      const body = await page.textContent("body");
-      expect(body?.toLowerCase()).toMatch(/giỏ hàng|cart/);
-    });
-  });
+async function loginAsCustomer(page: import("@playwright/test").Page) {
+  await page.goto("/login");
+  await page.getByLabel(/email/i).fill(CUSTOMER.email);
+  await page.getByLabel(/mật khẩu|password/i).fill(CUSTOMER.password);
+  await page.getByRole("button", { name: /đăng nhập|login/i }).click();
+  await expect(page).toHaveURL(/\/$|\/dashboard/, { timeout: 10000 });
+}
 
-  test.describe("Checkout Page Elements", () => {
-    test("should display checkout form fields", async ({ page }) => {
-      await page.goto("/checkout");
-      await page.waitForLoadState("networkidle");
+// ============================================================================
+// Product Browsing Tests - Xem sản phẩm
+// ============================================================================
 
-      // Form fields should be visible (labels have * for required)
-      await expect(page.getByText("Họ tên *")).toBeVisible({ timeout: 10000 });
-      await expect(page.getByText("Số điện thoại *")).toBeVisible();
-      await expect(page.getByText("Địa chỉ *")).toBeVisible();
-    });
+test.describe("Product Browsing - Xem sản phẩm", () => {
+  test("can view product listing - xem danh sách sản phẩm", async ({
+    page,
+  }) => {
+    await page.goto("/products");
 
-    test("should have payment method selection", async ({ page }) => {
-      await page.goto("/checkout");
-      await page.waitForLoadState("networkidle");
-
-      // Should have COD option - actual text in UI
-      const codOption = page.getByText("Thanh toán khi nhận hàng (COD)");
-      await expect(codOption).toBeVisible({ timeout: 10000 });
-    });
-
-    test("should validate required fields", async ({ page }) => {
-      await page.goto("/checkout");
-      await page.waitForLoadState("networkidle");
-
-      // Try to submit empty form
-      const submitButton = page.getByRole("button", { name: /đặt hàng|xác nhận/i });
-      if (await submitButton.isVisible()) {
-        await submitButton.click();
-
-        // Should show validation errors
-        await page.waitForTimeout(1000);
-        const bodyText = await page.textContent("body");
-        expect(bodyText?.toLowerCase()).toMatch(/bắt buộc|required|không hợp lệ|invalid/);
-      }
-    });
-
-    test("should validate phone number format", async ({ page }) => {
-      await page.goto("/checkout");
-      await page.waitForLoadState("networkidle");
-
-      const phoneInput = page.getByLabel(/số điện thoại|phone/i);
-      if (await phoneInput.isVisible()) {
-        await phoneInput.fill("123"); // Invalid phone
-
-        const submitButton = page.getByRole("button", { name: /đặt hàng|xác nhận/i });
-        if (await submitButton.isVisible()) {
-          await submitButton.click();
-          
-          await page.waitForTimeout(1000);
-          const bodyText = await page.textContent("body");
-          // Should show phone validation error
-          expect(bodyText).toBeTruthy();
-        }
-      }
+    // Should see product grid
+    await expect(page.locator("[data-testid='product-card']").first()).toBeVisible({
+      timeout: 10000,
     });
   });
 
-  test.describe("COD Checkout Flow", () => {
-    test("should fill checkout form with COD payment", async ({ page }) => {
-      await page.goto("/checkout");
-      await page.waitForLoadState("networkidle");
+  test("can view product detail - xem chi tiết sản phẩm", async ({ page }) => {
+    await page.goto("/products");
 
-      // Fill form fields
-      const nameInput = page.getByLabel(/họ tên|tên/i);
-      if (await nameInput.isVisible()) {
-        await nameInput.fill("Nguyễn Văn Test");
-        await page.getByLabel(/số điện thoại|phone/i).fill("0901234567");
-        await page.getByLabel(/địa chỉ/i).first().fill("123 Đường Test");
+    // Click on first product
+    await page.locator("[data-testid='product-card']").first().click();
 
-        // City/District/Ward fields
-        const cityInput = page.getByLabel(/tỉnh|thành phố|city/i);
-        if (await cityInput.isVisible()) {
-          await cityInput.fill("Hồ Chí Minh");
-        }
-
-        const districtInput = page.getByLabel(/quận|huyện|district/i);
-        if (await districtInput.isVisible()) {
-          await districtInput.fill("Quận 1");
-        }
-
-        const wardInput = page.getByLabel(/phường|xã|ward/i);
-        if (await wardInput.isVisible()) {
-          await wardInput.fill("Phường Bến Nghé");
-        }
-
-        // Select COD payment
-        const codRadio = page.getByLabel(/thanh toán khi nhận hàng|cod/i);
-        if (await codRadio.isVisible()) {
-          await codRadio.click();
-        }
-
-        // Verify form is filled
-        await expect(nameInput).toHaveValue("Nguyễn Văn Test");
-      }
+    // Should see product detail page
+    await expect(page.getByRole("button", { name: /thêm vào giỏ|add to cart/i })).toBeVisible({
+      timeout: 10000,
     });
   });
 
-  test.describe("Order Summary", () => {
-    test("should display order summary section", async ({ page }) => {
-      await page.goto("/checkout");
-      await page.waitForLoadState("networkidle");
+  test("can filter products by category - lọc theo danh mục", async ({
+    page,
+  }) => {
+    await page.goto("/products");
 
-      // Should have order summary or total section
-      const bodyText = await page.textContent("body");
-      expect(bodyText?.toLowerCase()).toMatch(/tổng|total|đơn hàng|order/);
-    });
+    // Click on a category filter if available
+    const categoryFilter = page.locator("[data-testid='category-filter']").first();
+    if (await categoryFilter.isVisible()) {
+      await categoryFilter.click();
+      // URL should update with category param
+      await expect(page).toHaveURL(/category=/);
+    }
+  });
+
+  test("can search products - tìm kiếm sản phẩm", async ({ page }) => {
+    await page.goto("/");
+
+    // Find and use search
+    const searchInput = page.getByPlaceholder(/tìm kiếm|search/i);
+    await searchInput.fill("áo");
+    await searchInput.press("Enter");
+
+    // Should navigate to search results
+    await expect(page).toHaveURL(/search|q=/);
   });
 });
 
-test.describe("Add to Cart Flow", () => {
-  test("should have add to cart button on product page", async ({ page }) => {
+// ============================================================================
+// Cart Tests - Giỏ hàng
+// ============================================================================
+
+test.describe("Cart Flow - Giỏ hàng", () => {
+  test("can add product to cart - thêm vào giỏ hàng", async ({ page }) => {
+    // Go to a product
     await page.goto("/products");
-    await page.waitForLoadState("networkidle");
+    await page.locator("[data-testid='product-card']").first().click();
 
-    // Find first product link
-    const productLink = page.locator('a[href^="/products/"]').first();
-    const hasProducts = await productLink.count() > 0;
+    // Add to cart
+    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
 
-    if (hasProducts) {
-      await productLink.click();
-      await page.waitForLoadState("networkidle");
-
-      // Product detail page should have add to cart
-      const addToCartButton = page.getByRole("button", { name: /thêm vào giỏ|add to cart/i });
-      await expect(addToCartButton).toBeVisible({ timeout: 10000 });
-    }
+    // Should show success notification or cart update
+    await expect(
+      page.getByText(/đã thêm|added|thành công/i)
+    ).toBeVisible({ timeout: 5000 });
   });
 
-  test("should add product to cart", async ({ page }) => {
+  test("can view cart - xem giỏ hàng", async ({ page }) => {
+    // Add item first
     await page.goto("/products");
-    await page.waitForLoadState("networkidle");
+    await page.locator("[data-testid='product-card']").first().click();
+    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
 
-    const productLink = page.locator('a[href^="/products/"]').first();
-    const hasProducts = await productLink.count() > 0;
-
-    if (hasProducts) {
-      await productLink.click();
-      await page.waitForLoadState("networkidle");
-
-      const addToCartButton = page.getByRole("button", { name: /thêm vào giỏ|add to cart/i });
-      if (await addToCartButton.isVisible()) {
-        await addToCartButton.click();
-
-        // Should show success feedback (toast or cart update)
-        await page.waitForTimeout(1000);
-
-        // Navigate to cart
-        await page.goto("/cart");
-        await page.waitForLoadState("networkidle");
-
-        // Cart should have items or still be accessible
-        const body = await page.textContent("body");
-        expect(body).toBeTruthy();
-      }
-    }
-  });
-});
-
-test.describe("Mobile Responsive", () => {
-  test.use({ viewport: { width: 375, height: 667 } });
-
-  test("checkout page should be mobile friendly", async ({ page }) => {
-    await page.goto("/checkout");
-    await page.waitForLoadState("networkidle");
-
-    // Page should be scrollable and usable on mobile
-    await expect(page.locator("body")).toBeVisible();
-
-    // Form should be accessible
-    const nameInput = page.getByLabel(/họ tên|tên/i);
-    if (await nameInput.isVisible()) {
-      await nameInput.tap();
-      await expect(nameInput).toBeFocused();
-    }
-  });
-
-  test("cart page should be mobile friendly", async ({ page }) => {
+    // Go to cart
     await page.goto("/cart");
-    await page.waitForLoadState("networkidle");
 
-    await expect(page.locator("body")).toBeVisible();
+    // Should see cart items
+    await expect(page.locator("[data-testid='cart-item']").first()).toBeVisible({
+      timeout: 10000,
+    });
+  });
+
+  test("can update quantity in cart - cập nhật số lượng", async ({ page }) => {
+    // Add item first
+    await page.goto("/products");
+    await page.locator("[data-testid='product-card']").first().click();
+    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+
+    // Go to cart
+    await page.goto("/cart");
+
+    // Increase quantity
+    const increaseBtn = page.getByRole("button", { name: /\+|tăng|increase/i }).first();
+    if (await increaseBtn.isVisible()) {
+      await increaseBtn.click();
+      // Total should update
+      await expect(page.getByText(/tổng|total/i)).toBeVisible();
+    }
+  });
+
+  test("can remove item from cart - xóa khỏi giỏ hàng", async ({ page }) => {
+    // Add item first
+    await page.goto("/products");
+    await page.locator("[data-testid='product-card']").first().click();
+    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+
+    // Go to cart
+    await page.goto("/cart");
+
+    // Remove item
+    const removeBtn = page.getByRole("button", { name: /xóa|remove|delete/i }).first();
+    if (await removeBtn.isVisible()) {
+      await removeBtn.click();
+
+      // Cart should be empty or item removed
+      await expect(
+        page.getByText(/trống|empty|không có sản phẩm/i)
+      ).toBeVisible({ timeout: 5000 });
+    }
+  });
+
+  test("shows empty cart message - thông báo giỏ hàng trống", async ({
+    page,
+  }) => {
+    // Clear cart by going directly
+    await page.goto("/cart");
+
+    // If cart is empty, should show message
+    const emptyMessage = page.getByText(/trống|empty|không có sản phẩm/i);
+    const cartItem = page.locator("[data-testid='cart-item']").first();
+
+    // Either shows empty message OR has items
+    const isEmpty = await emptyMessage.isVisible().catch(() => false);
+    const hasItems = await cartItem.isVisible().catch(() => false);
+
+    expect(isEmpty || hasItems).toBe(true);
+  });
+});
+
+// ============================================================================
+// Checkout Tests - Thanh toán
+// ============================================================================
+
+test.describe("Checkout Flow - Thanh toán", () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsCustomer(page);
+  });
+
+  test("redirects to login if not logged in - yêu cầu đăng nhập", async ({
+    browser,
+  }) => {
+    // Use new context without login
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    await page.goto("/checkout");
+
+    // Should redirect to login
+    await expect(page).toHaveURL(/\/login/);
+
+    await context.close();
+  });
+
+  test("can access checkout with items - vào trang checkout", async ({
+    page,
+  }) => {
+    // Add item to cart
+    await page.goto("/products");
+    await page.locator("[data-testid='product-card']").first().click();
+    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+
+    // Go to checkout
+    await page.goto("/checkout");
+
+    // Should see checkout form
+    await expect(page.getByLabel(/tên|name/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByLabel(/điện thoại|phone/i)).toBeVisible();
+    await expect(page.getByLabel(/địa chỉ|address/i)).toBeVisible();
+  });
+
+  test("shows validation errors for invalid shipping info - validate thông tin giao hàng", async ({
+    page,
+  }) => {
+    // Add item and go to checkout
+    await page.goto("/products");
+    await page.locator("[data-testid='product-card']").first().click();
+    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+    await page.goto("/checkout");
+
+    // Try to submit with invalid data
+    await page.getByLabel(/điện thoại|phone/i).fill("123"); // Invalid phone
+    await page.getByRole("button", { name: /đặt hàng|place order|thanh toán/i }).click();
+
+    // Should show validation error
+    await expect(page.getByText(/10 số|không hợp lệ|invalid/i)).toBeVisible();
+  });
+
+  test("can select payment method - chọn phương thức thanh toán", async ({
+    page,
+  }) => {
+    // Add item and go to checkout
+    await page.goto("/products");
+    await page.locator("[data-testid='product-card']").first().click();
+    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+    await page.goto("/checkout");
+
+    // Should see payment options
+    await expect(page.getByText(/COD|thanh toán khi nhận/i)).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByText(/Stripe|thẻ|card/i)).toBeVisible();
+  });
+
+  test("shows order summary - hiển thị tóm tắt đơn hàng", async ({ page }) => {
+    // Add item and go to checkout
+    await page.goto("/products");
+    await page.locator("[data-testid='product-card']").first().click();
+    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+    await page.goto("/checkout");
+
+    // Should see order summary
+    await expect(page.getByText(/tạm tính|subtotal/i)).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByText(/phí vận chuyển|shipping/i)).toBeVisible();
+    await expect(page.getByText(/tổng cộng|total/i)).toBeVisible();
+  });
+
+  test("can complete COD order - đặt hàng COD", async ({ page }) => {
+    // Add item
+    await page.goto("/products");
+    await page.locator("[data-testid='product-card']").first().click();
+    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+
+    // Go to checkout
+    await page.goto("/checkout");
+
+    // Fill shipping info
+    await page.getByLabel(/tên|name/i).fill("Test User");
+    await page.getByLabel(/điện thoại|phone/i).fill("0901234567");
+    await page.getByLabel(/email/i).fill("test@example.com");
+    await page.getByLabel(/địa chỉ|address/i).fill("123 Test Street");
+    await page.getByLabel(/phường|ward/i).fill("Phường 1");
+    await page.getByLabel(/quận|district/i).fill("Quận 1");
+    await page.getByLabel(/thành phố|city/i).fill("TP.HCM");
+
+    // Select COD
+    await page.getByText(/COD|thanh toán khi nhận/i).click();
+
+    // Place order
+    await page.getByRole("button", { name: /đặt hàng|place order|thanh toán/i }).click();
+
+    // Should redirect to success page or show confirmation
+    await expect(
+      page.getByText(/thành công|success|đã đặt|xác nhận/i)
+    ).toBeVisible({ timeout: 15000 });
+  });
+});
+
+// ============================================================================
+// Order History Tests - Lịch sử đơn hàng
+// ============================================================================
+
+test.describe("Order History - Lịch sử đơn hàng", () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsCustomer(page);
+  });
+
+  test("can view order history - xem lịch sử đơn hàng", async ({ page }) => {
+    await page.goto("/orders");
+
+    // Should see orders list or empty state
+    const orderItem = page.locator("[data-testid='order-item']").first();
+    const emptyState = page.getByText(/chưa có|no orders|trống/i);
+
+    const hasOrders = await orderItem.isVisible().catch(() => false);
+    const isEmpty = await emptyState.isVisible().catch(() => false);
+
+    // Either has orders or shows empty state
+    expect(hasOrders || isEmpty).toBe(true);
+  });
+
+  test("can view order detail - xem chi tiết đơn hàng", async ({ page }) => {
+    await page.goto("/orders");
+
+    // If there are orders, click on one
+    const orderItem = page.locator("[data-testid='order-item']").first();
+    if (await orderItem.isVisible()) {
+      await orderItem.click();
+
+      // Should see order details
+      await expect(page.getByText(/mã đơn|order number|ORD-/i)).toBeVisible({
+        timeout: 10000,
+      });
+    }
   });
 });

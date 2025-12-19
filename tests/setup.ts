@@ -1,15 +1,8 @@
-/**
- * Vitest Setup File
- *
- * Chạy trước mỗi test file để setup môi trường test.
- */
-
-/// <reference types="vitest/globals" />
-
 import "@testing-library/jest-dom/vitest";
-import { afterEach, vi } from "vitest";
+import { afterEach } from "vitest";
+import { vi } from "vitest";
 
-// Reset mocks sau mỗi test
+// Clear all mocks after each test
 afterEach(() => {
   vi.clearAllMocks();
 });

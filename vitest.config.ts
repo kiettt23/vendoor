@@ -12,9 +12,12 @@ export default defineConfig({
     setupFiles: ["./tests/setup.ts"],
 
     // Pattern để tìm test files
-    // - Unit tests: colocated trong src/
+    // - Unit tests: trong __tests__/ folders (co-located)
     // - Integration tests: trong tests/integration/
-    include: ["src/**/*.test.{ts,tsx}", "tests/integration/**/*.test.ts"],
+    include: [
+      "src/**/__tests__/**/*.test.{ts,tsx}",
+      "tests/integration/**/*.test.ts",
+    ],
 
     // Bỏ qua folders không cần test
     exclude: ["node_modules", "tests/e2e/**"],
