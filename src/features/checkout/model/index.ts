@@ -6,3 +6,5 @@ export {
   type InvalidCartItem,
   type CheckoutValidationResult,
 } from "./schema";
+
+export { useCheckoutForm } from "./use-checkout-form";

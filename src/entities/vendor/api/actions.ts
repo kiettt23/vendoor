@@ -1,73 +1,86 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/shared/lib/db";
-import { REVALIDATION_PATHS } from "@/shared/lib/constants";
-
+import { REVALIDATION_PATHS, CACHE_TAGS } from "@/shared/lib/constants";
 import type { VendorStatus } from "@/generated/prisma";
 
-export async function approveVendor(vendorId: string) {
-  await prisma.vendorProfile.update({
-    where: { id: vendorId },
-    data: { status: "APPROVED" },
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+async function addVendorRoleToUser(userId: string): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { roles: true },
   });
 
-  const vendor = await prisma.vendorProfile.findUnique({
+  if (user && !user.roles.includes("VENDOR")) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { roles: [...user.roles, "VENDOR"] },
+    });
+  }
+}
+
+/** Revalidate tất cả vendor-related caches */
+function revalidateVendorCaches(vendorId: string, slug?: string): void {
+  revalidateTag(CACHE_TAGS.VENDORS, "max");
+  revalidateTag(CACHE_TAGS.ADMIN_VENDORS, "max");
+  revalidateTag(CACHE_TAGS.ADMIN_STATS, "max");
+  if (slug) {
+    revalidateTag(CACHE_TAGS.VENDOR(slug), "max");
+  }
+  REVALIDATION_PATHS.ADMIN_VENDORS(vendorId).forEach((p) => revalidatePath(p));
+}
+
+/** Revalidate chỉ admin caches (cho reject) */
+function revalidateAdminVendorCaches(vendorId: string): void {
+  revalidateTag(CACHE_TAGS.ADMIN_VENDORS, "max");
+  revalidateTag(CACHE_TAGS.ADMIN_STATS, "max");
+  REVALIDATION_PATHS.ADMIN_VENDORS(vendorId).forEach((p) => revalidatePath(p));
+}
+
+// ============================================================================
+// Public Actions (Form-compatible - return void for use with form action)
+// ============================================================================
+
+export async function approveVendor(vendorId: string): Promise<void> {
+  const vendor = await prisma.vendorProfile.update({
     where: { id: vendorId },
-    select: { userId: true },
+    data: { status: "APPROVED" },
+    select: { userId: true, slug: true },
   });
 
   if (vendor) {
-    const user = await prisma.user.findUnique({
-      where: { id: vendor.userId },
-      select: { roles: true },
-    });
-    if (user && !user.roles.includes("VENDOR")) {
-      await prisma.user.update({
-        where: { id: vendor.userId },
-        data: { roles: [...user.roles, "VENDOR"] },
-      });
-    }
+    await addVendorRoleToUser(vendor.userId);
   }
 
-  REVALIDATION_PATHS.ADMIN_VENDORS(vendorId).forEach(p => revalidatePath(p));
+  revalidateVendorCaches(vendorId, vendor?.slug);
 }
 
-export async function rejectVendor(vendorId: string) {
+export async function rejectVendor(vendorId: string): Promise<void> {
   await prisma.vendorProfile.update({
     where: { id: vendorId },
     data: { status: "REJECTED" },
   });
-  REVALIDATION_PATHS.ADMIN_VENDORS(vendorId).forEach(p => revalidatePath(p));
+
+  revalidateAdminVendorCaches(vendorId);
 }
 
 export async function updateVendorStatus(
   vendorId: string,
   status: VendorStatus
-) {
-  await prisma.vendorProfile.update({
+): Promise<void> {
+  const vendor = await prisma.vendorProfile.update({
     where: { id: vendorId },
     data: { status },
+    select: { userId: true, slug: true },
   });
 
-  if (status === "APPROVED") {
-    const vendor = await prisma.vendorProfile.findUnique({
-      where: { id: vendorId },
-      select: { userId: true },
-    });
-    if (vendor) {
-      const user = await prisma.user.findUnique({
-        where: { id: vendor.userId },
-        select: { roles: true },
-      });
-      if (user && !user.roles.includes("VENDOR")) {
-        await prisma.user.update({
-          where: { id: vendor.userId },
-          data: { roles: [...user.roles, "VENDOR"] },
-        });
-      }
-    }
+  if (status === "APPROVED" && vendor) {
+    await addVendorRoleToUser(vendor.userId);
   }
 
-  REVALIDATION_PATHS.ADMIN_VENDORS(vendorId).forEach(p => revalidatePath(p));
+  revalidateVendorCaches(vendorId, vendor?.slug);
 }

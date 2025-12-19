@@ -8,6 +8,9 @@ export type {
   PaginatedProducts,
   ProductFormInput,
   ProductEditInput,
+  SearchSuggestion,
+  FlashSaleProduct,
+  AddToCartData,
 } from "./model";
 
 export {
@@ -19,23 +22,20 @@ export {
   type ProductVariantFormData,
 } from "./model";
 
+// ⚠️ Queries: import từ "@/entities/product/api/queries"
+
 export {
   createProduct,
   updateProduct,
   deleteProduct,
   searchProductsAction,
-  type SearchSuggestion,
 } from "./api";
 
 export type {
   VendorProduct,
   VendorProductForEdit,
   FeaturedProduct,
-  FlashSaleProduct,
 } from "./api";
-
-// ⚠️ Queries KHÔNG được export từ barrel file vì chứa server-only code (prisma)
-// Server Components: import trực tiếp từ "@/entities/product/api/queries"
 
 export {
   ProductCard,
@@ -44,6 +44,11 @@ export {
   ProductActions,
   ProductDetailClient,
   type ProductCardProps,
-  type AddToCartData,
 } from "./ui";
-export { calculateDiscount, hasDiscount, validateSKU, calculateAverageRating } from "./lib";
+
+export {
+  calculateDiscount,
+  hasDiscount,
+  validateSKU,
+  calculateAverageRating,
+} from "./lib";

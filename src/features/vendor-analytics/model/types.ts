@@ -1,6 +1,3 @@
-/**
- * Time range filter options
- */
 export type TimeRange = "7d" | "30d" | "90d" | "365d";
 
 export const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
@@ -10,9 +7,6 @@ export const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
   { value: "365d", label: "1 năm" },
 ];
 
-/**
- * Get date range from time range option
- */
 export function getDateRange(range: TimeRange): { start: Date; end: Date } {
   const end = new Date();
   const start = new Date();
@@ -23,18 +17,12 @@ export function getDateRange(range: TimeRange): { start: Date; end: Date } {
   return { start, end };
 }
 
-/**
- * Revenue data point
- */
 export interface RevenueDataPoint {
   date: string;
   revenue: number;
   orderCount: number;
 }
 
-/**
- * Product performance data
- */
 export interface ProductPerformance {
   productId: string;
   productName: string;
@@ -44,9 +32,6 @@ export interface ProductPerformance {
   totalRevenue: number;
 }
 
-/**
- * Vendor analytics summary
- */
 export interface VendorAnalyticsSummary {
   totalRevenue: number;
   totalOrders: number;
@@ -55,9 +40,6 @@ export interface VendorAnalyticsSummary {
   ordersChange: number;
 }
 
-/**
- * Full analytics data
- */
 export interface VendorAnalytics {
   summary: VendorAnalyticsSummary;
   revenueChart: RevenueDataPoint[];

@@ -11,9 +11,6 @@ interface PaginationProps {
   totalPages: number;
 }
 
-/**
- * Pagination component - giữ lại tất cả URL params khi chuyển trang
- */
 export function Pagination({ currentPage, totalPages }: PaginationProps) {
   const searchParams = useSearchParams();
 

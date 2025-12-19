@@ -8,11 +8,8 @@
  */
 
 // Types (safe for client - type-only)
-export type {
-  VendorOrderItem,
-  VendorOrdersPaginated,
-  CustomerOrderListItem,
-} from "./queries";
+export type { VendorOrderItem, VendorOrdersPaginated } from "./queries";
+export type { CustomerOrderListItem } from "../model/types";
 
 // Actions (Server Actions - callable from Client Components)
 export { updateOrderStatus, updateOrderStatusAction } from "./actions";

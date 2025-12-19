@@ -148,3 +148,45 @@ export function showInfoToast<T extends Exclude<ToastCategory, "error">>(
   const message = TOAST_MESSAGES[category][key] as string;
   toast.info(message);
 }
+
+/**
+ * Confirmation dialog messages
+ *
+ * Sử dụng với window.confirm() hoặc custom confirm dialog
+ *
+ * @example
+ * ```ts
+ * if (confirm(CONFIRM_MESSAGES.deleteProduct)) {
+ *   // Delete logic
+ * }
+ * ```
+ */
+export const CONFIRM_MESSAGES = {
+  // Product
+  deleteProduct: "Xác nhận xóa sản phẩm này?",
+  deleteVariant: "Xác nhận xóa biến thể này?",
+
+  // Category
+  deleteCategory: "Xác nhận xóa danh mục này?",
+
+  // Review
+  deleteReview: "Xác nhận xóa đánh giá này?",
+  deleteReply: "Xác nhận xóa phản hồi?",
+
+  // Order
+  cancelOrder: "Xác nhận hủy đơn hàng?",
+  updateOrderStatus: "Xác nhận cập nhật trạng thái đơn hàng?",
+
+  // Vendor
+  rejectVendor: "Xác nhận từ chối vendor này?",
+  approveVendor: "Xác nhận duyệt vendor này?",
+  suspendVendor: "Xác nhận tạm ngưng vendor này?",
+
+  // Cart
+  clearCart: "Xác nhận xóa tất cả sản phẩm trong giỏ hàng?",
+  removeCartItem: "Xác nhận xóa sản phẩm khỏi giỏ hàng?",
+
+  // General
+  unsavedChanges: "Bạn có thay đổi chưa lưu. Xác nhận rời khỏi trang?",
+  permanentAction: "Hành động này không thể hoàn tác. Tiếp tục?",
+} as const;

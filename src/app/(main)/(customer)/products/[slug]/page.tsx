@@ -3,9 +3,9 @@ import Link from "next/link";
 import { OptimizedImage } from "@/shared/ui/optimized-image";
 import { Store } from "lucide-react";
 import {
-  getProductBySlug,
-  getRelatedProducts,
-} from "@/entities/product/api/queries";
+  getCachedProductBySlug,
+  getCachedRelatedProducts,
+} from "@/entities/product/api/product-detail.queries";
 import { calculateDiscount } from "@/entities/product";
 import {
   getProductReviews,
@@ -36,7 +36,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const product = await getCachedProductBySlug(slug);
   if (!product) return { title: "Product Not Found" };
   return {
     title: `${product.name} | Vendoor`,
@@ -46,11 +46,11 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const product = await getCachedProductBySlug(slug);
   if (!product) notFound();
 
   const [relatedProducts, reviewStats, reviews, session] = await Promise.all([
-    getRelatedProducts(product.category.id, product.id),
+    getCachedRelatedProducts(product.category.id, product.id),
     getProductReviewStats(product.id),
     getProductReviews(product.id, { limit: 5 }),
     getSession(),
@@ -87,7 +87,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <BreadcrumbSeparator className="hidden sm:block" />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href={`${ROUTES.PRODUCTS}?category=${product.category.slug}`}>
+              <Link
+                href={`${ROUTES.PRODUCTS}?category=${product.category.slug}`}
+              >
                 {product.category.name}
               </Link>
             </BreadcrumbLink>
@@ -125,7 +127,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   key={i}
                   className="relative aspect-square rounded overflow-hidden bg-muted"
                 >
-                  <OptimizedImage src={img.url} alt="" fill className="object-cover" />
+                  <OptimizedImage
+                    src={img.url}
+                    alt=""
+                    fill
+                    className="object-cover"
+                  />
                 </div>
               ))}
             </div>
@@ -191,7 +198,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
       {/* Reviews Section */}
       <div className="mb-12 lg:mb-16">
-        <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Đánh Giá Sản Phẩm</h2>
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+          Đánh Giá Sản Phẩm
+        </h2>
 
         <ReviewList reviews={reviews.reviews} stats={reviewStats} />
 
@@ -208,7 +217,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {!userId && (
           <div className="mt-8 text-center py-6 bg-muted/30 rounded-lg">
             <p className="text-muted-foreground">
-              <Link href={ROUTES.LOGIN} className="text-primary hover:underline">
+              <Link
+                href={ROUTES.LOGIN}
+                className="text-primary hover:underline"
+              >
                 Đăng nhập
               </Link>{" "}
               để viết đánh giá
@@ -219,7 +231,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
       {relatedProducts.length > 0 && (
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">Sản Phẩm Liên Quan</h2>
+          <h2 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">
+            Sản Phẩm Liên Quan
+          </h2>
           <ProductGrid products={relatedProducts} columns={4} />
         </div>
       )}

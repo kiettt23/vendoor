@@ -3,21 +3,7 @@
 import { useState } from "react";
 import { ShoppingCart, Plus, Minus, Check, Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
-import type { ProductVariant } from "../model/types";
-
-export interface AddToCartData {
-  productId: string;
-  productName: string;
-  productSlug: string;
-  variantId: string;
-  variantName: string | null;
-  price: number;
-  quantity: number;
-  image: string;
-  stock: number;
-  vendorId: string;
-  vendorName: string;
-}
+import type { ProductVariant, AddToCartData } from "../model/types";
 
 interface ProductActionsProps {
   product: {

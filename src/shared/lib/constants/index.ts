@@ -36,7 +36,7 @@ export {
 export { AUTH, ACCOUNT } from "./auth";
 
 // Cache
-export { CACHE_DURATION, REVALIDATE_TAGS } from "./cache";
+export { CACHE_DURATION, CACHE_TAGS, STALE_TIME, GC_TIME } from "./cache";
 
 // React Query Keys
 export { queryKeys, type QueryKeys } from "./query-keys";

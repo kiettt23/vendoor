@@ -1,10 +1,3 @@
-/**
- * Class Names Utility
- *
- * Merge Tailwind CSS classes với conflict resolution
- * Usage: import { cn } from "@/lib/utils"
- */
-
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 

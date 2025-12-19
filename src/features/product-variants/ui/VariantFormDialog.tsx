@@ -113,7 +113,8 @@ export function VariantFormDialog({
           showErrorToast("generic", result.error);
         }
       }
-    } catch {
+    } catch (error) {
+      console.error("VariantFormDialog submit error:", error);
       showErrorToast("generic");
     }
     setIsSubmitting(false);

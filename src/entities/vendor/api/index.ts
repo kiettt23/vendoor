@@ -13,10 +13,11 @@ export type {
   AdminRecentOrder,
   VendorDetailForAdmin,
   FeaturedVendor,
-} from "./queries";
+  VendorAuthResult,
+} from "../model/types";
 
 // Actions (Server Actions - callable from Client Components)
 export { approveVendor, rejectVendor, updateVendorStatus } from "./actions";
 
 // Guards
-export { requireVendor, type VendorAuthResult } from "./guards";
+export { requireVendor } from "./guards";

@@ -4,9 +4,6 @@ import { Toaster } from "@/shared/ui/sonner";
 import { ReactQueryProvider } from "@/shared/providers";
 import "./globals.css";
 
-// Force dynamic rendering to get fresh session on every request
-export const dynamic = "force-dynamic";
-
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin", "vietnamese"],

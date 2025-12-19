@@ -1,17 +1,33 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/shared/lib/db";
-import { ok, err, type Result } from "@/shared/lib/utils";
-import { REVALIDATION_PATHS } from "@/shared/lib/constants";
+import { ok, err, type Result, createLogger } from "@/shared/lib/utils";
+import { REVALIDATION_PATHS, CACHE_TAGS } from "@/shared/lib/constants";
 import { getZodFirstError } from "@/shared/lib/validation";
+
+const logger = createLogger("inventory-management");
 
 import {
   bulkUpdateStockSchema,
   updateStockSchema,
   type BulkUpdateStockInput,
   type UpdateStockInput,
-} from "../model/types";
+} from "../model";
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+function revalidateInventoryCache(vendorId: string) {
+  revalidateTag(CACHE_TAGS.PRODUCTS, "max");
+  revalidateTag(CACHE_TAGS.PRODUCTS_BY_VENDOR(vendorId), "max");
+  REVALIDATION_PATHS.VENDOR_PRODUCTS.forEach((p) => revalidatePath(p));
+}
+
+// ============================================================================
+// Actions
+// ============================================================================
 
 export async function updateStock(
   vendorId: string,
@@ -25,7 +41,6 @@ export async function updateStock(
   const { variantId, stock } = parsed.data;
 
   try {
-    // Verify ownership
     const variant = await prisma.productVariant.findFirst({
       where: {
         id: variantId,
@@ -42,9 +57,10 @@ export async function updateStock(
       data: { stock },
     });
 
-    REVALIDATION_PATHS.VENDOR_PRODUCTS.forEach(p => revalidatePath(p));
+    revalidateInventoryCache(vendorId);
     return ok(undefined);
-  } catch {
+  } catch (error) {
+    logger.error("updateStock error:", error);
     return err("Không thể cập nhật tồn kho");
   }
 }
@@ -61,7 +77,6 @@ export async function bulkUpdateStock(
   const { updates } = parsed.data;
 
   try {
-    // Verify ownership of all variants
     const variantIds = updates.map((u) => u.variantId);
     const ownedVariants = await prisma.productVariant.findMany({
       where: {
@@ -78,7 +93,6 @@ export async function bulkUpdateStock(
       return err(`Không có quyền cập nhật ${unauthorizedIds.length} sản phẩm`);
     }
 
-    // Bulk update using transaction
     await prisma.$transaction(
       updates.map(({ variantId, stock }) =>
         prisma.productVariant.update({
@@ -88,9 +102,10 @@ export async function bulkUpdateStock(
       )
     );
 
-    REVALIDATION_PATHS.VENDOR_PRODUCTS.forEach(p => revalidatePath(p));
+    revalidateInventoryCache(vendorId);
     return ok({ updated: updates.length });
-  } catch {
+  } catch (error) {
+    logger.error("bulkUpdateStock error:", error);
     return err("Không thể cập nhật tồn kho");
   }
 }

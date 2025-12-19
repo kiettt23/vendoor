@@ -11,9 +11,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-import {
-  requireAuth,
-} from "@/entities/user";
+import { requireAuth } from "@/entities/user";
 import {
   getCurrentUserProfile,
   getUserOrderStats,
@@ -26,6 +24,9 @@ import { Badge } from "@/shared/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { formatPrice, formatDate } from "@/shared/lib";
 import { ROUTES } from "@/shared/lib/constants";
+
+// Force dynamic to ensure fresh user data
+export const dynamic = "force-dynamic";
 
 export default async function AccountPage() {
   await requireAuth();

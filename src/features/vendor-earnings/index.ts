@@ -1,10 +1,13 @@
+export type {
+  EarningsSummary,
+  EarningsTransaction,
+  MonthlyEarnings,
+} from "./model";
+
 export {
   getVendorEarningsSummary,
   getVendorTransactions,
   getMonthlyEarnings,
-  type EarningsSummary,
-  type EarningsTransaction,
-  type MonthlyEarnings,
-} from "./api";
+} from "./api/queries";
 
 export { EarningsStats, EarningsChart, TransactionList } from "./ui";

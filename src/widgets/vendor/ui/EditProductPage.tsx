@@ -1,38 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { OptimizedImage } from "@/shared/ui/optimized-image";
-import { ArrowLeft, Save, Loader2, Trash2, ImagePlus } from "lucide-react";
-import {
-  showToast,
-  showErrorToast,
-  ROUTES,
-} from "@/shared/lib/constants";
+import { ArrowLeft, Save, Loader2, Trash2 } from "lucide-react";
+
+import { ROUTES } from "@/shared/lib/constants";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
-import { Textarea } from "@/shared/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
-import { Switch } from "@/shared/ui/switch";
-import {
-  updateProduct,
-  deleteProduct,
-  productEditSchema,
-  type ProductEditFormData,
-} from "@/entities/product";
-import { VariantManager } from "@/features/product-variants";
 import type { CategoryOption } from "@/entities/category";
+import type { VendorProductForEdit } from "@/entities/product/api/vendor-product.queries";
+import { VariantManager } from "@/features/product-variants";
+import {
+  ImageUploadCard,
+  BasicInfoCard,
+  StatusCard,
+  type ProductImageData,
+} from "@/features/product-form";
+
+import { useEditProductForm } from "../model/use-edit-product-form";
 
 interface ProductData {
   id: string;
@@ -40,7 +23,7 @@ interface ProductData {
   description: string | null;
   categoryId: string;
   isActive: boolean;
-  images: { id: string; url: string }[];
+  images: ProductImageData[];
   variants: {
     id: string;
     name: string | null;
@@ -55,66 +38,26 @@ interface ProductData {
 }
 
 interface EditProductPageProps {
-  product: ProductData;
+  product: NonNullable<VendorProductForEdit>;
   categories: CategoryOption[];
 }
 
 export function EditProductPage({ product, categories }: EditProductPageProps) {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isActive, setIsActive] = useState(product.isActive);
+  const {
+    form,
+    isSubmitting,
+    isDeleting,
+    onSubmit,
+    handleDelete,
+  } = useEditProductForm({ product });
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
-  } = useForm<ProductEditFormData>({
-    resolver: zodResolver(productEditSchema),
-    defaultValues: {
-      name: product.name,
-      description: product.description || "",
-      categoryId: product.categoryId,
-      isActive: product.isActive,
-    },
-  });
-
-  const onSubmit = async (data: ProductEditFormData) => {
-    setIsSubmitting(true);
-    try {
-      const result = await updateProduct(product.id, {
-        ...data,
-        description: data.description || "",
-      });
-      if (result.success) {
-        showToast("vendor", "productUpdated");
-        router.refresh();
-      } else {
-        showErrorToast("generic", result.error);
-      }
-    } catch {
-      showErrorToast("generic");
-    }
-    setIsSubmitting(false);
-  };
-
-  const handleDelete = async () => {
-    if (!confirm("Xác nhận xóa sản phẩm này?")) return;
-    setIsDeleting(true);
-    try {
-      const result = await deleteProduct(product.id);
-      if (result.success) {
-        showToast("vendor", "productDeleted");
-        router.push(ROUTES.VENDOR_PRODUCTS);
-      } else {
-        showErrorToast("generic", result.error);
-      }
-    } catch {
-      showErrorToast("generic");
-    }
-    setIsDeleting(false);
-  };
+  } = form;
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
@@ -142,112 +85,27 @@ export function EditProductPage({ product, categories }: EditProductPageProps) {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Image section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Hình Ảnh</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {product.images.length > 0 ? (
-              <div className="flex gap-4 flex-wrap">
-                {product.images.map((img) => (
-                  <div
-                    key={img.id}
-                    className="relative h-24 w-24 rounded overflow-hidden bg-muted"
-                  >
-                    <OptimizedImage
-                      src={img.url}
-                      alt=""
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-                <ImagePlus className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <p className="text-muted-foreground text-sm">
-                  Tính năng upload hình ảnh sẽ sớm được cập nhật
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <ImageUploadCard
+          title="Hình Ảnh"
+          imagePreview={null}
+          onImageChange={() => {}}
+          onRemove={() => {}}
+          existingImages={product.images}
+        />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Thông Tin Cơ Bản</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="space-y-2">
-              <Label>Tên sản phẩm *</Label>
-              <Input {...register("name")} className="mt-1.5" />
-              {errors.name && (
-                <p className="text-sm text-destructive mt-1">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label>Mô tả</Label>
-              <Textarea
-                {...register("description")}
-                rows={4}
-                className="mt-1.5"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Danh mục *</Label>
-              <Select
-                onValueChange={(v) => setValue("categoryId", v)}
-                defaultValue={product.categoryId}
-              >
-                <SelectTrigger className="mt-1.5">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.categoryId && (
-                <p className="text-sm text-destructive mt-1">
-                  {errors.categoryId.message}
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <BasicInfoCard
+          register={register}
+          errors={errors}
+          setValue={setValue}
+          watch={watch}
+          categories={categories}
+          defaultCategoryId={product.categoryId}
+        />
 
         {/* Variant Manager - outside form since it has its own actions */}
         <VariantManager productId={product.id} variants={product.variants} />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Trạng Thái</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Hiển thị sản phẩm</p>
-                <p className="text-sm text-muted-foreground">
-                  Sản phẩm sẽ xuất hiện trên cửa hàng
-                </p>
-              </div>
-              <Switch
-                checked={isActive}
-                onCheckedChange={(v) => {
-                  setIsActive(v);
-                  setValue("isActive", v);
-                }}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <StatusCard setValue={setValue} watch={watch} />
 
         <Button
           type="submit"

@@ -43,3 +43,17 @@ export interface StockValidationResult {
   hasWarnings: boolean;
 }
 
+export interface CartTotals {
+  subtotal: number;
+  shippingFee: number;
+  platformFee: number;
+  total: number;
+  vendorCount: number;
+  itemCount: number;
+}
+
+export interface StockInfo {
+  variantId: string;
+  currentStock: number;
+  isAvailable: boolean;
+}

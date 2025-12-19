@@ -66,7 +66,8 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
       } else {
         showErrorToast("generic", updateResult.error);
       }
-    } catch {
+    } catch (error) {
+      console.error("ProfileForm submit error:", error);
       showErrorToast("generic");
     } finally {
       setIsSubmitting(false);

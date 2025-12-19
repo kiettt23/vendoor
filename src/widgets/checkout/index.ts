@@ -1,1 +1,1 @@
-export { CheckoutPage } from "./ui/CheckoutPage";
+export { CheckoutPage, CheckoutOrderSummary } from "./ui";

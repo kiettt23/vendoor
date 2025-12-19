@@ -1,10 +1,5 @@
 import { z } from "zod";
 
-// Review Schemas
-
-/**
- * Schema cho tạo review
- */
 export const createReviewSchema = z.object({
   productId: z.string().min(1, "ID sản phẩm không hợp lệ"),
   rating: z
@@ -22,9 +17,6 @@ export const createReviewSchema = z.object({
 
 export type CreateReviewInput = z.infer<typeof createReviewSchema>;
 
-/**
- * Schema cho vendor reply
- */
 export const vendorReplySchema = z.object({
   reviewId: z.string().min(1, "ID review không hợp lệ"),
   reply: z

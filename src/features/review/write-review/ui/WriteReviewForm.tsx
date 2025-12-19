@@ -70,7 +70,8 @@ export function WriteReviewForm({
       } else {
         showErrorToast("generic", result.error);
       }
-    } catch {
+    } catch (error) {
+      console.error("WriteReviewForm submit error:", error);
       showErrorToast("generic");
     } finally {
       setIsSubmitting(false);

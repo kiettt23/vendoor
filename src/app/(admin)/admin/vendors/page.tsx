@@ -1,6 +1,9 @@
 import { requireAdmin } from "@/entities/user";
 import { AdminVendorsPage } from "@/widgets/admin";
 
+// Force dynamic to ensure fresh vendor data
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   searchParams: Promise<{ status?: string }>;
 }

@@ -18,9 +18,6 @@ const sizeClasses = {
   lg: "h-5 w-5",
 };
 
-/**
- * Component hiển thị rating bằng sao
- */
 export function StarRating({
   rating,
   maxRating = 5,

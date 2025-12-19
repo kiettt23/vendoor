@@ -1,17 +1,12 @@
 "use server";
 
 import { prisma } from "@/shared/lib/db";
+import type { StockInfo } from "../model/types";
 
-export interface StockInfo {
-  variantId: string;
-  currentStock: number;
-  isAvailable: boolean;
-}
+// ============================================================================
+// Actions
+// ============================================================================
 
-/**
- * Lấy stock hiện tại của các variants trong cart
- * Dùng để sync cart với database
- */
 export async function getCartItemsStock(
   variantIds: string[]
 ): Promise<StockInfo[]> {
@@ -31,7 +26,8 @@ export async function getCartItemsStock(
     return {
       variantId,
       currentStock: variant?.stock ?? 0,
-      isAvailable: (variant?.stock ?? 0) > 0 && (variant?.product.isActive ?? false),
+      isAvailable:
+        (variant?.stock ?? 0) > 0 && (variant?.product.isActive ?? false),
     };
   });
 }

@@ -4,19 +4,14 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/shared/lib/db";
 import { ROUTES } from "@/shared/lib/constants";
 import { requireSession, getSession } from "@/shared/lib/auth/session";
+import type { UserRole, AuthResult } from "../model/types";
 
-export type UserRole = "CUSTOMER" | "VENDOR" | "ADMIN";
-
-export interface AuthResult {
-  session: NonNullable<Awaited<ReturnType<typeof getSession>>>;
-  user: {
-    id: string;
-    roles: UserRole[];
-    name?: string | null;
-    email?: string | null;
-  };
-}
-
+/**
+ * Yêu cầu user đã đăng nhập.
+ * Redirect về login nếu chưa.
+ *
+ * @returns Session và user info
+ */
 export async function requireAuth(): Promise<AuthResult> {
   const session = await requireSession();
 
@@ -40,6 +35,12 @@ export async function requireAuth(): Promise<AuthResult> {
   };
 }
 
+/**
+ * Yêu cầu user có role cụ thể.
+ * Redirect về home nếu không có quyền.
+ *
+ * @param role - Role cần kiểm tra
+ */
 export async function requireRole(role: UserRole): Promise<AuthResult> {
   const { session, user } = await requireAuth();
 
@@ -50,10 +51,21 @@ export async function requireRole(role: UserRole): Promise<AuthResult> {
   return { session, user };
 }
 
-export async function requireAdmin() {
+/**
+ * Yêu cầu user là ADMIN.
+ * Shortcut cho requireRole("ADMIN").
+ */
+export async function requireAdmin(): Promise<AuthResult> {
   return requireRole("ADMIN");
 }
 
+/**
+ * Kiểm tra user có role cụ thể hay không.
+ * Không redirect, chỉ trả về boolean.
+ *
+ * @param role - Role cần kiểm tra
+ * @returns true nếu user có role
+ */
 export async function hasRole(role: UserRole): Promise<boolean> {
   const session = await getSession();
   if (!session?.user) return false;

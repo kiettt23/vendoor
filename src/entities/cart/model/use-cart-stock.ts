@@ -2,13 +2,22 @@
 
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "@/shared/lib/constants/query-keys";
+import { queryKeys, STALE_TIME, GC_TIME } from "@/shared/lib/constants";
 import { useCart } from "./store";
 import { getCartItemsStock } from "../api/actions";
 
 /**
  * Hook để sync stock từ database vào cart store.
- * Auto-refetch khi focus lại window.
+ * Auto-refetch khi focus lại window vì stock thay đổi thường xuyên.
+ *
+ * @returns Object với loading state và refetch function
+ *
+ * @example
+ * // Trong CartPage hoặc Checkout
+ * const { isLoading, isFetching, refetch } = useCartStock();
+ *
+ * // Manual refetch khi cần
+ * <button onClick={() => refetch()}>Refresh Stock</button>
  */
 export function useCartStock() {
   const items = useCart((state) => state.items);
@@ -19,9 +28,9 @@ export function useCartStock() {
     queryKey: queryKeys.cart.stock(variantIds),
     queryFn: () => getCartItemsStock(variantIds),
     enabled: variantIds.length > 0,
-    staleTime: 30_000, // 30s - stock có thể thay đổi nhanh
-    gcTime: 60_000,
-    refetchOnWindowFocus: true,
+    staleTime: STALE_TIME.STOCK, // 30s - stock changes frequently
+    gcTime: GC_TIME.SHORT,
+    refetchOnWindowFocus: true, // Always refetch stock on focus
   });
 
   useEffect(() => {

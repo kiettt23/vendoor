@@ -21,6 +21,17 @@ export interface OrderListItem {
   _count: { items: number };
 }
 
+export interface CustomerOrderListItem {
+  id: string;
+  orderNumber: string;
+  status: OrderStatus;
+  total: number;
+  createdAt: Date;
+  vendor: { shopName: string };
+  items: { productName: string; quantity: number }[];
+  itemCount: number;
+}
+
 export interface CreatedOrder {
   id: string;
   orderNumber: string;

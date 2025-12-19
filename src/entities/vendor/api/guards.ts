@@ -4,58 +4,41 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/shared/lib/db";
 import { ROUTES } from "@/shared/lib/constants";
 import { requireSession } from "@/shared/lib/auth/session";
-import type { Session } from "@/shared/lib/auth";
-
-interface VendorUser {
-  id: string;
-  name: string | null;
-  email: string;
-  roles: string[];
-}
-
-export interface VendorAuthResult {
-  session: Session;
-  user: VendorUser;
-  vendorProfile: {
-    id: string;
-    shopName: string;
-    status: string;
-  };
-}
+import type { VendorAuthResult } from "../model/types";
 
 export async function requireVendor(): Promise<VendorAuthResult> {
   const session = await requireSession();
 
-  const user = await prisma.user.findUnique({
+  const data = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
       id: true,
       name: true,
       email: true,
       roles: true,
+      vendorProfile: {
+        select: { id: true, shopName: true, status: true },
+      },
     },
   });
 
-  if (!user || !user.roles.includes("VENDOR")) {
-    redirect(ROUTES.HOME);
-  }
-
-  const vendorProfile = await prisma.vendorProfile.findUnique({
-    where: { userId: user.id },
-    select: {
-      id: true,
-      shopName: true,
-      status: true,
-    },
-  });
-
-  if (!vendorProfile || vendorProfile.status !== "APPROVED") {
+  // Guard: Must be vendor with approved profile
+  if (
+    !data?.roles.includes("VENDOR") ||
+    !data.vendorProfile ||
+    data.vendorProfile.status !== "APPROVED"
+  ) {
     redirect(ROUTES.HOME);
   }
 
   return {
     session,
-    user,
-    vendorProfile,
+    user: {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      roles: data.roles,
+    },
+    vendorProfile: data.vendorProfile,
   };
 }

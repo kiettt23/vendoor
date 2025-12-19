@@ -29,21 +29,18 @@ export async function registerAsVendor(
       select: { id: true, status: true },
     });
 
-    if (existingProfile) {
-      if (existingProfile.status === "PENDING") {
-        return err("Bạn đã đăng ký làm người bán. Vui lòng đợi duyệt.");
-      }
-      if (existingProfile.status === "APPROVED") {
-        return err("Bạn đã là người bán.");
-      }
-      if (existingProfile.status === "REJECTED") {
-        return err(
-          "Đơn đăng ký của bạn đã bị từ chối. Vui lòng liên hệ hỗ trợ."
-        );
-      }
-      if (existingProfile.status === "SUSPENDED") {
-        return err("Tài khoản người bán của bạn đã bị đình chỉ.");
-      }
+    // Guard clauses for existing profile status
+    if (existingProfile?.status === "PENDING") {
+      return err("Bạn đã đăng ký làm người bán. Vui lòng đợi duyệt.");
+    }
+    if (existingProfile?.status === "APPROVED") {
+      return err("Bạn đã là người bán.");
+    }
+    if (existingProfile?.status === "REJECTED") {
+      return err("Đơn đăng ký của bạn đã bị từ chối. Vui lòng liên hệ hỗ trợ.");
+    }
+    if (existingProfile?.status === "SUSPENDED") {
+      return err("Tài khoản người bán của bạn đã bị đình chỉ.");
     }
 
     const slug = await generateUniqueSlug(validated.shopName, async (s) => {

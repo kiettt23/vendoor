@@ -4,7 +4,10 @@ export type {
   CartStore,
   StockValidationItem,
   StockValidationResult,
+  CartTotals,
+  StockInfo,
 } from "./model";
+
 export { useCartStore, useCart, useCartStock } from "./model";
 export { groupItemsByVendor, calculateCartTotals } from "./lib";
-export { getCartItemsStock, type StockInfo } from "./api";
+export { getCartItemsStock } from "./api";

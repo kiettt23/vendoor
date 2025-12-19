@@ -1,16 +1,43 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/shared/lib/db";
-import { ok, err, type Result } from "@/shared/lib/utils";
-import { ROUTES } from "@/shared/lib/constants";
+import { ok, err, type Result, createLogger } from "@/shared/lib/utils";
+import { ROUTES, CACHE_TAGS } from "@/shared/lib/constants";
 import type { CreateVariantData, VariantFormData } from "../model";
+
+const logger = createLogger("product-variants");
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+function revalidateVariantCache(vendorId?: string) {
+  revalidateTag(CACHE_TAGS.PRODUCTS, "page");
+  if (vendorId) {
+    revalidateTag(CACHE_TAGS.PRODUCTS_BY_VENDOR(vendorId), "page");
+  }
+  revalidatePath(ROUTES.VENDOR_PRODUCTS);
+}
+
+// ============================================================================
+// Actions
+// ============================================================================
 
 export async function createVariant(
   productId: string,
   data: CreateVariantData
 ): Promise<Result<string>> {
   try {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { vendorId: true },
+    });
+
+    if (!product) {
+      return err("Không tìm thấy sản phẩm");
+    }
+
     const variant = await prisma.productVariant.create({
       data: {
         productId,
@@ -24,9 +51,11 @@ export async function createVariant(
         isDefault: false,
       },
     });
-    revalidatePath(ROUTES.VENDOR_PRODUCTS);
+
+    revalidateVariantCache(product.vendorId);
     return ok(variant.id);
-  } catch {
+  } catch (error) {
+    logger.error("createVariant error:", error);
     return err("Không thể tạo biến thể");
   }
 }
@@ -36,6 +65,15 @@ export async function updateVariant(
   data: VariantFormData
 ): Promise<Result<void>> {
   try {
+    const variant = await prisma.productVariant.findUnique({
+      where: { id: variantId },
+      select: { product: { select: { vendorId: true } } },
+    });
+
+    if (!variant) {
+      return err("Không tìm thấy biến thể");
+    }
+
     await prisma.productVariant.update({
       where: { id: variantId },
       data: {
@@ -48,9 +86,11 @@ export async function updateVariant(
         stock: data.stock,
       },
     });
-    revalidatePath(ROUTES.VENDOR_PRODUCTS);
+
+    revalidateVariantCache(variant.product.vendorId);
     return ok(undefined);
-  } catch {
+  } catch (error) {
+    logger.error("updateVariant error:", error);
     return err("Không thể cập nhật biến thể");
   }
 }
@@ -75,9 +115,10 @@ export async function deleteVariant(variantId: string): Promise<Result<void>> {
     }
 
     await prisma.productVariant.delete({ where: { id: variantId } });
-    revalidatePath(ROUTES.VENDOR_PRODUCTS);
+    revalidateVariantCache(variant.product.vendorId);
     return ok(undefined);
-  } catch {
+  } catch (error) {
+    logger.error("deleteVariant error:", error);
     return err("Không thể xóa biến thể");
   }
 }
@@ -87,6 +128,15 @@ export async function setDefaultVariant(
   productId: string
 ): Promise<Result<void>> {
   try {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { vendorId: true },
+    });
+
+    if (!product) {
+      return err("Không tìm thấy sản phẩm");
+    }
+
     await prisma.$transaction([
       prisma.productVariant.updateMany({
         where: { productId },
@@ -97,9 +147,11 @@ export async function setDefaultVariant(
         data: { isDefault: true },
       }),
     ]);
-    revalidatePath(ROUTES.VENDOR_PRODUCTS);
+
+    revalidateVariantCache(product.vendorId);
     return ok(undefined);
-  } catch {
+  } catch (error) {
+    logger.error("setDefaultVariant error:", error);
     return err("Không thể đặt biến thể mặc định");
   }
 }

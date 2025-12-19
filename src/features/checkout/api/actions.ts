@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
+
 import { groupItemsByVendor } from "@/entities/cart";
 import type { CartItem } from "@/entities/cart";
 import { prepareOrderData } from "@/entities/order";
@@ -7,6 +9,7 @@ import type { CreateOrdersResult } from "@/entities/order";
 import { getSession } from "@/shared/lib/auth/session";
 import { prisma } from "@/shared/lib/db";
 import { generateOrderNumber } from "@/shared/lib/utils";
+import { CACHE_TAGS } from "@/shared/lib/constants";
 
 import type {
   CheckoutFormData,
@@ -14,8 +17,6 @@ import type {
   CheckoutValidationResult,
   InvalidCartItem,
 } from "../model";
-
-// Validate Checkout
 
 export async function validateCheckout(
   items: CartItem[]
@@ -41,8 +42,6 @@ export async function validateCheckout(
 
   return { isValid: invalidItems.length === 0, invalidItems };
 }
-
-// Create Orders
 
 export async function createOrders(
   cartItems: CartItem[],
@@ -199,6 +198,19 @@ export async function createOrders(
 
       return { orders: createdOrders, paymentId: payment.id };
     });
+
+    // Revalidate caches after successful order creation
+    // - Products: stock changed
+    // - Orders: new orders created
+    revalidateTag(CACHE_TAGS.PRODUCTS, "max");
+    revalidateTag(CACHE_TAGS.ORDERS, "max");
+    revalidateTag(CACHE_TAGS.ORDERS_BY_USER(session.user.id), "max");
+    
+    // Revalidate vendor-specific caches
+    for (const vendorId of vendorIds) {
+      revalidateTag(CACHE_TAGS.ORDERS_BY_VENDOR(vendorId), "max");
+      revalidateTag(CACHE_TAGS.VENDOR_STATS(vendorId), "max");
+    }
 
     return { success: true, ...result, totalAmount };
   } catch (error) {

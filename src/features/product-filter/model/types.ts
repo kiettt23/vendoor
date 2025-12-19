@@ -1,9 +1,3 @@
-/**
- * Product Filter Types
- *
- * Types cho filter sản phẩm nâng cao
- */
-
 export interface ProductFilterParams {
   /** Category slug */
   category?: string;

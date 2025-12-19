@@ -15,6 +15,21 @@ export const registerSchema = z.object({
   path: ["confirmPassword"],
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Email không hợp lệ"),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(8, "Mật khẩu phải có ít nhất 8 ký tự"),
+    confirmPassword: z.string().min(8, "Mật khẩu phải có ít nhất 8 ký tự"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Mật khẩu không khớp",
+    path: ["confirmPassword"],
+  });
+
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
-
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;

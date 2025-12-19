@@ -1,18 +1,8 @@
-/**
- * Product Constants
- */
-
-/**
- * Price limits (VND)
- */
 export const PRICE_LIMITS = {
   MIN: 1000,
   MAX: 1000000000, // 1 billion VND
 } as const;
 
-/**
- * Stock limits
- */
 export const STOCK_LIMITS = {
   MIN: 0,
   MAX: 999999,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Sparkles, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 
 import { Button } from "@/shared/ui/button";
@@ -28,9 +28,20 @@ interface AIGenerateButtonProps {
   className?: string;
 }
 
-/**
- * Button để trigger AI generate thông tin sản phẩm từ hình ảnh
- */
+function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
+        const base64 = result.split(",")[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+    });
+  }
+
 export function AIGenerateButton({
   imageFile,
   existingCategories,
@@ -40,6 +51,15 @@ export function AIGenerateButton({
 }: AIGenerateButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleGenerate = useCallback(async () => {
     if (!imageFile) {
@@ -85,13 +105,14 @@ export function AIGenerateButton({
         setStatus("error");
         showErrorToast("generic", result.error);
       }
-    } catch {
+    } catch (error) {
+      console.error("AIGenerateButton error:", error);
       setStatus("error");
       showErrorToast("generic");
     } finally {
       setIsLoading(false);
       // Reset status after 3s
-      setTimeout(() => setStatus("idle"), 3000);
+      timeoutRef.current = setTimeout(() => setStatus("idle"), 3000);
     }
   }, [imageFile, existingCategories, onGenerated]);
 
@@ -142,21 +163,4 @@ export function AIGenerateButton({
       </Tooltip>
     </TooltipProvider>
   );
-}
-
-/**
- * Convert File to base64 string (without data URL prefix)
- */
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
-      const base64 = result.split(",")[1];
-      resolve(base64);
-    };
-    reader.onerror = reject;
-  });
 }

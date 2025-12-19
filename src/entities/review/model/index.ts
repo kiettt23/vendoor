@@ -1,4 +1,3 @@
-// Types
 export type {
   Review,
   ReviewListItem,
@@ -6,7 +5,6 @@ export type {
   ReviewFormInput,
 } from "./types";
 
-// Schemas
 export {
   createReviewSchema,
   vendorReplySchema,

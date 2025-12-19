@@ -1,8 +1,8 @@
 "use client";
 
-import { ProductDetailClient, type AddToCartData } from "@/entities/product/ui";
+import { ProductDetailClient, type AddToCartData } from "@/entities/product";
 import { useCart } from "@/entities/cart";
-import type { ProductVariant } from "@/entities/product/model";
+import type { ProductVariant } from "@/entities/product";
 
 interface ProductDetailWithCartProps {
   product: {
@@ -19,10 +19,6 @@ interface ProductDetailWithCartProps {
   image: string;
 }
 
-/**
- * ProductDetailClient wrapper that injects cart functionality.
- * This lives in features layer to bridge entities (product) with entities (cart).
- */
 export function ProductDetailWithCart(props: ProductDetailWithCartProps) {
   const addItem = useCart((state) => state.addItem);
 

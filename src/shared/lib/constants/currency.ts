@@ -1,6 +1,3 @@
-/**
- * Currency configuration
- */
 export const CURRENCY = {
   CODE: "VND",
   SYMBOL: "₫",

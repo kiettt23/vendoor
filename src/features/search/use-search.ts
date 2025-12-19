@@ -7,7 +7,7 @@ import {
   searchProductsAction,
   type SearchSuggestion,
 } from "@/entities/product";
-import { queryKeys } from "@/shared/lib/constants/query-keys";
+import { queryKeys, STALE_TIME, GC_TIME } from "@/shared/lib/constants";
 import { LIMITS } from "@/shared/lib/constants/limits";
 
 interface UseSearchSuggestionsOptions {
@@ -33,8 +33,8 @@ export function useSearchSuggestions({
     queryKey: queryKeys.products.search(debouncedQuery),
     queryFn: () => searchProductsAction(debouncedQuery, limit),
     enabled: enabled && debouncedQuery.length >= minChars,
-    staleTime: 30_000, // 30s - suggestions can be slightly stale
-    gcTime: 5 * 60 * 1000, // 5 min cache
+    staleTime: STALE_TIME.SEARCH,
+    gcTime: GC_TIME.SHORT,
     refetchOnWindowFocus: false,
   });
 

@@ -1,30 +1,42 @@
 import { cache } from "react";
 
 import { getSession } from "@/shared/lib/auth/session";
-import { prisma } from "@/shared/lib/db";
+import {
+  prisma,
+  orderListInclude,
+  orderDetailInclude,
+  vendorOrderListInclude,
+  vendorOrderDetailInclude,
+  adminOrderListInclude,
+  adminOrderDetailInclude,
+} from "@/shared/lib/db";
 import { LIMITS } from "@/shared/lib/constants";
-import type { OrderStatus } from "@/generated/prisma";
+import type { OrderStatus, CustomerOrderListItem } from "../model/types";
 
-// Order Types (query-specific)
+// ============================================================================
+// Types
+// ============================================================================
 
-export interface CustomerOrderListItem {
-  id: string;
-  orderNumber: string;
-  status: OrderStatus;
-  total: number;
-  createdAt: Date;
-  vendor: { shopName: string };
-  items: { productName: string; quantity: number }[];
-  itemCount: number;
-}
+export type VendorOrderItem = Awaited<
+  ReturnType<typeof getVendorOrders>
+>[number];
+export type VendorOrdersPaginated = Awaited<
+  ReturnType<typeof getVendorOrdersPaginated>
+>;
 
-// Order Queries
+// ============================================================================
+// Customer Queries
+// ============================================================================
+//
+// Caching Strategy: Request-level deduplication ONLY (React cache)
+// - NO cross-request cache (unstable_cache) for order data
+//
+// Why NO cross-request cache?
+// - User-specific data (customerId filter) - different per user
+// - Orders change frequently (new orders, status updates)
+// - Fresh data critical for order tracking
+// - Using only cache() for request deduplication is sufficient
 
-/**
- * Lấy danh sách đơn hàng của customer hiện tại
- *
- * @cached React cache cho request deduplication
- */
 export const getCustomerOrders = cache(
   async (): Promise<CustomerOrderListItem[]> => {
     const session = await getSession();
@@ -32,11 +44,7 @@ export const getCustomerOrders = cache(
 
     const orders = await prisma.order.findMany({
       where: { customerId: session.user.id },
-      include: {
-        vendor: { select: { shopName: true } },
-        items: { select: { productName: true, quantity: true }, take: 2 },
-        _count: { select: { items: true } },
-      },
+      include: orderListInclude,
       orderBy: { createdAt: "desc" },
     });
 
@@ -53,92 +61,49 @@ export const getCustomerOrders = cache(
   }
 );
 
-/**
- * Lấy chi tiết đơn hàng theo ID
- *
- * @cached React cache cho request deduplication
- */
 export const getOrderById = cache(async (orderId: string) => {
   const session = await getSession();
   if (!session?.user) return null;
 
   return prisma.order.findFirst({
     where: { id: orderId, customerId: session.user.id },
-    include: {
-      vendor: { select: { shopName: true } },
-      items: {
-        include: {
-          variant: {
-            include: {
-              product: {
-                include: { images: { take: 1, orderBy: { order: "asc" } } },
-              },
-            },
-          },
-        },
-      },
-      payment: true,
-    },
+    include: orderDetailInclude,
   });
 });
 
-/**
- * Lấy danh sách đơn hàng của vendor
- *
- * @cached React cache cho request deduplication
- */
+// ============================================================================
+// Vendor Queries
+// ============================================================================
+//
+// Caching Strategy: Request-level deduplication ONLY (React cache)
+// - NO cross-request cache for vendor orders (same reason as customer orders)
+//
+// Why NO cross-request cache?
+// - Vendor-specific data (vendorId filter) - different per vendor
+// - Order status changes frequently - vendors need real-time updates
+// - Critical for vendor operations (fulfillment, tracking)
+
 export const getVendorOrders = cache(async (vendorId: string) => {
   return prisma.order.findMany({
     where: { vendorId },
-    include: {
-      customer: { select: { name: true, email: true } },
-      _count: { select: { items: true } },
-    },
+    include: vendorOrderListInclude,
     orderBy: { createdAt: "desc" },
   });
 });
 
-/**
- * Lấy chi tiết đơn hàng của vendor
- *
- * @cached React cache cho request deduplication
- */
 export const getVendorOrderDetail = cache(
   async (orderId: string, vendorId: string) => {
     return prisma.order.findFirst({
       where: { id: orderId, vendorId },
-      include: {
-        customer: { select: { name: true, email: true, phone: true } },
-        items: {
-          include: {
-            variant: {
-              include: {
-                product: {
-                  include: { images: { take: 1, orderBy: { order: "asc" } } },
-                },
-              },
-            },
-          },
-        },
-        payment: true,
-      },
+      include: vendorOrderDetailInclude,
     });
   }
 );
 
-/**
- * Lấy danh sách đơn hàng của vendor với pagination và filter
- *
- * @cached React cache cho request deduplication
- */
 export const getVendorOrdersPaginated = cache(
   async (
     vendorId: string,
-    options: {
-      page?: number;
-      limit?: number;
-      status?: string;
-    } = {}
+    options: { page?: number; limit?: number; status?: string } = {}
   ) => {
     const { page = 1, limit = LIMITS.ORDERS_PER_PAGE, status } = options;
 
@@ -163,64 +128,34 @@ export const getVendorOrdersPaginated = cache(
 
     return {
       orders,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     };
   }
 );
 
-export type VendorOrderItem = Awaited<
-  ReturnType<typeof getVendorOrders>
->[number];
+// ============================================================================
+// Admin Queries
+// ============================================================================
+//
+// Caching Strategy: Request-level deduplication ONLY (React cache)
+// - NO cross-request cache for admin order queries
+//
+// Why NO cross-request cache?
+// - Admin needs real-time order data across ALL vendors/customers
+// - Orders constantly being created and updated system-wide
+// - Admin dashboard must show latest state for management decisions
 
-export type VendorOrdersPaginated = Awaited<
-  ReturnType<typeof getVendorOrdersPaginated>
->;
-
-/**
- * Lấy tất cả đơn hàng (Admin)
- *
- * @cached React cache cho request deduplication
- */
 export const getAdminOrders = cache(async (limit = 50) => {
   return prisma.order.findMany({
-    include: {
-      customer: { select: { name: true, email: true } },
-      vendor: { select: { shopName: true } },
-      items: { select: { productName: true }, take: 1 },
-    },
+    include: adminOrderListInclude,
     orderBy: { createdAt: "desc" },
     take: limit,
   });
 });
 
-/**
- * Lấy chi tiết đơn hàng (Admin)
- *
- * @cached React cache cho request deduplication
- */
 export const getAdminOrderById = cache(async (orderId: string) => {
   return prisma.order.findUnique({
     where: { id: orderId },
-    include: {
-      customer: { select: { id: true, name: true, email: true, phone: true } },
-      vendor: { select: { id: true, shopName: true, slug: true } },
-      items: {
-        include: {
-          variant: {
-            include: {
-              product: {
-                include: { images: { take: 1, orderBy: { order: "asc" } } },
-              },
-            },
-          },
-        },
-      },
-      payment: true,
-    },
+    include: adminOrderDetailInclude,
   });
 });

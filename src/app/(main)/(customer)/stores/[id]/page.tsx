@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Store, Package, Calendar, ChevronLeft } from "lucide-react";
 
 import { getPublicVendorById } from "@/entities/vendor/api/queries";
-import { getProducts } from "@/entities/product/api/queries";
+import { getProducts } from "@/entities/product/api/product-list.queries";
 import { ProductCard } from "@/entities/product";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";

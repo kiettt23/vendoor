@@ -1,9 +1,5 @@
 import { ProductCardSkeleton } from "@/shared/ui/skeleton";
 
-/**
- * Loading state for products page
- * Automatically shown by Next.js during navigation
- */
 export default function Loading() {
   return (
     <div className="container mx-auto px-(--spacing-component) py-(--spacing-section)">

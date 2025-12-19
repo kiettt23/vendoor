@@ -2,11 +2,8 @@
 
 import { cn } from "@/shared/lib/utils";
 
-import {
-  type StockStatus,
-  STOCK_STATUS_CONFIG,
-  getStockStatus,
-} from "../model/types";
+import { type StockStatus, STOCK_STATUS_CONFIG } from "../model";
+import { getStockStatus } from "../lib";
 
 interface StockStatusBadgeProps {
   stock: number;

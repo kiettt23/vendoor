@@ -1,26 +1,8 @@
-/**
- * Review Types
- *
- * Tận dụng Prisma generated types cho base models.
- */
-
 import type { ReviewModel, ReviewStatus } from "@/generated/prisma";
 
-// Base Types (từ Prisma Generated)
-
-/**
- * Base Review type từ database
- */
+export type { ReviewStatus };
 export type Review = ReviewModel;
 
-// Re-export ReviewStatus for convenience
-export type { ReviewStatus };
-
-// Derived Types (cho specific use cases)
-
-/**
- * Review hiển thị trên trang sản phẩm
- */
 export interface ReviewListItem {
   id: string;
   rating: number;
@@ -38,9 +20,6 @@ export interface ReviewListItem {
   };
 }
 
-/**
- * Thống kê review của sản phẩm
- */
 export interface ReviewStats {
   averageRating: number;
   totalReviews: number;
@@ -53,9 +32,6 @@ export interface ReviewStats {
   };
 }
 
-/**
- * Review input từ user
- */
 export interface ReviewFormInput {
   productId: string;
   rating: number;

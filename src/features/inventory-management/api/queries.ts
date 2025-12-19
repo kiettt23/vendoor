@@ -6,12 +6,10 @@ import { LIMITS } from "@/shared/lib/constants";
 import {
   type InventoryItem,
   type InventoryStats,
-  type StockStatus,
-  getStockStatus,
+  type InventoryFilter,
   STOCK_THRESHOLDS,
-} from "../model/types";
-
-export type InventoryFilter = "all" | StockStatus;
+} from "../model";
+import { getStockStatus } from "../lib";
 
 interface GetInventoryParams {
   vendorId: string;
@@ -21,11 +19,6 @@ interface GetInventoryParams {
   limit?: number;
 }
 
-/**
- * Get inventory items for a vendor
- *
- * @cached React cache cho request deduplication
- */
 export const getVendorInventory = cache(
   async ({
     vendorId,
@@ -109,11 +102,6 @@ export const getVendorInventory = cache(
   }
 );
 
-/**
- * Get inventory statistics for a vendor
- *
- * @cached React cache cho request deduplication
- */
 export const getInventoryStats = cache(
   async (vendorId: string): Promise<InventoryStats> => {
     const [totalProducts, counts] = await Promise.all([

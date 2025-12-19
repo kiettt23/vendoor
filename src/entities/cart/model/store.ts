@@ -9,6 +9,7 @@ import {
 } from "@/shared/lib/constants";
 import type { CartStore } from "./types";
 
+/** Validate số lượng không vượt quá stock */
 function validateQuantity(quantity: number, stock: number) {
   if (quantity <= 0)
     return { isValid: false, message: "Số lượng phải lớn hơn 0" };
@@ -17,6 +18,25 @@ function validateQuantity(quantity: number, stock: number) {
   return { isValid: true };
 }
 
+/**
+ * Cart Store - Quản lý giỏ hàng với Zustand.
+ *
+ * Features:
+ * - Persist to localStorage (cart không mất khi refresh)
+ * - Validate quantity vs stock
+ * - Toast notifications
+ * - Stock sync từ database
+ *
+ * @example
+ * // Trong component
+ * const { items, addItem, removeItem } = useCart();
+ *
+ * // Add item
+ * addItem({ productId, variantId, price, quantity: 1, ... });
+ *
+ * // Get cart count
+ * const count = useCart(state => state.items.length);
+ */
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
@@ -26,9 +46,11 @@ export const useCartStore = create<CartStore>()(
         const items = get().items;
         const itemId = newItem.id || newItem.variantId;
         const existingItem = items.find((item) => item.id === itemId);
+        const quantity = newItem.quantity || 1;
 
+        // Case 1: Update existing item
         if (existingItem) {
-          const newQuantity = existingItem.quantity + (newItem.quantity || 1);
+          const newQuantity = existingItem.quantity + quantity;
           const validation = validateQuantity(newQuantity, existingItem.stock);
 
           if (!validation.isValid) {
@@ -45,24 +67,22 @@ export const useCartStore = create<CartStore>()(
             ),
           });
           showToast("cart", "updated");
-        } else {
-          const quantity = newItem.quantity || 1;
-          const validation = validateQuantity(quantity, newItem.stock);
-
-          if (!validation.isValid) {
-            showCustomToast.error(
-              TOAST_MESSAGES.cart.cannotAdd,
-              validation.message
-            );
-            return;
-          }
-
-          set({ items: [...items, { ...newItem, id: itemId, quantity }] });
-          showCustomToast.success(
-            TOAST_MESSAGES.cart.added,
-            newItem.productName
-          );
+          return;
         }
+
+        // Case 2: Add new item
+        const validation = validateQuantity(quantity, newItem.stock);
+
+        if (!validation.isValid) {
+          showCustomToast.error(
+            TOAST_MESSAGES.cart.cannotAdd,
+            validation.message
+          );
+          return;
+        }
+
+        set({ items: [...items, { ...newItem, id: itemId, quantity }] });
+        showCustomToast.success(TOAST_MESSAGES.cart.added, newItem.productName);
       },
 
       updateQuantity: (variantId, quantity) => {
@@ -100,17 +120,25 @@ export const useCartStore = create<CartStore>()(
       clearCart: () => set({ items: [] }),
 
       syncStock: (stockData) => {
+        if (stockData.length === 0) return;
+
         const items = get().items;
         const updatedItems = items.map((item) => {
-          const stockInfo = stockData.find((s) => s.variantId === item.variantId);
-          if (stockInfo) {
-            const newStock = stockInfo.currentStock;
-            // Auto-adjust quantity if exceeds new stock
-            const newQuantity = Math.min(item.quantity, newStock);
-            return { ...item, stock: newStock, quantity: newQuantity > 0 ? newQuantity : item.quantity };
-          }
-          return item;
+          const stockInfo = stockData.find(
+            (s) => s.variantId === item.variantId
+          );
+          if (!stockInfo) return item;
+
+          const newStock = stockInfo.currentStock;
+          const newQuantity = Math.min(item.quantity, newStock);
+
+          return {
+            ...item,
+            stock: newStock,
+            quantity: newQuantity > 0 ? newQuantity : item.quantity,
+          };
         });
+
         set({ items: updatedItems });
       },
     }),

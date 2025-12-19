@@ -12,11 +12,6 @@ import {
   getDateRange,
 } from "../model/types";
 
-/**
- * Get vendor analytics data
- *
- * @cached React cache cho request deduplication
- */
 export const getVendorAnalytics = cache(
   async (
     vendorProfileId: string,
@@ -142,9 +137,6 @@ export const getVendorAnalytics = cache(
   };
 });
 
-/**
- * Group orders by day for chart
- */
 function groupRevenueByDay(
   orders: { createdAt: Date; vendorEarnings: number }[],
   start: Date,
@@ -178,9 +170,6 @@ function groupRevenueByDay(
   }));
 }
 
-/**
- * Get product details for top selling items
- */
 async function getTopProductsDetails(
   topProductsData: {
     variantId: string;

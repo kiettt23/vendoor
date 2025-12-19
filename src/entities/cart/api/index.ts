@@ -1,1 +1,1 @@
-export { getCartItemsStock, type StockInfo } from "./actions";
+export { getCartItemsStock } from "./actions";

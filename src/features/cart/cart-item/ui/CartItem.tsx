@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Minus, Plus, Trash2, AlertTriangle } from "lucide-react";
 import { Button } from "@/shared/ui/button";
@@ -22,11 +22,20 @@ export function CartItemCard({ item, stockValidation }: CartItemProps) {
   const updateQuantity = useCart((state) => state.updateQuantity);
   const removeItem = useCart((state) => state.removeItem);
   const [isUpdating, setIsUpdating] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleUpdate = (qty: number) => {
     setIsUpdating(true);
     updateQuantity(item.id, qty);
-    setTimeout(() => setIsUpdating(false), 300);
+    timeoutRef.current = setTimeout(() => setIsUpdating(false), 300);
   };
 
   const hasStockIssue = stockValidation && !stockValidation.isAvailable;

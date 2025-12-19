@@ -12,13 +12,8 @@ export {
   type VendorReplyInput,
 } from "./model";
 
-/**
- * ⚠️ Review API Exports
- *
- * - Actions: Available here (callable from Client Components)
- * - Queries (getProductReviews, etc.): Import directly from
- *   "@/entities/review/api/queries" in Server Components only
- */
+// ⚠️ Queries: import từ "@/entities/review/api/queries"
+
 export {
   createReview,
   updateReview,

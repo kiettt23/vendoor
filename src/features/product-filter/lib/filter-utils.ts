@@ -1,21 +1,9 @@
-/**
- * Filter URL Utilities
- *
- * Helper functions để sync filter với URL search params
- */
-
 import type { ProductFilterParams, ProductSortOption } from "../model/types";
 
-/**
- * Normalize search text - loại bỏ khoảng trắng thừa
- */
 export function normalizeSearchText(text: string): string {
   return text.trim().replace(/\s+/g, " ");
 }
 
-/**
- * Parse search params thành filter params
- */
 export function parseFilterParams(
   searchParams: URLSearchParams
 ): ProductFilterParams {
@@ -51,9 +39,6 @@ export function parseFilterParams(
   return params;
 }
 
-/**
- * Build URL search params từ filter params
- */
 export function buildFilterSearchParams(
   params: ProductFilterParams
 ): URLSearchParams {
@@ -74,9 +59,6 @@ export function buildFilterSearchParams(
   return searchParams;
 }
 
-/**
- * Update một param trong URL (không xóa các params khác)
- */
 export function updateFilterParam(
   currentParams: URLSearchParams,
   key: string,
@@ -98,9 +80,6 @@ export function updateFilterParam(
   return newParams;
 }
 
-/**
- * Clear tất cả filters (giữ lại search nếu có)
- */
 export function clearFilters(
   currentParams: URLSearchParams,
   keepSearch = true
@@ -118,9 +97,6 @@ export function clearFilters(
   return newParams;
 }
 
-/**
- * Build URL cho category navigation - giữ lại search term
- */
 export function buildCategoryUrl(
   currentParams: URLSearchParams,
   categorySlug: string | null
@@ -138,9 +114,6 @@ export function buildCategoryUrl(
   return queryString ? `/products?${queryString}` : "/products";
 }
 
-/**
- * Build URL cho pagination - giữ lại tất cả params
- */
 export function buildPaginationUrl(
   currentParams: URLSearchParams,
   page: number
@@ -157,10 +130,6 @@ export function buildPaginationUrl(
   return queryString ? `/products?${queryString}` : "/products";
 }
 
-/**
- * Check có filter active không (ngoài search, category, page)
- * Category là navigation context, không phải filter
- */
 export function hasActiveFilters(params: ProductFilterParams): boolean {
   return !!(
     params.minPrice ||

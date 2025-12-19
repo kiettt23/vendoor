@@ -7,9 +7,6 @@ interface ReviewStatsSummaryProps {
   stats: ReviewStats;
 }
 
-/**
- * Component hiển thị tổng quan thống kê review
- */
 export function ReviewStatsSummary({ stats }: ReviewStatsSummaryProps) {
   const { averageRating, totalReviews, ratingDistribution } = stats;
 

@@ -13,9 +13,6 @@ interface ReviewCardProps {
   review: ReviewListItem;
 }
 
-/**
- * Card hiển thị 1 review
- */
 export function ReviewCard({ review }: ReviewCardProps) {
   return (
     <Card>

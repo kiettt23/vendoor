@@ -1,43 +1,46 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/shared/lib/db";
-import { slugify, ok, err, type Result } from "@/shared/lib/utils";
-import { REVALIDATION_PATHS } from "@/shared/lib/constants";
+import { slugify, tryCatch, type AsyncVoidResult } from "@/shared/lib/utils";
+import { REVALIDATION_PATHS, CACHE_TAGS } from "@/shared/lib/constants";
 
-export async function createCategory(name: string): Promise<Result<void>> {
+/** Invalidate tất cả cache liên quan đến categories */
+function revalidateCategoryCache() {
+  revalidateTag(CACHE_TAGS.CATEGORIES, "max");
+  REVALIDATION_PATHS.CATEGORIES.forEach((p) => revalidatePath(p));
+}
+
+export async function createCategory(name: string): AsyncVoidResult {
   const slug = slugify(name);
 
-  try {
+  const result = await tryCatch(async () => {
     await prisma.category.create({ data: { name, slug } });
-    REVALIDATION_PATHS.CATEGORIES.forEach(p => revalidatePath(p));
-    return ok(undefined);
-  } catch {
-    return err("Không thể tạo danh mục");
-  }
+    revalidateCategoryCache();
+  }, "Không thể tạo danh mục");
+
+  return result;
 }
 
 export async function updateCategory(
   id: string,
   name: string
-): Promise<Result<void>> {
+): AsyncVoidResult {
   const slug = slugify(name);
 
-  try {
+  const result = await tryCatch(async () => {
     await prisma.category.update({ where: { id }, data: { name, slug } });
-    REVALIDATION_PATHS.CATEGORIES.forEach(p => revalidatePath(p));
-    return ok(undefined);
-  } catch {
-    return err("Không thể cập nhật danh mục");
-  }
+    revalidateCategoryCache();
+  }, "Không thể cập nhật danh mục");
+
+  return result;
 }
 
-export async function deleteCategory(id: string): Promise<Result<void>> {
-  try {
+export async function deleteCategory(id: string): AsyncVoidResult {
+  const result = await tryCatch(async () => {
     await prisma.category.delete({ where: { id } });
-    REVALIDATION_PATHS.CATEGORIES.forEach(p => revalidatePath(p));
-    return ok(undefined);
-  } catch {
-    return err("Không thể xóa danh mục");
-  }
+    revalidateCategoryCache();
+  }, "Không thể xóa danh mục");
+
+  return result;
 }

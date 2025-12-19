@@ -21,9 +21,6 @@ interface CategoryTabsProps {
   totalAllProducts: number;
 }
 
-/**
- * Category navigation tabs - giữ lại search params khi chuyển category
- */
 export function CategoryTabs({
   categories,
   currentCategorySlug,

@@ -9,9 +9,6 @@ interface ReviewListProps {
   showStats?: boolean;
 }
 
-/**
- * Component hiển thị danh sách reviews
- */
 export function ReviewList({
   reviews,
   stats,

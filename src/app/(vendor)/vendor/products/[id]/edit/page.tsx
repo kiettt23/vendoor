@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireRole } from "@/entities/user";
-import { getVendorProductForEdit } from "@/entities/product/api/queries";
+import { getVendorProductForEdit } from "@/entities/product/api/vendor-product.queries";
 import { getCategories } from "@/entities/category/api/queries";
 import { EditProductPage } from "@/widgets/vendor";
 

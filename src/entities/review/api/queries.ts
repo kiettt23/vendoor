@@ -3,11 +3,20 @@ import { cache } from "react";
 import { prisma } from "@/shared/lib/db";
 import type { ReviewListItem, ReviewStats } from "../model";
 
-// Review Queries
+// ============================================================================
+// Product Reviews
+// ============================================================================
+//
+// Caching Strategy: Request-level deduplication ONLY (React cache)
+// - NO cross-request cache for review queries
+//
+// Why NO cross-request cache?
+// - Reviews need to appear immediately after approval (fresh data required)
+// - Product review stats change with each new review
+// - User experience: customers expect to see their review right after posting
+// - Vendor replies need to show up instantly
+// - Request-level cache() is sufficient for preventing duplicate queries in same render
 
-/**
- * Lấy danh sách reviews của sản phẩm
- */
 export const getProductReviews = cache(
   async (
     productId: string,
@@ -17,10 +26,7 @@ export const getProductReviews = cache(
 
     const [reviews, total] = await Promise.all([
       prisma.review.findMany({
-        where: {
-          productId,
-          status: "APPROVED",
-        },
+        where: { productId, status: "APPROVED" },
         select: {
           id: true,
           rating: true,
@@ -31,30 +37,19 @@ export const getProductReviews = cache(
           vendorReply: true,
           vendorReplyAt: true,
           createdAt: true,
-          user: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
+          user: { select: { id: true, name: true, image: true } },
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      prisma.review.count({
-        where: { productId, status: "APPROVED" },
-      }),
+      prisma.review.count({ where: { productId, status: "APPROVED" } }),
     ]);
 
     return { reviews, total };
   }
 );
 
-/**
- * Lấy thống kê reviews của sản phẩm
- */
 export const getProductReviewStats = cache(
   async (productId: string): Promise<ReviewStats> => {
     const reviews = await prisma.review.findMany({
@@ -63,7 +58,6 @@ export const getProductReviewStats = cache(
     });
 
     const totalReviews = reviews.length;
-
     if (totalReviews === 0) {
       return {
         averageRating: 0,
@@ -88,47 +82,63 @@ export const getProductReviewStats = cache(
   }
 );
 
-/**
- * Kiểm tra user đã review sản phẩm chưa
- */
+// ============================================================================
+// User Review Checks
+// ============================================================================
+//
+// Caching Strategy: Request-level deduplication ONLY (React cache)
+// - Used for permission checks (can user review this product?)
+// - cache() prevents duplicate queries during same page render
+// - No cross-request cache needed (user state can change between requests)
+
 export const hasUserReviewed = cache(
   async (userId: string, productId: string): Promise<boolean> => {
     const review = await prisma.review.findUnique({
-      where: {
-        userId_productId: { userId, productId },
-      },
+      where: { userId_productId: { userId, productId } },
       select: { id: true },
     });
-
     return !!review;
   }
 );
 
-/**
- * Kiểm tra user đã mua sản phẩm chưa (verified purchase)
- */
 export const hasUserPurchased = cache(
   async (userId: string, productId: string): Promise<boolean> => {
     const orderItem = await prisma.orderItem.findFirst({
       where: {
-        variant: {
-          productId,
-        },
-        order: {
-          customerId: userId,
-          status: "DELIVERED", // Chỉ count đơn đã giao thành công
-        },
+        variant: { productId },
+        order: { customerId: userId, status: "DELIVERED" },
       },
       select: { id: true },
     });
-
     return !!orderItem;
   }
 );
 
-/**
- * Lấy reviews của vendor (cho vendor dashboard)
- */
+export const getUserReview = cache(
+  async (userId: string, productId: string) => {
+    return prisma.review.findUnique({
+      where: { userId_productId: { userId, productId } },
+      select: {
+        id: true,
+        rating: true,
+        title: true,
+        content: true,
+        images: true,
+        createdAt: true,
+      },
+    });
+  }
+);
+
+// ============================================================================
+// Vendor Reviews
+// ============================================================================
+//
+// Caching Strategy: Request-level deduplication ONLY (React cache)
+// - Vendor dashboard review list (all reviews for vendor's products)
+// - Vendors need to see new reviews and replies in real-time
+// - No cross-request cache - vendor-specific and frequently changing
+
 export const getVendorReviews = cache(
   async (
     vendorProfileId: string,
@@ -136,17 +146,13 @@ export const getVendorReviews = cache(
   ) => {
     const { page = 1, limit = 10 } = options;
 
+    const whereClause = {
+      product: { vendor: { vendorProfile: { id: vendorProfileId } } },
+    };
+
     const [reviews, total] = await Promise.all([
       prisma.review.findMany({
-        where: {
-          product: {
-            vendor: {
-              vendorProfile: {
-                id: vendorProfileId,
-              },
-            },
-          },
-        },
+        where: whereClause,
         select: {
           id: true,
           rating: true,
@@ -158,59 +164,16 @@ export const getVendorReviews = cache(
           vendorReplyAt: true,
           createdAt: true,
           status: true,
-          user: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-          product: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-            },
-          },
+          user: { select: { id: true, name: true, image: true } },
+          product: { select: { id: true, name: true, slug: true } },
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      prisma.review.count({
-        where: {
-          product: {
-            vendor: {
-              vendorProfile: {
-                id: vendorProfileId,
-              },
-            },
-          },
-        },
-      }),
+      prisma.review.count({ where: whereClause }),
     ]);
 
     return { reviews, total };
-  }
-);
-
-/**
- * Lấy review của user cho 1 sản phẩm
- */
-export const getUserReview = cache(
-  async (userId: string, productId: string) => {
-    return prisma.review.findUnique({
-      where: {
-        userId_productId: { userId, productId },
-      },
-      select: {
-        id: true,
-        rating: true,
-        title: true,
-        content: true,
-        images: true,
-        createdAt: true,
-      },
-    });
   }
 );

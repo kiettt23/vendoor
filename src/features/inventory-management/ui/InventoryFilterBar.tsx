@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { useDebouncedCallback } from "use-debounce";
 import { Search, Package, AlertTriangle, CheckCircle } from "lucide-react";
 
 import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
-import type { InventoryStats, StockStatus } from "../model/types";
+import type { InventoryStats, StockStatus } from "../model";
 
 type FilterValue = "all" | StockStatus;
 
@@ -33,7 +34,7 @@ export function InventoryFilterBar({ stats }: InventoryFilterBarProps) {
     router.push(`?${params.toString()}`);
   };
 
-  const handleSearchChange = (value: string) => {
+  const handleSearchChange = useDebouncedCallback((value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (value) {
       params.set("search", value);
@@ -42,7 +43,7 @@ export function InventoryFilterBar({ stats }: InventoryFilterBarProps) {
     }
     params.delete("page");
     router.push(`?${params.toString()}`);
-  };
+  }, 300);
 
   const filters: {
     value: FilterValue;
@@ -119,12 +120,7 @@ export function InventoryFilterBar({ stats }: InventoryFilterBarProps) {
         <Input
           placeholder="Tìm sản phẩm..."
           defaultValue={currentSearch}
-          onChange={(e) => {
-            const value = e.target.value;
-            // Debounce search
-            const timeoutId = setTimeout(() => handleSearchChange(value), 300);
-            return () => clearTimeout(timeoutId);
-          }}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="pl-9"
         />
       </div>

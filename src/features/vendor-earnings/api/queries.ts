@@ -1,35 +1,12 @@
 import { cache } from "react";
 import { prisma } from "@/shared/lib/db";
 import { LIMITS } from "@/shared/lib/constants";
+import type {
+  EarningsSummary,
+  EarningsTransaction,
+  MonthlyEarnings,
+} from "../model/types";
 
-export interface EarningsSummary {
-  totalEarnings: number;
-  pendingEarnings: number;
-  completedEarnings: number;
-  totalOrders: number;
-  totalPlatformFee: number;
-}
-
-export interface EarningsTransaction {
-  id: string;
-  orderNumber: string;
-  subtotal: number;
-  platformFee: number;
-  vendorEarnings: number;
-  status: string;
-  createdAt: Date;
-  customerName: string;
-}
-
-export interface MonthlyEarnings {
-  month: string;
-  earnings: number;
-  orders: number;
-}
-
-/**
- * Lấy tổng quan doanh thu của vendor
- */
 export const getVendorEarningsSummary = cache(
   async (vendorId: string): Promise<EarningsSummary> => {
     const [completedOrders, pendingOrders] = await Promise.all([
@@ -70,9 +47,6 @@ export const getVendorEarningsSummary = cache(
   }
 );
 
-/**
- * Lấy danh sách transactions của vendor
- */
 export const getVendorTransactions = cache(
   async (
     vendorId: string,
@@ -124,9 +98,6 @@ export const getVendorTransactions = cache(
   }
 );
 
-/**
- * Lấy doanh thu theo tháng (6 tháng gần nhất)
- */
 export const getMonthlyEarnings = cache(
   async (vendorId: string): Promise<MonthlyEarnings[]> => {
     const sixMonthsAgo = new Date();

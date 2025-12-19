@@ -1,28 +1,10 @@
-/**
- * User Types
- *
- * Tận dụng Prisma generated types cho base models.
- */
-
 import type { UserModel, Role } from "@/generated/prisma";
+import type { getSession } from "@/shared/lib/auth/session";
 
-// Base Types (từ Prisma Generated)
-
-/**
- * Base User type từ database
- */
 export type User = UserModel;
 
-/**
- * User role từ Prisma enum
- */
 export type UserRole = Role;
 
-// Derived Types (cho specific use cases)
-
-/**
- * User trong session (minimal fields)
- */
 export interface SessionUser {
   id: string;
   email: string;
@@ -31,10 +13,17 @@ export interface SessionUser {
   roles: UserRole[];
 }
 
-/**
- * Full user session với session info
- */
 export interface UserSession {
   user: SessionUser;
   session: { id: string; expiresAt: Date };
+}
+
+export interface AuthResult {
+  session: NonNullable<Awaited<ReturnType<typeof getSession>>>;
+  user: {
+    id: string;
+    roles: UserRole[];
+    name?: string | null;
+    email?: string | null;
+  };
 }

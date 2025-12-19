@@ -1,11 +1,4 @@
 /**
- * ID Generation utilities
- *
- * Centralized functions for generating unique identifiers.
- * Usage: import { generateOrderNumber, generateSlug } from "@/lib/utils"
- */
-
-/**
  * Generate unique order number
  *
  * Format: ORD-YYYYMMDD-XXXXXX

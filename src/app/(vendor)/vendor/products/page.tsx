@@ -1,6 +1,9 @@
 import { requireRole } from "@/entities/user";
 import { VendorProductsPage } from "@/widgets/vendor";
 
+// Force dynamic to ensure fresh product data
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   await requireRole("VENDOR");
 

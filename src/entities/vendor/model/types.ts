@@ -1,22 +1,7 @@
-/**
- * Vendor Types
- *
- * Tận dụng Prisma generated types cho base models.
- */
-
 import type { VendorProfileModel, VendorStatus } from "@/generated/prisma";
 
-// Base Types (từ Prisma Generated)
-
-/**
- * Base VendorProfile type từ database
- */
 export type VendorProfile = VendorProfileModel;
-
-// Re-export VendorStatus for convenience
 export type { VendorStatus };
-
-// Derived Types (cho specific use cases)
 
 export interface VendorListItem {
   id: string;
@@ -52,9 +37,24 @@ export interface VendorDashboardStats {
   }[];
 }
 
-/**
- * Admin Dashboard Stats
- */
+export interface FeaturedVendor {
+  id: string;
+  slug: string | null;
+  name: string;
+  logo: string | null;
+  cover: string | null;
+  rating: number;
+  followers: string;
+  products: number;
+  location: string;
+  verified: boolean;
+  badge: string | null;
+}
+
+// ============================================================================
+// For Admin
+// ============================================================================
+
 export interface AdminDashboardStats {
   totalUsers: number;
   totalVendors: number;
@@ -63,9 +63,6 @@ export interface AdminDashboardStats {
   platformRevenue: number;
 }
 
-/**
- * Admin Recent Order
- */
 export interface AdminRecentOrder {
   id: string;
   orderNumber: string;
@@ -76,9 +73,6 @@ export interface AdminRecentOrder {
   vendor: { shopName: string };
 }
 
-/**
- * Vendor Detail for Admin
- */
 export interface VendorDetailForAdmin {
   id: string;
   userId: string;
@@ -104,5 +98,24 @@ export interface VendorDetailForAdmin {
   stats: {
     totalProducts: number;
     totalRevenue: number;
+  };
+}
+
+// ============================================================================
+// Guards
+// ============================================================================
+
+export interface VendorAuthResult {
+  session: { user: { id: string } };
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    roles: string[];
+  };
+  vendorProfile: {
+    id: string;
+    shopName: string;
+    status: string;
   };
 }

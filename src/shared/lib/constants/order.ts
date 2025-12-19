@@ -38,10 +38,6 @@ export interface StatusConfig {
   className?: string;
 }
 
-/**
- * Order status display configuration
- * Used by: order-history-page, order-detail-page, vendor-orders-page, admin-orders-page
- */
 export const ORDER_STATUS_CONFIG: Record<string, StatusConfig> = {
   PENDING_PAYMENT: {
     label: "Chờ thanh toán",
@@ -91,9 +87,7 @@ export const VENDOR_STATUS_CONFIG: Record<string, StatusConfig> = {
   SUSPENDED: { label: "Tạm ngưng", variant: "outline" },
 };
 
-/**
- * Helper to get status config with fallback
- */
+// Helper to get status config with fallback
 export function getStatusConfig(
   status: string,
   config: Record<string, StatusConfig>

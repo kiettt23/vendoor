@@ -1,8 +1,11 @@
+export type {
+  EarningsSummary,
+  EarningsTransaction,
+  MonthlyEarnings,
+} from "../model/types";
+
 export {
   getVendorEarningsSummary,
   getVendorTransactions,
   getMonthlyEarnings,
-  type EarningsSummary,
-  type EarningsTransaction,
-  type MonthlyEarnings,
 } from "./queries";

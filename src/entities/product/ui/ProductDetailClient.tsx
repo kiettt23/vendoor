@@ -7,8 +7,8 @@ import { Alert, AlertDescription } from "@/shared/ui/alert";
 import { PriceDisplay } from "@/shared/ui/price-display";
 import { AlertCircle } from "lucide-react";
 import { formatPrice, cn } from "@/shared/lib";
-import type { ProductVariant } from "../model/types";
-import { ProductActions, type AddToCartData } from "./ProductActions";
+import type { ProductVariant, AddToCartData } from "../model/types";
+import { ProductActions } from "./ProductActions";
 
 interface ProductDetailClientProps {
   product: {

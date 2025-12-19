@@ -3,11 +3,6 @@ import { cache } from "react";
 import { getSession } from "@/shared/lib/auth/session";
 import { prisma } from "@/shared/lib/db";
 
-/**
- * Lấy thông tin profile của user hiện tại
- *
- * @cached React cache cho request deduplication
- */
 export const getCurrentUserProfile = cache(async () => {
   const session = await getSession();
   if (!session?.user) return null;
@@ -29,9 +24,6 @@ export const getCurrentUserProfile = cache(async () => {
   return user;
 });
 
-/**
- * Lấy thống kê orders của user hiện tại
- */
 export const getUserOrderStats = cache(async () => {
   const session = await getSession();
   if (!session?.user) return null;
@@ -59,9 +51,6 @@ export const getUserOrderStats = cache(async () => {
   };
 });
 
-/**
- * Lấy recent orders của user hiện tại
- */
 export const getUserRecentOrders = cache(async (limit = 5) => {
   const session = await getSession();
   if (!session?.user) return [];

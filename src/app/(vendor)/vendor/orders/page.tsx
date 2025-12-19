@@ -1,6 +1,9 @@
 import { requireRole } from "@/entities/user";
 import { VendorOrdersPage } from "@/widgets/vendor";
 
+// Force dynamic to ensure fresh order data
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   searchParams: Promise<{ page?: string; status?: string }>;
 }

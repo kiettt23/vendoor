@@ -1,38 +1,13 @@
-/**
- * Product Types
- *
- * Tận dụng Prisma generated types cho base models,
- * chỉ define thêm các derived types cho specific use cases.
- */
-
 import type {
   ProductModel,
   ProductVariantModel,
   ProductImageModel,
 } from "@/generated/prisma";
 
-// Base Types (từ Prisma Generated)
-
-/**
- * Base Product type từ database
- */
 export type Product = ProductModel;
-
-/**
- * Base ProductVariant type từ database
- */
 export type ProductVariant = ProductVariantModel;
-
-/**
- * Base ProductImage type từ database
- */
 export type ProductImage = ProductImageModel;
 
-// Derived Types (cho specific use cases)
-
-/**
- * Product item cho danh sách (optimized fields)
- */
 export interface ProductListItem {
   id: string;
   name: string;
@@ -78,9 +53,16 @@ export interface PaginatedProducts {
   pagination: PaginationMeta;
 }
 
-// Action Types
+export interface SearchSuggestion {
+  id: string;
+  name: string;
+  slug: string;
+  image: string | null;
+  price: number | null;
+  category: string | null;
+  categorySlug: string | null;
+}
 
-// For creating product with default variant
 export interface ProductFormInput {
   name: string;
   description: string;
@@ -93,10 +75,36 @@ export interface ProductFormInput {
   imageUrl?: string;
 }
 
-// For editing product basic info (variants managed separately)
 export interface ProductEditInput {
   name: string;
   description: string;
   categoryId: string;
   isActive: boolean;
+}
+
+export interface FlashSaleProduct {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  originalPrice: number;
+  discountPercent: number;
+  image: string;
+  sold: number;
+  total: number;
+  store: string;
+}
+
+export interface AddToCartData {
+  productId: string;
+  productName: string;
+  productSlug: string;
+  variantId: string;
+  variantName: string | null;
+  price: number;
+  quantity: number;
+  image: string;
+  stock: number;
+  vendorId: string;
+  vendorName: string;
 }

@@ -2,9 +2,6 @@ import { z } from "zod";
 
 import { REGEX_PATTERNS } from "@/shared/lib/constants";
 
-/**
- * Schema đăng ký làm Vendor
- */
 export const vendorRegistrationSchema = z.object({
   shopName: z
     .string()

@@ -7,6 +7,7 @@ export type {
   OrderStatus,
   PaymentStatus,
   PaymentMethod,
+  CustomerOrderListItem,
 } from "./model";
 
 export {
@@ -19,17 +20,8 @@ export {
 
 export { OrderSummary, OrderStatusBadge } from "./ui";
 
-/**
- * ⚠️ Order API Exports
- *
- * - Actions (updateOrderStatus): Available here
- * - Queries (getCustomerOrders, etc.): Import directly from
- *   "@/entities/order/api/queries" in Server Components only
- */
+// ⚠️ Queries: import từ "@/entities/order/api/queries"
+
 export { updateOrderStatus, updateOrderStatusAction } from "./api";
 
-export type {
-  VendorOrderItem,
-  VendorOrdersPaginated,
-  CustomerOrderListItem,
-} from "./api";
+export type { VendorOrderItem, VendorOrdersPaginated } from "./api";

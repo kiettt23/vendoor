@@ -1,10 +1,3 @@
-/**
- * Format utilities for displaying data
- *
- * Centralized formatting functions for prices, dates, numbers, etc.
- * Usage: import { formatPrice, formatDate } from "@/lib/utils"
- */
-
 import { CURRENCY } from "../constants/currency";
 
 /**

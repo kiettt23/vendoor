@@ -4,7 +4,7 @@ import { AlertTriangle } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
 
-import { STOCK_THRESHOLDS } from "../model/types";
+import { STOCK_THRESHOLDS } from "../model";
 
 interface LowStockAlertProps {
   lowStockCount: number;

@@ -68,7 +68,8 @@ export function VendorRegistrationForm({
       } else {
         showCustomToast.error(result.error);
       }
-    } catch {
+    } catch (error) {
+      console.error("VendorRegistrationForm submit error:", error);
       showErrorToast("generic");
     } finally {
       setIsSubmitting(false);

@@ -20,9 +20,6 @@ const sizeClasses = {
   lg: "h-8 w-8",
 };
 
-/**
- * Component input rating bằng sao (interactive)
- */
 export function StarRatingInput({
   value,
   onChange,

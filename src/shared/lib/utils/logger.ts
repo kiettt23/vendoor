@@ -1,17 +1,7 @@
-/**
- * Logger utility for production-safe logging
- *
- * Replaces console.log/error with environment-aware logging.
- * Usage: import { createLogger, logger } from "@/lib/utils"
- */
-
 type LogLevel = "debug" | "info" | "warn" | "error";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
-/**
- * Logger class with environment-aware methods
- */
 class Logger {
   private context?: string;
 
@@ -19,27 +9,21 @@ class Logger {
     this.context = context;
   }
 
-  /**
-   * Format log message with context
-   */
+  // Format log message with context
   private format(level: LogLevel, message: string, _data?: unknown): string {
     const timestamp = new Date().toISOString();
     const ctx = this.context ? `[${this.context}]` : "";
     return `${timestamp} ${level.toUpperCase()} ${ctx} ${message}`;
   }
 
-  /**
-   * Debug logs (only in development)
-   */
+  // Debug logs (only in development)
   debug(message: string, data?: unknown) {
     if (isDevelopment) {
       console.log(this.format("debug", message), data || "");
     }
   }
 
-  /**
-   * Info logs (development + production)
-   */
+  // Info logs (development + production)
   info(message: string, data?: unknown) {
     if (isDevelopment) {
       console.log(this.format("info", message), data || "");
@@ -47,9 +31,7 @@ class Logger {
     // In production, could send to logging service (e.g., Sentry)
   }
 
-  /**
-   * Warning logs (development + production)
-   */
+  // Warning logs (development + production)
   warn(message: string, data?: unknown) {
     if (isDevelopment) {
       console.warn(this.format("warn", message), data || "");
@@ -57,9 +39,7 @@ class Logger {
     // In production, could send to logging service
   }
 
-  /**
-   * Error logs (development + production)
-   */
+  // Error logs (development + production)
   error(message: string, error?: unknown) {
     if (isDevelopment) {
       console.error(this.format("error", message), error || "");
@@ -69,9 +49,7 @@ class Logger {
     // when needed: Sentry.captureException(error, { extra: { message } });
   }
 
-  /**
-   * Create a child logger with additional context
-   */
+  // Create a child logger with additional context
   child(context: string): Logger {
     const parentContext = this.context ? `${this.context}:${context}` : context;
     return new Logger(parentContext);
@@ -111,9 +89,7 @@ export class PerformanceTimer {
     }
   }
 
-  /**
-   * End timer and log duration
-   */
+  // End timer and log duration
   end() {
     const duration = Date.now() - this.startTime;
 

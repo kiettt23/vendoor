@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PackageSearch } from "lucide-react";
 
-import { getProducts } from "@/entities/product/api/queries";
+import { getProducts } from "@/entities/product/api/product-list.queries";
 import { ProductCard } from "@/entities/product";
 import { getCategoriesWithCount } from "@/entities/category/api/queries";
 import { getApprovedVendors } from "@/entities/vendor/api/queries";

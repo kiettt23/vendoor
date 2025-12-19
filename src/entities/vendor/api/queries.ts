@@ -2,51 +2,35 @@ import { cache } from "react";
 
 import { getSession } from "@/shared/lib/auth/session";
 import { prisma } from "@/shared/lib/db";
-import { LIMITS } from "@/shared/lib/constants";
+import { LIMITS, CACHE_DURATION, CACHE_TAGS } from "@/shared/lib/constants";
+import { cacheQueryWithParams } from "@/shared/lib/cache";
+import type { FeaturedVendor } from "../model/types";
 
 // ============================================================================
-// Helper Functions (DRY)
+// Helpers
 // ============================================================================
 
-/**
- * Generate consistent rating từ vendor id (hash-based)
- * Đảm bảo mỗi vendor luôn có cùng rating qua các requests
- */
 function getConsistentRating(vendorId: string): number {
   let hash = 0;
   for (let i = 0; i < vendorId.length; i++) {
     hash = (hash << 5) - hash + vendorId.charCodeAt(i);
     hash |= 0;
   }
-  // Range 4.5 - 4.9, rounded to 1 decimal
   return Math.round((4.5 + (Math.abs(hash) % 5) * 0.1) * 10) / 10;
 }
 
-/**
- * Format follower count từ product count
- * TODO: Replace với real follower data khi có follower system
- */
 function formatFollowerCount(productCount: number): string {
   const followers = Math.floor(productCount * 1.5);
-  if (followers >= 1000) {
-    return `${(followers / 1000).toFixed(1)}K`;
-  }
+  if (followers >= 1000) return `${(followers / 1000).toFixed(1)}K`;
   return followers.toString();
 }
 
-/**
- * Determine vendor badge based on metrics
- */
 function getVendorBadge(productCount: number): string | null {
   if (productCount >= 10) return "Top Seller";
   if (productCount >= 5) return "Verified";
   return null;
 }
 
-/**
- * Get product counts for multiple vendors (DRY helper)
- * @returns Map<userId, productCount>
- */
 async function getProductCountsForVendors(
   userIds: string[]
 ): Promise<Map<string, number>> {
@@ -54,10 +38,7 @@ async function getProductCountsForVendors(
 
   const productCounts = await prisma.product.groupBy({
     by: ["vendorId"],
-    where: {
-      isActive: true,
-      vendorId: { in: userIds },
-    },
+    where: { isActive: true, vendorId: { in: userIds } },
     _count: true,
   });
 
@@ -65,80 +46,17 @@ async function getProductCountsForVendors(
 }
 
 // ============================================================================
-// Vendor Queries
+// Public Queries
 // ============================================================================
 
-/**
- * Lấy danh sách vendors (cho admin)
- *
- * @cached React cache cho request deduplication
- */
-export const getVendors = cache(async (status?: string) => {
-  const where = status
-    ? { status: status as "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" }
-    : {};
-
-  return prisma.vendorProfile.findMany({
-    where,
-    include: {
-      user: { select: { name: true, email: true } },
-      _count: { select: { orders: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-});
-
-/**
- * Lấy chi tiết vendor theo ID
- *
- * @cached React cache cho request deduplication
- */
-export const getVendorById = cache(async (vendorId: string) => {
-  return prisma.vendorProfile.findUnique({
-    where: { id: vendorId },
-    include: {
-      user: {
-        select: { name: true, email: true, phone: true, createdAt: true },
-      },
-      _count: { select: { orders: true } },
-    },
-  });
-});
-
-/**
- * Lấy thông tin vendor profile của user hiện tại
- *
- * @cached React cache cho request deduplication
- */
-export const getCurrentVendorProfile = cache(async () => {
-  const session = await getSession();
-  if (!session?.user) return null;
-
-  return prisma.vendorProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { id: true, shopName: true, status: true },
-  });
-});
-
-/**
- * Lấy danh sách vendors đã approved (public - cho filter)
- *
- * @cached React cache cho request deduplication
- */
 export const getApprovedVendors = cache(async () => {
   return prisma.vendorProfile.findMany({
     where: { status: "APPROVED" },
-    // Return userId (User.id) vì Product.vendorId references User.id
     select: { id: true, userId: true, shopName: true },
     orderBy: { shopName: "asc" },
   });
 });
 
-/**
- * Lấy danh sách vendors public với thông tin chi tiết (cho Stores page)
- *
- * @cached React cache cho request deduplication
- */
 export const getPublicVendors = cache(async () => {
   const vendors = await prisma.vendorProfile.findMany({
     where: { status: "APPROVED" },
@@ -152,7 +70,9 @@ export const getPublicVendors = cache(async () => {
     orderBy: { shopName: "asc" },
   });
 
-  const countMap = await getProductCountsForVendors(vendors.map((v) => v.userId));
+  const countMap = await getProductCountsForVendors(
+    vendors.map((v) => v.userId)
+  );
 
   return vendors.map((vendor) => ({
     id: vendor.id,
@@ -164,72 +84,6 @@ export const getPublicVendors = cache(async () => {
   }));
 });
 
-// Featured Vendors for Homepage
-
-export interface FeaturedVendor {
-  id: string;
-  slug: string | null;
-  name: string;
-  logo: string | null;
-  cover: string | null;
-  rating: number;
-  followers: string;
-  products: number;
-  location: string;
-  verified: boolean;
-  badge: string | null;
-}
-
-/**
- * Lấy vendors nổi bật cho homepage - sắp xếp theo thời gian tạo (lâu nhất trước)
- */
-export const getFeaturedVendors = cache(
-  async (limit = 6): Promise<FeaturedVendor[]> => {
-    const vendors = await prisma.vendorProfile.findMany({
-      where: { status: "APPROVED" },
-      select: {
-        id: true,
-        slug: true,
-        shopName: true,
-        logo: true,
-        banner: true,
-        userId: true,
-        createdAt: true,
-      },
-      // Sắp xếp theo createdAt ASC (lâu nhất trước)
-      orderBy: { createdAt: "asc" },
-      take: limit,
-    });
-
-    const countMap = await getProductCountsForVendors(
-      vendors.map((v) => v.userId)
-    );
-
-    return vendors.map((vendor) => {
-      const productCount = countMap.get(vendor.userId) || 0;
-
-      return {
-        id: vendor.id,
-        slug: vendor.slug,
-        name: vendor.shopName,
-        logo: vendor.logo,
-        cover: vendor.banner,
-        rating: getConsistentRating(vendor.id),
-        followers: formatFollowerCount(productCount),
-        products: productCount,
-        location: "Việt Nam",
-        verified: true,
-        badge: getVendorBadge(productCount),
-      };
-    });
-  }
-);
-
-/**
- * Lấy chi tiết vendor theo ID (public)
- *
- * @cached React cache cho request deduplication
- */
 export const getPublicVendorById = cache(async (vendorId: string) => {
   const vendor = await prisma.vendorProfile.findUnique({
     where: { id: vendorId, status: "APPROVED" },
@@ -249,17 +103,63 @@ export const getPublicVendorById = cache(async (vendorId: string) => {
     where: { vendorId: vendor.userId, isActive: true },
   });
 
-  return {
-    ...vendor,
-    productCount,
-  };
+  return { ...vendor, productCount };
 });
 
-/**
- * Lấy thống kê dashboard của vendor
- *
- * @cached React cache cho request deduplication
- */
+export const getFeaturedVendors = cache(
+  async (limit = 6): Promise<FeaturedVendor[]> => {
+    const vendors = await prisma.vendorProfile.findMany({
+      where: { status: "APPROVED" },
+      select: {
+        id: true,
+        slug: true,
+        shopName: true,
+        logo: true,
+        banner: true,
+        userId: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "asc" },
+      take: limit,
+    });
+
+    const countMap = await getProductCountsForVendors(
+      vendors.map((v) => v.userId)
+    );
+
+    return vendors.map((vendor) => {
+      const productCount = countMap.get(vendor.userId) || 0;
+      return {
+        id: vendor.id,
+        slug: vendor.slug,
+        name: vendor.shopName,
+        logo: vendor.logo,
+        cover: vendor.banner,
+        rating: getConsistentRating(vendor.id),
+        followers: formatFollowerCount(productCount),
+        products: productCount,
+        location: "Việt Nam",
+        verified: true,
+        badge: getVendorBadge(productCount),
+      };
+    });
+  }
+);
+
+// ============================================================================
+// Vendor Dashboard
+// ============================================================================
+
+export const getCurrentVendorProfile = cache(async () => {
+  const session = await getSession();
+  if (!session?.user) return null;
+
+  return prisma.vendorProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { id: true, shopName: true, status: true },
+  });
+});
+
 export const getVendorDashboardStats = cache(async (vendorId: string) => {
   const [totalProducts, totalOrders, totalRevenue, pendingOrders] =
     await Promise.all([
@@ -283,11 +183,6 @@ export const getVendorDashboardStats = cache(async (vendorId: string) => {
   };
 });
 
-/**
- * Lấy đơn hàng gần đây của vendor (cho dashboard)
- *
- * @cached React cache cho request deduplication
- */
 export const getVendorRecentOrders = cache(
   async (vendorId: string, limit = LIMITS.RECENT_ORDERS) => {
     return prisma.order.findMany({
@@ -305,11 +200,6 @@ export const getVendorRecentOrders = cache(
   }
 );
 
-/**
- * Lấy đầy đủ dữ liệu cho vendor dashboard
- *
- * @cached React cache cho request deduplication
- */
 export const getVendorDashboardData = cache(async (userId: string) => {
   const vendorProfile = await prisma.vendorProfile.findUnique({
     where: { userId },
@@ -321,84 +211,47 @@ export const getVendorDashboardData = cache(async (userId: string) => {
   const [stats, recentOrders, productCount] = await Promise.all([
     getVendorDashboardStats(vendorProfile.id),
     getVendorRecentOrders(vendorProfile.id),
-    prisma.product.count({
-      where: { vendorId: userId, isActive: true },
-    }),
+    prisma.product.count({ where: { vendorId: userId, isActive: true } }),
   ]);
 
   return {
     vendorProfile,
-    stats: {
-      ...stats,
-      totalProducts: productCount,
-    },
+    stats: { ...stats, totalProducts: productCount },
     recentOrders,
   };
 });
 
+// ============================================================================
 // Admin Queries
+// ============================================================================
 
-/**
- * Lấy thống kê tổng quan cho admin dashboard
- *
- * @cached React cache cho request deduplication
- */
-export const getAdminDashboardStats = cache(async () => {
-  const [totalUsers, totalVendors, totalProducts, totalOrders, revenue] =
-    await Promise.all([
-      prisma.user.count(),
-      prisma.vendorProfile.count({ where: { status: "APPROVED" } }),
-      prisma.product.count({ where: { isActive: true } }),
-      prisma.order.count(),
-      prisma.order.aggregate({
-        where: {
-          status: { in: ["DELIVERED", "SHIPPED", "PROCESSING", "PENDING"] },
-        },
-        _sum: { platformFee: true },
-      }),
-    ]);
+export const getVendors = cache(async (status?: string) => {
+  const where = status
+    ? { status: status as "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" }
+    : {};
 
-  return {
-    totalUsers,
-    totalVendors,
-    totalProducts,
-    totalOrders,
-    platformRevenue: revenue._sum.platformFee || 0,
-  };
+  return prisma.vendorProfile.findMany({
+    where,
+    include: {
+      user: { select: { name: true, email: true } },
+      _count: { select: { orders: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 });
 
-/**
- * Đếm số vendor đang chờ duyệt
- *
- * @cached React cache cho request deduplication
- */
-export const getPendingVendorsCount = cache(async () => {
-  return prisma.vendorProfile.count({ where: { status: "PENDING" } });
-});
-
-/**
- * Lấy đơn hàng gần đây cho admin dashboard
- *
- * @cached React cache cho request deduplication
- */
-export const getAdminRecentOrders = cache(
-  async (limit = LIMITS.RECENT_ORDERS) => {
-    return prisma.order.findMany({
-      include: {
-        customer: { select: { name: true, email: true } },
-        vendor: { select: { shopName: true } },
+export const getVendorById = cache(async (vendorId: string) => {
+  return prisma.vendorProfile.findUnique({
+    where: { id: vendorId },
+    include: {
+      user: {
+        select: { name: true, email: true, phone: true, createdAt: true },
       },
-      orderBy: { createdAt: "desc" },
-      take: limit,
-    });
-  }
-);
+      _count: { select: { orders: true } },
+    },
+  });
+});
 
-/**
- * Lấy chi tiết vendor cho admin (bao gồm stats)
- *
- * @cached React cache cho request deduplication
- */
 export const getVendorDetailForAdmin = cache(async (vendorId: string) => {
   const vendor = await prisma.vendorProfile.findUnique({
     where: { id: vendorId },
@@ -432,9 +285,70 @@ export const getVendorDetailForAdmin = cache(async (vendorId: string) => {
   };
 });
 
-// Type exports - re-export from model
-export type {
-  AdminDashboardStats,
-  AdminRecentOrder,
-  VendorDetailForAdmin,
-} from "../model/types";
+export const getAdminDashboardStats = cache(async () => {
+  const [totalUsers, totalVendors, totalProducts, totalOrders, revenue] =
+    await Promise.all([
+      prisma.user.count(),
+      prisma.vendorProfile.count({ where: { status: "APPROVED" } }),
+      prisma.product.count({ where: { isActive: true } }),
+      prisma.order.count(),
+      prisma.order.aggregate({
+        where: {
+          status: { in: ["DELIVERED", "SHIPPED", "PROCESSING", "PENDING"] },
+        },
+        _sum: { platformFee: true },
+      }),
+    ]);
+
+  return {
+    totalUsers,
+    totalVendors,
+    totalProducts,
+    totalOrders,
+    platformRevenue: revenue._sum.platformFee || 0,
+  };
+});
+
+export const getPendingVendorsCount = cache(async () => {
+  return prisma.vendorProfile.count({ where: { status: "PENDING" } });
+});
+
+export const getAdminRecentOrders = cache(
+  async (limit = LIMITS.RECENT_ORDERS) => {
+    return prisma.order.findMany({
+      include: {
+        customer: { select: { name: true, email: true } },
+        vendor: { select: { shopName: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+  }
+);
+
+// ============================================================================
+// Cached Versions (Cross-Request Cache)
+// ============================================================================
+//
+// Caching Strategy: Dual-layer caching for PUBLIC vendor data
+// - React cache() → Request-level deduplication
+// - unstable_cache() → Cross-request persistence
+//
+// Why cache vendor lists?
+// - Vendor profiles are PUBLIC data (approved vendors shown to all users)
+// - Vendor data changes infrequently (only on admin approval/status change)
+// - Featured vendors used on homepage → high traffic, low change rate
+// - Perfect candidate for aggressive caching
+
+export const getCachedFeaturedVendors = (limit?: number) =>
+  cacheQueryWithParams(
+    async () => getFeaturedVendors(limit),
+    ["featured-vendors", String(limit)],
+    { tags: [CACHE_TAGS.VENDORS], revalidate: CACHE_DURATION.VENDOR_PROFILE }
+  );
+
+export const getCachedPublicVendors = () =>
+  cacheQueryWithParams(async () => getPublicVendors(), ["public-vendors"], {
+    tags: [CACHE_TAGS.VENDORS],
+    revalidate: CACHE_DURATION.VENDOR_PROFILE,
+  });
