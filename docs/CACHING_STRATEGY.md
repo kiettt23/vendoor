@@ -1,619 +1,791 @@
-# Caching Strategy - Vendoor
+# Vendoor - Caching Strategy
 
-> Production-ready caching architecture for optimal performance
+Tài liệu giải thích chi tiết chiến lược caching trong dự án Vendoor.
 
-## Implementation Status ✅
+---
 
-| Phase | Status | Files |
-|-------|--------|-------|
-| **Phase 1: Foundation** | ✅ Done | `cache.ts`, `query-keys.ts`, `cache/index.ts`, `cache/revalidate.ts` |
-| **Phase 2: Server Caching** | ✅ Done | All `queries.ts` and `actions.ts` files |
-| **Phase 3: Client Caching** | ✅ Done | `ReactQueryProvider.tsx`, hooks |
-| **Phase 4: Monitoring** | ⏳ Pending | - |
+## 📋 Mục lục
 
-### Quick Reference - Implemented Files
+1. [Tổng quan về Caching](#1-tổng-quan-về-caching)
+2. [3 Layers of Caching](#2-3-layers-of-caching)
+3. [Route Rendering Strategy](#3-route-rendering-strategy)
+4. [Cache Tags System](#4-cache-tags-system)
+5. [Cache Utilities](#5-cache-utilities)
+6. [Cache Invalidation](#6-cache-invalidation)
+7. [Best Practices](#7-best-practices)
+8. [Debugging Cache](#8-debugging-cache)
+
+---
+
+## 1. Tổng quan về Caching
+
+### Tại sao cần Caching?
+
+Trong e-commerce, có rất nhiều queries lặp đi lặp lại:
+
+- Trang chủ hiển thị featured products → Query products table
+- Category page → Query products by category
+- Mỗi ProductCard → Query images, variants, reviews
+
+**Không có cache:**
 
 ```
-src/shared/lib/
-├── cache/
-│   ├── index.ts         # unstable_cache wrappers (cacheProducts, cacheProductDetail, etc.)
-│   └── revalidate.ts    # revalidateTag helpers (revalidateProduct, revalidateBulk, etc.)
-├── constants/
-│   ├── cache.ts         # CACHE_DURATION, STALE_TIME, GC_TIME, CACHE_TAGS
-│   └── query-keys.ts    # React Query key factory
-└── providers/
-    └── ReactQueryProvider.tsx  # QueryClient config
+User A truy cập /products → Query database
+User B truy cập /products → Query database (lặp lại!)
+User C truy cập /products → Query database (lặp lại!)
 ```
 
-### Next.js 16 Note ⚠️
+**Có cache:**
 
-```typescript
-// Next.js 16 requires 2 arguments for revalidateTag:
-revalidateTag("products", "max");  // ✅ Correct
-revalidateTag("products");          // ❌ Old syntax
+```
+User A truy cập /products → Query database → Save to cache
+User B truy cập /products → Return from cache (instant!)
+User C truy cập /products → Return from cache (instant!)
+```
 
-// "max" = stale-while-revalidate pattern
+### Caching trong Next.js
+
+Next.js App Router cung cấp nhiều cơ chế caching:
+
+| Mechanism          | Scope          | Purpose                           |
+| ------------------ | -------------- | --------------------------------- |
+| `cache()` (React)  | Single request | Dedupe same query trong 1 request |
+| `unstable_cache()` | Cross requests | Cache data với TTL và tags        |
+| Route Cache        | Full page      | Cache static pages                |
+| Data Cache         | fetch() calls  | Cache fetch responses             |
+
+---
+
+## 2. 3 Layers of Caching
+
+Vendoor sử dụng 3 layers caching:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  Layer 1: React cache() - Request Deduplication                 │
+│  ─────────────────────────────────────────────────────────────  │
+│                                                                 │
+│  Khi 1 page render:                                             │
+│  - Header gọi getCategories()                                   │
+│  - Sidebar gọi getCategories()                                  │
+│  - Footer gọi getCategories()                                   │
+│                                                                 │
+│  → Chỉ có 1 database query thực sự!                             │
+│                                                                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Layer 2: unstable_cache() - Cross-Request Caching              │
+│  ─────────────────────────────────────────────────────────────  │
+│                                                                 │
+│  User A request → Cache miss → Query DB → Store in cache        │
+│  User B request → Cache hit → Return cached data (1ms vs 100ms) │
+│                                                                 │
+│  Features:                                                      │
+│  - TTL (Time To Live): Auto expire sau X seconds                │
+│  - Tags: Invalidate theo category                               │
+│                                                                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Layer 3: Full Route Cache (Production)                         │
+│  ─────────────────────────────────────────────────────────────  │
+│                                                                 │
+│  Static pages được cache at build time:                         │
+│  - /about                                                       │
+│  - /contact                                                     │
+│  - Static product pages                                         │
+│                                                                 │
+│  → Zero server processing, served from CDN                      │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Table of Contents
+## 3. Route Rendering Strategy
 
-- [Overview](#overview)
-- [Cache Layers](#cache-layers)
-- [Cache Configuration by Data Type](#cache-configuration-by-data-type)
-- [Cache Configuration by Page](#cache-configuration-by-page)
-- [User Flow Examples](#user-flow-examples)
-- [Cache Invalidation](#cache-invalidation)
-- [Implementation Guide](#implementation-guide)
-- [Monitoring & Debugging](#monitoring--debugging)
+### Static vs Dynamic Rendering
 
----
+Next.js App Router có 2 modes rendering:
 
-## Overview
+| Mode        | Behavior                 | Use Case                      |
+| ----------- | ------------------------ | ----------------------------- |
+| **Static**  | Pre-render at build time | Public pages, marketing       |
+| **Dynamic** | Render on each request   | User-specific, real-time data |
 
-### Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         CACHE ARCHITECTURE                                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  User Request                                                                │
-│       │                                                                      │
-│       ▼                                                                      │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │ LAYER 1: Browser Cache (React Query)                                │    │
-│  │ • Per-user, per-device                                              │    │
-│  │ • Instant for repeat visits                                         │    │
-│  │ • staleTime + gcTime configuration                                  │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│       │ Cache MISS                                                          │
-│       ▼                                                                      │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │ LAYER 2: CDN/Edge Cache (Vercel Edge Network)                       │    │
-│  │ • Shared across all users                                           │    │
-│  │ • Geographic distribution                                           │    │
-│  │ • Static pages + ISR                                                │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│       │ Cache MISS                                                          │
-│       ▼                                                                      │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │ LAYER 3: Server Cache (unstable_cache + Data Cache)                 │    │
-│  │ • Cross-request caching                                             │    │
-│  │ • Tag-based invalidation                                            │    │
-│  │ • Revalidation strategies                                           │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│       │ Cache MISS                                                          │
-│       ▼                                                                      │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │ LAYER 4: Database (PostgreSQL + Prisma)                             │    │
-│  │ • Connection pooling                                                │    │
-│  │ • Query optimization                                                │    │
-│  │ • Indexes                                                           │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Design Principles
-
-1. **Cache close to user**: Browser > Edge > Server > Database
-2. **Granular invalidation**: Tag-based, not global
-3. **Fresh when critical**: No cache for checkout, stock checks
-4. **Stale-while-revalidate**: Show cached data, update in background
-
----
-
-## Cache Layers
-
-### Layer 1: React Query (Client-side)
-
-**Purpose**: Per-user caching, instant repeat visits, optimistic updates.
-
-**Configuration**:
-
-| Data Type | staleTime | gcTime | Lý do |
-|-----------|-----------|--------|-------|
-| Product listing | 5 min | 30 min | Ít thay đổi |
-| Product detail | 2 min | 15 min | Price/stock có thể thay đổi |
-| Categories | 30 min | 1 hour | Rất ít thay đổi |
-| User profile | 5 min | 10 min | User-specific |
-| Cart | 0 (fresh) | 5 min | Critical data |
-| Stock status | 30 sec | 2 min | Thay đổi thường xuyên |
-| Orders | 1 min | 10 min | User-specific |
-| Search results | 2 min | 10 min | Query-specific |
-
-**Features to implement**:
-- Prefetching on hover (product cards)
-- Optimistic updates (wishlist, cart)
-- Background refetching
-- Query deduplication
-
-### Layer 2: Edge/CDN Cache
-
-**Purpose**: Shared cache across all users, geographic distribution.
-
-**Strategies**:
-
-| Strategy | Use Case | Config |
-|----------|----------|--------|
-| Static Generation | Marketing pages, categories | `generateStaticParams` |
-| ISR | Product pages, store pages | `revalidate: 3600` |
-| Dynamic | User-specific, checkout | `dynamic: 'force-dynamic'` |
-
-**Headers**:
-```
-Cache-Control: s-maxage=3600, stale-while-revalidate=86400
-```
-
-### Layer 3: Server Cache (unstable_cache)
-
-**Purpose**: Cross-request caching with tag-based invalidation.
-
-**Configuration**:
+### Vendoor Route Strategy
 
 ```typescript
-// Cache wrapper utility
-import { unstable_cache } from 'next/cache';
+// ❌ KHÔNG dùng force-dynamic ở root layout
+// (đã xóa vì disable caching cho toàn app)
 
-export function createCachedQuery<T>(
-  fn: () => Promise<T>,
-  keyParts: string[],
-  options: {
-    tags: string[];
-    revalidate?: number;
-  }
-) {
-  return unstable_cache(fn, keyParts, options);
-}
+// ✅ Dùng force-dynamic CHỈ cho pages cần fresh session
+export const dynamic = "force-dynamic";
 ```
 
-**TTL by data type**:
+### Page Classifications
 
-| Data | TTL | Tags |
-|------|-----|------|
-| Products | 1 hour | `['products', 'product-{slug}']` |
-| Categories | 2 hours | `['categories', 'category-{slug}']` |
-| Vendors | 1 hour | `['vendors', 'vendor-{id}']` |
-| Reviews | 15 min | `['reviews', 'product-{slug}-reviews']` |
-| Search | 15 min | `['search', 'search-{hash}']` |
+#### 🔴 Dynamic Pages (`force-dynamic`)
 
-### Layer 4: Database
+Pages cần render mỗi request vì phụ thuộc vào session/user data:
 
-**Optimizations**:
-- Connection pooling (Prisma)
-- Selective field queries (`select`)
-- Proper indexes
-- Query optimization
-
----
-
-## Cache Configuration by Data Type
-
-### Products
+| Route              | Lý do                              |
+| ------------------ | ---------------------------------- |
+| `/account`         | User profile data                  |
+| `/account/profile` | User settings                      |
+| `/checkout`        | Cart validation, session           |
+| `/orders`          | User's order history               |
+| `/orders/[id]`     | Order detail + auth                |
+| `/wishlist`        | User's wishlist                    |
+| `/vendor/*`        | Vendor dashboard, products, orders |
+| `/admin/*`         | Admin dashboard, stats             |
 
 ```typescript
-// Product listing
-{
-  serverCache: {
-    tags: ['products'],
-    revalidate: 3600, // 1 hour
-  },
-  clientCache: {
-    staleTime: 5 * 60 * 1000, // 5 min
-    gcTime: 30 * 60 * 1000,   // 30 min
-  },
-  edge: {
-    revalidate: 3600,
-  }
-}
+// Ví dụ: src/app/(main)/(customer)/account/page.tsx
+import { requireAuth } from "@/entities/user";
 
-// Single product
-{
-  serverCache: {
-    tags: ['products', 'product-{slug}'],
-    revalidate: 1800, // 30 min
-  },
-  clientCache: {
-    staleTime: 2 * 60 * 1000, // 2 min
-    gcTime: 15 * 60 * 1000,   // 15 min
-  },
-  edge: {
-    generateStaticParams: true,
-    revalidate: 3600,
-  }
-}
-```
+// Force dynamic to ensure fresh user data
+export const dynamic = "force-dynamic";
 
-### Stock Status
-
-```typescript
-// KHÔNG CACHE - Always fresh
-{
-  serverCache: null,
-  clientCache: {
-    staleTime: 30 * 1000, // 30 sec
-    gcTime: 2 * 60 * 1000, // 2 min
-  },
-  edge: null,
-}
-```
-
-### Categories
-
-```typescript
-{
-  serverCache: {
-    tags: ['categories'],
-    revalidate: 7200, // 2 hours
-  },
-  clientCache: {
-    staleTime: 30 * 60 * 1000, // 30 min
-    gcTime: 60 * 60 * 1000,    // 1 hour
-  },
-  edge: {
-    generateStaticParams: true,
-    revalidate: 7200,
-  }
-}
-```
-
-### User-specific Data
-
-```typescript
-// Orders, Profile, Addresses
-{
-  serverCache: null, // User-specific, không shared cache
-  clientCache: {
-    staleTime: 1 * 60 * 1000, // 1 min
-    gcTime: 10 * 60 * 1000,   // 10 min
-  },
-  edge: null,
-}
-```
-
-### Cart & Checkout
-
-```typescript
-// KHÔNG CACHE - Critical, real-time
-{
-  serverCache: null,
-  clientCache: null, // Use Zustand
-  edge: {
-    dynamic: 'force-dynamic',
-  }
-}
-```
-
----
-
-## Cache Configuration by Page
-
-| Page | Rendering | Server Cache | Edge Cache | Client Cache |
-|------|-----------|--------------|------------|--------------|
-| `/` | ISR | ✅ 1h | ✅ 1h | ✅ 5min |
-| `/products` | ISR + Dynamic | ✅ 30min | ✅ 30min | ✅ 5min |
-| `/products/[slug]` | SSG + PPR | ✅ 30min | ✅ ISR 1h | ✅ 2min |
-| `/categories/[slug]` | SSG | ✅ 2h | ✅ ISR 2h | ✅ 30min |
-| `/stores` | ISR | ✅ 1h | ✅ 1h | ✅ 10min |
-| `/stores/[id]` | SSG | ✅ 1h | ✅ ISR 1h | ✅ 5min |
-| `/cart` | Client | ❌ | ❌ | Zustand |
-| `/checkout` | Dynamic | ❌ | ❌ | ❌ |
-| `/orders` | Dynamic | ❌ | ❌ | ✅ 1min |
-| `/orders/[id]` | Dynamic | ❌ | ❌ | ✅ 1min |
-| `/profile` | Dynamic | ❌ | ❌ | ✅ 5min |
-| `/vendor/*` | Dynamic | ❌ | ❌ | ✅ 1min |
-| `/admin/*` | Dynamic | ❌ | ❌ | ✅ 30sec |
-
----
-
-## User Flow Examples
-
-### Flow 1: Browse Products
-
-```
-User → /products
-    │
-    ▼
-[Browser] React Query: MISS (first visit)
-    │
-    ▼
-[Edge] Vercel Edge: HIT (shared cache)
-    │
-    ▼
-Response: ~50ms from edge
-
-─────────────────────────────────
-
-User revisits (< 5 min)
-    │
-    ▼
-[Browser] React Query: HIT
-    │
-    ▼
-Response: INSTANT (no network)
-
-─────────────────────────────────
-
-User revisits (> 5 min, < 30 min)
-    │
-    ▼
-[Browser] React Query: STALE
-    │
-    ├─▶ Show stale data immediately
-    │
-    └─▶ Background revalidation from edge
-```
-
-### Flow 2: Product Detail with PPR
-
-```
-User → /products/iphone-15-pro
-    │
-    ▼
-[Edge] Static shell: INSTANT
-    │
-    ├─▶ Breadcrumb, layout, product name
-    │
-    ▼
-[Streaming] Dynamic parts:
-    │
-    ├─▶ T=100ms: ProductPrice (cached 30min)
-    ├─▶ T=150ms: StockStatus (fresh query)
-    └─▶ T=300ms: Reviews (cached 15min)
-```
-
-### Flow 3: Add to Cart (Optimistic)
-
-```
-User clicks "Thêm vào giỏ"
-    │
-    ▼
-[Client] useOptimistic: UI updates INSTANTLY
-    │
-    ├─▶ Cart count: 2 → 3
-    ├─▶ Button: "Đã thêm ✓"
-    │
-    ▼
-[Background] Server Action
-    │
-    ├─▶ Success: Confirm state
-    └─▶ Failure: Rollback + show error
-```
-
-### Flow 4: Vendor Updates Product
-
-```
-Vendor submits form
-    │
-    ▼
-[Server] updateProduct()
-    │
-    ▼
-[DB] UPDATE products...
-    │
-    ▼
-[Invalidate]
-    ├─▶ revalidateTag('products')
-    ├─▶ revalidateTag('product-iphone-15-pro')
-    ├─▶ revalidateTag('category-phones')
-    └─▶ revalidatePath('/products/iphone-15-pro')
-    │
-    ▼
-Next request: Fresh data from DB
-```
-
----
-
-## Cache Invalidation
-
-### Tag Hierarchy
-
-```
-products
-├── product-{slug}
-├── category-{id}-products
-├── vendor-{id}-products
-└── search-results
-
-categories
-├── category-{slug}
-└── category-{id}
-
-vendors
-├── vendor-{id}
-└── vendor-{id}-products
-
-reviews
-├── product-{slug}-reviews
-└── user-{id}-reviews
-
-orders
-├── order-{id}
-├── user-{id}-orders
-└── vendor-{id}-orders
-
-inventory
-├── product-{slug}-stock
-└── vendor-{id}-inventory
-```
-
-### Invalidation Matrix
-
-| Action | Tags to Invalidate |
-|--------|-------------------|
-| Create product | `products`, `category-{id}-products`, `vendor-{id}-products` |
-| Update product | `products`, `product-{slug}`, `category-{id}-products`, `vendor-{id}-products` |
-| Delete product | Same as update + `search-results` |
-| Update stock | `product-{slug}-stock`, `inventory` |
-| Create review | `product-{slug}-reviews`, `reviews` |
-| Update order status | `order-{id}`, `user-{id}-orders`, `vendor-{id}-orders` |
-| Update category | `categories`, `category-{slug}` |
-| Update vendor profile | `vendors`, `vendor-{id}` |
-
-### Invalidation Code Pattern
-
-```typescript
-// In Server Actions
-export async function updateProduct(id: string, data: UpdateData) {
-  const product = await prisma.product.update({
-    where: { id },
-    data,
-  });
-
-  // Invalidate related caches
-  revalidateTag('products');
-  revalidateTag(`product-${product.slug}`);
-  revalidateTag(`category-${product.categoryId}-products`);
-  revalidateTag(`vendor-${product.vendorId}-products`);
-  
-  // Invalidate ISR page
-  revalidatePath(`/products/${product.slug}`);
-
-  return { success: true, data: product };
-}
-```
-
----
-
-## Implementation Guide
-
-### Phase 1: Foundation ✅ DONE
-
-**Completed**:
-- ✅ Created cache tag constants (`src/shared/lib/constants/cache.ts`)
-- ✅ Created `unstable_cache` wrapper utility (`src/shared/lib/cache/index.ts`)
-- ✅ Created revalidation helpers (`src/shared/lib/cache/revalidate.ts`)
-- ✅ Query keys factory (`src/shared/lib/constants/query-keys.ts`)
-
-**Key Code**:
-
-```typescript
-// Cache Tags - src/shared/lib/constants/cache.ts
-export const CACHE_TAGS = {
-  PRODUCTS: "products",
-  PRODUCT: (slug: string) => `product:${slug}`,
-  PRODUCTS_BY_CATEGORY: (slug: string) => `products:category:${slug}`,
-  PRODUCTS_BY_VENDOR: (id: string) => `products:vendor:${id}`,
+export default async function AccountPage() {
+  await requireAuth();
   // ...
-};
+}
+```
 
-// Cache Utilities - src/shared/lib/cache/index.ts
-export function cacheProducts<T>(fn: () => Promise<T>, categorySlug?: string) {
-  return unstable_cache(fn, ["products", categorySlug || "all"], {
-    tags: [CACHE_TAGS.PRODUCTS],
-    revalidate: CACHE_DURATION.PRODUCTS,
+#### 🟢 ISR Pages (`revalidate`)
+
+Pages có thể cache nhưng cần update định kỳ:
+
+| Route              | Revalidate | Lý do                                                        |
+| ------------------ | ---------- | ------------------------------------------------------------ |
+| `/products/[slug]` | 60s        | Product detail có thể cache, update khi stock/price thay đổi |
+
+```typescript
+// src/app/(main)/(customer)/products/[slug]/page.tsx
+
+// Enable ISR with 60s revalidation
+// Pages are generated on-demand at first request, then cached
+export const revalidate = 60;
+
+export default async function ProductDetailPage({ params }: PageProps) {
+  // Page renders, được cache 60s
+  // Sau 60s, request tiếp theo trigger background revalidation
+}
+```
+
+#### ⚪ Default (Auto)
+
+Pages không có explicit config - Next.js tự quyết định:
+
+| Route                 | Actual Behavior             |
+| --------------------- | --------------------------- |
+| `/` (Homepage)        | Dynamic (có database calls) |
+| `/products`           | Dynamic (search, filters)   |
+| `/stores`             | Dynamic (list vendors)      |
+| `/login`, `/register` | Dynamic (auth forms)        |
+
+### force-dynamic + Data Cache
+
+**Quan trọng:** `force-dynamic` KHÔNG conflict với `unstable_cache()`:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ Layer 1: Full Route Cache                                       │
+│ ─────────────────────────────────────────────────────────────── │
+│ ❌ force-dynamic DISABLE layer này                              │
+│ → Page phải render lại mỗi request                              │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ Layer 2: Data Cache (unstable_cache)                            │
+│ ─────────────────────────────────────────────────────────────── │
+│ ✅ force-dynamic KHÔNG ảnh hưởng layer này                      │
+│ → unstable_cache VẪN hoạt động bình thường                      │
+│ → Data vẫn được cache với tags và TTL                           │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ Layer 3: React cache() - Request Dedup                          │
+│ ─────────────────────────────────────────────────────────────── │
+│ ✅ force-dynamic KHÔNG ảnh hưởng layer này                      │
+│ → Cùng query gọi 5x trong 1 request = 1 DB call                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Ví dụ thực tế:**
+
+```typescript
+// Account page: force-dynamic
+export const dynamic = "force-dynamic";
+// → Page HTML render mỗi request
+
+export default async function AccountPage() {
+  const stats = await getCachedUserStats(userId);
+  // → unstable_cache vẫn hoạt động
+  // → Nếu data < 60s cũ, return cached
+  // → Nếu > 60s, query DB và cache mới
+}
+```
+
+---
+
+## 4. Cache Tags System
+
+### Định nghĩa Cache Tags
+
+```typescript
+// shared/lib/constants/cache.ts
+
+export const CACHE_TAGS = {
+  // ===== Products =====
+  PRODUCTS: "products",
+  // Tag cho tất cả products
+  // Invalidate khi: create, update, delete any product
+
+  PRODUCT: (slug: string) => `product:${slug}`,
+  // Tag cho 1 product cụ thể
+  // Ví dụ: "product:iphone-15-pro-max"
+  // Invalidate khi: update product đó
+
+  PRODUCTS_BY_CATEGORY: (categorySlug: string) =>
+    `products:category:${categorySlug}`,
+  // Tag cho products trong 1 category
+  // Ví dụ: "products:category:electronics"
+  // Invalidate khi: product thêm/bớt khỏi category
+
+  PRODUCTS_BY_VENDOR: (vendorId: string) => `products:vendor:${vendorId}`,
+  // Tag cho products của 1 vendor
+  // Ví dụ: "products:vendor:vendor_abc123"
+  // Invalidate khi: vendor tạo/sửa/xóa product
+
+  // ===== Categories =====
+  CATEGORIES: "categories",
+  // Tag cho tất cả categories
+  // Invalidate khi: admin tạo/sửa/xóa category
+
+  // ===== Orders =====
+  ORDERS: "orders",
+  // Tag chung cho orders
+
+  ORDERS_BY_USER: (userId: string) => `orders:user:${userId}`,
+  // Orders của 1 user cụ thể
+  // Invalidate khi: user đặt hàng mới
+
+  ORDERS_BY_VENDOR: (vendorId: string) => `orders:vendor:${vendorId}`,
+  // Orders của 1 vendor
+  // Invalidate khi: có order mới cho vendor
+
+  // ===== Stats =====
+  VENDOR_STATS: (vendorId: string) => `vendor:stats:${vendorId}`,
+  // Thống kê của vendor (revenue, orders, etc.)
+  // Invalidate khi: order status thay đổi
+
+  ADMIN_STATS: "admin:stats",
+  // Thống kê tổng hệ thống
+  // Invalidate khi: có thay đổi quan trọng
+};
+```
+
+### Cache Durations
+
+```typescript
+// shared/lib/constants/cache.ts
+
+export const CACHE_DURATION = {
+  // Thời gian cache (seconds)
+
+  PRODUCTS: 60, // 1 phút
+  // Products thay đổi thường xuyên (stock, price)
+
+  PRODUCT_DETAIL: 60, // 1 phút
+  // Chi tiết product cũng cần fresh data
+
+  CATEGORIES: 3600, // 1 giờ
+  // Categories ít thay đổi
+
+  VENDOR_PRODUCTS: 60, // 1 phút
+  // Vendor có thể update products thường xuyên
+
+  VENDOR_STATS: 300, // 5 phút
+  // Stats không cần real-time
+
+  ADMIN_STATS: 300, // 5 phút
+  // Admin stats cũng không cần real-time
+
+  HOMEPAGE: 60, // 1 phút
+  // Homepage data (featured, flash sale)
+};
+```
+
+---
+
+## 5. Cache Utilities
+
+### 5.1. Basic Cache Wrapper
+
+```typescript
+// shared/lib/cache/index.ts
+
+import { unstable_cache } from "next/cache";
+import { cache } from "react";
+
+/**
+ * Tạo cached function với tags và TTL
+ *
+ * @param fn - Async function cần cache
+ * @param config - Cache configuration
+ * @param keyParts - Unique key parts để phân biệt cache entries
+ */
+export function createCachedQuery<TArgs extends unknown[], TResult>(
+  fn: (...args: TArgs) => Promise<TResult>,
+  config: { tags?: string[]; revalidate?: number },
+  keyParts?: string[]
+): (...args: TArgs) => Promise<TResult> {
+  return unstable_cache(fn, keyParts, {
+    tags: config.tags,
+    revalidate: config.revalidate,
   });
 }
+```
 
-// Revalidation - src/shared/lib/cache/revalidate.ts
+**Giải thích từng dòng:**
+
+```typescript
+// unstable_cache là function của Next.js
+// Nhận vào:
+// 1. fn: function cần cache
+// 2. keyParts: array strings để tạo unique cache key
+// 3. options: { tags, revalidate }
+
+return unstable_cache(
+  fn, // Function gốc
+  keyParts, // Ví dụ: ["products", "electronics"]
+  {
+    tags: config.tags, // Ví dụ: ["products", "products:category:electronics"]
+    revalidate: config.revalidate, // Ví dụ: 60 (seconds)
+  }
+);
+```
+
+### 5.2. Specialized Cache Functions
+
+```typescript
+// shared/lib/cache/index.ts
+
+/**
+ * Cache cho product list
+ * Tự động thêm tags phù hợp
+ */
+export function cacheProducts<TResult>(
+  fn: () => Promise<TResult>,
+  categorySlug?: string
+): () => Promise<TResult> {
+  // Luôn có tag "products"
+  const tags: string[] = [CACHE_TAGS.PRODUCTS];
+
+  // Nếu filter theo category, thêm tag category
+  if (categorySlug) {
+    tags.push(CACHE_TAGS.PRODUCTS_BY_CATEGORY(categorySlug));
+  }
+
+  return unstable_cache(
+    fn,
+    ["products", categorySlug || "all"], // Cache key
+    {
+      tags,
+      revalidate: CACHE_DURATION.PRODUCTS, // 60 seconds
+    }
+  );
+}
+```
+
+**Cách sử dụng:**
+
+```typescript
+// entities/product/api/queries.ts
+
+export async function getProducts(categorySlug?: string) {
+  // Wrap database query với cache
+  const cachedQuery = cacheProducts(async () => {
+    return prisma.product.findMany({
+      where: categorySlug ? { category: { slug: categorySlug } } : undefined,
+      include: { images: true, variants: true },
+    });
+  }, categorySlug);
+
+  return cachedQuery();
+}
+```
+
+### 5.3. Product Detail Cache
+
+```typescript
+/**
+ * Cache cho chi tiết 1 product
+ * Tag: products (general) + product:slug (specific)
+ */
+export function cacheProductDetail<TResult>(
+  fn: () => Promise<TResult>,
+  slug: string
+): () => Promise<TResult> {
+  return unstable_cache(
+    fn,
+    ["product", slug], // Unique key per product
+    {
+      tags: [
+        CACHE_TAGS.PRODUCTS, // Invalidate khi any product changes
+        CACHE_TAGS.PRODUCT(slug), // Invalidate khi product này changes
+      ],
+      revalidate: CACHE_DURATION.PRODUCT_DETAIL,
+    }
+  );
+}
+```
+
+### 5.4. Vendor Stats Cache
+
+```typescript
+/**
+ * Cache thống kê vendor
+ * Invalidate khi orders của vendor thay đổi
+ */
+export function cacheVendorStats<TResult>(
+  fn: () => Promise<TResult>,
+  vendorId: string
+): () => Promise<TResult> {
+  return unstable_cache(fn, ["vendor-stats", vendorId], {
+    tags: [CACHE_TAGS.VENDOR_STATS(vendorId)],
+    revalidate: CACHE_DURATION.VENDOR_STATS, // 5 minutes
+  });
+}
+```
+
+### 5.5. Dual Cache (Request Dedup + Cross-Request)
+
+```typescript
+/**
+ * Kết hợp React cache() và unstable_cache()
+ * - React cache(): Dedupe trong 1 request
+ * - unstable_cache(): Cache across requests
+ */
+export function createDualCache<TArgs extends unknown[], TResult>(
+  fn: (...args: TArgs) => Promise<TResult>,
+  config: { tags?: string[]; revalidate?: number },
+  keyParts?: string[]
+): (...args: TArgs) => Promise<TResult> {
+  // Bước 1: Wrap với unstable_cache cho cross-request caching
+  const serverCached = unstable_cache(fn, keyParts, {
+    tags: config.tags,
+    revalidate: config.revalidate,
+  });
+
+  // Bước 2: Wrap tiếp với React cache() cho request dedup
+  return cache(serverCached);
+}
+```
+
+**Tại sao cần cả hai?**
+
+```
+Scenario: ProductPage render
+
+Header → getCategories()     ─┐
+Sidebar → getCategories()     │ React cache() dedupe
+Footer → getCategories()     ─┘   = 1 actual call
+                                         │
+                                         ▼
+                              unstable_cache()
+                                         │
+                            ┌────────────┴────────────┐
+                            ▼                          ▼
+                      Cache Hit                   Cache Miss
+                      (return cached)             (query DB, store)
+```
+
+---
+
+## 6. Cache Invalidation
+
+### 6.1. Revalidate Functions
+
+```typescript
+// shared/lib/cache/invalidation.ts
+
+import { revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "../constants/cache";
+
+/**
+ * Invalidate tất cả product caches
+ * Gọi khi: product created/updated/deleted
+ */
+export function revalidateProducts() {
+  revalidateTag(CACHE_TAGS.PRODUCTS);
+}
+
+/**
+ * Invalidate cache cho 1 product cụ thể
+ * Gọi khi: product updated
+ */
 export function revalidateProduct(slug: string) {
-  revalidateTag(CACHE_TAGS.PRODUCT(slug), "max");
-  revalidateTag(CACHE_TAGS.PRODUCTS, "max");
+  revalidateTag(CACHE_TAGS.PRODUCTS); // General list
+  revalidateTag(CACHE_TAGS.PRODUCT(slug)); // Specific product
+}
+
+/**
+ * Invalidate tất cả cache liên quan đến vendor
+ * Gọi khi: vendor's product changes, order changes
+ */
+export function revalidateVendor(vendorId: string) {
+  revalidateTag(CACHE_TAGS.PRODUCTS_BY_VENDOR(vendorId));
+  revalidateTag(CACHE_TAGS.VENDOR_STATS(vendorId));
+  revalidateTag(CACHE_TAGS.ORDERS_BY_VENDOR(vendorId));
+}
+
+/**
+ * Invalidate reviews
+ * Gọi khi: review created/updated/deleted
+ */
+export function revalidateReviews(productSlug: string) {
+  revalidateTag(CACHE_TAGS.PRODUCT(productSlug));
+}
+
+/**
+ * Invalidate orders
+ * Gọi khi: order created, status updated
+ */
+export function revalidateOrders(userId?: string, vendorId?: string) {
+  revalidateTag(CACHE_TAGS.ORDERS);
+  if (userId) {
+    revalidateTag(CACHE_TAGS.ORDERS_BY_USER(userId));
+  }
+  if (vendorId) {
+    revalidateTag(CACHE_TAGS.ORDERS_BY_VENDOR(vendorId));
+    revalidateTag(CACHE_TAGS.VENDOR_STATS(vendorId));
+  }
 }
 ```
 
-### Phase 2: Server Caching ✅ DONE
-
-**Completed**:
-- ✅ Product queries with `getCachedProductBySlug`, `getCachedFeaturedProducts`, etc.
-- ✅ Category queries with `getCachedCategories`, `getCachedCategoriesWithCount`
-- ✅ All actions updated with `revalidateTag(tag, "max")` - Next.js 16 syntax
-- ✅ Bulk revalidation helpers (`revalidateBulk.afterOrderCreate`, etc.)
-
-**Files Modified**:
-- `src/entities/product/api/queries.ts`
-- `src/entities/product/api/actions.ts`
-- `src/entities/category/api/queries.ts`
-- `src/entities/category/api/actions.ts`
-- `src/entities/order/api/actions.ts`
-- `src/entities/vendor/api/actions.ts`
-- `src/entities/review/api/actions.ts`
-- `src/features/checkout/api/actions.ts`
-
-### Phase 3: Client Caching ✅ DONE
-
-**Completed**:
-- ✅ React Query provider with optimized defaults
-- ✅ Hooks using `STALE_TIME`, `GC_TIME` constants
-- ✅ Optimistic updates for cart (Zustand)
-- ✅ Optimistic updates for wishlist (React Query `onMutate`)
-
-**Files Modified**:
-- `src/shared/providers/ReactQueryProvider.tsx`
-- `src/features/search/use-search.ts`
-- `src/entities/cart/model/use-cart-stock.ts`
-- `src/features/wishlist/wishlist-button/use-wishlist-mutation.ts`
-
-### Phase 4: Monitoring ⏳ PENDING
-
-**Tasks**:
-1. Add cache hit/miss logging
-2. Setup performance monitoring
-3. Create cache debugging utilities
-
----
-
-## Monitoring & Debugging
-
-### Cache Headers
-
-Check cache status in browser DevTools:
-
-```
-x-vercel-cache: HIT | MISS | STALE
-x-nextjs-cache: HIT | MISS | STALE
-cache-control: s-maxage=3600, stale-while-revalidate=86400
-```
-
-### Logging Pattern
+### 6.2. Invalidation trong Server Actions
 
 ```typescript
-// Development only
-if (process.env.NODE_ENV === 'development') {
-  console.log(`[Cache] ${cacheHit ? 'HIT' : 'MISS'}: ${cacheKey}`);
+// entities/product/api/actions.ts
+
+export async function createProduct(data: ProductFormInput) {
+  const session = await requireSession();
+
+  // Create product trong database
+  const product = await prisma.product.create({
+    data: {
+      name: data.name,
+      slug: generateSlug(data.name),
+      vendorId: session.user.id,
+      // ... other fields
+    },
+  });
+
+  // ⬇️ INVALIDATE CACHES SAU KHI TẠO
+
+  // 1. Invalidate general products list
+  revalidateTag(CACHE_TAGS.PRODUCTS);
+
+  // 2. Invalidate vendor's products
+  revalidateTag(CACHE_TAGS.PRODUCTS_BY_VENDOR(session.user.id));
+
+  // 3. Nếu có category, invalidate category products
+  if (data.categoryId) {
+    const category = await prisma.category.findUnique({
+      where: { id: data.categoryId },
+      select: { slug: true },
+    });
+    if (category) {
+      revalidateTag(CACHE_TAGS.PRODUCTS_BY_CATEGORY(category.slug));
+    }
+  }
+
+  return { success: true, product };
 }
 ```
 
-### Debug Utilities
+### 6.3. Checkout Flow Invalidation
 
 ```typescript
-// Force bypass cache
-const data = await getProducts({ _bypass: true });
+// features/checkout/api/actions.ts
 
-// Check cache status
-const { data, cacheStatus } = await getProductsWithStatus(slug);
+export async function createOrders(...) {
+  // ... create orders logic ...
+
+  // INVALIDATE MULTIPLE CACHES
+
+  // 1. Products (stock changed)
+  revalidateTag(CACHE_TAGS.PRODUCTS);
+
+  // 2. General orders
+  revalidateTag(CACHE_TAGS.ORDERS);
+
+  // 3. User's orders
+  revalidateTag(CACHE_TAGS.ORDERS_BY_USER(session.user.id));
+
+  // 4. Vendor-specific caches (loop qua tất cả vendors)
+  for (const vendorId of affectedVendorIds) {
+    revalidateTag(CACHE_TAGS.ORDERS_BY_VENDOR(vendorId));
+    revalidateTag(CACHE_TAGS.VENDOR_STATS(vendorId));
+  }
+
+  return result;
+}
 ```
 
 ---
 
-## Future Considerations
+## 7. Best Practices
 
-### Redis (When to add)
+### ✅ DO
 
-**Triggers**:
-- Traffic > 10,000 DAU
-- DB CPU > 50% sustained
-- P95 latency > 500ms
+```typescript
+// ✅ Dùng tags có hierarchy
+revalidateTag("products");                    // Broad
+revalidateTag("products:category:electronics"); // Specific
 
-**Use cases**:
-- Session storage
-- Rate limiting
-- Search autocomplete
-- Real-time features
+// ✅ Invalidate sau mutations
+await prisma.product.update({...});
+revalidateTag(CACHE_TAGS.PRODUCT(slug));
 
-### Prisma Accelerate
+// ✅ Set appropriate TTL
+// Frequently changing: 60s
+// Rarely changing: 3600s (1 hour)
 
-**When to consider**:
-- Global user base
-- Complex queries
-- High read volume
+// ✅ Combine React cache + unstable_cache
+const getCachedData = cache(
+  unstable_cache(fetchData, ["key"], { tags: ["tag"] })
+);
+```
+
+### ❌ DON'T
+
+```typescript
+// ❌ Cache user-specific data với general tag
+// User A's data sẽ show cho User B!
+unstable_cache(getUserOrders, ["orders"], {
+  tags: ["orders"],  // ❌ Too broad!
+});
+
+// ✅ Correct
+unstable_cache(getUserOrders, ["orders", userId], {
+  tags: [CACHE_TAGS.ORDERS_BY_USER(userId)],
+});
+
+// ❌ Forget to invalidate
+await prisma.product.update({...});
+// Missing revalidateTag!
+
+// ❌ Over-invalidate
+// Invalidate everything on every change
+revalidateTag("products");
+revalidateTag("orders");
+revalidateTag("users");
+// ❌ This defeats the purpose of caching!
+```
 
 ---
 
-## References
+## 8. Debugging Cache
 
-- [Next.js Caching Documentation](https://nextjs.org/docs/app/building-your-application/caching)
-- [React Query Documentation](https://tanstack.com/query/latest)
-- [Vercel Edge Network](https://vercel.com/docs/edge-network/overview)
+### Development Tools
+
+```typescript
+// Thêm logging để debug cache
+const cachedFunction = unstable_cache(
+  async () => {
+    console.log("🔍 Cache MISS - fetching from DB");
+    return await prisma.product.findMany();
+  },
+  ["products"],
+  { tags: ["products"], revalidate: 60 }
+);
+
+// Khi cache hit, console.log không chạy
+// Khi cache miss, sẽ thấy log
+```
+
+### Force Revalidate
+
+```typescript
+// Trong development, force revalidate toàn bộ
+import { revalidateTag } from "next/cache";
+
+// Route handler để manual revalidate
+// app/api/revalidate/route.ts
+export async function POST(req: Request) {
+  const { tag } = await req.json();
+  revalidateTag(tag);
+  return Response.json({ revalidated: true });
+}
+```
+
+### Check Cache Headers
+
+```bash
+# Xem cache headers trong response
+curl -I https://your-site.com/products
+
+# Look for:
+# x-vercel-cache: HIT    → Served from cache
+# x-vercel-cache: MISS   → Fetched fresh
+```
+
+---
+
+## 8. Visual Summary
+
+```
+                    ┌──────────────────────────────────┐
+                    │         User Request              │
+                    └──────────────┬───────────────────┘
+                                   │
+                    ┌──────────────▼───────────────────┐
+                    │     React cache() (Layer 1)      │
+                    │    Request-level deduplication   │
+                    │                                  │
+                    │  Same fn called 5x = 1 execution │
+                    └──────────────┬───────────────────┘
+                                   │
+                    ┌──────────────▼───────────────────┐
+                    │  unstable_cache() (Layer 2)      │
+                    │    Cross-request caching         │
+                    │                                  │
+                    │  Tags: ["products", "category:x"]│
+                    │  TTL: 60 seconds                 │
+                    └──────────────┬───────────────────┘
+                                   │
+               ┌───────────────────┼───────────────────┐
+               ▼                                       ▼
+        ┌─────────────┐                        ┌─────────────┐
+        │ Cache HIT   │                        │ Cache MISS  │
+        │             │                        │             │
+        │ Return data │                        │ Query DB    │
+        │ (~1ms)      │                        │ Store cache │
+        └─────────────┘                        │ (~100ms)    │
+                                               └─────────────┘
+                                                      │
+                    ┌─────────────────────────────────┘
+                    │
+                    ▼
+        ┌─────────────────────────────────────────────┐
+        │            Cache Invalidation               │
+        │                                             │
+        │  createProduct() → revalidateTag("products")│
+        │  updateProduct() → revalidateTag("product:x")│
+        │  createOrder()   → revalidateTag("orders")  │
+        └─────────────────────────────────────────────┘
+```
+
+---
+
+## 🔗 Related Documentation
+
+- [DATA_FLOW.md](./DATA_FLOW.md) - Luồng data và caching
+- [TECHNICAL_DECISIONS.md](./TECHNICAL_DECISIONS.md) - Tại sao chọn caching strategy này
+- [API_REFERENCE.md](./API_REFERENCE.md) - Server Actions với cache invalidation

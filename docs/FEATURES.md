@@ -1,395 +1,436 @@
-# ✨ Tính Năng
+# Vendoor - Features
 
-Danh sách các tính năng của Vendoor theo từng vai trò người dùng.
-
----
-
-## 🛒 Customer Features
-
-### Duyệt Sản Phẩm
-
-| Tính năng              | Mô tả                                             |
-| ---------------------- | ------------------------------------------------- |
-| Trang chủ              | Hero banner, sản phẩm nổi bật, categories         |
-| Danh mục sản phẩm      | Lọc theo category, search, pagination             |
-| Chi tiết sản phẩm      | Ảnh gallery, variants, thông tin vendor           |
-| Sản phẩm liên quan     | Gợi ý sản phẩm cùng category                      |
-| **Search Suggestions** | Gợi ý sản phẩm real-time khi gõ (debounced 300ms) |
-| **Search toàn văn**    | Tìm trong cả name và description                  |
-| **Category Dropdown**  | Chọn nhanh danh mục từ search bar                 |
-
-### Giỏ Hàng & Thanh Toán
-
-| Tính năng         | Mô tả                                     |
-| ----------------- | ----------------------------------------- |
-| Giỏ hàng          | Thêm/xóa/cập nhật số lượng, persist local |
-| Nhóm theo vendor  | Tách đơn theo từng vendor                 |
-| Phí vận chuyển    | Tính theo số lượng vendor                 |
-| Checkout          | Form địa chỉ, ghi chú, chọn payment       |
-| Thanh toán COD    | Thanh toán khi nhận hàng                  |
-| Thanh toán Stripe | Thanh toán online qua Stripe              |
-
-### Quản Lý Đơn Hàng
-
-| Tính năng           | Mô tả                                      |
-| ------------------- | ------------------------------------------ |
-| Lịch sử đơn hàng    | Danh sách đơn đã đặt                       |
-| Chi tiết đơn hàng   | Thông tin sản phẩm, trạng thái, vendor     |
-| Theo dõi trạng thái | PENDING → PROCESSING → SHIPPED → DELIVERED |
-
-### Wishlist ⭐
-
-| Tính năng           | Mô tả                                |
-| ------------------- | ------------------------------------ |
-| Thêm vào yêu thích  | Toggle button trên trang sản phẩm    |
-| Danh sách yêu thích | Xem tất cả sản phẩm đã lưu           |
-| Xóa khỏi yêu thích  | Remove từ wishlist                   |
-| Persist theo user   | Lưu vào database, sync across device |
-
-### Đánh Giá Sản Phẩm ⭐
-
-| Tính năng           | Mô tả                                   |
-| ------------------- | --------------------------------------- |
-| Viết đánh giá       | Rating 1-5 sao, tiêu đề, nội dung       |
-| **Upload ảnh** ⭐   | Upload tối đa 5 ảnh cho mỗi review      |
-| **Image gallery**   | Xem ảnh review với lightbox full-screen |
-| Verified purchase   | Auto-check nếu user đã mua + nhận hàng  |
-| Xem đánh giá        | Danh sách reviews với thống kê          |
-| Rating distribution | Hiển thị phân bố số sao                 |
-| Vendor reply        | Xem phản hồi từ người bán               |
-
-**Chi tiết Review Images:**
-
-```
-Upload Flow:
-1. Click "Thêm ảnh" hoặc drag & drop vào vùng upload
-2. Preview ảnh với option xóa từng ảnh
-3. Max 5 ảnh, mỗi ảnh ≤ 5MB, format: JPEG/PNG/WebP
-4. Ảnh upload lên Cloudinary với folder `reviews/`
-
-Display Flow:
-1. Thumbnail grid hiển thị dưới nội dung review
-2. Click ảnh → Lightbox full-screen với navigation ←→
-3. Keyboard support: ArrowLeft, ArrowRight, Escape
-4. Counter hiển thị "2/5" khi xem ảnh
-```
-
-**Files liên quan:**
-
-- `src/features/review/write-review/ui/ReviewImageUpload.tsx`
-- `src/shared/ui/image-lightbox.tsx`
-- `src/entities/review/ui/ReviewImageGallery.tsx`
-
-### Đăng Ký Bán Hàng ⭐
-
-| Tính năng           | Mô tả                            |
-| ------------------- | -------------------------------- |
-| Form đăng ký        | Thông tin shop, địa chỉ, liên hệ |
-| Theo dõi trạng thái | PENDING → APPROVED/REJECTED      |
-| Chờ duyệt           | Admin review và approve          |
+Tài liệu mô tả chi tiết các tính năng của hệ thống theo từng vai trò người dùng.
 
 ---
 
-## 🏪 Vendor Features
+## 👤 Customer (Khách hàng)
 
-### Dashboard
+### Xem & Tìm kiếm sản phẩm
 
-| Tính năng        | Mô tả                         |
-| ---------------- | ----------------------------- |
-| Tổng quan        | Doanh thu, đơn hàng, thống kê |
-| Đơn hàng gần đây | Quick view các đơn mới nhất   |
+| Tính năng           | Mô tả                                 | Location                         |
+| ------------------- | ------------------------------------- | -------------------------------- |
+| **Product Listing** | Xem danh sách sản phẩm với pagination | `/products`                      |
+| **Category Filter** | Lọc theo danh mục                     | `/products?category=electronics` |
+| **Price Filter**    | Lọc theo khoảng giá                   | Filter panel                     |
+| **Sort**            | Sắp xếp theo giá, mới nhất, bán chạy  | Sort dropdown                    |
+| **Search**          | Tìm kiếm theo tên sản phẩm            | Header search bar                |
+| **Product Detail**  | Xem chi tiết, ảnh, variants, reviews  | `/products/[slug]`               |
 
-### Quản Lý Sản Phẩm
+**Components:**
 
-| Tính năng           | Mô tả                                     |
-| ------------------- | ----------------------------------------- |
-| Danh sách sản phẩm  | Tất cả sản phẩm của vendor                |
-| Thêm sản phẩm       | Form với variants, ảnh, category          |
-| Sửa sản phẩm        | Cập nhật thông tin, giá, stock            |
-| Xóa sản phẩm        | Soft delete sản phẩm                      |
-| Upload ảnh          | Multi-image upload qua Cloudinary         |
-| **AI Auto-fill** ⭐ | Upload ảnh → AI generate tên, mô tả, tags |
+- `features/product-filter` - FilterPanel, SortDropdown
+- `features/search` - SearchBar, SearchResults
+- `entities/product` - ProductCard, ProductDetailClient
 
-### Quản Lý Đơn Hàng
+---
+
+### Giỏ hàng (Cart)
+
+| Tính năng            | Mô tả                                          |
+| -------------------- | ---------------------------------------------- |
+| **Add to Cart**      | Thêm sản phẩm (chọn variant, số lượng)         |
+| **View Cart**        | Xem giỏ hàng (CartSheet slide-in)              |
+| **Update Quantity**  | Tăng/giảm số lượng                             |
+| **Remove Item**      | Xóa sản phẩm khỏi giỏ                          |
+| **Stock Validation** | Không cho thêm quá số lượng tồn kho            |
+| **Persist**          | Giỏ hàng lưu localStorage (persist qua reload) |
+
+**Implementation:**
+
+```typescript
+// Zustand store với persist middleware
+const useCartStore = create(
+  persist(
+    (set, get) => ({
+      items: [],
+      addItem: (newItem) => { ... },
+      updateQuantity: (variantId, quantity) => { ... },
+      removeItem: (variantId) => { ... },
+      clearCart: () => set({ items: [] }),
+    }),
+    { name: "cart-storage" }  // localStorage key
+  )
+);
+```
+
+**Components:**
+
+- `entities/cart` - Zustand store, CartItem
+- `features/cart` - CartSheet, AddToCartButton
+
+---
+
+### Wishlist (Yêu thích)
 
 | Tính năng           | Mô tả                                  |
 | ------------------- | -------------------------------------- |
-| Danh sách đơn hàng  | Đơn của vendor với filter theo status  |
-| Chi tiết đơn hàng   | Thông tin customer, sản phẩm, shipping |
-| Cập nhật trạng thái | Chuyển đổi status theo workflow        |
-| Tính commission     | Hiển thị phần vendor nhận được         |
+| **Add to Wishlist** | Click heart icon trên product card     |
+| **View Wishlist**   | Xem danh sách đã thích tại `/wishlist` |
+| **Remove**          | Xóa khỏi wishlist                      |
+| **Move to Cart**    | Thêm vào giỏ từ wishlist               |
 
-### Phản Hồi Đánh Giá ⭐
+**Khác với Cart:**
 
-| Tính năng      | Mô tả                                |
-| -------------- | ------------------------------------ |
-| Xem reviews    | Danh sách đánh giá tất cả sản phẩm   |
-| Reply đánh giá | Vendor phản hồi customer reviews     |
-| Sửa/Xóa reply  | Edit hoặc xóa phản hồi đã gửi        |
-| Verified badge | Hiển thị "Đã mua hàng" cho customers |
-| Link sản phẩm  | Quick navigate đến trang sản phẩm    |
+- Wishlist lưu **database** (cần đăng nhập)
+- Cart lưu **localStorage** (không cần đăng nhập)
 
-### Quản Lý Tồn Kho ⭐ (NEW)
+**Components:**
 
-| Tính năng          | Mô tả                               |
-| ------------------ | ----------------------------------- |
-| Danh sách tồn kho  | Xem tất cả variants với stock       |
-| Inline editing     | Chỉnh stock trực tiếp trong bảng    |
-| Filter theo status | Lọc: Tất cả, Còn hàng, Sắp hết, Hết |
-| Low stock alert    | Cảnh báo sản phẩm cần nhập thêm     |
-| Stock status badge | Badge màu cho từng trạng thái stock |
-| Tìm kiếm           | Search theo tên sản phẩm            |
+- `entities/wishlist` - WishlistItem
+- `features/wishlist` - WishlistButton, WishlistPage
 
-**Chi tiết Inventory Management:**
+---
+
+### Checkout (Thanh toán)
+
+| Tính năng          | Mô tả                                  |
+| ------------------ | -------------------------------------- |
+| **Shipping Info**  | Form nhập địa chỉ giao hàng            |
+| **Payment Method** | Chọn COD hoặc Stripe                   |
+| **Order Review**   | Xem lại đơn hàng trước khi đặt         |
+| **Place Order**    | Tạo orders (1 order/vendor)            |
+| **Stock Check**    | Validate stock real-time trước khi đặt |
+
+**Flow:**
 
 ```
-Stock Status Thresholds (từ STOCK_LIMITS):
-- OUT_OF_STOCK: stock = 0 → Badge đỏ "Hết hàng"
-- LOW_STOCK: stock ≤ 5 → Badge vàng "Sắp hết" + Alert
-- IN_STOCK: stock > 5 → Badge xanh "Còn hàng"
-
-Inline Edit Flow:
-1. Click vào ô "Tồn kho" trong bảng
-2. Input number xuất hiện với giá trị hiện tại
-3. Nhập số mới (≥ 0) → Click ✓ hoặc Enter để lưu
-4. Click ✗ hoặc Escape để hủy
-5. Server validation + toast notification
-
-Filter Options:
-- "Tất cả": Hiển thị tất cả variants
-- "Còn hàng": stock > LOW_STOCK_THRESHOLD
-- "Sắp hết": 0 < stock ≤ LOW_STOCK_THRESHOLD
-- "Hết hàng": stock = 0
-
-Low Stock Alert:
-- Summary box hiển thị số sản phẩm sắp hết + hết hàng
-- Link "Xem chi tiết" → auto filter "Sắp hết"
-- Xuất hiện cả trên trang chi tiết sản phẩm (customer view)
+Cart → /checkout → Fill shipping → Select payment
+                                         │
+                    ┌────────────────────┴────────────────────┐
+                    ▼                                          ▼
+                  COD                                       Stripe
+                    │                                          │
+            Orders created                         Stripe Checkout Session
+            status: PENDING                                    │
+                    │                                   Payment success
+                    │                                          │
+                    ▼                                          ▼
+            /orders/[id]                           Orders status → PENDING
+                                                               │
+                                                               ▼
+                                                      /orders?success=true
 ```
 
-**Routes:**
+**Components:**
 
-- `/vendor/inventory` - Trang quản lý tồn kho
+- `features/checkout` - CheckoutForm, PaymentSelector
+- `widgets/checkout` - CheckoutPage
 
-**Files liên quan:**
+---
 
-- `src/features/inventory-management/api/queries.ts` - getVendorInventory, getInventoryStats
-- `src/features/inventory-management/api/actions.ts` - updateStock, bulkUpdateStock
-- `src/features/inventory-management/ui/StockTable.tsx` - Table với inline edit
-- `src/features/inventory-management/ui/StockStatusBadge.tsx` - Badge component
-- `src/features/inventory-management/ui/LowStockAlert.tsx` - Alert summary
-- `src/features/inventory-management/ui/InventoryFilterBar.tsx` - Search + filter
+### Order Tracking
 
-### Phân Tích Doanh Thu ⭐ (NEW)
+| Tính năng        | Mô tả                                               |
+| ---------------- | --------------------------------------------------- |
+| **Order List**   | Xem tất cả đơn hàng tại `/orders`                   |
+| **Order Detail** | Chi tiết 1 đơn tại `/orders/[id]`                   |
+| **Status Track** | Theo dõi trạng thái (PENDING → SHIPPED → DELIVERED) |
+| **Cancel Order** | Hủy đơn (chỉ khi PENDING)                           |
 
-| Tính năng         | Mô tả                                |
-| ----------------- | ------------------------------------ |
-| Summary cards     | Tổng doanh thu, đơn hàng, giá trị TB |
-| Revenue chart     | Biểu đồ doanh thu theo thời gian     |
-| Top products      | 5 sản phẩm bán chạy nhất             |
-| Time range filter | Lọc: 7 ngày, 30 ngày, 3 tháng, 1 năm |
-| Period comparison | So sánh % tăng/giảm với kỳ trước     |
-
-**Chi tiết Vendor Analytics:**
+**Order Statuses:**
 
 ```
-Summary Cards (4 metrics):
-1. Tổng doanh thu: Sum of completed order amounts
-2. Số đơn hàng: Count of orders
-3. Giá trị trung bình: Avg order value
-4. Sản phẩm đã bán: Total quantity sold
-
-Mỗi card hiển thị:
-- Giá trị hiện tại (formatted VND)
-- % thay đổi so với kỳ trước (xanh +, đỏ -)
-- Icon tương ứng
-
-Revenue Chart:
-- AreaChart (Recharts) với gradient fill
-- X-axis: Ngày (format dd/MM)
-- Y-axis: Doanh thu (format VND)
-- Tooltip hiển thị chi tiết khi hover
-- Data aggregated theo ngày
-
-Top Products Table:
-- 5 sản phẩm bán chạy nhất trong kỳ
-- Columns: Sản phẩm, Số lượng bán, Doanh thu
-- Sort by revenue desc
-
-Time Range Options:
-- 7 ngày (default)
-- 30 ngày
-- 3 tháng
-- 1 năm
-
-Period Comparison Logic:
-- Current: selectedRange
-- Previous: same duration trước đó
-- Example: 7d current vs 7d previous
-- Change % = ((current - previous) / previous) * 100
+PENDING_PAYMENT → PENDING → PROCESSING → SHIPPED → DELIVERED
+                     │           │
+                     └─────┬─────┘
+                           ▼
+                      CANCELLED
 ```
 
-**Routes:**
+**Components:**
 
-- `/vendor/analytics` - Trang phân tích doanh thu
-
-**Files liên quan:**
-
-- `src/features/vendor-analytics/api/queries.ts` - getVendorAnalytics (với period comparison)
-- `src/features/vendor-analytics/ui/AnalyticsSummaryCards.tsx` - 4 metric cards
-- `src/features/vendor-analytics/ui/RevenueChart.tsx` - AreaChart component
-- `src/features/vendor-analytics/ui/TopProductsTable.tsx` - Top 5 products
-- `src/features/vendor-analytics/ui/TimeRangeFilter.tsx` - Dropdown filter
+- `entities/order` - OrderStatusBadge
+- `widgets/orders` - OrderList, OrderDetail
 
 ---
 
-## 👨‍💼 Admin Features
+### Reviews (Đánh giá)
 
-### Dashboard
+| Tính năng          | Mô tả                                    |
+| ------------------ | ---------------------------------------- |
+| **View Reviews**   | Xem reviews trên product detail page     |
+| **Write Review**   | Viết review (1-5 stars, comment, images) |
+| **Verified Badge** | Badge "Đã mua hàng" nếu có order         |
+| **Vendor Reply**   | Xem phản hồi từ vendor                   |
 
-| Tính năng          | Mô tả                             |
-| ------------------ | --------------------------------- |
-| Tổng quan platform | Doanh thu tổng, số đơn, số vendor |
-| Thống kê           | Charts và metrics                 |
+**Constraint:** 1 user chỉ review 1 lần/product
 
-### Quản Lý Vendor
+**Components:**
 
-| Tính năng        | Mô tả                               |
-| ---------------- | ----------------------------------- |
-| Danh sách vendor | Tất cả vendor đã đăng ký            |
-| Duyệt vendor     | Approve/Reject đơn đăng ký          |
-| Chi tiết vendor  | Thông tin shop, sản phẩm, doanh thu |
-
-### Quản Lý Danh Mục
-
-| Tính năng           | Mô tả                          |
-| ------------------- | ------------------------------ |
-| CRUD categories     | Thêm/sửa/xóa danh mục sản phẩm |
-| Upload ảnh category | Ảnh đại diện cho category      |
-
-### Quản Lý Đơn Hàng
-
-| Tính năng           | Mô tả                          |
-| ------------------- | ------------------------------ |
-| Tất cả đơn hàng     | View toàn bộ đơn trên platform |
-| Chi tiết đơn        | Thông tin đầy đủ về đơn hàng   |
-| Platform commission | Phí platform thu từ mỗi đơn    |
+- `entities/review` - ReviewCard, StarRating
+- `features/review` - ReviewForm
 
 ---
 
-## 🔐 Authentication
+## 🏪 Vendor (Người bán)
 
-| Tính năng         | Mô tả                          |
-| ----------------- | ------------------------------ |
-| Đăng ký           | Email/password với validation  |
-| Đăng nhập         | Session-based với Better Auth  |
-| Role-based access | CUSTOMER, VENDOR, ADMIN        |
-| Protected routes  | Middleware + Guards            |
-| Đăng ký vendor    | Form thông tin shop, chờ duyệt |
+### Dashboard Analytics
 
----
+| Metric                  | Mô tả                            |
+| ----------------------- | -------------------------------- |
+| **Total Revenue**       | Tổng doanh thu                   |
+| **Total Orders**        | Số đơn hàng                      |
+| **Average Order Value** | Giá trị đơn trung bình           |
+| **Revenue Chart**       | Biểu đồ doanh thu theo thời gian |
+| **Top Products**        | Sản phẩm bán chạy                |
+| **Recent Orders**       | Đơn hàng gần đây                 |
 
-## 💳 Payment
+**Components:**
 
-| Tính năng          | Mô tả                               |
-| ------------------ | ----------------------------------- |
-| COD                | Thanh toán khi nhận hàng            |
-| Stripe Checkout    | Redirect đến Stripe payment page    |
-| Webhook handling   | Xử lý payment success/failure       |
-| Multi-vendor split | Tách đơn theo vendor khi thanh toán |
+- `features/vendor-analytics` - RevenueChart, OrderStats, TopProducts
+- `widgets/vendor` - VendorDashboard
 
 ---
 
-## 🔍 Search & Discovery
+### Product Management
 
-| Tính năng                 | Mô tả                                     |
-| ------------------------- | ----------------------------------------- |
-| Search suggestions        | Real-time gợi ý với ảnh, giá, category    |
-| Debounced input           | 300ms delay để tránh spam requests        |
-| Search name + description | Tìm trong cả tên và mô tả sản phẩm        |
-| Category filter           | Dropdown chọn danh mục trong search bar   |
-| Keyboard navigation       | ↑↓ Enter Escape để điều hướng suggestions |
-| Mobile search             | Full-screen panel với suggestions         |
+| Tính năng              | Mô tả                                        | Route                        |
+| ---------------------- | -------------------------------------------- | ---------------------------- |
+| **List Products**      | Xem tất cả sản phẩm                          | `/vendor/products`           |
+| **Create Product**     | Thêm sản phẩm mới                            | `/vendor/products/new`       |
+| **Edit Product**       | Chỉnh sửa sản phẩm                           | `/vendor/products/[id]/edit` |
+| **Delete Product**     | Xóa sản phẩm (soft delete)                   | Action                       |
+| **Image Upload**       | Upload nhiều ảnh (Cloudinary)                | ProductForm                  |
+| **Variant Management** | Tạo/sửa variants (color, size, price, stock) | VariantForm                  |
 
----
+**Product Form Fields:**
 
-## 🎨 UI/UX
+- Basic: name, description, category
+- Pricing: price, compareAtPrice (giá gốc)
+- Variants: color, size, SKU, stock
+- Images: multiple, drag-drop, reorder
 
-| Tính năng           | Mô tả                        |
-| ------------------- | ---------------------------- |
-| Responsive design   | Mobile-first với Tailwind    |
-| Dark mode ready     | CSS variables cho theming    |
-| Loading states      | Skeleton loading cho UX mượt |
-| Error boundaries    | Graceful error handling      |
-| Toast notifications | Feedback cho user actions    |
+**Components:**
 
----
-
-## 🔮 Planned Features
-
-| Tính năng              | Priority | Status  |
-| ---------------------- | -------- | ------- |
-| Wishlist               | Medium   | ✅ Done |
-| Reviews & Ratings      | High     | ✅ Done |
-| Review Images          | Medium   | ✅ Done |
-| Vendor Registration    | High     | ✅ Done |
-| Search Suggestions     | High     | ✅ Done |
-| Inventory Management   | High     | ✅ Done |
-| Vendor Analytics       | Medium   | ✅ Done |
-| Account/Profile        | High     | ✅ Done |
-| OAuth Google           | High     | ✅ Done |
-| Forgot Password        | High     | ✅ Done |
-| AI Product Auto-fill   | Medium   | ✅ Done |
-| Cloudinary Integration | High     | ✅ Done |
-| Refund Flow            | High     | Planned |
-| Payment History        | Medium   | Planned |
-| Email Notifications    | High     | Planned |
-| Coupons/Vouchers       | Medium   | Planned |
-| Flash Sales            | Medium   | Planned |
-| Order Tracking         | Medium   | Planned |
-| Review Moderation      | Medium   | Planned |
-| Chat vendor-customer   | Low      | Backlog |
-| Push notifications     | Low      | Backlog |
-| Multi-language (i18n)  | Low      | Backlog |
+- `features/product-form` - ProductForm, ImageUploader
+- `features/product-variants` - VariantForm, VariantTable
+- `entities/product` - createProduct, updateProduct
 
 ---
 
-## 📂 FSD Structure Reference
+### Order Management
+
+| Tính năng            | Mô tả                                          |
+| -------------------- | ---------------------------------------------- |
+| **Order List**       | Xem đơn hàng của shop                          |
+| **Filter by Status** | Lọc theo trạng thái                            |
+| **Update Status**    | Chuyển status (PENDING → PROCESSING → SHIPPED) |
+| **Add Tracking**     | Thêm mã vận đơn khi SHIPPED                    |
+| **Vendor Note**      | Ghi chú nội bộ                                 |
+
+**Status Flow (Vendor):**
 
 ```
-src/
-├── app/                          # App layer - routes, layouts
-│   ├── (customer)/              # Customer routes
-│   ├── (vendor)/                # Vendor routes
-│   └── (admin)/                 # Admin routes
-├── widgets/                      # Widget layer - page compositions
-│   ├── vendor/ui/
-│   │   ├── VendorInventoryPage.tsx
-│   │   └── VendorAnalyticsPage.tsx
-├── features/                     # Feature layer - user interactions
-│   ├── inventory-management/    # ⭐ NEW
-│   │   ├── api/actions.ts       # updateStock, bulkUpdateStock
-│   │   ├── api/queries.ts       # getVendorInventory, getInventoryStats
-│   │   ├── model/types.ts       # StockStatus, InventoryItem
-│   │   └── ui/                  # StockTable, StockStatusBadge, etc.
-│   ├── vendor-analytics/        # ⭐ NEW
-│   │   ├── api/queries.ts       # getVendorAnalytics
-│   │   ├── model/types.ts       # TimeRange, RevenueDataPoint
-│   │   └── ui/                  # Charts, Cards, Filters
-│   └── review/
-│       └── write-review/ui/
-│           └── ReviewImageUpload.tsx  # ⭐ NEW
-├── entities/                     # Entity layer - business objects
-│   ├── review/ui/
-│   │   └── ReviewImageGallery.tsx  # ⭐ NEW
-│   └── ...
-└── shared/                       # Shared layer - utilities
-    ├── lib/constants/
-    │   └── product.ts           # STOCK_LIMITS
-    └── ui/
-        └── image-lightbox.tsx   # ⭐ NEW
+PENDING ──────► PROCESSING ──────► SHIPPED
+   │                                  │
+   │                                  └── Cần nhập tracking number
+   │
+   └── Cancel (if needed)
 ```
+
+**Components:**
+
+- `widgets/vendor` - VendorOrderList, VendorOrderDetail
+- `entities/order` - updateOrderStatus
 
 ---
 
-_Last updated: December 3, 2025_
+### Inventory Management
+
+| Tính năng           | Mô tả                       |
+| ------------------- | --------------------------- |
+| **Stock Overview**  | Xem tồn kho tất cả variants |
+| **Low Stock Alert** | Cảnh báo sắp hết hàng       |
+| **Bulk Update**     | Cập nhật stock hàng loạt    |
+| **Stock History**   | Lịch sử thay đổi stock      |
+
+**Components:**
+
+- `features/inventory-management` - StockEditor, LowStockAlert, StockTable
+
+---
+
+### Earnings Tracking
+
+| Tính năng            | Mô tả                                               |
+| -------------------- | --------------------------------------------------- |
+| **Earnings Summary** | Tổng thu nhập (sau commission)                      |
+| **Commission Rate**  | Xem % phí platform                                  |
+| **Order Breakdown**  | Chi tiết từng đơn (subtotal, platformFee, earnings) |
+
+**Calculation:**
+
+```
+vendorEarnings = subtotal × (1 - commissionRate)
+               = 1,000,000 × (1 - 0.1)
+               = 900,000 VND
+```
+
+**Components:**
+
+- `features/vendor-earnings` - EarningsTable, EarningsSummary
+
+---
+
+### Review Management
+
+| Tính năng        | Mô tả                                       |
+| ---------------- | ------------------------------------------- |
+| **View Reviews** | Xem tất cả reviews của shop                 |
+| **Reply**        | Phản hồi review                             |
+| **Rating Stats** | Thống kê rating (5 sao: 80%, 4 sao: 15%...) |
+
+**Components:**
+
+- `widgets/vendor` - VendorReviews
+- `entities/review` - vendorReply action
+
+---
+
+### Shop Settings
+
+| Tính năng         | Mô tả                               |
+| ----------------- | ----------------------------------- |
+| **Shop Profile**  | Tên shop, description, logo, banner |
+| **Business Info** | Địa chỉ, SĐT, email                 |
+
+**Components:**
+
+- `widgets/vendor` - VendorSettingsForm
+
+---
+
+## 🔐 Admin (Quản trị viên)
+
+### Dashboard Overview
+
+| Metric                | Mô tả                          |
+| --------------------- | ------------------------------ |
+| **Total Users**       | Tổng số users                  |
+| **Total Vendors**     | Số vendors (approved)          |
+| **Total Revenue**     | Tổng doanh thu platform        |
+| **Platform Earnings** | Thu nhập platform (commission) |
+| **Recent Activities** | Hoạt động gần đây              |
+
+**Components:**
+
+- `widgets/admin` - AdminDashboard, AdminStats
+
+---
+
+### Vendor Approval
+
+| Tính năng              | Mô tả                          |
+| ---------------------- | ------------------------------ |
+| **Pending List**       | Danh sách vendor chờ duyệt     |
+| **Review Application** | Xem thông tin đăng ký          |
+| **Approve**            | Chấp nhận vendor               |
+| **Reject**             | Từ chối kèm lý do              |
+| **Suspend**            | Đình chỉ vendor đang hoạt động |
+
+**Vendor Status Flow:**
+
+```
+          Approve
+PENDING ──────────► APPROVED ◄─────► SUSPENDED
+    │                                    │
+    │ Reject                             │
+    ▼                                    ▼
+REJECTED                          Can be re-approved
+```
+
+**Components:**
+
+- `widgets/admin` - VendorApprovalList, VendorApprovalDetail
+
+---
+
+### Category Management
+
+| Tính năng           | Mô tả                       |
+| ------------------- | --------------------------- |
+| **List Categories** | Xem tất cả categories       |
+| **Create Category** | Thêm category mới           |
+| **Edit Category**   | Sửa name, slug, image       |
+| **Delete Category** | Xóa (nếu không có products) |
+
+**Components:**
+
+- `widgets/admin` - CategoryManagement
+- `entities/category` - CategoryForm
+
+---
+
+### Order Oversight
+
+| Tính năng       | Mô tả                               |
+| --------------- | ----------------------------------- |
+| **All Orders**  | Xem tất cả orders trong hệ thống    |
+| **Filter**      | Lọc theo status, vendor, date range |
+| **Order Stats** | Thống kê orders by status           |
+
+**Components:**
+
+- `widgets/admin` - AdminOrderList
+
+---
+
+## 🔧 Shared Features
+
+### Authentication
+
+| Tính năng           | Route                |
+| ------------------- | -------------------- |
+| **Login**           | `/login`             |
+| **Register**        | `/register`          |
+| **Vendor Register** | `/vendor-register`   |
+| **Logout**          | Action               |
+| **Google OAuth**    | Button on login page |
+
+**Components:**
+
+- `features/auth` - LoginForm, RegisterForm, VendorRegisterForm
+
+---
+
+### Profile Management
+
+| Tính năng        | Mô tả                                |
+| ---------------- | ------------------------------------ |
+| **View Profile** | Xem thông tin cá nhân tại `/profile` |
+| **Edit Profile** | Cập nhật name, phone, avatar         |
+
+**Components:**
+
+- `features/profile` - ProfileForm
+
+---
+
+## 🎨 AI Features
+
+### AI Product Generator
+
+| Tính năng                | Mô tả                        |
+| ------------------------ | ---------------------------- |
+| **Generate Description** | AI tạo mô tả sản phẩm từ tên |
+| **Suggest Tags**         | Gợi ý tags/keywords          |
+| **Improve Content**      | Cải thiện content đã có      |
+
+**Integration:** OpenAI API
+
+**Components:**
+
+- `features/ai-product-generator` - AIProductForm
+
+---
+
+## 📱 Responsive Design
+
+Tất cả pages đều responsive:
+
+| Breakpoint | Width      | Notes                     |
+| ---------- | ---------- | ------------------------- |
+| Mobile     | < 640px    | Single column, bottom nav |
+| Tablet     | 640-1024px | 2 columns                 |
+| Desktop    | > 1024px   | Full layout với sidebar   |

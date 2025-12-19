@@ -1,487 +1,279 @@
-# 🔌 API Reference
+# Vendoor - API Reference
 
-Tài liệu chi tiết về Server Actions và Queries trong Vendoor.
-
----
-
-## 📖 Conventions
-
-### File Structure
-
-```
-src/entities/{entity}/api/
-├── queries.ts    # Read operations (SELECT)
-└── actions.ts    # Write operations (INSERT/UPDATE/DELETE)
-```
-
-### Response Pattern
-
-```typescript
-// Success
-{ success: true, data: T }
-
-// Error
-{ success: false, error: string }
-```
-
-### Caching
-
-- **Queries**: Wrapped với `cache()` + `unstable_cache()`
-- **Actions**: Gọi `revalidateTag(tag, "max")` sau mutation
+Tài liệu API endpoints và Server Actions trong dự án.
 
 ---
 
-## 🛍️ Product
+## 📋 Overview
 
-### Queries (`src/entities/product/api/queries.ts`)
+Vendoor sử dụng **Server Actions** cho hầu hết mutations thay vì REST API. Tuy nhiên có một số API Routes cho webhook và auth.
 
-#### `getProducts(options)`
+---
 
-Lấy danh sách sản phẩm với filter, sort, pagination.
+## 🔐 Authentication API
+
+### Better Auth Endpoints
+
+| Method | Endpoint                                   | Description          |
+| ------ | ------------------------------------------ | -------------------- |
+| POST   | `/api/auth/sign-up/email`                  | Đăng ký bằng email   |
+| POST   | `/api/auth/sign-in/email`                  | Đăng nhập bằng email |
+| POST   | `/api/auth/sign-out`                       | Đăng xuất            |
+| GET    | `/api/auth/session`                        | Lấy session hiện tại |
+| GET    | `/api/auth/sign-in/social?provider=google` | OAuth Google         |
+
+**Example - Sign Up:**
 
 ```typescript
-const products = await getProducts({
-  categorySlug?: string,      // Filter by category
-  vendorId?: string,          // Filter by vendor
-  minPrice?: number,          // Price range
-  maxPrice?: number,
-  minRating?: number,         // Min rating (1-5)
-  search?: string,            // Search in name, description
-  sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'popular',
-  page?: number,              // Pagination (default: 1)
-  limit?: number,             // Items per page (default: 12)
+// Client-side
+import { signUp } from "@/shared/lib/auth";
+
+await signUp.email({
+  email: "user@example.com",
+  password: "password123",
+  name: "John Doe",
 });
-
-// Returns: { products: Product[], total: number, totalPages: number }
 ```
 
-#### `getProductBySlug(slug)`
-
-Lấy chi tiết sản phẩm.
+**Example - Sign In:**
 
 ```typescript
-const product = await getProductBySlug("iphone-15-pro-max");
+import { signIn } from "@/shared/lib/auth";
 
-// Returns: Product | null
-// Includes: variants, images, category, vendor, reviews
+await signIn.email({
+  email: "user@example.com",
+  password: "password123",
+});
 ```
 
-#### `getCachedProductBySlug(slug)`
+---
 
-Version cached của `getProductBySlug`.
+## 💳 Webhook Endpoints
+
+### Stripe Webhook
+
+| Method | Endpoint               | Description            |
+| ------ | ---------------------- | ---------------------- |
+| POST   | `/api/webhooks/stripe` | Stripe payment webhook |
+
+**Events Handled:**
+
+- `checkout.session.completed` - Payment thành công
+
+**Implementation:**
 
 ```typescript
-const product = await getCachedProductBySlug("iphone-15-pro-max");
-// Cache: 2 phút, tags: ['products', 'product:{slug}']
+// app/api/webhooks/stripe/route.ts
+export async function POST(req: Request) {
+  const sig = req.headers.get("stripe-signature");
+  const event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
+
+  switch (event.type) {
+    case "checkout.session.completed":
+      // Update order status to PENDING
+      // Update payment status to COMPLETED
+      break;
+  }
+
+  return Response.json({ received: true });
+}
 ```
 
-#### `getFeaturedProducts(limit)`
+---
 
-Lấy sản phẩm nổi bật cho trang chủ.
+## ⚡ Server Actions
 
-```typescript
-const featured = await getFeaturedProducts(8);
-// Returns: Product[] (sorted by rating, stock > 0)
-```
+### Product Actions
 
-#### `getRelatedProducts(productId, categoryId, limit)`
+| Action                 | Location                          | Description                |
+| ---------------------- | --------------------------------- | -------------------------- |
+| `createProduct`        | `entities/product/api/actions.ts` | Tạo sản phẩm mới           |
+| `updateProduct`        | `entities/product/api/actions.ts` | Cập nhật sản phẩm          |
+| `deleteProduct`        | `entities/product/api/actions.ts` | Xóa sản phẩm (soft delete) |
+| `searchProductsAction` | `entities/product/api/actions.ts` | Tìm kiếm sản phẩm          |
 
-Lấy sản phẩm liên quan.
-
-```typescript
-const related = await getRelatedProducts(productId, categoryId, 4);
-// Returns: Product[] (cùng category, exclude current)
-```
-
-#### `searchProducts(query, limit)`
-
-Tìm kiếm sản phẩm (cho autocomplete).
+**Example - Create Product:**
 
 ```typescript
-const results = await searchProducts("iphone", 5);
-// Returns: { id, name, slug, price, image }[]
-```
+import { createProduct } from "@/entities/product";
 
-### Actions (`src/entities/product/api/actions.ts`)
-
-#### `createProduct(data)`
-
-Tạo sản phẩm mới (Vendor only).
-
-```typescript
 const result = await createProduct({
-  name: string,
-  slug: string,
-  description?: string,
-  categoryId: string,
-  variants: [{
-    name?: string,
-    price: number,
-    compareAtPrice?: number,
-    stock: number,
-    sku?: string,
-    color?: string,
-    size?: string,
-    isDefault: boolean,
-  }],
-  images: [{ url: string, alt?: string, order: number }],
+  name: "iPhone 15",
+  description: "Latest iPhone",
+  categoryId: "cat_123",
+  variants: [{ price: 25000000, stock: 10, color: "Black", size: null }],
+  images: [{ url: "https://cloudinary.com/...", order: 0 }],
 });
 
-// Revalidates: products, products:vendor:{vendorId}
-```
-
-#### `updateProduct(id, data)`
-
-Cập nhật sản phẩm.
-
-```typescript
-const result = await updateProduct(productId, {
-  name?: string,
-  description?: string,
-  categoryId?: string,
-  isActive?: boolean,
-});
-
-// Revalidates: products, product:{slug}
-```
-
-#### `deleteProduct(id)`
-
-Soft delete sản phẩm (set `isActive: false`).
-
-```typescript
-const result = await deleteProduct(productId);
-// Revalidates: products, product:{slug}
+if (result.success) {
+  console.log(result.product);
+}
 ```
 
 ---
 
-## 📦 Order
+### Checkout Actions
 
-### Queries (`src/entities/order/api/queries.ts`)
+| Action             | Location                           | Description                   |
+| ------------------ | ---------------------------------- | ----------------------------- |
+| `validateCheckout` | `features/checkout/api/actions.ts` | Validate stock trước checkout |
+| `createOrders`     | `features/checkout/api/actions.ts` | Tạo orders từ cart            |
 
-#### `getOrdersByUser(userId, options)`
-
-Lấy đơn hàng của customer.
-
-```typescript
-const orders = await getOrdersByUser(userId, {
-  status?: OrderStatus,
-  page?: number,
-  limit?: number,
-});
-
-// Returns: { orders: Order[], total: number }
-```
-
-#### `getOrdersByVendor(vendorId, options)`
-
-Lấy đơn hàng của vendor.
+**Example - Create Orders:**
 
 ```typescript
-const orders = await getOrdersByVendor(vendorId, {
-  status?: OrderStatus,
-  page?: number,
-  limit?: number,
-});
-```
-
-#### `getOrderById(id)`
-
-Chi tiết đơn hàng.
-
-```typescript
-const order = await getOrderById(orderId);
-// Includes: items, shippingAddress, vendor, customer
-```
-
-### Actions (`src/entities/order/api/actions.ts`)
-
-#### `updateOrderStatus(orderId, status)`
-
-Cập nhật trạng thái đơn hàng.
-
-```typescript
-const result = await updateOrderStatus(orderId, "SHIPPED");
-
-// Status flow: PENDING → PROCESSING → SHIPPED → DELIVERED
-//                                             → CANCELLED
-// Revalidates: orders, order:{id}
-```
-
----
-
-## 🛒 Cart
-
-Cart sử dụng **Zustand** (client-side), không có server API.
-
-### Store (`src/entities/cart/model/store.ts`)
-
-```typescript
-import { useCartStore } from "@/entities/cart";
-
-// Get state
-const items = useCartStore((state) => state.items);
-
-// Actions
-useCartStore.getState().addItem(item);
-useCartStore.getState().updateQuantity(variantId, quantity);
-useCartStore.getState().removeItem(variantId);
-useCartStore.getState().clearCart();
-useCartStore.getState().syncStock(stockData);
-```
-
----
-
-## ⭐ Wishlist
-
-### Queries (`src/entities/wishlist/api/queries.ts`)
-
-#### `getWishlist(userId)`
-
-Lấy danh sách wishlist.
-
-```typescript
-const wishlist = await getWishlist(userId);
-// Returns: WishlistItem[] (includes product details)
-```
-
-#### `isInWishlist(userId, productId)`
-
-Check sản phẩm có trong wishlist.
-
-```typescript
-const inWishlist = await isInWishlist(userId, productId);
-// Returns: boolean
-```
-
-### Actions (`src/entities/wishlist/api/actions.ts`)
-
-#### `toggleWishlist(userId, productId)`
-
-Toggle sản phẩm trong wishlist.
-
-```typescript
-const result = await toggleWishlist(userId, productId);
-// Returns: { success: true, data: { added: boolean } }
-// Revalidates: wishlist
-```
-
----
-
-## ⭐ Review
-
-### Queries (`src/entities/review/api/queries.ts`)
-
-#### `getProductReviews(productId, options)`
-
-Lấy reviews của sản phẩm.
-
-```typescript
-const reviews = await getProductReviews(productId, {
-  page?: number,
-  limit?: number,
-  sortBy?: 'newest' | 'rating_high' | 'rating_low',
-});
-
-// Returns: { reviews: Review[], stats: { average, total, distribution } }
-```
-
-### Actions (`src/entities/review/api/actions.ts`)
-
-#### `createReview(data)`
-
-Tạo review mới.
-
-```typescript
-const result = await createReview({
-  productId: string,
-  rating: number,       // 1-5
-  title?: string,
-  comment?: string,
-  images?: string[],    // Cloudinary URLs
-});
-
-// Validates: User đã mua + nhận hàng
-// Revalidates: reviews, reviews:product:{id}
-```
-
-#### `replyToReview(reviewId, reply)` (Vendor)
-
-Vendor phản hồi review.
-
-```typescript
-const result = await replyToReview(reviewId, "Cảm ơn bạn đã đánh giá!");
-```
-
----
-
-## 🏪 Vendor
-
-### Queries (`src/entities/vendor/api/queries.ts`)
-
-#### `getVendorProfile(userId)`
-
-Lấy thông tin vendor của user.
-
-```typescript
-const vendor = await getVendorProfile(userId);
-// Returns: VendorProfile | null
-```
-
-#### `getPublicVendors(options)`
-
-Lấy danh sách vendor công khai.
-
-```typescript
-const vendors = await getPublicVendors({
-  page?: number,
-  limit?: number,
-  search?: string,
-});
-```
-
-#### `getVendorStats(vendorId)`
-
-Thống kê cho vendor dashboard.
-
-```typescript
-const stats = await getVendorStats(vendorId);
-// Returns: { totalOrders, revenue, productCount, avgRating }
-```
-
-### Actions (`src/entities/vendor/api/actions.ts`)
-
-#### `registerVendor(data)`
-
-Đăng ký bán hàng.
-
-```typescript
-const result = await registerVendor({
-  shopName: string,
-  description?: string,
-  businessAddress?: string,
-  businessPhone?: string,
-  businessEmail?: string,
-});
-
-// Creates VendorProfile with status: PENDING
-```
-
-#### `approveVendor(vendorId)` (Admin)
-
-Duyệt vendor.
-
-```typescript
-const result = await approveVendor(vendorId);
-// Updates status: PENDING → APPROVED
-// Adds VENDOR role to user
-```
-
----
-
-## 📁 Category
-
-### Queries (`src/entities/category/api/queries.ts`)
-
-#### `getCategories()`
-
-Lấy tất cả categories.
-
-```typescript
-const categories = await getCategories();
-// Returns: Category[]
-```
-
-#### `getCategoriesWithCount()`
-
-Categories với số lượng sản phẩm.
-
-```typescript
-const categories = await getCategoriesWithCount();
-// Returns: (Category & { _count: { products: number } })[]
-```
-
-### Actions (`src/entities/category/api/actions.ts`)
-
-#### `createCategory(data)` (Admin)
-
-Tạo category mới.
-
-```typescript
-const result = await createCategory({
-  name: string,
-  slug: string,
-  description?: string,
-  image?: string,
-});
-```
-
----
-
-## 💳 Checkout
-
-### Actions (`src/features/checkout/api/actions.ts`)
-
-#### `createOrder(data)`
-
-Tạo đơn hàng từ cart.
-
-```typescript
-const result = await createOrder({
-  items: CartItem[],
-  shippingAddress: {
-    fullName: string,
-    phone: string,
-    address: string,
-    ward: string,
-    district: string,
-    province: string,
+import { createOrders } from "@/features/checkout";
+
+const result = await createOrders(
+  cartItems, // CartItem[]
+  {
+    // ShippingInfo
+    name: "Nguyen Van A",
+    phone: "0901234567",
+    address: "123 ABC Street",
+    city: "Ho Chi Minh",
+    district: "District 1",
+    ward: "Ward 1",
+    note: "Call before delivery",
   },
-  paymentMethod: 'COD' | 'STRIPE',
-  note?: string,
-});
+  "COD" // PaymentMethod: "COD" | "STRIPE"
+);
 
-// Returns: { success: true, data: { orderId, stripeSessionId? } }
-// Revalidates: orders, products (stock update)
-```
-
-#### `verifyStripePayment(sessionId)`
-
-Verify thanh toán Stripe.
-
-```typescript
-const result = await verifyStripePayment(sessionId);
-// Updates order status: PENDING → PROCESSING
+if (result.success) {
+  // result.orders - Array of created orders
+  // result.totalAmount - Total amount
+  // result.paymentId - Payment ID
+}
 ```
 
 ---
 
-## 🔐 Authentication
+### Order Actions
 
-### Guards (`src/entities/user/api/guards.ts`)
+| Action              | Location                        | Description                  |
+| ------------------- | ------------------------------- | ---------------------------- |
+| `updateOrderStatus` | `entities/order/api/actions.ts` | Cập nhật trạng thái đơn hàng |
+| `cancelOrder`       | `entities/order/api/actions.ts` | Hủy đơn hàng                 |
 
-```typescript
-import { requireAuth, requireVendor, requireAdmin } from "@/entities/user";
-
-// In Server Components or Actions
-const user = await requireAuth();        // Throws if not logged in
-const vendor = await requireVendor();    // Throws if not vendor
-const admin = await requireAdmin();      // Throws if not admin
-```
-
-### Queries (`src/entities/user/api/queries.ts`)
-
-#### `getCurrentUser()`
+**Example - Update Status:**
 
 ```typescript
-const user = await getCurrentUser();
-// Returns: User | null
+import { updateOrderStatus } from "@/entities/order";
+
+// Vendor cập nhật status
+await updateOrderStatus(orderId, "PROCESSING");
+await updateOrderStatus(orderId, "SHIPPED", { trackingNumber: "VN123456" });
 ```
 
-#### `getCurrentUserProfile()`
+---
+
+### Review Actions
+
+| Action         | Location                         | Description         |
+| -------------- | -------------------------------- | ------------------- |
+| `createReview` | `entities/review/api/actions.ts` | Tạo review mới      |
+| `replyReview`  | `entities/review/api/actions.ts` | Vendor reply review |
+
+**Example - Create Review:**
 
 ```typescript
-const profile = await getCurrentUserProfile();
-// Returns: User with orders count, reviews count
+import { createReview } from "@/entities/review";
+
+await createReview({
+  productId: "prod_123",
+  rating: 5,
+  title: "Great product!",
+  content: "Very satisfied with this purchase.",
+  images: ["https://..."],
+});
 ```
+
+---
+
+### Wishlist Actions
+
+| Action               | Location                           | Description       |
+| -------------------- | ---------------------------------- | ----------------- |
+| `addToWishlist`      | `features/wishlist/api/actions.ts` | Thêm vào wishlist |
+| `removeFromWishlist` | `features/wishlist/api/actions.ts` | Xóa khỏi wishlist |
+
+---
+
+### Vendor Actions
+
+| Action                | Location                                      | Description             |
+| --------------------- | --------------------------------------------- | ----------------------- |
+| `registerVendor`      | `features/vendor-registration/api/actions.ts` | Đăng ký vendor          |
+| `updateVendorProfile` | `entities/vendor/api/actions.ts`              | Cập nhật thông tin shop |
+
+---
+
+### Admin Actions
+
+| Action           | Location                           | Description       |
+| ---------------- | ---------------------------------- | ----------------- |
+| `approveVendor`  | `widgets/admin/api/actions.ts`     | Approve vendor    |
+| `rejectVendor`   | `widgets/admin/api/actions.ts`     | Reject vendor     |
+| `createCategory` | `entities/category/api/actions.ts` | Tạo category mới  |
+| `updateCategory` | `entities/category/api/actions.ts` | Cập nhật category |
+| `deleteCategory` | `entities/category/api/actions.ts` | Xóa category      |
+
+---
+
+### Upload Actions
+
+| Action        | Location                       | Description               |
+| ------------- | ------------------------------ | ------------------------- |
+| `uploadImage` | `shared/lib/upload/actions.ts` | Upload ảnh lên Cloudinary |
+| `deleteImage` | `shared/lib/upload/actions.ts` | Xóa ảnh từ Cloudinary     |
+
+**Example - Upload Image:**
+
+```typescript
+import { uploadImage } from "@/shared/lib/upload";
+
+const formData = new FormData();
+formData.append("file", file);
+
+const result = await uploadImage(formData);
+// result.url - Cloudinary URL
+```
+
+---
+
+## 📊 Data Queries (Server-Only)
+
+Các queries chỉ dùng trong Server Components:
+
+| Query               | Location                                   | Description       |
+| ------------------- | ------------------------------------------ | ----------------- |
+| `getProducts`       | `entities/product/api/queries.ts`          | List products     |
+| `getProductBySlug`  | `entities/product/api/queries.ts`          | Chi tiết product  |
+| `getCategories`     | `entities/category/api/queries.ts`         | List categories   |
+| `getOrdersByUser`   | `entities/order/api/queries.ts`            | Orders của user   |
+| `getOrdersByVendor` | `entities/order/api/queries.ts`            | Orders của vendor |
+| `getVendorStats`    | `features/vendor-analytics/api/queries.ts` | Thống kê vendor   |
+| `getAdminStats`     | `widgets/admin/api/queries.ts`             | Thống kê admin    |
+
+**Example - Get Products:**
+
+```typescript
+// Server Component only!
+import { getProducts } from "@/entities/product/api/queries";
+
+const { products, pagination } = await getProducts({
+  categorySlug: "electronics",
+  minPrice: 1000000,
+  maxPrice: 50000000,
+  sort: "price_asc",
+  page: 1,
+  limit: 12,
+});
+```
+
+---
+
+## 🔗 Related Documentation
+
+- [DATA_FLOW.md](./DATA_FLOW.md) - Luồng data chi tiết
+- [TECHNICAL_DECISIONS.md](./TECHNICAL_DECISIONS.md) - Tại sao Server Actions

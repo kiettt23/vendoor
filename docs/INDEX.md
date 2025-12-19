@@ -1,147 +1,77 @@
-# 📚 Vendoor Documentation Index
+# Vendoor Documentation
 
-> Tổng hợp tất cả documentation của dự án Vendoor.
+Bộ tài liệu toàn diện cho dự án Vendoor - Sàn thương mại điện tử đa người bán.
 
----
+## 📚 Mục lục
 
-## 🚀 Bắt Đầu
+### Core Documentation
 
-| Tài liệu | Mô tả |
-|----------|-------|
-| [Quick Start](./QUICKSTART.md) | Setup dự án trong 5 phút |
-| [Commands](./COMMANDS.md) | Danh sách scripts và lệnh thường dùng |
-| [Contributing](../CONTRIBUTING.md) | Hướng dẫn đóng góp code |
+| Tài liệu                                           | Mô tả                                       |
+| -------------------------------------------------- | ------------------------------------------- |
+| [OVERVIEW.md](./OVERVIEW.md)                       | Tổng quan dự án, tech stack, roles          |
+| [ARCHITECTURE.md](./ARCHITECTURE.md)               | Feature-Sliced Design & layer structure     |
+| [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)     | Chi tiết cấu trúc thư mục                   |
+| [TECHNICAL_DECISIONS.md](./TECHNICAL_DECISIONS.md) | Giải thích các quyết định kỹ thuật          |
+| [DATABASE.md](./DATABASE.md)                       | Database schema (Neon + Prisma), models     |
+| [FEATURES.md](./FEATURES.md)                       | Tính năng theo role (Customer/Vendor/Admin) |
+| [DATA_FLOW.md](./DATA_FLOW.md)                     | Luồng hoạt động chính                       |
 
----
+### Business & Logic
 
-## 🏗️ Kiến Trúc & Cấu Trúc
+| Tài liệu                                   | Mô tả                                     |
+| ------------------------------------------ | ----------------------------------------- |
+| [BUSINESS_LOGIC.md](./BUSINESS_LOGIC.md)   | Business rules, tính toán, ràng buộc      |
+| [DATA_FLOW.md](./DATA_FLOW.md)             | Luồng hoạt động chính (checkout, auth...) |
 
-| Tài liệu | Mô tả |
-|----------|-------|
-| [Architecture](./ARCHITECTURE.md) | Feature-Sliced Design, layer structure |
-| [Code Map](./CODE_MAP.md) | Cấu trúc thư mục chi tiết |
-| [Database Schema](./DATABASE_SCHEMA.md) | Prisma models, relations, constraints |
-| [API Reference](./API_REFERENCE.md) | Server Actions & Queries documentation |
+### Development & Operations
 
----
+| Tài liệu                                     | Mô tả                             |
+| -------------------------------------------- | --------------------------------- |
+| [API_REFERENCE.md](./API_REFERENCE.md)       | API endpoints & Server Actions    |
+| [CACHING_STRATEGY.md](./CACHING_STRATEGY.md) | Chiến lược caching chi tiết       |
+| [DEPLOYMENT.md](./DEPLOYMENT.md)             | Hướng dẫn deploy (Vercel, Docker) |
+| [CONTRIBUTING.md](./CONTRIBUTING.md)         | Hướng dẫn đóng góp code           |
+| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)   | Xử lý lỗi thường gặp              |
 
-## ⚡ Performance & Optimization
+### Testing
 
-| Tài liệu | Mô tả |
-|----------|-------|
-| [Caching Strategy](./CACHING_STRATEGY.md) | Multi-layer caching (React Query, unstable_cache, revalidateTag) |
+| Tài liệu                                   | Mô tả                                         |
+| ------------------------------------------ | --------------------------------------------- |
+| [TESTING.md](./TESTING.md)                 | Testing strategy, commands, coverage          |
+| [MANUAL_TESTING.md](./MANUAL_TESTING.md)   | Checklist test thủ công trước release         |
 
----
+### Learning Resources
 
-## ✨ Tính Năng
+| Tài liệu                       | Mô tả                             |
+| ------------------------------ | --------------------------------- |
+| [CODE_TOUR.md](./CODE_TOUR.md) | 🎒 Tour hướng dẫn đọc code từ đầu |
 
-| Tài liệu | Mô tả |
-|----------|-------|
-| [Features](./FEATURES.md) | Danh sách tính năng theo role (Customer, Vendor, Admin) |
-| [User Flows](./USER_FLOWS.md) | Luồng xử lý nghiệp vụ (checkout, order lifecycle) |
-| [Stripe Setup](./STRIPE_SETUP.md) | Hướng dẫn cấu hình thanh toán Stripe |
-
----
-
-## 🧪 Testing
-
-| Tài liệu | Mô tả |
-|----------|-------|
-| [Testing](./TESTING.md) | Strategy, structure, best practices |
-| [Manual Testing](./MANUAL_TESTING.md) | Checklist test thủ công |
-
----
-
-## 📋 Roadmap & Status
-
-| Tài liệu | Mô tả |
-|----------|-------|
-| [Missing Features](./MISSING_FEATURES.md) | Tính năng chưa implement |
-| [Improvements](./IMPROVEMENTS.md) | Cải tiến kỹ thuật cần làm |
-
----
-
-## 📖 Quick Reference
-
-### Tech Stack
-
-| Công nghệ | Version | Vai trò |
-|-----------|---------|---------|
-| Next.js | 16 | Framework (App Router) |
-| React | 19 | UI Library |
-| TypeScript | 5 | Type Safety |
-| Prisma | 7 | Database ORM |
-| PostgreSQL | - | Database |
-| Better Auth | 1.3 | Authentication |
-| Zustand | 5 | Client State (Cart) |
-| Tailwind CSS | 4 | Styling |
-| Shadcn/UI | - | UI Components |
-| React Query | 5 | Server State |
-| Cloudinary | - | Image Optimization |
-| Stripe | - | Payment |
-| Vitest | 4 | Unit Testing |
-| Playwright | 1.57 | E2E Testing |
-
-### FSD Layer Hierarchy
-
-```
-src/
-├── app/          # Layer 1: Routing & Pages
-├── widgets/      # Layer 2: Page sections (Header, Footer)
-├── features/     # Layer 3: User interactions (AddToCart, Checkout)
-├── entities/     # Layer 4: Business objects (Product, Order, Cart)
-└── shared/       # Layer 5: Reusable code (UI, lib, hooks)
-
-Import rule: app → widgets → features → entities → shared
-```
-
-### Test Accounts
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | `admin@vendoor.com` | `Kiet1461!` |
-| Vendor | `vendor@vendoor.com` | `Kiet1461!` |
-| Customer | `customer@vendoor.com` | `Kiet1461!` |
-
-### Common Commands
+## ⚡ Quick Start
 
 ```bash
-# Development
-pnpm dev              # Start dev server
-pnpm build            # Production build
-pnpm start            # Start production
+# 1. Clone & install
+git clone <repo-url>
+cd vendoor
+pnpm install
 
-# Testing
-pnpm test             # Unit tests (Vitest)
-pnpm test:e2e         # E2E tests (Playwright)
-pnpm test:coverage    # Coverage report
+# 2. Setup environment
+cp .env.example .env
+# Fill DATABASE_URL, BETTER_AUTH_SECRET, CLOUDINARY_*
 
-# Database
-pnpm db:studio        # Prisma Studio
-pnpm db:seed          # Seed sample data
-pnpm db:reset         # Reset database
+# 3. Database
+pnpm prisma migrate dev
+pnpm db:seed
+
+# 4. Run
+pnpm dev
 ```
 
-### Key Directories
+Mở http://localhost:3000 🎉
 
-| Path | Mô tả |
-|------|-------|
-| `src/app/` | Next.js App Router (routes, layouts) |
-| `src/entities/` | Business logic: product, order, cart, user, vendor |
-| `src/features/` | Interactive features: checkout, wishlist, auth |
-| `src/widgets/` | Page sections: header, footer, checkout page |
-| `src/shared/ui/` | Shadcn/UI components |
-| `src/shared/lib/` | Utilities, constants, auth config |
-| `prisma/` | Schema, migrations, seed |
-| `tests/` | E2E tests (Playwright) |
+## 👤 Test Accounts
 
----
-
-## 🔗 External Links
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Prisma Documentation](https://www.prisma.io/docs)
-- [Better Auth](https://www.better-auth.com/)
-- [Shadcn/UI](https://ui.shadcn.com/)
-- [Feature-Sliced Design](https://feature-sliced.design/)
-- [React Query](https://tanstack.com/query/latest)
+| Role     | Email                  | Password    |
+| -------- | ---------------------- | ----------- |
+| Admin    | `admin@vendoor.com`    | `Kiet1461!` |
+| Vendor   | `vendor@vendoor.com`   | `Kiet1461!` |
+| Customer | `customer@vendoor.com` | `Kiet1461!` |

@@ -1,334 +1,411 @@
-# 🧪 Testing
+# Vendoor - Testing Guide
 
-Test coverage cho các tính năng trong Vendoor. Đối chiếu với `FEATURES.md`.
+Tài liệu hướng dẫn testing strategy, cách chạy tests, và coverage của dự án.
 
 ---
 
-## 📊 Tổng quan
+## 📋 Mục lục
 
-| Loại Test   | Files | Tests | Status  |
+1. [Overview](#1-overview)
+2. [Test Commands](#2-test-commands)
+3. [Unit Tests](#3-unit-tests)
+4. [Integration Tests](#4-integration-tests)
+5. [E2E Tests](#5-e2e-tests)
+6. [Test Patterns](#6-test-patterns)
+7. [Writing New Tests](#7-writing-new-tests)
+
+---
+
+## 1. Overview
+
+### Test Distribution
+
+| Type        | Files | Tests | Purpose |
 | ----------- | ----- | ----- | ------- |
-| Unit        | 20    | 355+  | ✅ Pass |
-| Integration | 2     | 13    | ✅ Pass |
-| E2E         | 5     | 25+   | ✅ Pass |
+| Unit        | 7     | 215   | Pure functions, schemas, utils |
+| Integration | 4     | 78    | Multi-module flows với mocked DB |
+| E2E         | 3     | ~35   | Full user journeys |
+| **Total**   | **14**| **293+** | |
 
-**Total: 375 tests**
+### Tools
 
-**Commands:**
+| Tool | Purpose |
+|------|---------|
+| **Vitest** | Unit & Integration testing |
+| **Playwright** | E2E browser testing |
+| **Testing Library** | DOM assertions |
+
+### File Structure
+
+```
+vendoor/
+├── src/
+│   ├── shared/lib/utils/__tests__/     # Shared utils tests
+│   ├── entities/
+│   │   ├── cart/__tests__/             # Cart entity tests
+│   │   ├── order/__tests__/            # Order entity tests
+│   │   └── product/__tests__/          # Product entity tests
+│   └── features/
+│       ├── auth/__tests__/             # Auth feature tests
+│       └── checkout/__tests__/         # Checkout feature tests
+├── tests/
+│   ├── setup.ts                        # Global test setup
+│   ├── helpers/
+│   │   ├── mocks.ts                    # Mock factories
+│   │   └── fixtures.ts                 # Test data factories
+│   ├── integration/
+│   │   ├── auth/                       # Auth integration tests
+│   │   ├── checkout/                   # Checkout integration tests
+│   │   └── inventory/                  # Inventory integration tests
+│   └── e2e/
+│       ├── auth.spec.ts                # Auth E2E tests
+│       ├── checkout-flow.spec.ts       # Checkout E2E tests
+│       └── vendor-flow.spec.ts         # Vendor E2E tests
+├── vitest.config.ts
+└── playwright.config.ts
+```
+
+---
+
+## 2. Test Commands
+
+### Unit & Integration Tests (Vitest)
 
 ```bash
-pnpm test          # Unit + Integration
-pnpm test:e2e      # E2E (cần dev server)
-pnpm test:coverage # Coverage report
+# Run all tests
+pnpm test
+
+# Watch mode
+pnpm test -- --watch
+
+# Run specific file
+pnpm test -- src/entities/cart/__tests__/utils.test.ts
+
+# Run with pattern
+pnpm test -- cart
+
+# Coverage report
+pnpm test:coverage
+```
+
+### E2E Tests (Playwright)
+
+```bash
+# Run all E2E tests
+pnpm test:e2e
+
+# UI mode (interactive)
+pnpm test:e2e:ui
+
+# Run specific file
+pnpm test:e2e -- tests/e2e/auth.spec.ts
+
+# Run with headed browser
+pnpm test:e2e -- --headed
+
+# Debug mode
+pnpm test:e2e -- --debug
 ```
 
 ---
 
-## 🛒 Customer Features
-
-### Giỏ Hàng & Thanh Toán
-
-| Tính năng                  | Test File                       | Tests | Status |
-| -------------------------- | ------------------------------- | ----- | ------ |
-| Thêm/xóa/cập nhật giỏ hàng | `cart/model/store.test.ts`      | 11    | ✅     |
-| Nhóm sản phẩm theo vendor  | `cart/lib/utils.test.ts`        | 4     | ✅     |
-| Tính subtotal mỗi vendor   | `cart/lib/utils.test.ts`        | 2     | ✅     |
-| Tính phí ship theo vendor  | `cart/lib/utils.test.ts`        | 2     | ✅     |
-| Tính platform fee          | `cart/lib/utils.test.ts`        | 1     | ✅     |
-| Checkout form validation   | `checkout/model/schema.test.ts` | 17    | ✅     |
-| Checkout flow              | `e2e/customer-journey.spec.ts`  | 2     | ✅     |
-
-### Quản Lý Đơn Hàng
-
-| Tính năng                  | Test File                 | Tests | Status |
-| -------------------------- | ------------------------- | ----- | ------ |
-| Tính commission            | `order/lib/utils.test.ts` | 3     | ✅     |
-| Prepare order data         | `order/lib/utils.test.ts` | 6     | ✅     |
-| Validate status transition | `order/lib/utils.test.ts` | 12    | ✅     |
-
-### Đánh Giá Sản Phẩm ⭐
-
-| Tính năng                     | Test File                      | Tests | Status |
-| ----------------------------- | ------------------------------ | ----- | ------ |
-| createReviewSchema validation | `review/model/schema.test.ts`  | 22    | ✅     |
-| vendorReplySchema validation  | `review/model/schema.test.ts`  | 7     | ✅     |
-| Image upload validation       | `upload/validation.test.ts`    | 26    | ✅     |
-| Image lightbox                | `e2e/product-features.spec.ts` | 2     | ✅     |
-
-### Image Upload Utilities
-
-| Tính năng              | Test File                          | Tests | Status |
-| ---------------------- | ---------------------------------- | ----- | ------ |
-| validateImageFile      | `upload/validation.test.ts`        | 9     | ✅     |
-| validateFileSize       | `upload/validation.test.ts`        | 6     | ✅     |
-| validateFileType       | `upload/validation.test.ts`        | 5     | ✅     |
-| validateImageFiles     | `upload/validation.test.ts`        | 6     | ✅     |
-| buildTransformString   | `upload/cloudinary-loader.test.ts` | 10    | ✅     |
-| isCloudinaryUrl        | `upload/cloudinary-loader.test.ts` | 6     | ✅     |
-| transformCloudinaryUrl | `upload/cloudinary-loader.test.ts` | 7     | ✅     |
-| getBlurPlaceholderUrl  | `upload/cloudinary-loader.test.ts` | 4     | ✅     |
-
-### Upload Constants
-
-| Tính năng          | Test File                  | Tests | Status |
-| ------------------ | -------------------------- | ----- | ------ |
-| FILE_UPLOAD limits | `constants/upload.test.ts` | 6     | ✅     |
-| IMAGE_DIMENSIONS   | `constants/upload.test.ts` | 4     | ✅     |
-| CLOUDINARY_PRESETS | `constants/upload.test.ts` | 12    | ✅     |
-
-### Search & Discovery
-
-| Tính năng           | Test File                      | Tests | Status |
-| ------------------- | ------------------------------ | ----- | ------ |
-| Search suggestions  | `e2e/product-features.spec.ts` | 2     | ✅     |
-| Search results page | `e2e/product-features.spec.ts` | 1     | ✅     |
-
-### Wishlist
-
-| Tính năng            | Test File                      | Tests | Status |
-| -------------------- | ------------------------------ | ----- | ------ |
-| Wishlist page access | `e2e/product-features.spec.ts` | 2     | ✅     |
-
----
-
-## 🏪 Vendor Features
-
-### Quản Lý Sản Phẩm
-
-| Tính năng            | Test File                   | Tests | Status |
-| -------------------- | --------------------------- | ----- | ------ |
-| Calculate discount   | `product/lib/utils.test.ts` | 4     | ✅     |
-| Has discount check   | `product/lib/utils.test.ts` | 3     | ✅     |
-| Validate SKU         | `product/lib/utils.test.ts` | 6     | ✅     |
-| Generate unique slug | `product/lib/utils.test.ts` | 4     | ✅     |
-| Products page        | `e2e/vendor-flow.spec.ts`   | 1     | ✅     |
-
-### Quản Lý Tồn Kho ⭐ (NEW)
-
-| Tính năng                        | Test File                                  | Tests | Status |
-| -------------------------------- | ------------------------------------------ | ----- | ------ |
-| Stock status thresholds          | `inventory-management/model/types.test.ts` | 2     | ✅     |
-| getStockStatus function          | `inventory-management/model/types.test.ts` | 4     | ✅     |
-| Stock status config (UI)         | `inventory-management/model/types.test.ts` | 3     | ✅     |
-| updateStockSchema validation     | `inventory-management/model/types.test.ts` | 5     | ✅     |
-| bulkUpdateStockSchema validation | `inventory-management/model/types.test.ts` | 3     | ✅     |
-| updateStock action               | `integration/api/inventory.test.ts`        | 3     | ✅     |
-| bulkUpdateStock action           | `integration/api/inventory.test.ts`        | 2     | ✅     |
-| getInventoryStats query          | `integration/api/inventory.test.ts`        | 1     | ✅     |
-| Inventory page access            | `e2e/vendor-flow.spec.ts`                  | 2     | ✅     |
-
-### Phân Tích Doanh Thu ⭐ (NEW)
-
-| Tính năng                | Test File                              | Tests | Status |
-| ------------------------ | -------------------------------------- | ----- | ------ |
-| Time range options       | `vendor-analytics/model/types.test.ts` | 2     | ✅     |
-| getDateRange function    | `vendor-analytics/model/types.test.ts` | 5     | ✅     |
-| Type definitions         | `vendor-analytics/model/types.test.ts` | 1     | ✅     |
-| getVendorAnalytics query | `integration/api/analytics.test.ts`    | 5     | ✅     |
-| Handle empty orders      | `integration/api/analytics.test.ts`    | 1     | ✅     |
-| Period comparison        | `integration/api/analytics.test.ts`    | 1     | ✅     |
-| Analytics page access    | `e2e/vendor-flow.spec.ts`              | 2     | ✅     |
-
-### Phản Hồi Đánh Giá
-
-| Tính năng           | Test File                 | Tests | Status |
-| ------------------- | ------------------------- | ----- | ------ |
-| Reviews page access | `e2e/vendor-flow.spec.ts` | 1     | ✅     |
-
-### Quản Lý Đơn Hàng
-
-| Tính năng          | Test File                 | Tests | Status |
-| ------------------ | ------------------------- | ----- | ------ |
-| Orders page access | `e2e/vendor-flow.spec.ts` | 1     | ✅     |
-
----
-
-## 👨‍💼 Admin Features
-
-| Tính năng           | Test File                      | Tests | Status |
-| ------------------- | ------------------------------ | ----- | ------ |
-| Login page          | `e2e/admin-flow.spec.ts`       | 1     | ✅     |
-| Public pages access | `e2e/admin-flow.spec.ts`       | 1     | ✅     |
-| Category CRUD       | `category/api/actions.test.ts` | 6     | ✅     |
-
----
-
-## 🔐 Authentication
-
-| Tính năng                  | Test File                   | Tests | Status |
-| -------------------------- | --------------------------- | ----- | ------ |
-| Login form display         | `e2e/auth.spec.ts`          | 1     | ✅     |
-| Login validation errors    | `e2e/auth.spec.ts`          | 1     | ✅     |
-| Register form display      | `e2e/auth.spec.ts`          | 1     | ✅     |
-| Password validation        | `e2e/auth.spec.ts`          | 1     | ✅     |
-| Password match validation  | `e2e/auth.spec.ts`          | 1     | ✅     |
-| Protected routes redirect  | `e2e/auth.spec.ts`          | 2     | ✅     |
-| Login schema validation    | `auth/model/schema.test.ts` | 5     | ✅     |
-| Register schema validation | `auth/model/schema.test.ts` | 5     | ✅     |
-
----
-
-## 🛠️ Shared Utilities
-
-### Format Utils
-
-| Function          | Test File              | Tests | Status |
-| ----------------- | ---------------------- | ----- | ------ |
-| formatPrice       | `utils/format.test.ts` | 4     | ✅     |
-| formatPriceNumber | `utils/format.test.ts` | 2     | ✅     |
-| parsePrice        | `utils/format.test.ts` | 4     | ✅     |
-| formatDate        | `utils/format.test.ts` | 3     | ✅     |
-| formatPhone       | `utils/format.test.ts` | 4     | ✅     |
-| formatFileSize    | `utils/format.test.ts` | 5     | ✅     |
-
-### ID Generation
-
-| Function             | Test File          | Tests | Status |
-| -------------------- | ------------------ | ----- | ------ |
-| generateOrderNumber  | `utils/id.test.ts` | 4     | ✅     |
-| generateId           | `utils/id.test.ts` | 3     | ✅     |
-| generateRandomString | `utils/id.test.ts` | 2     | ✅     |
-
-### Result Pattern
-
-| Function     | Test File              | Tests | Status |
-| ------------ | ---------------------- | ----- | ------ |
-| ok           | `utils/result.test.ts` | 3     | ✅     |
-| okVoid       | `utils/result.test.ts` | 1     | ✅     |
-| err          | `utils/result.test.ts` | 2     | ✅     |
-| tryCatch     | `utils/result.test.ts` | 3     | ✅     |
-| isOk / isErr | `utils/result.test.ts` | 6     | ✅     |
-
-### Form Validation
-
-| Function         | Test File                 | Tests | Status |
-| ---------------- | ------------------------- | ----- | ------ |
-| formatZodErrors  | `validation/form.test.ts` | 3     | ✅     |
-| getFirstError    | `validation/form.test.ts` | 2     | ✅     |
-| hasErrors        | `validation/form.test.ts` | 2     | ✅     |
-| validatePhone    | `validation/form.test.ts` | 6     | ✅     |
-| validateEmail    | `validation/form.test.ts` | 6     | ✅     |
-| validatePassword | `validation/form.test.ts` | 5     | ✅     |
-| validateSlug     | `validation/form.test.ts` | 4     | ✅     |
-
----
-
-## ⏳ TODO - Chưa có tests
-
-| Feature              | Priority | Reason               |
-| -------------------- | -------- | -------------------- |
-| Stripe payment flow  | High     | Cần Stripe test mode |
-| AI product auto-fill | Low      | External API         |
-
----
-
-## 🏪 Vendor Features (NEW)
-
-### Product Schema Validation
-
-| Tính năng                       | Test File                      | Tests | Status |
-| ------------------------------- | ------------------------------ | ----- | ------ |
-| productSchema validation        | `product/model/schema.test.ts` | 24    | ✅     |
-| productVariantSchema validation | `product/model/schema.test.ts` | 9     | ✅     |
-
-### Vendor Registration
-
-| Tính năng                  | Test File                                  | Tests | Status |
-| -------------------------- | ------------------------------------------ | ----- | ------ |
-| vendorRegistrationSchema   | `vendor-registration/model/schema.test.ts` | 32    | ✅     |
-| shopName validation        | `vendor-registration/model/schema.test.ts` | 6     | ✅     |
-| businessPhone validation   | `vendor-registration/model/schema.test.ts` | 8     | ✅     |
-| businessEmail validation   | `vendor-registration/model/schema.test.ts` | 6     | ✅     |
-| businessAddress validation | `vendor-registration/model/schema.test.ts` | 5     | ✅     |
-
----
-
-## 📁 Test Files Location
-
-```
-src/
-├── entities/
-│   ├── cart/lib/utils.test.ts
-│   ├── cart/model/store.test.ts
-│   ├── category/api/actions.test.ts
-│   ├── order/lib/utils.test.ts
-│   ├── product/lib/utils.test.ts
-│   ├── product/model/schema.test.ts
-│   ├── review/model/schema.test.ts
-│   └── vendor/lib/utils.test.ts
-├── features/
-│   ├── auth/model/schema.test.ts
-│   ├── checkout/model/schema.test.ts
-│   ├── inventory-management/model/types.test.ts
-│   ├── vendor-analytics/model/types.test.ts
-│   └── vendor-registration/model/schema.test.ts
-└── shared/lib/
-    ├── constants/upload.test.ts
-    ├── upload/validation.test.ts
-    ├── upload/cloudinary-loader.test.ts
-    ├── utils/format.test.ts
-    ├── utils/id.test.ts
-    ├── utils/result.test.ts
-    └── validation/form.test.ts
-
-tests/
-├── e2e/
-│   ├── auth.spec.ts
-│   ├── customer-journey.spec.ts
-│   ├── vendor-flow.spec.ts
-│   ├── admin-flow.spec.ts
-│   └── product-features.spec.ts
-└── integration/api/
-    ├── inventory.test.ts
-    └── analytics.test.ts
-```
-
----
-
-_Last updated: December 3, 2025_
-
----
-
-## 🎯 Đề Xuất Bổ Sung Để 100% Bug-Free
-
-### 🔴 High Priority
-
-| Feature                  | Why                 | Approach                                 |
-| ------------------------ | ------------------- | ---------------------------------------- |
-| **Stripe Payment**       | Core business logic | Sử dụng Stripe test mode + mock webhooks |
-| **Stock Reservation**    | Race condition      | Test concurrent requests                 |
-| **Order Status Machine** | Critical flow       | Test all state transitions               |
-
-### 🟡 Medium Priority
-
-| Feature                 | Why           | Approach                             |
-| ----------------------- | ------------- | ------------------------------------ |
-| **Rate Limiting**       | Security      | Test API throttling                  |
-| **Session Management**  | Auth security | Test token expiry/refresh            |
-| **Image Upload Stress** | Reliability   | Test large files, concurrent uploads |
-
-### 🟢 Nice to Have
-
-| Feature               | Why             | Approach                         |
-| --------------------- | --------------- | -------------------------------- |
-| **Performance Tests** | User experience | Load testing với k6/Artillery    |
-| **Visual Regression** | UI consistency  | Playwright screenshot comparison |
-| **Accessibility**     | Compliance      | axe-core integration             |
-
-### 🛡️ Security Tests Cần Thêm
+## 3. Unit Tests
+
+### Coverage
+
+| File | Tests | Coverage |
+|------|-------|----------|
+| `format.test.ts` | 57 | `formatPrice`, `formatDate`, `formatPercent`, `formatNumber` |
+| `id.test.ts` | 12 | `generateOrderNumber`, `generateRandomString`, `generateSlug` |
+| `order/utils.test.ts` | 36 | `calculateCommission`, `calculateSubtotal`, `validateStatusTransition` |
+| `cart/utils.test.ts` | 17 | `calculateCartTotals`, `groupItemsByVendor` |
+| `product/utils.test.ts` | 35 | `calculateDiscount`, `validateSKU`, `calculateAverageRating` |
+| `checkout/schema.test.ts` | 34 | Checkout form validation |
+| `auth/schema.test.ts` | 24 | Login/register validation |
+
+### Example: Format Utils
 
 ```typescript
-// tests/security/
-├── xss.test.ts          // Input sanitization
-├── csrf.test.ts         // Token validation
-├── sql-injection.test.ts // Prisma already safe, nhưng test edge cases
-└── auth-bypass.test.ts  // Protected route testing
+// src/shared/lib/utils/__tests__/format.test.ts
+describe("formatPrice - Format giá tiền VND", () => {
+  it("formats standard price - hiển thị giá chuẩn", () => {
+    expect(formatPrice(100000)).toBe("100.000\u00A0₫");
+  });
+
+  it("formats zero - hiển thị 0", () => {
+    expect(formatPrice(0)).toBe("0\u00A0₫");
+  });
+
+  it("formats millions - hiển thị triệu", () => {
+    expect(formatPrice(1500000)).toBe("1.500.000\u00A0₫");
+  });
+});
 ```
 
-### 📊 Coverage Goals
+### Example: Schema Validation
 
-| Metric          | Current | Target |
-| --------------- | ------- | ------ |
-| Line Coverage   | ~60%    | 80%+   |
-| Branch Coverage | ~50%    | 75%+   |
-| Critical Paths  | 95%     | 100%   |
+```typescript
+// src/features/checkout/__tests__/schema.test.ts
+describe("Phone validation - Validate SĐT", () => {
+  it("accepts valid Vietnam phone - SĐT hợp lệ", () => {
+    const result = checkoutSchema.safeParse({ ...validData, phone: "0901234567" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects phone not starting with 0 - không bắt đầu bằng 0", () => {
+    const result = checkoutSchema.safeParse({ ...validData, phone: "1901234567" });
+    expect(result.success).toBe(false);
+  });
+});
+```
+
+---
+
+## 4. Integration Tests
+
+### Coverage
+
+| File | Tests | Coverage |
+|------|-------|----------|
+| `validate-checkout.test.ts` | 8 | Stock validation before checkout |
+| `create-orders.test.ts` | 12 | Order creation with mocked DB |
+| `guards.test.ts` | 28 | `requireAuth`, `requireRole`, `requireVendor`, `hasRole` |
+| `stock-management.test.ts` | 30 | `updateStock`, `bulkUpdateStock` |
+
+### Mock Pattern (vi.hoisted)
+
+```typescript
+// tests/integration/auth/guards.test.ts
+vi.mock("server-only", () => ({}));
+
+const mockGetSession = vi.hoisted(() => vi.fn());
+vi.mock("@/shared/lib/auth/config", () => ({
+  auth: {
+    api: {
+      getSession: () => mockGetSession(),
+    },
+  },
+}));
+
+const mockPrisma = vi.hoisted(() => ({
+  user: { findUnique: vi.fn() },
+}));
+vi.mock("@/shared/lib/db", () => ({
+  prisma: mockPrisma,
+}));
+
+// Import sau khi mock
+import { requireAuth } from "@/entities/user/api/guards";
+
+describe("requireAuth", () => {
+  it("returns user when authenticated", async () => {
+    mockGetSession.mockResolvedValue({ user: { id: "user-123" } });
+    mockPrisma.user.findUnique.mockResolvedValue({
+      id: "user-123",
+      name: "Test",
+      roles: ["CUSTOMER"],
+    });
+
+    const result = await requireAuth();
+    expect(result.user.id).toBe("user-123");
+  });
+});
+```
+
+### Fixtures Pattern
+
+```typescript
+// tests/helpers/fixtures.ts
+export function createCartItem(overrides: Partial<CartItem> = {}): CartItem {
+  return {
+    id: "cart-item-1",
+    variantId: "variant-1",
+    productId: "product-1",
+    vendorId: "vendor-1",
+    vendorName: "Test Shop",
+    name: "Test Product",
+    price: 150000,
+    quantity: 2,
+    stock: 10,
+    image: "/test.jpg",
+    ...overrides,
+  };
+}
+
+export function createMultiVendorCart(): CartItem[] {
+  return [
+    createCartItem({ vendorId: "vendor-1" }),
+    createCartItem({ id: "cart-item-2", vendorId: "vendor-2" }),
+  ];
+}
+```
+
+---
+
+## 5. E2E Tests
+
+### Test Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Customer | `customer@vendoor.com` | `Kiet1461!` |
+| Vendor | `vendor@vendoor.com` | `Kiet1461!` |
+| Admin | `admin@vendoor.com` | `Kiet1461!` |
+
+### Coverage
+
+| File | Scenarios |
+|------|-----------|
+| `auth.spec.ts` | Login, logout, register, protected routes |
+| `checkout-flow.spec.ts` | Browse products, cart, checkout COD |
+| `vendor-flow.spec.ts` | Dashboard, products, orders, inventory |
+
+### Example: Auth E2E
+
+```typescript
+// tests/e2e/auth.spec.ts
+test("customer can login successfully", async ({ page }) => {
+  await page.goto("/login");
+
+  await page.getByLabel(/email/i).fill("customer@vendoor.com");
+  await page.getByLabel(/mật khẩu|password/i).fill("Kiet1461!");
+  await page.getByRole("button", { name: /đăng nhập|login/i }).click();
+
+  await expect(page).toHaveURL(/\/$|\/dashboard/);
+});
+```
+
+### Example: Checkout E2E
+
+```typescript
+// tests/e2e/checkout-flow.spec.ts
+test("can complete COD order", async ({ page }) => {
+  await loginAsCustomer(page);
+
+  // Add item to cart
+  await page.goto("/products");
+  await page.locator("[data-testid='product-card']").first().click();
+  await page.getByRole("button", { name: /thêm vào giỏ/i }).click();
+
+  // Checkout
+  await page.goto("/checkout");
+  await page.getByLabel(/tên/i).fill("Test User");
+  await page.getByLabel(/điện thoại/i).fill("0901234567");
+  // ...fill other fields
+
+  await page.getByText(/COD/i).click();
+  await page.getByRole("button", { name: /đặt hàng/i }).click();
+
+  await expect(page.getByText(/thành công/i)).toBeVisible();
+});
+```
+
+---
+
+## 6. Test Patterns
+
+### Naming Convention
+
+```typescript
+// Pattern: "action - expected result - context (Vietnamese)"
+describe("formatPrice - Format giá tiền VND", () => {
+  it("formats standard price - hiển thị giá chuẩn", () => {});
+  it("handles zero - xử lý số 0", () => {});
+  it("handles negative - xử lý số âm", () => {});
+});
+```
+
+### AAA Pattern
+
+```typescript
+it("calculates commission correctly", () => {
+  // Arrange
+  const subtotal = 100000;
+
+  // Act
+  const result = calculateCommission(subtotal);
+
+  // Assert
+  expect(result).toBe(2000); // 2%
+});
+```
+
+### Testing Errors
+
+```typescript
+it("returns error when stock is insufficient", async () => {
+  mockPrisma.productVariant.findUnique.mockResolvedValue({ stock: 2 });
+
+  const result = await validateCheckout([createCartItem({ quantity: 5 })]);
+
+  expect(result.isValid).toBe(false);
+  expect(result.errors).toContain("không đủ hàng");
+});
+```
+
+---
+
+## 7. Writing New Tests
+
+### Unit Test Template
+
+```typescript
+// src/entities/[entity]/__tests__/utils.test.ts
+import { describe, it, expect } from "vitest";
+import { myFunction } from "../lib/utils";
+
+describe("myFunction - Mô tả chức năng", () => {
+  describe("happy path - trường hợp thành công", () => {
+    it("does X when given Y - làm X khi có Y", () => {
+      const result = myFunction(input);
+      expect(result).toBe(expected);
+    });
+  });
+
+  describe("edge cases - trường hợp biên", () => {
+    it("handles empty input - xử lý input rỗng", () => {});
+    it("handles null - xử lý null", () => {});
+  });
+
+  describe("error cases - trường hợp lỗi", () => {
+    it("throws when invalid - throw khi không hợp lệ", () => {});
+  });
+});
+```
+
+### Integration Test Template
+
+```typescript
+// tests/integration/[feature]/action.test.ts
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+vi.mock("server-only", () => ({}));
+
+const mockPrisma = vi.hoisted(() => ({
+  model: { findUnique: vi.fn(), create: vi.fn() },
+}));
+vi.mock("@/shared/lib/db", () => ({ prisma: mockPrisma }));
+
+import { myAction } from "@/features/[feature]/api/actions";
+
+describe("myAction - Mô tả action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("succeeds when valid - thành công khi hợp lệ", async () => {
+    mockPrisma.model.findUnique.mockResolvedValue({ id: "1" });
+
+    const result = await myAction(validInput);
+
+    expect(result.success).toBe(true);
+  });
+});
+```
+
+---
+
+## 🔗 Related Documentation
+
+- [MANUAL_TESTING.md](./MANUAL_TESTING.md) - Checklist test thủ công
+- [CONTRIBUTING.md](./CONTRIBUTING.md) - Hướng dẫn đóng góp

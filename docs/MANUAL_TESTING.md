@@ -1,287 +1,416 @@
-# 🔍 Manual Testing Checklist
+# Vendoor - Manual Testing Checklist
 
-Checklist để test thủ công các tính năng trước khi deploy. Dùng để cross-check với automated tests.
-
----
-
-## 📋 Hướng Dẫn Sử Dụng
-
-1. Mở file này khi cần test
-2. Copy checklist vào issue/task tracking
-3. Tick ✅ khi pass, ❌ khi fail
-4. Ghi note nếu có bug
-
-**Test Environment:**
-
-- Local: `http://localhost:3000`
-- Staging: `[staging-url]`
-
-**Test Accounts:**
-
-```
-Customer: customer@test.com / password123
-Vendor: vendor@test.com / password123
-Admin: admin@test.com / password123
-```
+Checklist test thủ công trước khi release. Tập trung vào những gì **unit test không thể cover**:
+- UI/UX interactions
+- Real database operations
+- Third-party integrations (Stripe, Cloudinary)
+- Cross-browser compatibility
+- Responsive design
+- Performance & loading states
+- Error handling hiển thị cho user
 
 ---
 
-## 🛒 Customer Features
+## 📋 Mục lục
 
-### 1. Authentication
-
-| #   | Test Case                     | Steps                                                                    | Expected                             | Status |
-| --- | ----------------------------- | ------------------------------------------------------------------------ | ------------------------------------ | ------ |
-| 1.1 | Đăng ký tài khoản mới         | 1. Vào `/auth/register`<br>2. Điền email, password, confirm<br>3. Submit | Tạo account thành công, redirect `/` | ✅     |
-| 1.2 | Đăng ký - email đã tồn tại    | 1. Đăng ký với email đã có                                               | Hiện lỗi "Email đã được sử dụng"     | ✅     |
-| 1.3 | Đăng ký - password không khớp | 1. Nhập confirm password khác                                            | Hiện lỗi validation                  | ✅     |
-| 1.4 | Đăng nhập thành công          | 1. Vào `/auth/login`<br>2. Nhập credentials đúng                         | Redirect về homepage                 | ✅     |
-| 1.5 | Đăng nhập - sai password      | 1. Nhập password sai                                                     | Hiện lỗi "Sai email hoặc mật khẩu"   | ✅     |
-| 1.6 | Đăng xuất                     | 1. Click avatar → Đăng xuất                                              | Clear session, redirect `/`          | ✅     |
-| 1.7 | Protected route redirect      | 1. Logout<br>2. Truy cập `/account`                                      | Redirect đến `/auth/login`           | ✅     |
-| 1.8 | OAuth Google                  | 1. Click "Đăng nhập với Google"<br>2. Chọn account                       | Đăng nhập thành công                 | ✅     |
-| 1.9 | Quên mật khẩu                 | 1. Click "Quên mật khẩu"<br>2. Nhập email<br>3. Check email              | Nhận email reset password            | ☐      |
-
-### 2. Duyệt Sản Phẩm
-
-| #   | Test Case           | Steps                                           | Expected                                | Status |
-| --- | ------------------- | ----------------------------------------------- | --------------------------------------- | ------ |
-| 2.1 | Trang chủ load      | 1. Vào `/`                                      | Hero banner, featured products hiển thị | ✅     |
-| 2.2 | Category navigation | 1. Click vào category từ navbar                 | Redirect đến `/category/[slug]`         | ✅     |
-| 2.3 | Product detail      | 1. Click vào sản phẩm                           | Hiển thị ảnh, giá, mô tả, variants      | ✅     |
-| 2.4 | Image gallery       | 1. Vào trang sản phẩm<br>2. Click ảnh thumbnail | Main image thay đổi                     | ☐      |
-| 2.5 | Variant selection   | 1. Click variant khác (size, color)             | Giá cập nhật, stock hiển thị            | ✅     |
-| 2.6 | Related products    | 1. Scroll xuống cuối product page               | Hiển thị sản phẩm liên quan             | ✅     |
-
-### 3. Search
-
-| #   | Test Case                    | Steps                                     | Expected                                | Status |
-| --- | ---------------------------- | ----------------------------------------- | --------------------------------------- | ------ |
-| 3.1 | Search suggestions           | 1. Gõ "iphone" vào search bar             | Dropdown hiện suggestions với ảnh, giá  | ✅     |
-| 3.2 | Search debounce              | 1. Gõ nhanh                               | Không spam requests (check Network tab) | ✅     |
-| 3.3 | Search results page          | 1. Nhấn Enter sau khi search              | Redirect `/search?q=...` với kết quả    | ✅     |
-| 3.4 | Category filter trong search | 1. Chọn category từ dropdown<br>2. Search | Kết quả filter theo category            | ✅     |
-| 3.5 | Keyboard navigation          | 1. Gõ search<br>2. Dùng ↑↓ Enter          | Navigate suggestions, chọn được         | ✅     |
-| 3.6 | No results                   | 1. Search "xyzabc123"                     | Hiện "Không tìm thấy sản phẩm"          | ✅     |
-
-### 4. Giỏ Hàng
-
-| #   | Test Case             | Steps                                                               | Expected                         | Status |
-| --- | --------------------- | ------------------------------------------------------------------- | -------------------------------- | ------ |
-| 4.1 | Thêm vào giỏ          | 1. Vào product detail<br>2. Chọn variant<br>3. Click "Thêm vào giỏ" | Toast success, cart badge update | ✅     |
-| 4.2 | Thêm số lượng > stock | 1. Thêm qty > available stock                                       | Hiện lỗi hoặc cap tại max stock  | ✅     |
-| 4.3 | Cập nhật số lượng     | 1. Vào cart<br>2. +/- số lượng                                      | Subtotal cập nhật                | ✅     |
-| 4.4 | Xóa item              | 1. Click icon xóa item                                              | Item biến mất, total cập nhật    | ✅     |
-| 4.5 | Persist sau refresh   | 1. Thêm items<br>2. Refresh page                                    | Cart items vẫn còn               | ✅     |
-| 4.6 | Multi-vendor grouping | 1. Thêm sản phẩm từ 2+ vendors                                      | Items nhóm theo vendor           | ✅     |
-| 4.7 | Empty cart            | 1. Xóa hết items                                                    | Hiện "Giỏ hàng trống"            | ✅     |
-
-### 5. Checkout
-
-| #   | Test Case        | Steps                                              | Expected                              | Status |
-| --- | ---------------- | -------------------------------------------------- | ------------------------------------- | ------ |
-| 5.1 | Checkout form    | 1. Vào checkout                                    | Form hiển thị: tên, SĐT, địa chỉ      | ✅     |
-| 5.2 | Form validation  | 1. Submit form trống                               | Hiện lỗi validation mỗi field         | ✅     |
-| 5.3 | Phone validation | 1. Nhập SĐT sai format (8 số)                      | Hiện lỗi "Số điện thoại không hợp lệ" | ✅     |
-| 5.4 | COD checkout     | 1. Điền đủ thông tin<br>2. Chọn COD<br>3. Đặt hàng | Tạo order, redirect success page      | ✅     |
-| 5.5 | Stripe checkout  | 1. Chọn Stripe<br>2. Đặt hàng                      | Redirect đến Stripe checkout          | ✅     |
-| 5.6 | Stripe success   | 1. Complete Stripe payment                         | Redirect về `/checkout/success`       | ✅     |
-| 5.7 | Order splitting  | 1. Checkout với 2+ vendor items                    | Tạo 2 orders riêng biệt               | ✅     |
-
-### 6. Wishlist
-
-| #   | Test Case         | Steps                                        | Expected                    | Status |
-| --- | ----------------- | -------------------------------------------- | --------------------------- | ------ |
-| 6.1 | Thêm vào wishlist | 1. Vào product detail<br>2. Click heart icon | Heart filled, toast success | ✅     |
-| 6.2 | Xóa khỏi wishlist | 1. Click heart icon lần nữa                  | Heart unfilled, removed     | ✅     |
-| 6.3 | Wishlist page     | 1. Vào `/wishlist`                           | Hiển thị tất cả saved items | ✅     |
-| 6.4 | Require login     | 1. Logout<br>2. Click heart                  | Redirect đến login          | ✅     |
-
-### 7. Reviews
-
-| #   | Test Case                 | Steps                                               | Expected                        | Status |
-| --- | ------------------------- | --------------------------------------------------- | ------------------------------- | ------ |
-| 7.1 | Viết review (no purchase) | 1. Vào product chưa mua<br>2. Viết review           | Không có badge "Đã mua hàng"    | ☐      |
-| 7.2 | Viết review (purchased)   | 1. Vào product đã mua & delivered<br>2. Viết review | Có badge "Đã mua hàng"          | ☐      |
-| 7.3 | Rating validation         | 1. Submit review không chọn sao                     | Hiện lỗi "Chọn số sao"          | ✅     |
-| 7.4 | Upload images             | 1. Upload 3 ảnh cho review                          | Preview hiện, submit thành công | ✅     |
-| 7.5 | Max 5 images              | 1. Thử upload 6 ảnh                                 | Chỉ chấp nhận 5, warning hiện   | ✅     |
-| 7.6 | Image lightbox            | 1. Click ảnh trong review                           | Lightbox full-screen mở         | ✅     |
-| 7.7 | Lightbox navigation       | 1. Dùng ←→ hoặc click prev/next                     | Navigate giữa ảnh               | ✅     |
-
-### 8. Order History
-
-| #   | Test Case    | Steps                    | Expected                             | Status |
-| --- | ------------ | ------------------------ | ------------------------------------ | ------ |
-| 8.1 | View orders  | 1. Vào `/account/orders` | Danh sách đơn hàng hiển thị          | ✅     |
-| 8.2 | Order detail | 1. Click vào order       | Chi tiết: items, status, vendor info | ✅     |
-| 8.3 | Order status | 1. Check order mới       | Status PENDING hiển thị đúng         | ✅     |
+1. [Pre-Release Checklist](#1-pre-release-checklist)
+2. [Authentication Flows](#2-authentication-flows)
+3. [Customer Journey](#3-customer-journey)
+4. [Vendor Operations](#4-vendor-operations)
+5. [Admin Operations](#5-admin-operations)
+6. [Payment Integration](#6-payment-integration)
+7. [Image Upload](#7-image-upload)
+8. [Responsive & Cross-Browser](#8-responsive--cross-browser)
+9. [Error Handling](#9-error-handling)
+10. [Performance](#10-performance)
 
 ---
 
-## 🏪 Vendor Features
+## 1. Pre-Release Checklist
 
-### 9. Vendor Registration
+### Environment Check
 
-| #   | Test Case            | Steps                             | Expected                              | Status |
-| --- | -------------------- | --------------------------------- | ------------------------------------- | ------ |
-| 9.1 | Registration form    | 1. Vào `/vendor/register`         | Form hiển thị đầy đủ fields           | ✅     |
-| 9.2 | Submit đăng ký       | 1. Điền đủ thông tin<br>2. Submit | Tạo application, status PENDING       | ✅     |
-| 9.3 | Shop name validation | 1. Nhập tên < 3 ký tự             | Hiện lỗi validation                   | ✅     |
-| 9.4 | Phone validation     | 1. Nhập SĐT sai format            | Hiện lỗi "Số điện thoại không hợp lệ" | ✅     |
-| 9.5 | Duplicate shop name  | 1. Đăng ký với tên shop đã có     | Hiện lỗi "Tên shop đã tồn tại"        | ☐      |
+- [ ] Database seeded với test data (`pnpm db:seed`)
+- [ ] Environment variables đã set đầy đủ
+- [ ] Cloudinary credentials hoạt động
+- [ ] Stripe test keys configured (nếu test payment)
+- [ ] Build production thành công (`pnpm build`)
 
-### 10. Product Management
+### Quick Smoke Test
 
-| #    | Test Case       | Steps                                                     | Expected                            | Status |
-| ---- | --------------- | --------------------------------------------------------- | ----------------------------------- | ------ |
-| 10.1 | Products list   | 1. Vào `/vendor/products`                                 | Danh sách sản phẩm của vendor       | ✅     |
-| 10.2 | Add product     | 1. Click "Thêm sản phẩm"<br>2. Điền form<br>3. Submit     | Tạo product mới                     | ✅     |
-| 10.3 | Required fields | 1. Submit form thiếu tên                                  | Hiện lỗi validation                 | ✅     |
-| 10.4 | Add variant     | 1. Trong form, click "Thêm biến thể"                      | Variant row xuất hiện               | ☐      |
-| 10.5 | Image upload    | 1. Upload ảnh sản phẩm                                    | Preview hiện, upload lên Cloudinary | ☐      |
-| 10.6 | Edit product    | 1. Click Edit trên product<br>2. Sửa thông tin<br>3. Save | Cập nhật thành công                 | ☐      |
-| 10.7 | Delete product  | 1. Click Delete<br>2. Confirm                             | Product bị soft delete              | ☐      |
-| 10.8 | AI auto-fill    | 1. Upload ảnh<br>2. Click "AI gợi ý"                      | Tên, mô tả, tags được fill          | ☐      |
-
-### 11. Inventory Management
-
-| #    | Test Case                 | Steps                                                | Expected                      | Status |
-| ---- | ------------------------- | ---------------------------------------------------- | ----------------------------- | ------ |
-| 11.1 | Inventory list            | 1. Vào `/vendor/inventory`                           | Danh sách variants với stock  | ✅     |
-| 11.2 | Inline edit               | 1. Click vào ô Tồn kho<br>2. Nhập số mới<br>3. Enter | Stock cập nhật, toast success | ✅     |
-| 11.3 | Negative stock validation | 1. Nhập số âm                                        | Hiện lỗi, không cho save      | ✅     |
-| 11.4 | Filter: Còn hàng          | 1. Chọn filter "Còn hàng"                            | Chỉ hiện stock > 5            | ✅     |
-| 11.5 | Filter: Sắp hết           | 1. Chọn filter "Sắp hết"                             | Chỉ hiện 1 ≤ stock ≤ 5        | ✅     |
-| 11.6 | Filter: Hết hàng          | 1. Chọn filter "Hết hàng"                            | Chỉ hiện stock = 0            | ✅     |
-| 11.7 | Low stock alert           | 1. Có product sắp hết                                | Alert box hiển thị số lượng   | ✅     |
-| 11.8 | Search                    | 1. Gõ tên sản phẩm                                   | Filter theo tên               | ☐      |
-
-### 12. Order Management
-
-| #    | Test Case          | Steps                                            | Expected                           | Status |
-| ---- | ------------------ | ------------------------------------------------ | ---------------------------------- | ------ |
-| 12.1 | Orders list        | 1. Vào `/vendor/orders`                          | Danh sách đơn của vendor           | ✅     |
-| 12.2 | Filter by status   | 1. Chọn filter status                            | Chỉ hiện orders với status đó      | ✅     |
-| 12.3 | Order detail       | 1. Click vào order                               | Chi tiết: customer, items, address | ✅     |
-| 12.4 | Update status      | 1. Click "Xác nhận"<br>2. Chuyển sang PROCESSING | Status update, toast success       | ✅     |
-| 12.5 | Status transition  | 1. PENDING → PROCESSING → SHIPPED                | Các nút đúng theo workflow         | ✅     |
-| 12.6 | Commission display | 1. Xem order detail                              | Hiển thị phần vendor nhận được     | ✅     |
-
-### 13. Analytics
-
-| #    | Test Case           | Steps                        | Expected                     | Status |
-| ---- | ------------------- | ---------------------------- | ---------------------------- | ------ |
-| 13.1 | Analytics page      | 1. Vào `/vendor/analytics`   | 4 summary cards hiển thị     | ✅     |
-| 13.2 | Revenue chart       | 1. Scroll xuống              | Chart hiển thị đúng data     | ✅     |
-| 13.3 | Top products        | 1. Xem bảng Top Products     | 5 sản phẩm bán chạy nhất     | ✅     |
-| 13.4 | Time range: 7 days  | 1. Chọn "7 ngày"             | Data filter 7 ngày gần nhất  | ✅     |
-| 13.5 | Time range: 30 days | 1. Chọn "30 ngày"            | Data filter 30 ngày          | ✅     |
-| 13.6 | Period comparison   | 1. Check % change trên cards | Hiển thị +/- so với kỳ trước | ✅     |
-| 13.7 | Empty state         | 1. Vendor mới không có order | Hiện "Chưa có dữ liệu"       | ✅     |
-
-### 14. Review Replies
-
-| #    | Test Case    | Steps                                                | Expected                     | Status |
-| ---- | ------------ | ---------------------------------------------------- | ---------------------------- | ------ |
-| 14.1 | Reviews list | 1. Vào `/vendor/reviews`                             | Danh sách reviews của vendor | ✅     |
-| 14.2 | Reply review | 1. Click "Phản hồi"<br>2. Nhập nội dung<br>3. Submit | Reply hiển thị dưới review   | ✅     |
-| 14.3 | Edit reply   | 1. Click "Sửa" trên reply<br>2. Cập nhật             | Reply updated                | ✅     |
-| 14.4 | Delete reply | 1. Click "Xóa"<br>2. Confirm                         | Reply removed                | ✅     |
+| Test | Expected | Status |
+|------|----------|--------|
+| Homepage loads | Hiển thị products, categories | ⬜ |
+| Login works | Redirect sau login | ⬜ |
+| Add to cart | Toast success, cart updates | ⬜ |
+| Checkout COD | Order created, redirect to success | ⬜ |
+| Vendor dashboard | Stats hiển thị, products list loads | ⬜ |
+| Admin dashboard | Stats hiển thị, vendor list loads | ⬜ |
 
 ---
 
-## 👨‍💼 Admin Features
+## 2. Authentication Flows
 
-### 15. Admin Dashboard
+### 2.1 Login
 
-| #    | Test Case        | Steps                             | Expected                         | Status |
-| ---- | ---------------- | --------------------------------- | -------------------------------- | ------ |
-| 15.1 | Dashboard access | 1. Login admin<br>2. Vào `/admin` | Dashboard với stats hiển thị     | ✅     |
-| 15.2 | Platform metrics | 1. Check summary cards            | Tổng doanh thu, đơn, vendor đúng | ✅     |
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Login thành công | 1. Vào `/login`<br>2. Nhập `customer@vendoor.com` / `Kiet1461!`<br>3. Click "Đăng nhập" | Redirect về `/`, user menu hiển thị | ⬜ |
+| Login sai password | Nhập email đúng, password sai | Hiển thị error message rõ ràng | ⬜ |
+| Login email không tồn tại | Nhập email không có trong DB | Hiển thị error "Email không tồn tại" hoặc generic | ⬜ |
+| Validation empty fields | Submit form trống | Hiển thị validation errors cho từng field | ⬜ |
+| Remember session | Login, close browser, mở lại | Vẫn logged in | ⬜ |
 
-### 16. Vendor Approval
+### 2.2 Register
 
-| #    | Test Case       | Steps                              | Expected                   | Status |
-| ---- | --------------- | ---------------------------------- | -------------------------- | ------ |
-| 16.1 | Pending vendors | 1. Vào `/admin/vendors`            | Danh sách vendor chờ duyệt | ✅     |
-| 16.2 | Approve vendor  | 1. Click "Approve"<br>2. Confirm   | Vendor status → APPROVED   | ✅     |
-| 16.3 | Reject vendor   | 1. Click "Reject"<br>2. Nhập lý do | Vendor status → REJECTED   | ✅     |
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Register thành công | 1. Vào `/register`<br>2. Điền đầy đủ thông tin hợp lệ<br>3. Submit | Account created, redirect hoặc auto-login | ⬜ |
+| Email đã tồn tại | Dùng email đã có trong DB | Error "Email đã được sử dụng" | ⬜ |
+| Password mismatch | Confirm password khác password | Error "Mật khẩu không khớp" | ⬜ |
+| Weak password | Password < 8 ký tự hoặc không có số/chữ hoa | Validation error cụ thể | ⬜ |
 
-### 17. Category Management
+### 2.3 Logout
 
-| #    | Test Case       | Steps                             | Expected             | Status |
-| ---- | --------------- | --------------------------------- | -------------------- | ------ |
-| 17.1 | Categories list | 1. Vào `/admin/categories`        | Danh sách categories | ✅     |
-| 17.2 | Add category    | 1. Click "Thêm"<br>2. Điền form   | Category mới tạo     | ✅     |
-| 17.3 | Edit category   | 1. Click Edit<br>2. Sửa thông tin | Category updated     | ✅     |
-| 17.4 | Delete category | 1. Click Delete<br>2. Confirm     | Category removed     | ✅     |
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Logout thành công | Click menu → "Đăng xuất" | Redirect về home, user menu thành "Đăng nhập" | ⬜ |
+| Session cleared | Sau logout, vào `/orders` | Redirect về `/login` | ⬜ |
 
----
+### 2.4 Protected Routes
 
-## 📱 Responsive Testing
-
-| #   | Test Case                  | Breakpoint       | Status |
-| --- | -------------------------- | ---------------- | ------ |
-| R.1 | Homepage                   | Mobile (375px)   | ☐      |
-| R.2 | Product detail             | Mobile (375px)   | ☐      |
-| R.3 | Cart drawer                | Mobile (375px)   | ☐      |
-| R.4 | Checkout form              | Mobile (375px)   | ☐      |
-| R.5 | Search (full-screen panel) | Mobile (375px)   | ☐      |
-| R.6 | Vendor dashboard           | Tablet (768px)   | ☐      |
-| R.7 | Admin dashboard            | Tablet (768px)   | ☐      |
-| R.8 | All pages                  | Desktop (1280px) | ☐      |
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Access `/orders` khi chưa login | Direct URL | Redirect `/login` | ⬜ |
+| Access `/vendor` khi là Customer | Login as customer, go to `/vendor` | Redirect về home | ⬜ |
+| Access `/admin` khi không phải Admin | Login as vendor, go to `/admin` | Redirect về home | ⬜ |
 
 ---
 
-## 🌐 Cross-Browser Testing
+## 3. Customer Journey
 
-| #   | Browser       | Version     | Status |
-| --- | ------------- | ----------- | ------ |
-| B.1 | Chrome        | Latest      | ☐      |
-| B.2 | Firefox       | Latest      | ☐      |
-| B.3 | Safari        | Latest      | ☐      |
-| B.4 | Edge          | Latest      | ☐      |
-| B.5 | Mobile Safari | iOS 16+     | ☐      |
-| B.6 | Chrome Mobile | Android 12+ | ☐      |
+### 3.1 Product Browsing
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Product listing loads | Vào `/products` | Grid sản phẩm hiển thị, có pagination | ⬜ |
+| Filter by category | Click category trong sidebar | Products filtered, URL updated | ⬜ |
+| Sort by price | Chọn "Giá thấp → cao" | Products re-ordered | ⬜ |
+| Search products | Nhập keyword, Enter | Results hiển thị, có highlight | ⬜ |
+| Product detail | Click sản phẩm | Chi tiết, ảnh gallery, variants, reviews | ⬜ |
+| Select variant | Chọn color/size | Price updates, stock updates | ⬜ |
+| Out of stock variant | Chọn variant stock = 0 | Button "Hết hàng" disabled | ⬜ |
+
+### 3.2 Cart Operations
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Add to cart | Click "Thêm vào giỏ" | Toast success, cart icon badge updates | ⬜ |
+| Add same item twice | Add, then add again | Quantity increased, not duplicate | ⬜ |
+| Add over stock | Thử add qty > stock | Error message, không cho add | ⬜ |
+| View cart | Click cart icon | Slide-in panel với items | ⬜ |
+| Update quantity | +/- buttons | Total recalculated | ⬜ |
+| Remove item | Click xóa | Item removed, total updated | ⬜ |
+| Cart persist | Add items, refresh page | Items vẫn còn (localStorage) | ⬜ |
+| Multi-vendor cart | Add từ 2+ shops | Shipping fee = 30k × vendor count | ⬜ |
+
+### 3.3 Checkout (COD)
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Access checkout | Click "Thanh toán" từ cart | Form shipping + payment options | ⬜ |
+| Validation errors | Submit form thiếu fields | Specific errors per field | ⬜ |
+| Invalid phone | Nhập SĐT < 10 số | Error "SĐT phải 10 số" | ⬜ |
+| Select COD | Chọn "Thanh toán khi nhận" | COD selected, no Stripe form | ⬜ |
+| Place order | Fill valid data, submit | Loading → Success page | ⬜ |
+| Stock deducted | Check product after order | Stock giảm đúng quantity | ⬜ |
+| Order created | Check `/orders` | Order mới với status PENDING | ⬜ |
+| Cart cleared | Sau order thành công | Cart trống | ⬜ |
+| Multi-vendor split | Order từ 2 shops | Tạo 2 orders riêng | ⬜ |
+
+### 3.4 Order Tracking
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| View order list | Vào `/orders` | Danh sách orders, sorted by date | ⬜ |
+| View order detail | Click order | Chi tiết items, shipping, status | ⬜ |
+| Status badge | Xem order | Badge màu đúng theo status | ⬜ |
+| Cancel order | Cancel PENDING order | Status → CANCELLED | ⬜ |
+| Cannot cancel SHIPPED | Thử cancel order đã ship | Button disabled hoặc error | ⬜ |
+
+### 3.5 Wishlist
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Add to wishlist | Click heart icon | Heart filled, toast success | ⬜ |
+| View wishlist | Vào `/wishlist` | List products đã thích | ⬜ |
+| Remove from wishlist | Click heart again | Removed từ list | ⬜ |
+| Move to cart | Click "Thêm vào giỏ" từ wishlist | Added to cart | ⬜ |
+| Require login | Click heart khi chưa login | Redirect to login | ⬜ |
+
+### 3.6 Reviews
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| View reviews | Xem product detail | Reviews list với rating, images | ⬜ |
+| Write review | Click "Viết đánh giá" | Form với stars, text, image upload | ⬜ |
+| Submit review | Fill và submit | Review hiển thị, average updated | ⬜ |
+| One review per product | Thử review lại | Error "Bạn đã đánh giá" | ⬜ |
+| Verified purchase badge | Review sản phẩm đã mua | Badge "Đã mua hàng" hiển thị | ⬜ |
 
 ---
 
-## ⚡ Performance Checklist
+## 4. Vendor Operations
 
-| #   | Test Case                 | Tool         | Target             | Status |
-| --- | ------------------------- | ------------ | ------------------ | ------ |
-| P.1 | Homepage LCP              | Lighthouse   | < 2.5s             | ☐      |
-| P.2 | Homepage FCP              | Lighthouse   | < 1.8s             | ☐      |
-| P.3 | CLS                       | Lighthouse   | < 0.1              | ☐      |
-| P.4 | Mobile Performance Score  | Lighthouse   | > 80               | ☐      |
-| P.5 | Desktop Performance Score | Lighthouse   | > 90               | ☐      |
-| P.6 | Bundle size               | Build output | < 500KB first load | ☐      |
+### 4.1 Dashboard
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Access dashboard | Login vendor, vào `/vendor` | Stats: revenue, orders, products | ⬜ |
+| Stats accuracy | Compare với actual orders | Numbers match | ⬜ |
+| Recent orders | Xem "Đơn hàng gần đây" | Orders mới nhất, clickable | ⬜ |
+
+### 4.2 Product Management
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| List products | Vào `/vendor/products` | Grid/table sản phẩm của vendor | ⬜ |
+| Create product | Click "Thêm sản phẩm" | Form với đầy đủ fields | ⬜ |
+| Upload images | Add images | Preview, reorder drag-drop | ⬜ |
+| Add variants | Add color/size variants | Price, stock per variant | ⬜ |
+| Save product | Submit form hợp lệ | Product created, redirect to list | ⬜ |
+| Edit product | Click edit | Pre-filled form | ⬜ |
+| Update product | Change và save | Updated, cache invalidated | ⬜ |
+| Delete product | Click delete | Soft delete, không hiển thị | ⬜ |
+
+### 4.3 Order Management
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| View orders | Vào `/vendor/orders` | Orders của shop | ⬜ |
+| Filter by status | Select "Đang xử lý" | Filtered results | ⬜ |
+| Update to PROCESSING | Click "Xác nhận" | Status updated | ⬜ |
+| Update to SHIPPED | Add tracking, click "Gửi hàng" | Status updated, tracking saved | ⬜ |
+| Cannot skip status | Thử PENDING → SHIPPED trực tiếp | Error hoặc blocked | ⬜ |
+
+### 4.4 Inventory
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| View inventory | Vào `/vendor/inventory` | All variants với stock | ⬜ |
+| Low stock warning | Variant stock ≤ 10 | Badge "Sắp hết" | ⬜ |
+| Update stock | Change số lượng | Saved, product page updated | ⬜ |
+| Bulk update | Update nhiều variants | All saved in one action | ⬜ |
+
+### 4.5 Review Reply
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| View reviews | Vào `/vendor/reviews` | Reviews cho shop | ⬜ |
+| Reply to review | Click reply, write, submit | Reply hiển thị dưới review | ⬜ |
+| One reply only | Thử reply lại | Button disabled hoặc error | ⬜ |
 
 ---
 
-## 🐛 Bug Report
+## 5. Admin Operations
 
+### 5.1 Dashboard
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Access dashboard | Login admin, vào `/admin` | Platform-wide stats | ⬜ |
+| Total revenue | Xem "Tổng doanh thu" | Sum của tất cả orders | ⬜ |
+| Platform earnings | Xem "Thu nhập sàn" | Sum của platformFee | ⬜ |
+
+### 5.2 Vendor Approval
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| View pending vendors | Vào `/admin/vendors` | List vendors PENDING | ⬜ |
+| Review application | Click vendor | Chi tiết shop info | ⬜ |
+| Approve vendor | Click "Duyệt" | Status → APPROVED | ⬜ |
+| Reject vendor | Click "Từ chối" + reason | Status → REJECTED | ⬜ |
+| Suspend vendor | Chọn vendor APPROVED, suspend | Status → SUSPENDED | ⬜ |
+| Approved vendor can sell | Login vendor đã approve | Access `/vendor` thành công | ⬜ |
+| Suspended vendor blocked | Login vendor bị suspend | Redirect hoặc error message | ⬜ |
+
+### 5.3 Category Management
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| View categories | Vào `/admin/categories` | List categories | ⬜ |
+| Create category | Add name, slug, image | Category created | ⬜ |
+| Edit category | Change name, save | Updated | ⬜ |
+| Delete category | Delete category không có products | Deleted | ⬜ |
+| Cannot delete if has products | Delete category có products | Error message | ⬜ |
+
+### 5.4 Order Oversight
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| View all orders | Vào `/admin/orders` | All orders in system | ⬜ |
+| Filter by vendor | Select vendor | Filtered | ⬜ |
+| Filter by status | Select status | Filtered | ⬜ |
+| View order detail | Click order | Full detail với vendor info | ⬜ |
 
 ---
 
-## ✅ Release Checklist
+## 6. Payment Integration
 
-Trước khi deploy production:
+### 6.1 Stripe (Test Mode)
 
-- [ ] Tất cả test cases pass
-- [ ] Automated tests pass (`pnpm test`)
-- [ ] E2E tests pass (`pnpm test:e2e`)
-- [ ] No TypeScript errors
-- [ ] No ESLint errors
-- [ ] Performance scores đạt target
-- [ ] Responsive tested
-- [ ] Cross-browser tested
-- [ ] Security headers configured
-- [ ] Environment variables set
-- [ ] Database migrations run
-- [ ] Stripe webhook configured
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Select Stripe | Chọn "Thanh toán thẻ" | Stripe form appears | ⬜ |
+| Test card success | Card: `4242 4242 4242 4242` | Payment success, order created | ⬜ |
+| Test card declined | Card: `4000 0000 0000 0002` | Error "Card declined" | ⬜ |
+| Test card 3DS | Card: `4000 0025 0000 3155` | 3DS popup, then success | ⬜ |
+| Cancel payment | Close Stripe, quay lại | Cart vẫn còn, không tạo order | ⬜ |
+| Webhook received | Check order sau payment | Status: PENDING (không phải PENDING_PAYMENT) | ⬜ |
+
+**Test Cards:** https://stripe.com/docs/testing
 
 ---
 
-_Last updated: December 3, 2025_
+## 7. Image Upload
+
+### 7.1 Product Images
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Upload single image | Select 1 file | Preview hiển thị | ⬜ |
+| Upload multiple | Select nhiều files | All previews | ⬜ |
+| Drag and drop | Drag file vào zone | Upload works | ⬜ |
+| Reorder images | Drag to reorder | Order saved | ⬜ |
+| Delete image | Click X trên preview | Removed | ⬜ |
+| Large file | Upload > 5MB | Error "File quá lớn" | ⬜ |
+| Invalid format | Upload .pdf | Error "Chỉ hỗ trợ ảnh" | ⬜ |
+| Cloudinary upload | Save product | Images có Cloudinary URL | ⬜ |
+
+### 7.2 Avatar/Logo
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Upload avatar | Profile → change avatar | New avatar displays | ⬜ |
+| Upload shop logo | Vendor settings → logo | Logo updated | ⬜ |
+| Crop/resize | Upload large image | Auto-resized | ⬜ |
+
+---
+
+## 8. Responsive & Cross-Browser
+
+### 8.1 Responsive Breakpoints
+
+| Screen | Test Pages | Status |
+|--------|------------|--------|
+| Mobile (< 640px) | Home, Products, Cart, Checkout | ⬜ |
+| Tablet (640-1024px) | Home, Products, Vendor Dashboard | ⬜ |
+| Desktop (> 1024px) | All pages | ⬜ |
+
+### 8.2 Mobile-Specific
+
+| Test Case | Expected | Status |
+|-----------|----------|--------|
+| Navigation hamburger | Menu opens/closes | ⬜ |
+| Cart sheet | Full-screen on mobile | ⬜ |
+| Product images | Swipeable gallery | ⬜ |
+| Forms | Keyboard doesn't cover inputs | ⬜ |
+| Touch targets | Buttons ≥ 44px | ⬜ |
+
+### 8.3 Cross-Browser
+
+| Browser | Version | Status |
+|---------|---------|--------|
+| Chrome | Latest | ⬜ |
+| Firefox | Latest | ⬜ |
+| Safari | Latest | ⬜ |
+| Edge | Latest | ⬜ |
+| Mobile Safari (iOS) | Latest | ⬜ |
+| Chrome Mobile (Android) | Latest | ⬜ |
+
+---
+
+## 9. Error Handling
+
+### 9.1 Network Errors
+
+| Test Case | Steps | Expected | Status |
+|-----------|-------|----------|--------|
+| Offline mode | Disconnect network, navigate | Error page hoặc offline indicator | ⬜ |
+| API timeout | Slow network | Loading state, then retry option | ⬜ |
+| Submit form offline | Fill form, disconnect, submit | Error message, data preserved | ⬜ |
+
+### 9.2 Validation Errors
+
+| Test Case | Expected | Status |
+|-----------|----------|--------|
+| Form errors visible | Red border, error text below field | ⬜ |
+| Focus on first error | Auto-scroll to first error | ⬜ |
+| Clear error on fix | Error disappears when fixed | ⬜ |
+
+### 9.3 Server Errors
+
+| Test Case | Expected | Status |
+|-----------|----------|--------|
+| 404 page | Custom 404 với link về home | ⬜ |
+| 500 error | Friendly error message, không show stack trace | ⬜ |
+| Rate limit | "Quá nhiều request, thử lại sau" | ⬜ |
+
+---
+
+## 10. Performance
+
+### 10.1 Page Load
+
+| Page | Target | Actual | Status |
+|------|--------|--------|--------|
+| Homepage | < 3s | ___ s | ⬜ |
+| Product listing | < 2s | ___ s | ⬜ |
+| Product detail | < 2s | ___ s | ⬜ |
+| Checkout | < 2s | ___ s | ⬜ |
+| Vendor dashboard | < 3s | ___ s | ⬜ |
+
+### 10.2 Interactions
+
+| Action | Target | Status |
+|--------|--------|--------|
+| Add to cart | Instant feedback (< 100ms) | ⬜ |
+| Search autocomplete | < 300ms after typing stops | ⬜ |
+| Filter products | < 500ms | ⬜ |
+| Submit order | Loading state, < 5s total | ⬜ |
+
+### 10.3 Images
+
+| Test | Expected | Status |
+|------|----------|--------|
+| Lazy loading | Images below fold load on scroll | ⬜ |
+| Placeholder | Skeleton/blur while loading | ⬜ |
+| Responsive images | Serve appropriate size | ⬜ |
+
+---
+
+## 📝 Notes
+
+### Khi tìm thấy bug
+
+1. Screenshot/video lỗi
+2. Steps to reproduce
+3. Expected vs Actual
+4. Browser/device info
+5. Console errors (nếu có)
+
+### Sau khi test xong
+
+- [ ] Tất cả checklist items passed
+- [ ] Không có critical bugs
+- [ ] Performance acceptable
+- [ ] Cross-browser OK
+- [ ] Mobile OK
+
+---
+
+## 🔗 Related Documentation
+
+- [TESTING.md](./TESTING.md) - Automated tests
+- [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) - Common issues
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Deploy process
