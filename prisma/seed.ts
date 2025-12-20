@@ -85,7 +85,8 @@ async function main() {
         name: "Điện thoại",
         slug: "dien-thoai",
         description: "Điện thoại thông minh từ các thương hiệu hàng đầu",
-        image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80",
+        image:
+          "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80",
       },
     }),
     prisma.category.upsert({
@@ -95,7 +96,8 @@ async function main() {
         name: "Laptop",
         slug: "laptop",
         description: "Laptop cho công việc và giải trí",
-        image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&q=80",
+        image:
+          "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&q=80",
       },
     }),
     prisma.category.upsert({
@@ -105,7 +107,8 @@ async function main() {
         name: "Tablet",
         slug: "tablet",
         description: "Máy tính bảng cao cấp",
-        image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&q=80",
+        image:
+          "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&q=80",
       },
     }),
     prisma.category.upsert({
@@ -115,7 +118,8 @@ async function main() {
         name: "Tai nghe",
         slug: "tai-nghe",
         description: "Tai nghe chính hãng chất lượng cao",
-        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
+        image:
+          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
       },
     }),
     prisma.category.upsert({
@@ -125,7 +129,8 @@ async function main() {
         name: "Phụ kiện",
         slug: "phu-kien",
         description: "Phụ kiện công nghệ đa dạng",
-        image: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&q=80",
+        image:
+          "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&q=80",
       },
     }),
     prisma.category.upsert({
@@ -135,7 +140,8 @@ async function main() {
         name: "Gaming",
         slug: "gaming",
         description: "Thiết bị gaming chuyên nghiệp",
-        image: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=400&q=80",
+        image:
+          "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=400&q=80",
       },
     }),
   ]);
@@ -260,7 +266,8 @@ async function main() {
       slug: "sony-center",
       description: "Trung tâm Sony chính hãng",
       logo: "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=200&q=80",
-      banner: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+      banner:
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
       status: "APPROVED",
       commissionRate: 0.1,
     },
@@ -275,7 +282,8 @@ async function main() {
       slug: "techzone",
       description: "Đa dạng sản phẩm công nghệ",
       logo: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=200&q=80",
-      banner: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80",
+      banner:
+        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80",
       status: "APPROVED",
       commissionRate: 0.1,
     },
@@ -290,7 +298,8 @@ async function main() {
       slug: "logitech-store",
       description: "Cửa hàng Logitech chính hãng",
       logo: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=200&q=80",
-      banner: "https://images.unsplash.com/photo-1593152167544-085d3b9c4938?w=800&q=80",
+      banner:
+        "https://images.unsplash.com/photo-1593152167544-085d3b9c4938?w=800&q=80",
       status: "APPROVED",
       commissionRate: 0.1,
     },
@@ -305,7 +314,8 @@ async function main() {
       slug: "asus-gaming-vn",
       description: "Chuyên gaming gear ASUS ROG",
       logo: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=200&q=80",
-      banner: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=800&q=80",
+      banner:
+        "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=800&q=80",
       status: "APPROVED",
       commissionRate: 0.1,
     },
@@ -411,8 +421,15 @@ async function main() {
       stock: number;
     }>;
   }) {
-    const product = await prisma.product.create({
-      data: {
+    // Use upsert to allow re-seeding
+    const product = await prisma.product.upsert({
+      where: { slug: data.slug },
+      update: {
+        name: data.name,
+        description: data.description,
+        isActive: true,
+      },
+      create: {
         vendorId: data.vendorId,
         categoryId: data.categoryId,
         name: data.name,
@@ -421,6 +438,12 @@ async function main() {
         isActive: true,
       },
     });
+
+    // Delete existing variants and images for clean re-seed
+    await prisma.productVariant.deleteMany({
+      where: { productId: product.id },
+    });
+    await prisma.productImage.deleteMany({ where: { productId: product.id } });
 
     // Create variants (default or multiple)
     if (data.variants && data.variants.length > 0) {
@@ -1093,16 +1116,16 @@ async function main() {
 
   let reviewCount = 0;
   const reviewedProducts = new Set<string>(); // Track user+product to avoid duplicates
-  
+
   for (const order of deliveredOrders) {
     for (const item of order.items) {
       const reviewKey = `${order.customerId}-${item.variant.product.id}`;
-      
+
       // Skip if already reviewed this product
       if (reviewedProducts.has(reviewKey)) {
         continue;
       }
-      
+
       // 70% chance to leave a review
       if (Math.random() > 0.3) {
         const rating = Math.floor(Math.random() * 2) + 4; // 4-5 stars mostly
