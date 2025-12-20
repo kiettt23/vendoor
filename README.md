@@ -62,6 +62,7 @@ Mở http://localhost:3000 🎉
 | **Shadcn/UI**     | -         | UI Components            |
 | **Cloudinary**    | -         | Image Optimization       |
 | **Stripe**        | -         | Payment Processing       |
+| **Open AI**     | -         | AI Product Descriptions  |
 | **Vitest**        | 4         | Unit/Integration Testing |
 | **Playwright**    | 1.57      | E2E Testing              |
 
@@ -105,6 +106,7 @@ src/
 ### 🏪 Vendor
 - Dashboard analytics
 - Quản lý sản phẩm (CRUD, variants, images)
+- AI-powered product descriptions
 - Quản lý đơn hàng
 - Quản lý tồn kho
 - Phản hồi đánh giá
