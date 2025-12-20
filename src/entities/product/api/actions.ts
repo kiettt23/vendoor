@@ -41,6 +41,11 @@ export async function searchProductsAction(
   const products = await prisma.product.findMany({
     where: {
       isActive: true,
+      vendor: {
+        vendorProfile: {
+          status: "APPROVED",
+        },
+      },
       OR: [
         { name: { contains: query, mode: "insensitive" } },
         { description: { contains: query, mode: "insensitive" } },

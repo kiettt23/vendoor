@@ -68,7 +68,14 @@ export const getProducts = cache(
     } = params;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = { isActive: true };
+    const where: any = {
+      isActive: true,
+      vendor: {
+        vendorProfile: {
+          status: "APPROVED",
+        },
+      },
+    };
 
     if (categorySlug) {
       where.category = { slug: categorySlug };
@@ -144,7 +151,14 @@ export const getProducts = cache(
 export const getFeaturedProducts = cache(
   async (limit = LIMITS.FEATURED_PRODUCTS) => {
     return prisma.product.findMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        vendor: {
+          vendorProfile: {
+            status: "APPROVED",
+          },
+        },
+      },
       include: productListInclude,
       orderBy: { createdAt: "desc" },
       take: limit,

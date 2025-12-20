@@ -21,7 +21,9 @@ export const getProductBySlug = cache(
       include: productDetailInclude,
     });
 
+    // Don't show product if vendor is not APPROVED
     if (!product || !product.vendor.vendorProfile) return null;
+    if (product.vendor.vendorProfile.status !== "APPROVED") return null;
 
     return {
       id: product.id,
@@ -54,7 +56,16 @@ export const getRelatedProducts = cache(
     limit = 4
   ): Promise<ProductListItem[]> => {
     const products = await prisma.product.findMany({
-      where: { categoryId, isActive: true, id: { not: currentProductId } },
+      where: {
+        categoryId,
+        isActive: true,
+        id: { not: currentProductId },
+        vendor: {
+          vendorProfile: {
+            status: "APPROVED",
+          },
+        },
+      },
       include: productListInclude,
       take: limit,
       orderBy: { createdAt: "desc" },

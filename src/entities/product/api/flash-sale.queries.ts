@@ -18,6 +18,11 @@ export const getFlashSaleProducts = cache(
     const products = await prisma.product.findMany({
       where: {
         isActive: true,
+        vendor: {
+          vendorProfile: {
+            status: "APPROVED",
+          },
+        },
         variants: {
           some: {
             compareAtPrice: { not: null },

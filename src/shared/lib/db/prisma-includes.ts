@@ -45,7 +45,9 @@ export const productDetailInclude = {
     select: {
       id: true,
       name: true,
-      vendorProfile: { select: { id: true, shopName: true, slug: true } },
+      vendorProfile: {
+        select: { id: true, shopName: true, slug: true, status: true },
+      },
     },
   },
   category: { select: { id: true, name: true, slug: true } },
