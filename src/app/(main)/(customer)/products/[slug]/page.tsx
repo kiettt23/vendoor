@@ -142,7 +142,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="space-y-6">
           <div>
             <Link
-              href={`/shop/${product.vendor.slug}`}
+              href={ROUTES.STORE_DETAIL(
+                product.vendor.slug || product.vendor.vendorProfileId
+              )}
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-2"
             >
               <Store className="h-4 w-4" />

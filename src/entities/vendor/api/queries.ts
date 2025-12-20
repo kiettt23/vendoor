@@ -84,9 +84,13 @@ export const getPublicVendors = cache(async () => {
   }));
 });
 
-export const getPublicVendorById = cache(async (vendorId: string) => {
-  const vendor = await prisma.vendorProfile.findUnique({
-    where: { id: vendorId, status: "APPROVED" },
+export const getPublicVendorById = cache(async (idOrSlug: string) => {
+  // Support finding vendor by either id or slug
+  const vendor = await prisma.vendorProfile.findFirst({
+    where: {
+      status: "APPROVED",
+      OR: [{ id: idOrSlug }, { slug: idOrSlug }],
+    },
     select: {
       id: true,
       userId: true,
