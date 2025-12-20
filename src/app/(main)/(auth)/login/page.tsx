@@ -33,6 +33,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const { data: session, isPending } = useSession();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const isAddingAccount = searchParams.get("addAccount") === "true";
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,12 +45,12 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  // Redirect nếu đã đăng nhập
+  // Redirect nếu đã đăng nhập (trừ khi đang thêm tài khoản mới)
   useEffect(() => {
-    if (!isPending && session?.user) {
+    if (!isPending && session?.user && !isAddingAccount) {
       router.replace("/");
     }
-  }, [session, isPending, router]);
+  }, [session, isPending, router, isAddingAccount]);
 
   // Thông báo lý do redirect nếu có callbackUrl (bị bắt đăng nhập)
   useEffect(() => {
@@ -88,7 +89,8 @@ export default function LoginPage() {
     );
   }
 
-  if (session?.user) {
+  // Nếu đã đăng nhập và không phải thêm tài khoản -> không render
+  if (session?.user && !isAddingAccount) {
     return null;
   }
 
@@ -100,9 +102,13 @@ export default function LoginPage() {
 
         <Card className="w-full">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Đăng nhập</CardTitle>
+            <CardTitle className="text-2xl">
+              {isAddingAccount ? "Thêm tài khoản" : "Đăng nhập"}
+            </CardTitle>
             <CardDescription>
-              Nhập email và mật khẩu để đăng nhập
+              {isAddingAccount
+                ? "Đăng nhập tài khoản khác để chuyển đổi nhanh"
+                : "Nhập email và mật khẩu để đăng nhập"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -188,7 +194,10 @@ export default function LoginPage() {
           <CardFooter>
             <p className="text-sm text-muted-foreground">
               Chưa có tài khoản?{" "}
-              <Link href={ROUTES.REGISTER} className="text-primary hover:underline">
+              <Link
+                href={isAddingAccount ? `${ROUTES.REGISTER}?addAccount=true` : ROUTES.REGISTER}
+                className="text-primary hover:underline"
+              >
                 Đăng ký
               </Link>
             </p>

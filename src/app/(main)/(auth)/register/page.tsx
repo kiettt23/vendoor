@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -30,7 +30,9 @@ import {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, isPending } = useSession();
+  const isAddingAccount = searchParams.get("addAccount") === "true";
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,12 +44,12 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   });
 
-  // Redirect nếu đã đăng nhập
+  // Redirect nếu đã đăng nhập (trừ khi đang thêm tài khoản mới)
   useEffect(() => {
-    if (!isPending && session?.user) {
+    if (!isPending && session?.user && !isAddingAccount) {
       router.replace("/");
     }
-  }, [session, isPending, router]);
+  }, [session, isPending, router, isAddingAccount]);
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
@@ -95,8 +97,8 @@ export default function RegisterPage() {
     );
   }
 
-  // Đã đăng nhập thì không render
-  if (session?.user) {
+  // Nếu đã đăng nhập và không phải thêm tài khoản -> không render
+  if (session?.user && !isAddingAccount) {
     return null;
   }
 
@@ -108,8 +110,14 @@ export default function RegisterPage() {
 
         <Card className="w-full">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Đăng ký</CardTitle>
-            <CardDescription>Tạo tài khoản mới</CardDescription>
+            <CardTitle className="text-2xl">
+              {isAddingAccount ? "Đăng ký tài khoản mới" : "Đăng ký"}
+            </CardTitle>
+            <CardDescription>
+              {isAddingAccount
+                ? "Tạo thêm tài khoản mới để chuyển đổi nhanh"
+                : "Tạo tài khoản mới"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -214,7 +222,10 @@ export default function RegisterPage() {
           <CardFooter>
             <p className="text-sm text-muted-foreground">
               Đã có tài khoản?{" "}
-              <Link href={ROUTES.LOGIN} className="text-primary hover:underline">
+              <Link
+                href={isAddingAccount ? `${ROUTES.LOGIN}?addAccount=true` : ROUTES.LOGIN}
+                className="text-primary hover:underline"
+              >
                 Đăng nhập
               </Link>
             </p>
