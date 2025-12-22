@@ -34,7 +34,7 @@ import { cn } from "@/shared/lib/utils";
 const TEST_ACCOUNTS = [
   {
     email: "admin@vendoor.com",
-    password: "Kiet1461!",
+    password: "Test@123456",
     role: "Admin",
     icon: Shield,
     color: "text-red-600",
@@ -42,7 +42,7 @@ const TEST_ACCOUNTS = [
   },
   {
     email: "apple@vendoor.com",
-    password: "Kiet1461!",
+    password: "Test@123456",
     role: "Vendor",
     icon: Store,
     color: "text-blue-600",
@@ -50,7 +50,7 @@ const TEST_ACCOUNTS = [
   },
   {
     email: "customer@vendoor.com",
-    password: "Kiet1461!",
+    password: "Test@123456",
     role: "Customer",
     icon: User,
     color: "text-green-600",
@@ -284,7 +284,9 @@ export function UserMenu({
                   return (
                     <DropdownMenuItem
                       key={account.email}
-                      onClick={() => !isCurrentUser && handleQuickLogin(account)}
+                      onClick={() =>
+                        !isCurrentUser && handleQuickLogin(account)
+                      }
                       disabled={isLoggingIn}
                       className={cn(
                         "flex items-center gap-2 cursor-pointer",
