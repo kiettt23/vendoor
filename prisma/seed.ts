@@ -336,8 +336,8 @@ async function main() {
   // ============================================
   console.log("🔐 Creating credential accounts for vendors...");
 
-  // Use same password for all vendors: Kiet1461!
-  const vendorPassword = "Kiet1461!";
+  // Use same password for all vendors: Test@123456
+  const vendorPassword = "Test@123456";
 
   await Promise.all([
     createCredentialAccount(appleStoreUser.id, vendorPassword),
@@ -348,7 +348,7 @@ async function main() {
     createCredentialAccount(asusUser.id, vendorPassword),
   ]);
 
-  console.log("✅ Created 6 vendor accounts (password: Kiet1461!)");
+  console.log("✅ Created 6 vendor accounts (password: Test@123456)");
 
   // ============================================
   // 2c. CREATE ADMIN USER
@@ -367,7 +367,7 @@ async function main() {
   });
 
   await createCredentialAccount(adminUser.id, vendorPassword);
-  console.log("✅ Created admin user (admin@vendoor.com / Kiet1461!)");
+  console.log("✅ Created admin user (admin@vendoor.com / Test@123456)");
 
   // ============================================
   // 2d. CREATE TEST CUSTOMER USER
@@ -386,7 +386,7 @@ async function main() {
   });
 
   await createCredentialAccount(customerUser.id, vendorPassword);
-  console.log("✅ Created test customer (customer@vendoor.com / Kiet1461!)");
+  console.log("✅ Created test customer (customer@vendoor.com / Test@123456)");
 
   // ============================================
   // 3. CREATE PRODUCTS (From v0 data)
