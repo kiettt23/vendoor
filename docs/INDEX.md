@@ -18,10 +18,10 @@ Bộ tài liệu toàn diện cho dự án Vendoor - Sàn thương mại điện
 
 ### Business & Logic
 
-| Tài liệu                                   | Mô tả                                     |
-| ------------------------------------------ | ----------------------------------------- |
-| [BUSINESS_LOGIC.md](./BUSINESS_LOGIC.md)   | Business rules, tính toán, ràng buộc      |
-| [DATA_FLOW.md](./DATA_FLOW.md)             | Luồng hoạt động chính (checkout, auth...) |
+| Tài liệu                                 | Mô tả                                     |
+| ---------------------------------------- | ----------------------------------------- |
+| [BUSINESS_LOGIC.md](./BUSINESS_LOGIC.md) | Business rules, tính toán, ràng buộc      |
+| [DATA_FLOW.md](./DATA_FLOW.md)           | Luồng hoạt động chính (checkout, auth...) |
 
 ### Development & Operations
 
@@ -35,10 +35,10 @@ Bộ tài liệu toàn diện cho dự án Vendoor - Sàn thương mại điện
 
 ### Testing
 
-| Tài liệu                                   | Mô tả                                         |
-| ------------------------------------------ | --------------------------------------------- |
-| [TESTING.md](./TESTING.md)                 | Testing strategy, commands, coverage          |
-| [MANUAL_TESTING.md](./MANUAL_TESTING.md)   | Checklist test thủ công trước release         |
+| Tài liệu                                 | Mô tả                                 |
+| ---------------------------------------- | ------------------------------------- |
+| [TESTING.md](./TESTING.md)               | Testing strategy, commands, coverage  |
+| [MANUAL_TESTING.md](./MANUAL_TESTING.md) | Checklist test thủ công trước release |
 
 ### Learning Resources
 
@@ -70,8 +70,8 @@ Mở http://localhost:3000 🎉
 
 ## 👤 Test Accounts
 
-| Role     | Email                  | Password    |
-| -------- | ---------------------- | ----------- |
-| Admin    | `admin@vendoor.com`    | `Kiet1461!` |
-| Vendor   | `vendor@vendoor.com`   | `Kiet1461!` |
-| Customer | `customer@vendoor.com` | `Kiet1461!` |
+| Role     | Email                  | Password      |
+| -------- | ---------------------- | ------------- |
+| Admin    | `admin@vendoor.com`    | `Test@123456` |
+| Vendor   | `vendor@vendoor.com`   | `Test@123456` |
+| Customer | `customer@vendoor.com` | `Test@123456` |

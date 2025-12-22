@@ -10,15 +10,15 @@ Sàn thương mại điện tử đa người bán (Multi-Vendor Marketplace) - 
 
 ## 📚 Documentation
 
-| Tài liệu | Mô tả |
-|----------|-------|
-| **[📖 Full Documentation](./docs/INDEX.md)** | Index tất cả docs |
-| [Quick Start](./docs/QUICKSTART.md) | Setup trong 5 phút |
-| [Architecture](./docs/ARCHITECTURE.md) | FSD structure |
-| [Features](./docs/FEATURES.md) | Tính năng theo role |
-| [Database Schema](./docs/DATABASE_SCHEMA.md) | Prisma models |
+| Tài liệu                                       | Mô tả                    |
+| ---------------------------------------------- | ------------------------ |
+| **[📖 Full Documentation](./docs/INDEX.md)**   | Index tất cả docs        |
+| [Quick Start](./docs/QUICKSTART.md)            | Setup trong 5 phút       |
+| [Architecture](./docs/ARCHITECTURE.md)         | FSD structure            |
+| [Features](./docs/FEATURES.md)                 | Tính năng theo role      |
+| [Database Schema](./docs/DATABASE_SCHEMA.md)   | Prisma models            |
 | [Caching Strategy](./docs/CACHING_STRATEGY.md) | Performance optimization |
-| [Testing](./docs/TESTING.md) | Test strategy |
+| [Testing](./docs/TESTING.md)                   | Test strategy            |
 
 ---
 
@@ -48,23 +48,24 @@ Mở http://localhost:3000 🎉
 
 ## 🛠️ Tech Stack
 
-| Công nghệ         | Phiên bản | Vai trò                  |
-| ----------------- | --------- | ------------------------ |
-| **Next.js**       | 16        | Framework, App Router    |
-| **React**         | 19        | UI Library               |
-| **TypeScript**    | 5         | Type Safety              |
-| **Prisma**        | 7         | Database ORM             |
-| **PostgreSQL**    | -         | Database                 |
-| **Better Auth**   | 1.3       | Authentication           |
-| **Zustand**       | 5         | Client State (Cart)      |
-| **Tanstack Query**| 5         | Server State             |
-| **Tailwind**      | 4         | Styling                  |
-| **Shadcn/UI**     | -         | UI Components            |
-| **Cloudinary**    | -         | Image Optimization       |
-| **Stripe**        | -         | Payment Processing       |
-| **Open AI**     | -         | AI Product Descriptions  |
-| **Vitest**        | 4         | Unit/Integration Testing |
-| **Playwright**    | 1.57      | E2E Testing              |
+| Công nghệ          | Phiên bản | Vai trò                  |
+| ------------------ | --------- | ------------------------ |
+| **Next.js**        | 16        | Framework, App Router    |
+| **React**          | 19        | UI Library               |
+| **TypeScript**     | 5         | Type Safety              |
+| **Zod**            | 3         | Schema Validation        |
+| **Prisma**         | 7         | Database ORM             |
+| **PostgreSQL**     | -         | Database                 |
+| **Better Auth**    | 1.3       | Authentication           |
+| **Zustand**        | 5         | Client State (Cart)      |
+| **Tanstack Query** | 5         | Server State             |
+| **Tailwind**       | 4         | Styling                  |
+| **Shadcn/UI**      | -         | UI Components            |
+| **Cloudinary**     | -         | Image Optimization       |
+| **Stripe**         | -         | Payment Processing       |
+| **Open AI**        | -         | AI Product Descriptions  |
+| **Vitest**         | 4         | Unit/Integration Testing |
+| **Playwright**     | 1.57      | E2E Testing              |
 
 ---
 
@@ -83,19 +84,20 @@ src/
 
 ### Layer Details
 
-| Layer | Chứa gì | Ví dụ |
-|-------|---------|-------|
-| `app/` | Routes, layouts, pages | `(customer)/`, `(vendor)/`, `(admin)/` |
-| `widgets/` | Composed UI sections | `Header`, `CheckoutPage`, `ProductGrid` |
-| `features/` | Interactive features | `checkout/`, `wishlist/`, `auth/` |
-| `entities/` | Business logic + UI | `product/`, `order/`, `cart/`, `vendor/` |
-| `shared/` | Reusable code | `ui/`, `lib/`, `hooks/`, `constants/` |
+| Layer       | Chứa gì                | Ví dụ                                    |
+| ----------- | ---------------------- | ---------------------------------------- |
+| `app/`      | Routes, layouts, pages | `(customer)/`, `(vendor)/`, `(admin)/`   |
+| `widgets/`  | Composed UI sections   | `Header`, `CheckoutPage`, `ProductGrid`  |
+| `features/` | Interactive features   | `checkout/`, `wishlist/`, `auth/`        |
+| `entities/` | Business logic + UI    | `product/`, `order/`, `cart/`, `vendor/` |
+| `shared/`   | Reusable code          | `ui/`, `lib/`, `hooks/`, `constants/`    |
 
 ---
 
 ## ✨ Features
 
 ### 👤 Customer
+
 - Xem & tìm kiếm sản phẩm (filter, sort, pagination)
 - Giỏ hàng (persist localStorage)
 - Wishlist (yêu thích)
@@ -104,6 +106,7 @@ src/
 - Đánh giá sản phẩm
 
 ### 🏪 Vendor
+
 - Dashboard analytics
 - Quản lý sản phẩm (CRUD, variants, images)
 - AI-powered product descriptions
@@ -112,6 +115,7 @@ src/
 - Phản hồi đánh giá
 
 ### 🔐 Admin
+
 - Approve/Reject vendors
 - Quản lý categories
 - Quản lý đơn hàng toàn hệ thống
@@ -121,19 +125,19 @@ src/
 
 ## 📜 Scripts
 
-| Lệnh | Mô tả |
-| ---- | ----- |
-| `pnpm dev` | Dev server (http://localhost:3000) |
-| `pnpm build` | Production build |
-| `pnpm start` | Start production server |
-| `pnpm test` | Unit & Integration tests (Vitest) |
-| `pnpm test:e2e` | E2E tests (Playwright) |
-| `pnpm test:coverage` | Test với coverage report |
-| `pnpm lint` | ESLint check |
-| `pnpm typecheck` | TypeScript check |
-| `pnpm db:studio` | Prisma Studio (GUI database) |
-| `pnpm db:seed` | Seed sample data |
-| `pnpm db:reset` | Reset database |
+| Lệnh                 | Mô tả                              |
+| -------------------- | ---------------------------------- |
+| `pnpm dev`           | Dev server (http://localhost:3000) |
+| `pnpm build`         | Production build                   |
+| `pnpm start`         | Start production server            |
+| `pnpm test`          | Unit & Integration tests (Vitest)  |
+| `pnpm test:e2e`      | E2E tests (Playwright)             |
+| `pnpm test:coverage` | Test với coverage report           |
+| `pnpm lint`          | ESLint check                       |
+| `pnpm typecheck`     | TypeScript check                   |
+| `pnpm db:studio`     | Prisma Studio (GUI database)       |
+| `pnpm db:seed`       | Seed sample data                   |
+| `pnpm db:reset`      | Reset database                     |
 
 ---
 
@@ -141,11 +145,11 @@ src/
 
 **35 test files, 533 tests passing**
 
-| Type | Tools | Coverage |
-|------|-------|----------|
-| Unit | Vitest | Entities, Features, Shared utils |
-| Integration | Vitest | Checkout flow, Inventory, Analytics |
-| E2E | Playwright | Auth, Customer journey, Vendor flow, Admin flow |
+| Type        | Tools      | Coverage                                        |
+| ----------- | ---------- | ----------------------------------------------- |
+| Unit        | Vitest     | Entities, Features, Shared utils                |
+| Integration | Vitest     | Checkout flow, Inventory, Analytics             |
+| E2E         | Playwright | Auth, Customer journey, Vendor flow, Admin flow |
 
 ```bash
 # Chạy tất cả tests
@@ -162,11 +166,11 @@ pnpm test -- --watch
 
 ## 👤 Test Accounts
 
-| Role | Email | Password |
-| ---- | ----- | -------- |
-| Admin | `admin@vendoor.com` | `Kiet1461!` |
-| Vendor | `vendor@vendoor.com` | `Kiet1461!` |
-| Customer | `customer@vendoor.com` | `Kiet1461!` |
+| Role     | Email                  | Password      |
+| -------- | ---------------------- | ------------- |
+| Admin    | `admin@vendoor.com`    | `Test@123456` |
+| Vendor   | `vendor@vendoor.com`   | `Test@123456` |
+| Customer | `customer@vendoor.com` | `Test@123456` |
 
 ---
 
@@ -186,11 +190,12 @@ User ─────┬───── VendorProfile ───── Product ─
           ├───── Wishlist
           │
           └───── Cart (client-side, Zustand)
-          
+
 Category ───── Product
 ```
 
 ### Key Relations
+
 - **User** có thể là Customer, Vendor, hoặc Admin (roles)
 - **VendorProfile** 1:1 với User (khi được approve)
 - **Product** thuộc 1 Vendor, 1 Category
@@ -251,12 +256,12 @@ import { formatPrice, generateId } from "@/shared/lib";
 
 ## 📁 Key Files
 
-| File | Mô tả |
-|------|-------|
-| `prisma/schema.prisma` | Database schema |
-| `src/shared/lib/auth/` | Better Auth config |
-| `src/shared/lib/db.ts` | Prisma client |
-| `src/entities/cart/model/store.ts` | Cart Zustand store |
+| File                                   | Mô tả                   |
+| -------------------------------------- | ----------------------- |
+| `prisma/schema.prisma`                 | Database schema         |
+| `src/shared/lib/auth/`                 | Better Auth config      |
+| `src/shared/lib/db.ts`                 | Prisma client           |
+| `src/entities/cart/model/store.ts`     | Cart Zustand store      |
 | `src/features/checkout/api/actions.ts` | Checkout server actions |
 
 ---

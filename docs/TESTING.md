@@ -20,20 +20,20 @@ Tài liệu hướng dẫn testing strategy, cách chạy tests, và coverage c�
 
 ### Test Distribution
 
-| Type        | Files | Tests | Purpose |
-| ----------- | ----- | ----- | ------- |
-| Unit        | 7     | 215   | Pure functions, schemas, utils |
-| Integration | 4     | 78    | Multi-module flows với mocked DB |
-| E2E         | 3     | ~35   | Full user journeys |
-| **Total**   | **14**| **293+** | |
+| Type        | Files  | Tests    | Purpose                          |
+| ----------- | ------ | -------- | -------------------------------- |
+| Unit        | 7      | 215      | Pure functions, schemas, utils   |
+| Integration | 4      | 78       | Multi-module flows với mocked DB |
+| E2E         | 3      | ~35      | Full user journeys               |
+| **Total**   | **14** | **293+** |                                  |
 
 ### Tools
 
-| Tool | Purpose |
-|------|---------|
-| **Vitest** | Unit & Integration testing |
-| **Playwright** | E2E browser testing |
-| **Testing Library** | DOM assertions |
+| Tool                | Purpose                    |
+| ------------------- | -------------------------- |
+| **Vitest**          | Unit & Integration testing |
+| **Playwright**      | E2E browser testing        |
+| **Testing Library** | DOM assertions             |
 
 ### File Structure
 
@@ -113,15 +113,15 @@ pnpm test:e2e -- --debug
 
 ### Coverage
 
-| File | Tests | Coverage |
-|------|-------|----------|
-| `format.test.ts` | 57 | `formatPrice`, `formatDate`, `formatPercent`, `formatNumber` |
-| `id.test.ts` | 12 | `generateOrderNumber`, `generateRandomString`, `generateSlug` |
-| `order/utils.test.ts` | 36 | `calculateCommission`, `calculateSubtotal`, `validateStatusTransition` |
-| `cart/utils.test.ts` | 17 | `calculateCartTotals`, `groupItemsByVendor` |
-| `product/utils.test.ts` | 35 | `calculateDiscount`, `validateSKU`, `calculateAverageRating` |
-| `checkout/schema.test.ts` | 34 | Checkout form validation |
-| `auth/schema.test.ts` | 24 | Login/register validation |
+| File                      | Tests | Coverage                                                               |
+| ------------------------- | ----- | ---------------------------------------------------------------------- |
+| `format.test.ts`          | 57    | `formatPrice`, `formatDate`, `formatPercent`, `formatNumber`           |
+| `id.test.ts`              | 12    | `generateOrderNumber`, `generateRandomString`, `generateSlug`          |
+| `order/utils.test.ts`     | 36    | `calculateCommission`, `calculateSubtotal`, `validateStatusTransition` |
+| `cart/utils.test.ts`      | 17    | `calculateCartTotals`, `groupItemsByVendor`                            |
+| `product/utils.test.ts`   | 35    | `calculateDiscount`, `validateSKU`, `calculateAverageRating`           |
+| `checkout/schema.test.ts` | 34    | Checkout form validation                                               |
+| `auth/schema.test.ts`     | 24    | Login/register validation                                              |
 
 ### Example: Format Utils
 
@@ -148,12 +148,18 @@ describe("formatPrice - Format giá tiền VND", () => {
 // src/features/checkout/__tests__/schema.test.ts
 describe("Phone validation - Validate SĐT", () => {
   it("accepts valid Vietnam phone - SĐT hợp lệ", () => {
-    const result = checkoutSchema.safeParse({ ...validData, phone: "0901234567" });
+    const result = checkoutSchema.safeParse({
+      ...validData,
+      phone: "0901234567",
+    });
     expect(result.success).toBe(true);
   });
 
   it("rejects phone not starting with 0 - không bắt đầu bằng 0", () => {
-    const result = checkoutSchema.safeParse({ ...validData, phone: "1901234567" });
+    const result = checkoutSchema.safeParse({
+      ...validData,
+      phone: "1901234567",
+    });
     expect(result.success).toBe(false);
   });
 });
@@ -165,12 +171,12 @@ describe("Phone validation - Validate SĐT", () => {
 
 ### Coverage
 
-| File | Tests | Coverage |
-|------|-------|----------|
-| `validate-checkout.test.ts` | 8 | Stock validation before checkout |
-| `create-orders.test.ts` | 12 | Order creation with mocked DB |
-| `guards.test.ts` | 28 | `requireAuth`, `requireRole`, `requireVendor`, `hasRole` |
-| `stock-management.test.ts` | 30 | `updateStock`, `bulkUpdateStock` |
+| File                        | Tests | Coverage                                                 |
+| --------------------------- | ----- | -------------------------------------------------------- |
+| `validate-checkout.test.ts` | 8     | Stock validation before checkout                         |
+| `create-orders.test.ts`     | 12    | Order creation with mocked DB                            |
+| `guards.test.ts`            | 28    | `requireAuth`, `requireRole`, `requireVendor`, `hasRole` |
+| `stock-management.test.ts`  | 30    | `updateStock`, `bulkUpdateStock`                         |
 
 ### Mock Pattern (vi.hoisted)
 
@@ -246,19 +252,19 @@ export function createMultiVendorCart(): CartItem[] {
 
 ### Test Accounts
 
-| Role | Email | Password |
-|------|-------|----------|
-| Customer | `customer@vendoor.com` | `Kiet1461!` |
-| Vendor | `vendor@vendoor.com` | `Kiet1461!` |
-| Admin | `admin@vendoor.com` | `Kiet1461!` |
+| Role     | Email                  | Password      |
+| -------- | ---------------------- | ------------- |
+| Customer | `customer@vendoor.com` | `Test@123456` |
+| Vendor   | `vendor@vendoor.com`   | `Test@123456` |
+| Admin    | `admin@vendoor.com`    | `Test@123456` |
 
 ### Coverage
 
-| File | Scenarios |
-|------|-----------|
-| `auth.spec.ts` | Login, logout, register, protected routes |
-| `checkout-flow.spec.ts` | Browse products, cart, checkout COD |
-| `vendor-flow.spec.ts` | Dashboard, products, orders, inventory |
+| File                    | Scenarios                                 |
+| ----------------------- | ----------------------------------------- |
+| `auth.spec.ts`          | Login, logout, register, protected routes |
+| `checkout-flow.spec.ts` | Browse products, cart, checkout COD       |
+| `vendor-flow.spec.ts`   | Dashboard, products, orders, inventory    |
 
 ### Example: Auth E2E
 
@@ -268,7 +274,7 @@ test("customer can login successfully", async ({ page }) => {
   await page.goto("/login");
 
   await page.getByLabel(/email/i).fill("customer@vendoor.com");
-  await page.getByLabel(/mật khẩu|password/i).fill("Kiet1461!");
+  await page.getByLabel(/mật khẩu|password/i).fill("Test@123456");
   await page.getByRole("button", { name: /đăng nhập|login/i }).click();
 
   await expect(page).toHaveURL(/\/$|\/dashboard/);
