@@ -7,15 +7,15 @@ import { test, expect } from "@playwright/test";
 const TEST_ACCOUNTS = {
   customer: {
     email: "customer@vendoor.com",
-    password: "Kiet1461!",
+    password: "Test@123456",
   },
   vendor: {
     email: "vendor@vendoor.com",
-    password: "Kiet1461!",
+    password: "Test@123456",
   },
   admin: {
     email: "admin@vendoor.com",
-    password: "Kiet1461!",
+    password: "Test@123456",
   },
 };
 
@@ -34,7 +34,9 @@ test.describe("Login Flow - Đăng nhập", () => {
     // Check form elements exist
     await expect(page.getByLabel(/email/i)).toBeVisible();
     await expect(page.getByLabel(/mật khẩu|password/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: /đăng nhập|login/i })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /đăng nhập|login/i })
+    ).toBeVisible();
   });
 
   test("shows error with invalid credentials - sai thông tin", async ({
@@ -201,7 +203,9 @@ test.describe("Register Flow - Đăng ký", () => {
       .click();
 
     // Expect error about existing email
-    await expect(page.getByText(/đã tồn tại|already exists|đã được sử dụng/i)).toBeVisible({
+    await expect(
+      page.getByText(/đã tồn tại|already exists|đã được sử dụng/i)
+    ).toBeVisible({
       timeout: 10000,
     });
   });

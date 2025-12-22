@@ -6,12 +6,12 @@ import { test, expect } from "@playwright/test";
 
 const VENDOR = {
   email: "vendor@vendoor.com",
-  password: "Kiet1461!",
+  password: "Test@123456",
 };
 
 const CUSTOMER = {
   email: "customer@vendoor.com",
-  password: "Kiet1461!",
+  password: "Test@123456",
 };
 
 // ============================================================================
@@ -39,9 +39,9 @@ test.describe("Vendor Dashboard Access - Truy cập dashboard vendor", () => {
 
     // Should see vendor dashboard
     await expect(page).toHaveURL(/\/vendor/);
-    await expect(
-      page.getByText(/dashboard|tổng quan|quản lý/i)
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/dashboard|tổng quan|quản lý/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test("non-vendor is redirected - non-vendor bị redirect", async ({
@@ -69,7 +69,9 @@ test.describe("Vendor Dashboard Access - Truy cập dashboard vendor", () => {
 
     // Should see stats widgets
     await expect(
-      page.getByText(/doanh thu|revenue|đơn hàng|orders|sản phẩm|products/i).first()
+      page
+        .getByText(/doanh thu|revenue|đơn hàng|orders|sản phẩm|products/i)
+        .first()
     ).toBeVisible({ timeout: 10000 });
   });
 });
@@ -166,7 +168,9 @@ test.describe("Order Management - Quản lý đơn hàng", () => {
     await page.goto("/vendor/orders");
 
     // Find status filter
-    const statusFilter = page.getByRole("combobox", { name: /trạng thái|status/i });
+    const statusFilter = page.getByRole("combobox", {
+      name: /trạng thái|status/i,
+    });
     if (await statusFilter.isVisible()) {
       await statusFilter.click();
       // Select a status
@@ -257,7 +261,10 @@ test.describe("Inventory Management - Quản lý tồn kho", () => {
 
     // Either shows warning or has status indicators
     const hasWarning = await lowStockBadge.isVisible().catch(() => false);
-    const hasStatus = await stockStatus.first().isVisible().catch(() => false);
+    const hasStatus = await stockStatus
+      .first()
+      .isVisible()
+      .catch(() => false);
 
     // At least one should exist in a proper inventory page
     expect(hasWarning || hasStatus || true).toBe(true);
@@ -278,7 +285,9 @@ test.describe("Vendor Settings - Cài đặt shop", () => {
 
     // Should see settings form
     await expect(
-      page.getByLabel(/tên shop|shop name/i).or(page.getByText(/cài đặt|settings/i))
+      page
+        .getByLabel(/tên shop|shop name/i)
+        .or(page.getByText(/cài đặt|settings/i))
     ).toBeVisible({ timeout: 10000 });
   });
 
@@ -324,9 +333,18 @@ test.describe("Revenue & Analytics - Doanh thu & Thống kê", () => {
 
     // Should see charts or stats
     const hasAnalytics =
-      (await page.getByText(/thống kê|analytics|biểu đồ|chart/i).isVisible().catch(() => false)) ||
-      (await page.locator("canvas").isVisible().catch(() => false)) ||
-      (await page.getByText(/doanh thu|orders|revenue/i).isVisible().catch(() => false));
+      (await page
+        .getByText(/thống kê|analytics|biểu đồ|chart/i)
+        .isVisible()
+        .catch(() => false)) ||
+      (await page
+        .locator("canvas")
+        .isVisible()
+        .catch(() => false)) ||
+      (await page
+        .getByText(/doanh thu|orders|revenue/i)
+        .isVisible()
+        .catch(() => false));
 
     // Page should have some analytics content
     expect(hasAnalytics || (await page.url()).includes("analytics")).toBe(true);

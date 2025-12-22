@@ -6,7 +6,7 @@ import { test, expect } from "@playwright/test";
 
 const CUSTOMER = {
   email: "customer@vendoor.com",
-  password: "Kiet1461!",
+  password: "Test@123456",
 };
 
 // ============================================================================
@@ -32,7 +32,9 @@ test.describe("Product Browsing - Xem sản phẩm", () => {
     await page.goto("/products");
 
     // Should see product grid
-    await expect(page.locator("[data-testid='product-card']").first()).toBeVisible({
+    await expect(
+      page.locator("[data-testid='product-card']").first()
+    ).toBeVisible({
       timeout: 10000,
     });
   });
@@ -44,7 +46,9 @@ test.describe("Product Browsing - Xem sản phẩm", () => {
     await page.locator("[data-testid='product-card']").first().click();
 
     // Should see product detail page
-    await expect(page.getByRole("button", { name: /thêm vào giỏ|add to cart/i })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: /thêm vào giỏ|add to cart/i })
+    ).toBeVisible({
       timeout: 10000,
     });
   });
@@ -55,7 +59,9 @@ test.describe("Product Browsing - Xem sản phẩm", () => {
     await page.goto("/products");
 
     // Click on a category filter if available
-    const categoryFilter = page.locator("[data-testid='category-filter']").first();
+    const categoryFilter = page
+      .locator("[data-testid='category-filter']")
+      .first();
     if (await categoryFilter.isVisible()) {
       await categoryFilter.click();
       // URL should update with category param
@@ -87,40 +93,50 @@ test.describe("Cart Flow - Giỏ hàng", () => {
     await page.locator("[data-testid='product-card']").first().click();
 
     // Add to cart
-    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+    await page
+      .getByRole("button", { name: /thêm vào giỏ|add to cart/i })
+      .click();
 
     // Should show success notification or cart update
-    await expect(
-      page.getByText(/đã thêm|added|thành công/i)
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/đã thêm|added|thành công/i)).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test("can view cart - xem giỏ hàng", async ({ page }) => {
     // Add item first
     await page.goto("/products");
     await page.locator("[data-testid='product-card']").first().click();
-    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+    await page
+      .getByRole("button", { name: /thêm vào giỏ|add to cart/i })
+      .click();
 
     // Go to cart
     await page.goto("/cart");
 
     // Should see cart items
-    await expect(page.locator("[data-testid='cart-item']").first()).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.locator("[data-testid='cart-item']").first()).toBeVisible(
+      {
+        timeout: 10000,
+      }
+    );
   });
 
   test("can update quantity in cart - cập nhật số lượng", async ({ page }) => {
     // Add item first
     await page.goto("/products");
     await page.locator("[data-testid='product-card']").first().click();
-    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+    await page
+      .getByRole("button", { name: /thêm vào giỏ|add to cart/i })
+      .click();
 
     // Go to cart
     await page.goto("/cart");
 
     // Increase quantity
-    const increaseBtn = page.getByRole("button", { name: /\+|tăng|increase/i }).first();
+    const increaseBtn = page
+      .getByRole("button", { name: /\+|tăng|increase/i })
+      .first();
     if (await increaseBtn.isVisible()) {
       await increaseBtn.click();
       // Total should update
@@ -132,13 +148,17 @@ test.describe("Cart Flow - Giỏ hàng", () => {
     // Add item first
     await page.goto("/products");
     await page.locator("[data-testid='product-card']").first().click();
-    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+    await page
+      .getByRole("button", { name: /thêm vào giỏ|add to cart/i })
+      .click();
 
     // Go to cart
     await page.goto("/cart");
 
     // Remove item
-    const removeBtn = page.getByRole("button", { name: /xóa|remove|delete/i }).first();
+    const removeBtn = page
+      .getByRole("button", { name: /xóa|remove|delete/i })
+      .first();
     if (await removeBtn.isVisible()) {
       await removeBtn.click();
 
@@ -197,7 +217,9 @@ test.describe("Checkout Flow - Thanh toán", () => {
     // Add item to cart
     await page.goto("/products");
     await page.locator("[data-testid='product-card']").first().click();
-    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+    await page
+      .getByRole("button", { name: /thêm vào giỏ|add to cart/i })
+      .click();
 
     // Go to checkout
     await page.goto("/checkout");
@@ -214,12 +236,16 @@ test.describe("Checkout Flow - Thanh toán", () => {
     // Add item and go to checkout
     await page.goto("/products");
     await page.locator("[data-testid='product-card']").first().click();
-    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+    await page
+      .getByRole("button", { name: /thêm vào giỏ|add to cart/i })
+      .click();
     await page.goto("/checkout");
 
     // Try to submit with invalid data
     await page.getByLabel(/điện thoại|phone/i).fill("123"); // Invalid phone
-    await page.getByRole("button", { name: /đặt hàng|place order|thanh toán/i }).click();
+    await page
+      .getByRole("button", { name: /đặt hàng|place order|thanh toán/i })
+      .click();
 
     // Should show validation error
     await expect(page.getByText(/10 số|không hợp lệ|invalid/i)).toBeVisible();
@@ -231,7 +257,9 @@ test.describe("Checkout Flow - Thanh toán", () => {
     // Add item and go to checkout
     await page.goto("/products");
     await page.locator("[data-testid='product-card']").first().click();
-    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+    await page
+      .getByRole("button", { name: /thêm vào giỏ|add to cart/i })
+      .click();
     await page.goto("/checkout");
 
     // Should see payment options
@@ -245,7 +273,9 @@ test.describe("Checkout Flow - Thanh toán", () => {
     // Add item and go to checkout
     await page.goto("/products");
     await page.locator("[data-testid='product-card']").first().click();
-    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+    await page
+      .getByRole("button", { name: /thêm vào giỏ|add to cart/i })
+      .click();
     await page.goto("/checkout");
 
     // Should see order summary
@@ -260,7 +290,9 @@ test.describe("Checkout Flow - Thanh toán", () => {
     // Add item
     await page.goto("/products");
     await page.locator("[data-testid='product-card']").first().click();
-    await page.getByRole("button", { name: /thêm vào giỏ|add to cart/i }).click();
+    await page
+      .getByRole("button", { name: /thêm vào giỏ|add to cart/i })
+      .click();
 
     // Go to checkout
     await page.goto("/checkout");
@@ -278,7 +310,9 @@ test.describe("Checkout Flow - Thanh toán", () => {
     await page.getByText(/COD|thanh toán khi nhận/i).click();
 
     // Place order
-    await page.getByRole("button", { name: /đặt hàng|place order|thanh toán/i }).click();
+    await page
+      .getByRole("button", { name: /đặt hàng|place order|thanh toán/i })
+      .click();
 
     // Should redirect to success page or show confirmation
     await expect(
