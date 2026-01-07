@@ -70,7 +70,7 @@ export function Header({ initialUser }: HeaderProps) {
           <div className="md:hidden shrink-0">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" aria-label="Menu">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>

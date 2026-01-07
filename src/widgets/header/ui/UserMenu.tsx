@@ -349,10 +349,11 @@ export function UserMenu({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-5 w-5 opacity-0 group-hover:opacity-100"
+                    aria-label="Xóa phiên đăng nhập"
+                    className="h-8 w-8 p-1.5 opacity-0 group-hover:opacity-100"
                     onClick={(e) => handleRevokeSession(e, s.session.token)}
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </Button>
                 </DropdownMenuItem>
               );

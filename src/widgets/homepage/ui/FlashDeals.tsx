@@ -113,6 +113,7 @@ export function FlashDeals({ products }: FlashDealsProps) {
                   <Progress
                     value={(product.sold / product.total) * 100}
                     className="h-2"
+                    aria-label={`Đã bán ${product.sold} trên ${product.total} sản phẩm`}
                   />
                   <p className="text-xs text-muted-foreground">
                     Đã bán {product.sold}/{product.total}

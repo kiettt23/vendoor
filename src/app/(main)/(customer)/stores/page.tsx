@@ -29,7 +29,7 @@ export default async function StoresPage() {
       {vendors.length === 0 ? (
         <div className="py-16 text-center">
           <Store className="text-muted-foreground mx-auto mb-4 h-16 w-16" />
-          <h3 className="mb-2 text-lg font-semibold">Chưa có cửa hàng nào</h3>
+          <h2 className="mb-2 text-lg font-semibold">Chưa có cửa hàng nào</h2>
           <p className="text-muted-foreground">Hãy quay lại sau nhé!</p>
         </div>
       ) : (

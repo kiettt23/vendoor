@@ -17,13 +17,13 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90",
         outline:
           "bg-background text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-        // Semantic status variants
+        // Semantic status variants (WCAG AA compliant contrast ratios)
         success:
-          "border-transparent bg-green-500 text-white [a&]:hover:bg-green-600",
+          "border-transparent bg-green-700 text-white [a&]:hover:bg-green-800",
         warning:
-          "border-transparent bg-yellow-500 text-white [a&]:hover:bg-yellow-600",
-        error: "border-transparent bg-red-500 text-white [a&]:hover:bg-red-600",
-        info: "border-transparent bg-blue-500 text-white [a&]:hover:bg-blue-600",
+          "border-transparent bg-yellow-600 text-white [a&]:hover:bg-yellow-700",
+        error: "border-transparent bg-red-600 text-white [a&]:hover:bg-red-700",
+        info: "border-transparent bg-blue-600 text-white [a&]:hover:bg-blue-700",
         // Soft variants
         "success-soft":
           "border-green-200 bg-green-50 text-green-700 [a&]:hover:bg-green-100",

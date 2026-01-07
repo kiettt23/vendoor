@@ -64,7 +64,11 @@ export function Logo({
 
   if (asLink) {
     return (
-      <Link href="/" className={containerClass}>
+      <Link
+        href="/"
+        className={containerClass}
+        aria-label={!showText ? "Trang chủ Vendoor" : undefined}
+      >
         {content}
       </Link>
     );

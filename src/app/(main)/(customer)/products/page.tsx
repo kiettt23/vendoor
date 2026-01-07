@@ -108,9 +108,9 @@ export default async function ProductsPage({ searchParams }: PageProps) {
       {products.length === 0 ? (
         <div className="text-center py-16">
           <PackageSearch className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">
+          <h2 className="text-lg font-semibold mb-2">
             Không tìm thấy sản phẩm
-          </h3>
+          </h2>
           <p className="text-muted-foreground mb-4">
             Thử tìm kiếm với từ khóa khác
           </p>

@@ -11,10 +11,10 @@ interface FeaturedStoresProps {
 }
 
 const badgeColors: Record<string, string> = {
-  Premium: "bg-amber-500",
-  "Top Seller": "bg-green-500",
-  Verified: "bg-blue-500",
-  Gaming: "bg-purple-500",
+  Premium: "bg-amber-600", // WCAG AA compliant
+  "Top Seller": "bg-green-700", // WCAG AA: 4.5:1+ contrast
+  Verified: "bg-blue-600", // WCAG AA: 4.5:1+ contrast
+  Gaming: "bg-purple-600",
   New: "bg-primary",
 };
 

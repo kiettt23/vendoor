@@ -59,6 +59,7 @@ export function Footer() {
                   key={social.name}
                   href={social.href}
                   className="h-9 w-9 rounded-lg bg-background/10 flex items-center justify-center hover:bg-background/20"
+                  aria-label={`Theo dõi trên ${social.name}`}
                 >
                   <social.icon className="h-4 w-4" />
                 </Link>

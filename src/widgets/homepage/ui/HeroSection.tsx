@@ -30,7 +30,7 @@ export function HeroSection() {
     <section className="relative overflow-hidden">
       {/* Animated Background Mesh */}
       <div className="absolute inset-0 bg-background">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+        <div className="absolute inset-0 bg-linear-to-b from-secondary/20 to-transparent"></div>
       </div>
 
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">

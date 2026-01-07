@@ -34,7 +34,11 @@ export function ReviewStatsSummary({ stats }: ReviewStatsSummaryProps) {
           return (
             <div key={rating} className="flex items-center gap-2">
               <span className="text-sm w-8 text-right">{rating} ★</span>
-              <Progress value={percentage} className="flex-1 h-2" />
+              <Progress
+                value={percentage}
+                className="flex-1 h-2"
+                aria-label={`${rating} sao: ${percentage.toFixed(0)}% (${count} đánh giá)`}
+              />
               <span className="text-sm text-muted-foreground w-10 text-right">
                 {count}
               </span>

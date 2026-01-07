@@ -118,9 +118,9 @@ export function TestimonialsSection() {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <h4 className="font-semibold">
+                    <p className="font-semibold">
                       {testimonials[currentIndex].name}
-                    </h4>
+                    </p>
                     {testimonials[currentIndex].type === "seller" && (
                       <BadgeCheck className="h-4 w-4 text-primary" />
                     )}
@@ -139,6 +139,7 @@ export function TestimonialsSection() {
                 size="icon"
                 className="rounded-full h-9 w-9 bg-transparent"
                 onClick={prevTestimonial}
+                aria-label="Đánh giá trước"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -148,13 +149,24 @@ export function TestimonialsSection() {
                 {testimonials.map((_, index) => (
                   <button
                     key={index}
-                    className={`h-2 rounded-full transition-all ${
+                    className={`rounded-full transition-all flex items-center justify-center ${
                       index === currentIndex
-                        ? "w-6 bg-primary"
-                        : "w-2 bg-border hover:bg-muted-foreground"
+                        ? "h-6 w-8 bg-primary" // Active: larger for visibility
+                        : "h-6 w-6 bg-border hover:bg-muted-foreground" // 24px minimum touch target
                     }`}
                     onClick={() => setCurrentIndex(index)}
-                  />
+                    aria-label={`Chuyển đến đánh giá ${index + 1}`}
+                    aria-current={index === currentIndex ? "true" : "false"}
+                  >
+                    {/* Visual dot inside clickable area */}
+                    <span
+                      className={`rounded-full ${
+                        index === currentIndex
+                          ? "h-2 w-6 bg-primary-foreground/20"
+                          : "h-2 w-2 bg-current"
+                      }`}
+                    />
+                  </button>
                 ))}
               </div>
 
@@ -163,6 +175,7 @@ export function TestimonialsSection() {
                 size="icon"
                 className="rounded-full h-9 w-9 bg-transparent"
                 onClick={nextTestimonial}
+                aria-label="Đánh giá tiếp theo"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
