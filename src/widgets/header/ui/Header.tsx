@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Menu, Store, MapPin } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
@@ -13,8 +14,14 @@ import {
   HEADER_ICON_BUTTONS,
   ROUTES,
 } from "@/shared/lib/constants";
-import { SearchInput, SearchInputMobile } from "@/features/search";
+import { SearchInput } from "@/features/search";
 import { UserMenu } from "./UserMenu";
+
+// Lazy load mobile-only components for better performance
+const SearchInputMobile = dynamic(
+  () => import("@/features/search").then((mod) => ({ default: mod.SearchInputMobile })),
+  { ssr: false }
+);
 
 export type HeaderProps = {
   initialUser?: {
